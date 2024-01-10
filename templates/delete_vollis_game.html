@@ -1,5 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
 <form action='' method="post">
-    Click YES to confirm
-    <input type = "submit" value="YES">
-    <a href='/edit_vollis_games'>Cancel</a>
+    <div><h2>Are you sure about deleting this game?</h2></div>
+    <div><input type="submit" value="Yes!" class="delete_input"></div>
+    <div><a href="/edit_vollis_games"><button type="button">Nah...</button></a></div>
 </form>
+{% endblock %}

@@ -18,7 +18,8 @@
         	<table>
         		<thead>
     				<tr>
-      					<th scope="col" colspan="1">Date</th>
+                        <th class="rank" scope="col" colspan="1">#</th>
+                        <th scope="col" colspan="1">Date</th>
                         <th scope="col" colspan="1">Winners</th>
                         <th scope="col" colspan="1"></th>
                         <th scope="col" colspan="1">Losers</th>
@@ -29,7 +30,8 @@
         		<tbody>
                 {% for game in games %}
         			<tr>
-            			<td>{{ game[1][0:10] }}<br>
+            			<td class="rank">{{ loop.index }}</td>
+                        <td>{{ game[1][0:10] }}<br>
                             {% if game[1]|length > 14 %}
                                 {{ game[1][11:19] }}
                             {% endif %}</td>

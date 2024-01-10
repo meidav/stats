@@ -48,6 +48,7 @@
                 <h1>Today's games</h1>
                 <thead>
                     <tr>
+                        <th class="rank" scope="col" colspan="1">#</th>
                         <th scope="col" colspan="1">Date</th>
                         <th scope="col" colspan="1">Winners</th>
                         <th scope="col" colspan="1"></th>
@@ -59,6 +60,7 @@
                 <tbody>
                 {% for game in games %}
                     <tr>
+                        <td class="rank">{{ loop.index }}</td>
                         <td>{{ game[1][0:10] }}<br>{{ game[1][11:19] }}</td>
                         <td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
                         <td>{{ game[4] }}</td>

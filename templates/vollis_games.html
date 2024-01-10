@@ -18,6 +18,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th class="rank" scope="col" colspan="1">#</th>
                         <th scope="col" colspan="1">Date</th>
                         <th scope="col" colspan="1">Winner</th>
                         <th scope="col" colspan="1"></th>
@@ -28,6 +29,7 @@
                 <tbody>
                 {% for game in games %}
                     <tr class="table-double-row">
+                        <td class="rank">{{ loop.index }}</td>
                         <td>{{ game[1][5:7] }}/{{ game[1][8:10] }}/{{ game[1][0:4] }}<br>{{ game[1][11:16] }}</td>
                         <td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
                         <td>{{ game[3] }}</td>
