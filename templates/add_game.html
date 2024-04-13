@@ -4,48 +4,54 @@
 
 	<h1>{% block title %} Add a game {% endblock %}</h1>
 	<div class="container">
-	<form method="post">
-		<datalist id="players">
-			{% for player in players %}
-				<option value= "{{ player }}"></option>
-			{% endfor %}
-		</datalist>
-		<datalist id="w_scores">
-			{% for score in w_scores %}
-				<option value= "{{ score }}"></option>
-			{% endfor %}
-		</datalist>
-		<datalist id="l_scores">
-			{% for score in l_scores %}
-				<option value= "{{ score }}"></option>
-			{% endfor %}
-		</datalist>
-		<input type="text" name="winner1"
+		<form method="post">
+			<datalist id="players">
+				{% for player in players %}
+					<option value="{{ player }}"></option>
+				{% endfor %}
+			</datalist>
+			<datalist id="w_scores">
+				{% for score in w_scores %}
+					<option value="{{ score }}"></option>
+				{% endfor %}
+			</datalist>
+			<datalist id="l_scores">
+				{% for score in l_scores %}
+					<option value="{{ score }}"></option>
+				{% endfor %}
+			</datalist>
+			<input type="text" name="winner1"
 				placeholder="Winner 1"
 				value="{{ request.form['winner1'] }}"
-				list="players">
-		<input type="text" name="winner2"
+				list="players"
+				autocomplete="on">
+			<input type="text" name="winner2"
 				placeholder="Winner 2"
 				value="{{ request.form['winner2'] }}"
-				list="players">
-		<input type="text" name="loser1"
+				list="players"
+				autocomplete="on">
+			<input type="text" name="loser1"
 				placeholder="Loser 1"
 				value="{{ request.form['loser1'] }}"
-				list="players">      
-		<input type="text" name="loser2"
+				list="players"
+				autocomplete="on">      
+			<input type="text" name="loser2"
 				placeholder="Loser 2"
 				value="{{ request.form['loser2'] }}"
-				list="players">
-		<input type="number" pattern="[0-9]*" name="winner_score"
-				placeholder="Winners' Score"
+				list="players"
+				autocomplete="on">
+			<input type="number" pattern="[0-9]*" name="winner_score"
+				placeholder="Winners' score"
 				value="{{ request.form['winner_score'] }}"
-				list="w_scores">
-		<input type="number" pattern="[0-9]*" name="loser_score"
-				placeholder="Losers' Score"
+				list="w_scores"
+				autocomplete="on">
+			<input type="number" pattern="[0-9]*" name="loser_score"
+				placeholder="Losers' score"
 				value="{{ request.form['loser_score'] }}"
-				list="l_scores">    
-		<input type="submit" value="Submit">
-	</form>
+				list="l_scores"
+				autocomplete="on">    
+			<input type="submit" value="Submit">
+		</form>
 	</div>
 	<div>
 	{% if todays_stats %}

@@ -6,40 +6,48 @@
 
     <h1>Add a vollis game</h1>
     <div>
-    <form method="post">
-        <datalist id="players">
-            {% for player in players %}
-                <option value= "{{ player }}"></option>
-            {% endfor %}
-        </datalist>
-        <datalist id="winning_scores">
-            {% for score in winning_scores %}
-                <option value= "{{ score }}"></option>
-            {% endfor %}
-        </datalist>
-        <datalist id="losing_scores">
-            {% for score in losing_scores %}
-                <option value= "{{ score }}"></option>
-            {% endfor %}
-        </datalist>
-        <input type="text" name="winner"
-                placeholder="Winner"
-                value="{{ request.form['winner'] }}"
-                list="players">
-        <input type="text" name="loser"
-                placeholder="Loser"
-                value="{{ request.form['loser'] }}"
-                list="players">
-        <input type="number" pattern="[0-9]*" name="winner_score"
-                placeholder="Winner's Score"
-                value="{{ request.form['winner_score'] }}"
-                list="winning_scores">
-        <input type="number" pattern="[0-9]*" name="loser_score"
-                placeholder="Loser's Score"
-                value="{{ request.form['loser_score'] }}"
-                list="losing_scores">
-        <input type="submit" value="Submit">
-    </form>
+        <form method="post">
+            <datalist id="players_list">
+                {% for player in players %}
+                    <option value="{{ player }}"></option>
+                {% endfor %}
+            </datalist>
+            <datalist id="winning_scores_list">
+                {% for score in winning_scores %}
+                    <option value="{{ score }}"></option>
+                {% endfor %}
+            </datalist>
+            <datalist id="losing_scores_list">
+                {% for score in losing_scores %}
+                    <option value="{{ score }}"></option>
+                {% endfor %}
+            </datalist>
+            <input type="text" name="winner"
+                    placeholder="Winner"
+                    value="{{ request.form['winner'] }}"
+                    list="players_list"
+                    id="winner_players"
+                    autocomplete>
+            <input type="text" name="loser"
+                    placeholder="Loser"
+                    value="{{ request.form['loser'] }}"
+                    list="players_list"
+                    id="loser_players"
+                    autocomplete>
+            <input type="number" pattern="[0-9]*" name="winner_score"
+                    placeholder="Winner's score"
+                    value="{{ request.form['winner_score'] }}"
+                    list="winning_scores_list"
+                    id="winner_scores"
+                    autocomplete>
+            <input type="number" pattern="[0-9]*" name="loser_score"
+                    placeholder="Loser's score"
+                    value="{{ request.form['loser_score'] }}"
+                    list="losing_scores_list"
+                    id="losing_scores"
+                    autocomplete>
+            <input type="submit" value="Submit">
+        </form>
     </div>
 
     <div>
@@ -120,7 +128,6 @@
                 </tr>
             </thead>
             <tbody>
-                <tr><td>{% if stats %} Stats exist {% else %} No stats {% endif %}</td></tr>
                 {% for player in stats %}
                 <tr>
                     <td class="rank">{{ loop.index }}</td>

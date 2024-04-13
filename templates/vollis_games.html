@@ -30,7 +30,7 @@
                 {% for game in games %}
                     <tr class="table-double-row">
                         <td class="rank">{{ loop.index }}</td>
-                        <td>{{ game[1][5:7] }}/{{ game[1][8:10] }}/{{ game[1][0:4] }}<br>{{ game[1][11:16] }}</td>
+                        <td>{{ convertToUserLocalTime(game[1])[0:10] }}<br>{{ convertToUserLocalTime(game[1])[11:19] }}</td>
                         <td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
                         <td>{{ game[3] }}</td>
                         <td><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[4] }}</a></td>

@@ -135,13 +135,13 @@ def games():
     all_years = grab_all_years()
     games = year_games(str(date.today().year))
     year = str(date.today().year)
-    return render_template('games.html', games=games, year=year, all_years=all_years)
+    return render_template('games.html', games=games, year=year, all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
 
 @app.route('/games/<year>')
 def games_by_year(year):
     all_years = grab_all_years()
     games = year_games(year)
-    return render_template('games.html', games=games, year=year, all_years=all_years)
+    return render_template('games.html', games=games, year=year, all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
 
 @app.route('/add_game/', methods=('GET', 'POST'))
 def add_game():
@@ -190,13 +190,13 @@ def add_game():
 def edit_games():
     all_years = grab_all_years()
     games = year_games(str(date.today().year))
-    return render_template('edit_games.html', games=games, year=str(date.today().year), all_years=all_years)
+    return render_template('edit_games.html', games=games, year=str(date.today().year), all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
 
 @app.route('/edit_games/<year>')
 def edit_games_by_year(year):
     all_years = grab_all_years()
     games = year_games(year)
-    return render_template('edit_games.html', games=games, year=year, all_years=all_years)
+    return render_template('edit_games.html', games=games, year=year, all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
 
 
 @app.route('/edit/<int:id>/',methods = ['GET','POST'])
@@ -223,7 +223,7 @@ def update(id):
             return redirect(url_for('edit_games'))
  
     return render_template('edit_game.html', game=game, players=players, 
-        w_scores=w_scores, l_scores=l_scores, year=str(date.today().year))
+        w_scores=w_scores, l_scores=l_scores, year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
 
 
 @app.route('/delete/<int:id>/',methods = ['GET','POST'])
@@ -252,7 +252,7 @@ def vollis_stats(year):
     minimum_games = 2
     stats = vollis_stats_per_year(year, minimum_games)
     return render_template('vollis_stats.html', stats=stats,
-        all_years=all_years, minimum_games=minimum_games, year=year)
+        all_years=all_years, minimum_games=minimum_games, year=year, convertToUserLocalTime=convertToUserLocalTime)
 
 @app.route('/vollis_stats/')
 def vollis():
@@ -263,7 +263,7 @@ def vollis():
     minimum_games = 0
     stats = vollis_stats_per_year(year, minimum_games)
     return render_template('vollis_stats.html', stats=stats, todays_stats=t_stats, games=games,
-        all_years=all_years, minimum_games=minimum_games, year=year)
+        all_years=all_years, minimum_games=minimum_games, year=year, convertToUserLocalTime=convertToUserLocalTime)
 
 
 @app.route('/add_vollis_game/', methods=('GET', 'POST'))
@@ -296,25 +296,25 @@ def add_vollis_game():
 def edit_vollis_games():
     all_years = all_vollis_years()
     games = vollis_year_games(str(date.today().year))
-    return render_template('edit_vollis_games.html', games=games, all_years=all_years, year=str(date.today().year))
+    return render_template('edit_vollis_games.html', games=games, all_years=all_years, year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
 
 @app.route('/edit_past_year_vollis_games/<year>')
 def edit_vollis_games_by_year(year):
     all_years = all_vollis_years()
     games = vollis_year_games(year)
-    return render_template('edit_vollis_games.html', all_years=all_years, games=games, year=year)
+    return render_template('edit_vollis_games.html', all_years=all_years, games=games, year=year, convertToUserLocalTime=convertToUserLocalTime)
 
 @app.route('/vollis_games/')
 def vollis_games():
     all_years = all_vollis_years()
     games = vollis_year_games(str(date.today().year))
-    return render_template('vollis_games.html', games=games, all_years=all_years, year=str(date.today().year))
+    return render_template('vollis_games.html', games=games, all_years=all_years, year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
 
 @app.route('/vollis_games/<year>')
 def vollis_games_by_year(year):
     all_years = all_vollis_years()
     games = vollis_year_games(year)
-    return render_template('vollis_games.html', all_years=all_years, games=games, year=year)
+    return render_template('vollis_games.html', all_years=all_years, games=games, year=year, convertToUserLocalTime=convertToUserLocalTime)
 
 
 @app.route('/edit_vollis_game/<int:id>/',methods = ['GET','POST'])
@@ -336,7 +336,7 @@ def update_vollis_game(id):
             edit_vollis_game(game_id, game[1], winner, winner_score, loser, loser_score, datetime.now(), game_id)
             return redirect(url_for('edit_vollis_games'))
  
-    return render_template('edit_vollis_game.html', game=game, players=players, year=str(date.today().year))
+    return render_template('edit_vollis_game.html', game=game, players=players, year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
 
 
 @app.route('/delete_vollis_game/<int:id>/',methods = ['GET','POST'])
@@ -347,7 +347,7 @@ def delete_vollis_game(id):
         remove_vollis_game(game_id)
         return redirect(url_for('edit_vollis_games'))
  
-    return render_template('delete_vollis_game.html', game=game)
+    return render_template('delete_vollis_game.html', game=game, convertToUserLocalTime=convertToUserLocalTime)
 
 @app.route('/vollis_player/<year>/<name>')
 def vollis_player_stats(year, name):
