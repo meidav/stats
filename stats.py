@@ -5,9 +5,47 @@ from datetime import datetime, date
 from vollis_functions import *
 from one_v_one_functions import *
 from other_functions import *
+from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b83880e869f054bfc465a6f46125ac715e7286ed25e88537'
+
+def convertToUserLocalTime(gmt_time_str):
+    # Assuming gmt_time_str is in the format 'YYYY-MM-DD HH:MM:SS.ssssss' (GMT)
+    gmt_format = '%Y-%m-%d %H:%M:%S.%f'
+    
+    # Parse the GMT time string into a datetime object
+    gmt_time = datetime.strptime(gmt_time_str, gmt_format)
+    
+    # Get the user's local timezone (you can replace 'America/Los_Angeles' with the desired timezone)
+    user_tz = pytz.timezone('America/Los_Angeles')
+    
+    # Convert the GMT time to the user's local time
+    local_time = gmt_time.astimezone(user_tz)
+    
+    # Format the local time string as desired
+    local_time_str = local_time.strftime('%Y-%m-%d %H:%M:%S')
+
+    return local_time_str
+
+def convertGametimeToUserLocalTime(gmt_time_str):
+    # Assuming gmt_time_str is in the format 'MM/DD/YYYY HH:MM AM/PM' (GMT)
+    gmt_format = '%m/%d/%Y %I:%M %p'
+    
+    # Parse the GMT time string into a datetime object
+    gmt_time = datetime.strptime(gmt_time_str, gmt_format)
+    
+    # Get the user's local timezone (you can replace 'America/Los_Angeles' with the desired timezone)
+    user_tz = pytz.timezone('America/Los_Angeles')
+    
+    # Convert the GMT time to the user's local time
+    local_time = gmt_time.astimezone(user_tz)
+    
+    # Format the local time string as desired
+    local_time_str = local_time.strftime('%Y-%m-%d %I:%M %p')
+    
+    return local_time_str
 
 @app.route('/')
 def index():
@@ -145,7 +183,7 @@ def add_game():
             return redirect(url_for('add_game'))
 
     return render_template('add_game.html', todays_stats=t_stats, games=games, players=players, 
-        w_scores=w_scores, l_scores=l_scores, year=year, stats=stats, rare_stats=rare_stats, minimum_games=minimum_games)
+        w_scores=w_scores, l_scores=l_scores, year=year, stats=stats, rare_stats=rare_stats, minimum_games=minimum_games, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
 
 
 @app.route('/edit_games/')
@@ -232,11 +270,13 @@ def vollis():
 def add_vollis_game():
     games = vollis_year_games('All years')
     players = all_vollis_players(games)
-    stats = todays_vollis_stats()
-    games = todays_vollis_games()
+    t_stats = todays_vollis_stats()
+    t_games = todays_vollis_games()
     year = str(date.today().year)
     winning_scores = vollis_winning_scores()
     losing_scores = vollis_losing_scores()
+    minimum_games = 0
+    stats = vollis_stats_per_year(year, minimum_games)
     if request.method == 'POST':
         winner = request.form['winner']
         loser = request.form['loser']
@@ -249,9 +289,8 @@ def add_vollis_game():
             add_vollis_stats([datetime.now(), winner, loser, winner_score, loser_score, datetime.now()])
             return redirect(url_for('add_vollis_game'))
 
-    return render_template('add_vollis_game.html', year=year, players=players, todays_stats=stats, games=games,
-        winning_scores=winning_scores, losing_scores=losing_scores)
-
+    return render_template('add_vollis_game.html', year=year, players=players, todays_stats=t_stats, games=t_games,
+        winning_scores=winning_scores, losing_scores=losing_scores, stats=stats, convertToUserLocalTime=convertToUserLocalTime)
 
 @app.route('/edit_vollis_games/')
 def edit_vollis_games():

@@ -5,9 +5,23 @@
     <title>Arbel's Stats | {% block title %} {% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <meta name="viewport" content="width=device-width" />
+
+    <script>
+        document.addEventListener('click', function(event) {
+            var nav = document.getElementById('main-nav');
+            var targetElement = event.target; // Clicked element
+
+            // Check if the clicked element is outside of the nav menu and not the menu toggle button
+            if (!nav.contains(targetElement) && targetElement.id !== 'menu__toggle') {
+                // Hide the nav menu
+                var menuToggle = document.getElementById('menu__toggle');
+                menuToggle.checked = false; // Uncheck the menu toggle checkbox
+            }
+        });
+    </script>
 </head>
 <body>
-    <nav>
+    <nav id="main-nav">
         <h1><a href="{{ url_for('index') }}">Doubles</a> <a href="{{ url_for('vollis') }}">Vollis</a></h1>
         <div class="hamburger-menu-container">
             <input id="menu__toggle" type="checkbox" />
