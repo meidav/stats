@@ -63,7 +63,7 @@ def index():
     stats = stats_per_year(str(date.today().year), minimum_games)
     rare_stats = rare_stats_per_year(str(date.today().year), minimum_games)
     return render_template('stats.html', todays_stats=t_stats, stats=stats, games=games, rare_stats=rare_stats, 
-        minimum_games=minimum_games, year=str(date.today().year), all_years=all_years)
+        minimum_games=minimum_games, year=str(date.today().year), all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
 
 @app.route('/stats/<year>/')
 def stats(year):
@@ -78,7 +78,7 @@ def stats(year):
     all_years = grab_all_years()
     stats = stats_per_year(year, minimum_games)
     rare_stats = rare_stats_per_year(year, minimum_games)
-    return render_template('stats.html', all_years=all_years, stats=stats, rare_stats=rare_stats, minimum_games=minimum_games, year=year)
+    return render_template('stats.html', all_years=all_years, stats=stats, rare_stats=rare_stats, minimum_games=minimum_games, year=year, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
 
 @app.route('/top_teams/')
 def top_teams():
