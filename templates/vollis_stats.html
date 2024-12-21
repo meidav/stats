@@ -1,3 +1,36 @@
+
+<script>
+    window.sortTable = function(columnIndex, tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            console.error(`Table with ID ${tableId} not found.`);
+            return;
+        }
+
+        const rows = Array.from(table.tBodies[0].rows);
+        const isNumeric = !isNaN(rows[0].cells[columnIndex].innerText.trim());
+        const direction = table.dataset.sortDirection === "asc" ? -1 : 1;
+        table.dataset.sortDirection = table.dataset.sortDirection === "asc" ? "desc" : "asc";
+
+        rows.sort((a, b) => {
+            const aValue = isNumeric
+                ? parseFloat(a.cells[columnIndex].innerText.trim()) || 0
+                : a.cells[columnIndex].textContent.trim().toLowerCase();
+            const bValue = isNumeric
+                ? parseFloat(b.cells[columnIndex].innerText.trim()) || 0
+                : b.cells[columnIndex].textContent.trim().toLowerCase();
+            return aValue > bValue ? direction : aValue < bValue ? -direction : 0;
+        });
+
+        // Re-append rows to the table body after sorting
+        rows.forEach(row => table.tBodies[0].appendChild(row));
+
+        // Force CSS reflow to re-apply styles
+        table.offsetHeight;  // This will force a reflow, re-apply styles
+    };
+</script>
+    
+
 {% extends 'base.html' %}
 
 {% block content %}
@@ -15,16 +48,16 @@
     </nav>
     <div>
     {% if todays_stats %}
-    <table>
+    <table id="todaysStatsTable">
         <h1>Today's vollis stats</h1>
         <thead>
             <tr>
-                <th class="rank" scope="col" colspan="1">#</th>
-                <th class="player_name" scope="col" colspan="1">Player</th>
-                <th class="numbered_stats" scope="col" colspan="1">Wins</th>
-                <th class="numbered_stats" scope="col" colspan="1">Losses</th>
-                <th class="numbered_stats" scope="col" colspan="1">Win %</th>
-                <th class="numbered_stats" scope="col" colspan="1">+/-</th>
+                <th class="rank clickable" scope="col" colspan="1" onclick="sortTable(0, 'todaysStatsTable')">#</th>
+                <th class="player_name clickable" scope="col" colspan="1" onclick="sortTable(1, 'todaysStatsTable')">Player</th>
+                <th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(2, 'todaysStatsTable')">Wins</th>
+                <th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(3, 'todaysStatsTable')">Losses</th>
+                <th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(4, 'todaysStatsTable')">Win %</th>
+                <th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(5, 'todaysStatsTable')">+/-</th>
             </tr>
         </thead>
         <tbody>
@@ -44,14 +77,14 @@
             {% endfor %}
         </tbody>
     </table>
-    <table>
+    <table id="gamesTable">
         <h1>Today's vollis games</h1>
         <thead>
             <tr>
-                <th class="rank" scope="col" colspan="1">#</th>
-                <th scope="col" colspan="1">Date/Updated</th>
-                <th scope="col" colspan="1">Winner</th>
-                <th scope="col" colspan="1">Loser</th>
+                <th class="rank clickable" scope="col" colspan="1" onclick="sortTable(0, 'gamesTable')">#</th>
+                <th class="clickable" scope="col" colspan="1" onclick="sortTable(1, 'gamesTable')">Date/Updated</th>
+                <th class="clickable" scope="col" colspan="1" onclick="sortTable(2, 'gamesTable')">Winner</th>
+                <th class="clickable" scope="col" colspan="1" onclick="sortTable(3, 'gamesTable')">Loser</th>
             </tr>
         </thead>
         <tbody>
@@ -70,21 +103,20 @@
                 </tr>
             {% endfor %}
         </tbody>
-        
     </table>
     {% endif %}
     </div>
     <h1>{% block title %} {{ year }} Vollis Stats {% endblock %}</h1>
         <div>
-        	<table>
+        	<table id="yearlyStatsTable">
         		<thead>
     				<tr>
-                        <th class="rank" scope="col" colspan="1">#</th>
-      					<th class="player_name" scope="col" colspan="1">Player</th>
-      					<th class="numbered_stats" scope="col" colspan="1">Wins</th>
-      					<th class="numbered_stats" scope="col" colspan="1">Losses</th>
-      					<th class="numbered_stats" scope="col" colspan="1">Win %</th>
-      					<th class="numbered_stats" scope="col" colspan="1">Games</th>
+                        <th class="rank clickable" scope="col" colspan="1" onclick="sortTable(0, 'yearlyStatsTable')">#</th>
+      					<th class="player_name clickable" scope="col" colspan="1" onclick="sortTable(1, 'yearlyStatsTable')">Player</th>
+      					<th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(2, 'yearlyStatsTable')">Wins</th>
+      					<th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(3, 'yearlyStatsTable')">Losses</th>
+      					<th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(4, 'yearlyStatsTable')">Win %</th>
+      					<th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(5, 'yearlyStatsTable')">Games</th>
     				</tr>
   				</thead>
         		<tbody>

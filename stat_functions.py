@@ -44,6 +44,42 @@ def set_cur():
 	cur = conn.cursor()
 	return cur	
 
+def get_stats_for_date_range(start_date, end_date):
+	"""
+	Generates player statistics for games played within a specified date range.
+
+	Parameters:
+		start_date (str): The start date in 'YYYY-MM-DD' format.
+		end_date (str): The end date in 'YYYY-MM-DD' format.
+
+	Returns:
+		list: A list of player stats [player, wins, losses, win_percentage].
+	"""
+	cur = set_cur()
+	cur.execute(
+		"SELECT * FROM games WHERE game_date BETWEEN ? AND ? ORDER BY game_date DESC",
+		(start_date, end_date)
+	)
+	games = cur.fetchall()
+	games = convert_ampm(games)
+
+	players = all_players(games)
+	stats = []
+	for player in players:
+		wins, losses = 0, 0
+		for game in games:
+			if player == game[2] or player == game[3]:  # Winner team
+				wins += 1
+			elif player == game[5] or player == game[6]:  # Loser team
+				losses += 1
+		win_percentage = wins / (wins + losses) if (wins + losses) > 0 else 0
+		stats.append([player, wins, losses, win_percentage])
+
+	stats.sort(key=lambda x: x[1], reverse=True)  # Sort by wins
+	stats.sort(key=lambda x: x[3], reverse=True)  # Then by win percentage
+	return stats
+
+
 def stats_per_year(year, minimum_games):
 	if year == 'All years':
 		games = all_games()

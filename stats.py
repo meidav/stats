@@ -6,7 +6,9 @@ from vollis_functions import *
 from one_v_one_functions import *
 from other_functions import *
 from datetime import datetime
+from datetime import timedelta
 import pytz
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b83880e869f054bfc465a6f46125ac715e7286ed25e88537'
@@ -47,6 +49,25 @@ def convertGametimeToUserLocalTime(gmt_time_str):
     
     return local_time_str
 
+from datetime import timedelta
+
+# Helper function to get stats for the last 30 days
+def last_30_days_stats():
+    try:
+        today = date.today()
+        thirty_days_ago = today - timedelta(days=30)
+        
+        # Assuming you have a database function that fetches stats for a date range
+        # Replace 'get_stats_for_date_range' with your actual query or database function.
+        # Here's an example:
+        stats = get_stats_for_date_range(str(thirty_days_ago), str(today))
+        
+        return stats
+    except Exception as e:
+        print(f"Error fetching last 30 days stats: {e}")
+        return []  # Return empty list on failure to ensure stability
+
+"""
 @app.route('/')
 def index():
     games = year_games(str(date.today().year))
@@ -64,6 +85,39 @@ def index():
     rare_stats = rare_stats_per_year(str(date.today().year), minimum_games)
     return render_template('stats.html', todays_stats=t_stats, stats=stats, games=games, rare_stats=rare_stats, 
         minimum_games=minimum_games, year=str(date.today().year), all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
+"""
+
+@app.route('/')
+def index():
+    try:
+        games = year_games(str(date.today().year))
+        if games:
+            if len(games) < 30:
+                minimum_games = 1
+            else:
+                minimum_games = len(games) // 30
+        else:
+            minimum_games = 1
+
+        all_years = grab_all_years()
+        t_stats = todays_stats()
+        games = todays_games()
+        stats = stats_per_year(str(date.today().year), minimum_games)
+        rare_stats = rare_stats_per_year(str(date.today().year), minimum_games)
+        
+        # Get last 30 days stats
+        last_30_stats = last_30_days_stats()
+
+        return render_template('stats.html', todays_stats=t_stats, stats=stats, games=games,
+                               rare_stats=rare_stats, minimum_games=minimum_games,
+                               year=str(date.today().year), all_years=all_years,
+                               convertGametimeToUserLocalTime=convertGametimeToUserLocalTime,
+                               last_30_stats=last_30_stats)  # Pass last 30 days stats
+
+    except Exception as e:
+        print(f"Error in the index route: {e}")
+        return redirect(url_for('error_page'))  # Optionally redirect to an error page
+
 
 @app.route('/stats/<year>/')
 def stats(year):
