@@ -91,13 +91,13 @@
             {% for match in matches %}
                 <tr class="table-double-row">
                     <td class="rank" style="vertical-align: bottom;">{{ loop.index }}</td>
-                    <td>{{ convertToUserLocalTime(match[1])[0:10] }}<br>{{ convertToUserLocalTime(match[1])[11:19] }}</td>
+                    <td>{{ (match[1])[0:10] }}<br>{{ (match[1])[11:19] }}</td>
                     <td><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
                     <td><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
                 </tr>
                 <tr class="table-double-row">
                     <td class="rank"> </td>
-                    <td>{{ convertToUserLocalTime(match[6])[0:10] }}<br>{{ convertToUserLocalTime(match[6])[11:19] }}</td>
+                    <td>{{ (match[6])[0:10] }}<br>{{ (match[6])[11:19] }}</td>
                     <td>{{ match[3] }}</td>
                     <td>{{ match[5] }}</td>
                 </tr>

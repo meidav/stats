@@ -2,7 +2,7 @@
 
 {% block content %}
 	<h1>{% block title %} Edit Game {% endblock %}</h1>
-	<!--
+	
 	<table>
 	   <thead>
 			<tr>
@@ -13,12 +13,12 @@
 		</thead>
 	   	<tbody>
 			<tr>
-				<td>{{ convertToUserLocalTime(game[1])[0:10] }}<br>{{ convertToUserLocalTime(game[1])[11:19] }}</td>
+				<td>{{ (game[1])[0:10] }}<br>{{ (game[1])[11:19] }}</td>
 				<td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
 				<td><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[5] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a></td>
 			</tr>
 			<tr>
-				<td>{{ convertToUserLocalTime(game[8])[0:10] }}<br>{{ convertToUserLocalTime(game[8])[11:19] }}</td>
+				<td>{{ (game[8])[0:10] }}<br>{{ (game[8])[11:19] }}</td>
 				<td>{{ game[4] }}</td>
 				<td>{{ game[7] }}</td>
 			</tr>
@@ -68,5 +68,5 @@
 			  <input type="submit" value="Submit">
 		   </form>
 	   </div>
-	   -->
+	   
 {% endblock %}

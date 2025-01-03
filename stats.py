@@ -1,13 +1,11 @@
 from flask import Flask, render_template, request, url_for, flash, redirect
 from database_functions import *
 from stat_functions import *
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from vollis_functions import *
 from tennis_functions import *
 from one_v_one_functions import *
 from other_functions import *
-from datetime import datetime
-from datetime import timedelta
 import pytz
 import logging
 
@@ -22,53 +20,14 @@ def setup_logging():
     handler.setLevel(logging.ERROR)  # Set the logging level to ERROR
     app.logger.addHandler(handler)
 
-# Get the local timezone of the system
-LOCAL_TIMEZONE = pytz.timezone('America/Los_Angeles')  # Replace with your system's timezone if needed
+# TIME OFFSET
+TIME_OFFSET = -8 #set this to the difference between your timezone and utc
 
 def get_local_time():
-    """
-    Returns the current time in the local timezone as a timezone-aware datetime object.
-    """
-    return datetime.now(LOCAL_TIMEZONE)
-
-def convertToUserLocalTime(gmt_time_str):
-    # Assuming gmt_time_str is in the format 'YYYY-MM-DD HH:MM:SS.ssssss' (GMT)
-    gmt_format = '%Y-%m-%d %H:%M:%S.%f'
+    utc_now = datetime.now()
+    local_time = utc_now + timedelta(hours=TIME_OFFSET)
+    return local_time
     
-    # Parse the GMT time string into a datetime object
-    gmt_time = datetime.strptime(gmt_time_str, gmt_format)
-    
-    # Get the user's local timezone (you can replace 'America/Los_Angeles' with the desired timezone)
-    user_tz = pytz.timezone('America/Los_Angeles')
-    
-    # Convert the GMT time to the user's local time
-    local_time = gmt_time.astimezone(user_tz)
-    
-    # Format the local time string as desired
-    local_time_str = local_time.strftime('%Y-%m-%d %H:%M:%S')
-
-    return local_time_str
-
-def convertGametimeToUserLocalTime(gmt_time_str):
-    # Assuming gmt_time_str is in the format 'MM/DD/YYYY HH:MM AM/PM' (GMT)
-    gmt_format = '%m/%d/%Y %I:%M %p'
-    
-    # Parse the GMT time string into a datetime object
-    gmt_time = datetime.strptime(gmt_time_str, gmt_format)
-    
-    # Get the user's local timezone (you can replace 'America/Los_Angeles' with the desired timezone)
-    user_tz = pytz.timezone('America/Los_Angeles')
-    
-    # Convert the GMT time to the user's local time
-    local_time = gmt_time.astimezone(user_tz)
-    
-    # Format the local time string as desired
-    local_time_str = local_time.strftime('%Y-%m-%d %I:%M %p')
-    
-    return local_time_str
-
-from datetime import timedelta
-
 # Helper function to get stats for the last 30 days
 def last_30_days_stats():
     try:
@@ -105,11 +64,8 @@ def index():
         # Get last 30 days stats
         last_30_stats = last_30_days_stats()
 
-        return render_template('stats.html', todays_stats=t_stats, stats=stats, games=games,
-                               rare_stats=rare_stats, minimum_games=minimum_games,
-                               year=str(date.today().year), all_years=all_years,
-                               convertGametimeToUserLocalTime=convertGametimeToUserLocalTime,
-                               last_30_stats=last_30_stats)  # Pass last 30 days stats
+        return render_template('stats.html', todays_stats=t_stats, stats=stats, games=games, rare_stats=rare_stats, minimum_games=minimum_games,
+                               year=str(date.today().year), all_years=all_years, last_30_stats=last_30_stats)  # Pass last 30 days stats
 
     except Exception as e:
         print(f"Error in the index route: {e}")
@@ -132,7 +88,7 @@ def stats(year):
     rare_stats = rare_stats_per_year(year, minimum_games)
     last_30_stats = None
     return render_template('stats.html', todays_stats=t_stats, all_years=all_years, stats=stats, rare_stats=rare_stats, minimum_games=minimum_games, year=year, 
-                           convertGametimeToUserLocalTime=convertGametimeToUserLocalTime, last_30_stats=last_30_stats)
+                           last_30_stats=last_30_stats)
 
 @app.route('/top_teams/')
 def top_teams():
@@ -189,13 +145,13 @@ def games():
     all_years = grab_all_years()
     games = year_games(str(date.today().year))
     year = str(date.today().year)
-    return render_template('games.html', games=games, year=year, all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
+    return render_template('games.html', games=games, year=year, all_years=all_years)
 
 @app.route('/games/<year>')
 def games_by_year(year):
     all_years = grab_all_years()
     games = year_games(year)
-    return render_template('games.html', games=games, year=year, all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
+    return render_template('games.html', games=games, year=year, all_years=all_years)
 
 @app.route('/add_game/', methods=('GET', 'POST'))
 def add_game():
@@ -254,8 +210,8 @@ def add_game():
                     minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score=winner_score, loser_score=loser_score)
                 
             # Save the game stats only if validation passed
-            utc_time = datetime.now()
-            add_game_stats([utc_time, winner1, winner2, loser1, loser2, winner_score, loser_score, utc_time])
+            my_time = get_local_time()
+            add_game_stats([my_time, winner1, winner2, loser1, loser2, winner_score, loser_score, my_time])
 
             # After successfully adding the game, re-render the template with updated data
             games_current_year = year_games(current_year)  # Re-fetch games data for the current year
@@ -263,7 +219,7 @@ def add_game():
             rare_stats = rare_stats_per_year(current_year, minimum_games)
             t_stats = todays_stats()
 
-            flash('Game added', 'success')  # Flash success message with custom category
+            flash(f'Game added! date/time in db: "{my_time}"', 'success')  # Flash success message with custom category
             return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
                 w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
                 minimum_games=minimum_games, winner1='', winner2='', loser1='', loser2='', winner_score='', loser_score='')
@@ -283,29 +239,27 @@ def add_game():
 def edit_games():
     all_years = grab_all_years()
     games = year_games(str(date.today().year))
-    return render_template('edit_games.html', games=games, year=str(date.today().year), 
-                           all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
+    return render_template('edit_games.html', games=games, year=str(date.today().year), all_years=all_years)
 
 @app.route('/edit_games/<year>')
 def edit_games_by_year(year):
     #flash("Received request to edit games with year: " + year)
     all_years = grab_all_years()
     games = year_games(year)
-    return render_template('edit_games.html', games=games, year=year, 
-                           all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
+    return render_template('edit_games.html', games=games, year=year, all_years=all_years)
 
 @app.route('/edit_game/<int:id>/', methods=['GET', 'POST'])
 def update(id):
-    flash("Received request to edit game with ID: " + id)
-    #game_id = id
-    #x = find_game(game_id)
+    #flash(f'Received request to edit game with ID: "{id}"', 'danger')
+    game_id = id
+    x = find_game(game_id)
 
-    #game = [x[0][0], x[0][1], x[0][2], x[0][3], x[0][4], x[0][5], x[0][6], x[0][7], x[0][8]]
-    #w_scores = winners_scores()
-    #l_scores = losers_scores()
-    #games = year_games(str(date.today().year))
-    #players = all_players(games)
-    """
+    game = [x[0][0], x[0][1], x[0][2], x[0][3], x[0][4], x[0][5], x[0][6], x[0][7], x[0][8]]
+    w_scores = winners_scores()
+    l_scores = losers_scores()
+    games = year_games(str(date.today().year))
+    players = all_players(games)
+    
     if request.method == 'POST':
         winner1 = request.form['winner1']
         winner2 = request.form['winner2']
@@ -325,21 +279,18 @@ def update(id):
                 flash('Invalid score values!')
                 return redirect(url_for('edit_game', id=game_id))
 
-            # Replace deprecated utcnow() with datetime.now(datetime.timezone.utc)
-            utc_time = datetime.now(timezone.utc)
+            my_time = get_local_time()
 
             try:
-                update_game(game_id, game[1], winner1, winner2, winner_score, loser1, loser2, loser_score, utc_time, game_id)
+                update_game(game_id, game[1], winner1, winner2, winner_score, loser1, loser2, loser_score, my_time, game_id)
             except Exception as e:
-                app.logger.error(f"Error updating game with ID {game_id}: {e}")
                 flash(f'Error updating game: {str(e)}')
                 return redirect(url_for('edit_games'))
 
             return redirect(url_for('edit_games'))
-    """
-    #return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
-    return render_template('edit_game.html')
-
+    
+    return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+    
 
 @app.route('/delete/<int:id>/',methods = ['GET','POST'])
 def delete_game(id):
@@ -365,7 +316,7 @@ def vollis_stats(year):
     minimum_games = 2
     stats = vollis_stats_per_year(year, minimum_games)
     return render_template('vollis_stats.html', stats=stats,
-        all_years=all_years, minimum_games=minimum_games, year=year, convertToUserLocalTime=convertToUserLocalTime)
+        all_years=all_years, minimum_games=minimum_games, year=year)
 
 @app.route('/vollis_stats/')
 def vollis():
@@ -376,7 +327,7 @@ def vollis():
     minimum_games = 0
     stats = vollis_stats_per_year(year, minimum_games)
     return render_template('vollis_stats.html', stats=stats, todays_stats=t_stats, games=games,
-        all_years=all_years, minimum_games=minimum_games, year=year, convertToUserLocalTime=convertToUserLocalTime)
+        all_years=all_years, minimum_games=minimum_games, year=year)
 
 
 @app.route('/add_vollis_game/', methods=('GET', 'POST'))
@@ -409,62 +360,33 @@ def add_vollis_game():
 
     return render_template('add_vollis_game.html', year=year, players=players, todays_stats=t_stats, 
                            games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, 
-                           stats=stats, convertToUserLocalTime=convertToUserLocalTime)
+                           stats=stats)
 
 @app.route('/edit_vollis_games/')
 def edit_vollis_games():
     all_years = all_vollis_years()
     games = vollis_year_games(str(date.today().year))
     return render_template('edit_vollis_games.html', games=games, all_years=all_years, 
-                           year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
+                           year=str(date.today().year))
 
 
 @app.route('/edit_past_year_vollis_games/<year>')
 def edit_vollis_games_by_year(year):
     all_years = all_vollis_years()
     games = vollis_year_games(year)
-    return render_template('edit_vollis_games.html', all_years=all_years, games=games, year=year, convertToUserLocalTime=convertToUserLocalTime)
+    return render_template('edit_vollis_games.html', all_years=all_years, games=games, year=year)
 
 @app.route('/vollis_games/')
 def vollis_games():
     all_years = all_vollis_years()
     games = vollis_year_games(str(date.today().year))
-    return render_template('vollis_games.html', games=games, all_years=all_years, year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
+    return render_template('vollis_games.html', games=games, all_years=all_years, year=str(date.today().year))
 
 @app.route('/vollis_games/<year>')
 def vollis_games_by_year(year):
     all_years = all_vollis_years()
     games = vollis_year_games(year)
-    return render_template('vollis_games.html', all_years=all_years, games=games, year=year, convertToUserLocalTime=convertToUserLocalTime)
-
-"""
-@app.route('/edit_vollis_game/<int:id>/', methods=['GET', 'POST'])
-def update_vollis_game(id):
-    game_id = id
-    x = find_vollis_game(game_id)
-    game = [x[0][0], x[0][1], x[0][2], x[0][3], x[0][4], x[0][5], x[0][6]]
-    games = vollis_year_games(str(date.today().year))
-    players = all_vollis_players(games)
-
-    if request.method == 'POST':
-        winner = request.form['winner']
-        loser = request.form['loser']
-        winner_score = request.form['winner_score']
-        loser_score = request.form['loser_score']
-
-        if not winner or not loser or not winner_score or not loser_score:
-            flash('All fields required!')
-        else:
-            # Store timestamp in UTC
-            utc_time = datetime.now(timezone.utc)
-
-            # Update the game with the UTC timestamp
-            edit_vollis_game(game_id, game[1], winner, winner_score, loser, loser_score, utc_time, game_id)
-            return redirect(url_for('edit_vollis_games'))
-
-    return render_template('edit_vollis_game.html', game=game, players=players, 
-                           year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
-"""
+    return render_template('vollis_games.html', all_years=all_years, games=games, year=year)
 
 @app.route('/edit_vollis_game/<int:id>/', methods=['GET', 'POST'])
 def update_vollis_game(id):
@@ -503,7 +425,7 @@ def update_vollis_game(id):
             return redirect(url_for('edit_vollis_games'))
 
     return render_template('edit_vollis_game.html', game=game, players=players, 
-                           year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
+                           year=str(date.today().year))
 
 
 @app.route('/delete_vollis_game/<int:id>/',methods = ['GET','POST'])
@@ -514,7 +436,7 @@ def delete_vollis_game(id):
         remove_vollis_game(game_id)
         return redirect(url_for('edit_vollis_games'))
  
-    return render_template('delete_vollis_game.html', game=game, convertToUserLocalTime=convertToUserLocalTime)
+    return render_template('delete_vollis_game.html', game=game)
 
 @app.route('/vollis_player/<year>/<name>')
 def vollis_player_stats(year, name):
@@ -535,7 +457,7 @@ def tennis_stats(year):
     minimum_matches = 2
     stats = tennis_stats_per_year(year, minimum_matches)
     return render_template('tennis_stats.html', stats=stats,
-        all_years=all_years, minimum_matches=minimum_matches, year=year, convertToUserLocalTime=convertToUserLocalTime)
+        all_years=all_years, minimum_matches=minimum_matches, year=year)
 
 @app.route('/tennis_stats/')
 def tennis():
@@ -546,7 +468,7 @@ def tennis():
     minimum_matches = 0
     stats = tennis_stats_per_year(year, minimum_matches)
     return render_template('tennis_stats.html', stats=stats, todays_stats=t_stats, matches=matches,
-        all_years=all_years, minimum_matches=minimum_matches, year=year, convertToUserLocalTime=convertToUserLocalTime)
+        all_years=all_years, minimum_matches=minimum_matches, year=year)
 
 
 @app.route('/add_tennis_match/', methods=('GET', 'POST'))
@@ -580,33 +502,33 @@ def add_tennis_match():
 
     return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
                            matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, 
-                           stats=stats, convertToUserLocalTime=convertToUserLocalTime)
+                           stats=stats)
 
 @app.route('/edit_tennis_matches/')
 def edit_tennis_matches():
     all_years = all_tennis_years()
     matches = tennis_year_matches(str(date.today().year))
     return render_template('edit_tennis_matches.html', matches=matches, all_years=all_years, 
-                           year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
+                           year=str(date.today().year))
 
 
 @app.route('/edit_past_year_tennis_matches/<year>')
 def edit_tennis_matches_by_year(year):
     all_years = all_tennis_years()
     matches = tennis_year_matches(year)
-    return render_template('edit_tennis_matches.html', all_years=all_years, matches=matches, year=year, convertToUserLocalTime=convertToUserLocalTime)
+    return render_template('edit_tennis_matches.html', all_years=all_years, matches=matches, year=year)
 
 @app.route('/tennis_matches/')
 def tennis_matches():
     all_years = all_tennis_years()
     matches = tennis_year_matches(str(date.today().year))
-    return render_template('tennis_matches.html', matches=matches, all_years=all_years, year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
+    return render_template('tennis_matches.html', matches=matches, all_years=all_years, year=str(date.today().year))
 
 @app.route('/tennis_matches/<year>')
 def tennis_matches_by_year(year):
     all_years = all_tennis_years()
     matches = tennis_year_matches(year)
-    return render_template('tennis_matches.html', all_years=all_years, matches=matches, year=year, convertToUserLocalTime=convertToUserLocalTime)
+    return render_template('tennis_matches.html', all_years=all_years, matches=matches, year=year)
 
 
 @app.route('/edit_tennis_match/<int:id>/', methods=['GET', 'POST'])
@@ -634,7 +556,7 @@ def update_tennis_match(id):
             return redirect(url_for('edit_tennis_matches'))
 
     return render_template('edit_tennis_match.html', match=match, players=players, 
-                           year=str(date.today().year), convertToUserLocalTime=convertToUserLocalTime)
+                           year=str(date.today().year))
 
 
 @app.route('/delete_tennis_match/<int:id>/',methods = ['GET','POST'])
@@ -645,7 +567,7 @@ def delete_tennis_match(id):
         remove_tennis_match(match_id)
         return redirect(url_for('edit_tennis_matches'))
  
-    return render_template('delete_tennis_match.html', match=match, convertToUserLocalTime=convertToUserLocalTime)
+    return render_template('delete_tennis_match.html', match=match)
 
 @app.route('/tennis_player/<year>/<name>')
 def tennis_player_stats(year, name):
