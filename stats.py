@@ -292,6 +292,7 @@ def delete_game(id):
     game = find_game(id)
     if request.method == 'POST':
         remove_game(game_id)
+        flash(f'Game deleted!', 'danger')
         return redirect(url_for('edit_games'))
  
     return render_template('delete_game.html', game=game)
@@ -434,6 +435,7 @@ def delete_vollis_game(id):
     game = find_vollis_game(id)
     if request.method == 'POST':
         remove_vollis_game(game_id)
+        flash(f'Game deleted!', 'danger')
         return redirect(url_for('edit_vollis_games'))
  
     return render_template('delete_vollis_game.html', game=game)

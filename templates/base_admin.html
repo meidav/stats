@@ -36,6 +36,13 @@
             </ul>
         </div>
     </nav>
+    <div class="alerts">
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
     <nav>
         <div class="dropdown">
             <button class="dropbtn">Add/Edit
@@ -50,11 +57,7 @@
         </div>  
     </nav>
     <div class="content">
-        {% for category, message in get_flashed_messages(with_categories=True) %}
-            <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
+        
         {% block content %} {% endblock %}
     </div>    
 </body>

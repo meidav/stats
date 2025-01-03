@@ -241,7 +241,7 @@ caption {
   max-width: 360px;
   font-size: 1rem;
   padding: 20px;
-  margin: 5px auto;
+  margin: 5px auto 30px auto;
   color: #e7b5c0;
   background-color: #543038;
   border-radius: var(--rounded-corners);
