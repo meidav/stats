@@ -204,7 +204,7 @@ def add_game():
                 
             # Validate uniqueness of players
             if len(set([winner1, winner2, loser1, loser2])) < 4:
-                flash('Each player must be unique!', 'danger')
+                flash('Players must be unique!', 'danger')
                 return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
                     w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
                     minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score=winner_score, loser_score=loser_score)
@@ -213,16 +213,9 @@ def add_game():
             my_time = get_local_time()
             add_game_stats([my_time, winner1, winner2, loser1, loser2, winner_score, loser_score, my_time])
 
-            # After successfully adding the game, re-render the template with updated data
-            games_current_year = year_games(current_year)  # Re-fetch games data for the current year
-            stats = stats_per_year(current_year, minimum_games)  # Re-fetch the updated stats
-            rare_stats = rare_stats_per_year(current_year, minimum_games)
-            t_stats = todays_stats()
-
-            flash(f'Game added! date/time in db: "{my_time}"', 'success')  # Flash success message with custom category
-            return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
-                w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
-                minimum_games=minimum_games, winner1='', winner2='', loser1='', loser2='', winner_score='', loser_score='')
+            #flash(f'Game added! date/time in db: "{my_time}"', 'success')  # Flash success message with custom category
+            flash(f'Game added!', 'success')
+            return redirect(url_for('add_game'))
 
         except Exception as e:
             # Log the error for debugging
@@ -269,14 +262,14 @@ def update(id):
         loser_score = request.form['loser_score']
 
         if not winner1 or not winner2 or not loser1 or not loser2 or not winner_score or not loser_score:
-            flash('All fields required!')
+            flash('All fields are required!', 'danger')
         else:
             # Validate score values
             try:
                 winner_score = int(winner_score)
                 loser_score = int(loser_score)
             except ValueError:
-                flash('Invalid score values!')
+                flash('Invalid score values!', 'danger')
                 return redirect(url_for('edit_game', id=game_id))
 
             my_time = get_local_time()
@@ -287,6 +280,7 @@ def update(id):
                 flash(f'Error updating game: {str(e)}')
                 return redirect(url_for('edit_games'))
 
+            flash(f'Game updated!', 'success')
             return redirect(url_for('edit_games'))
     
     return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
@@ -329,7 +323,6 @@ def vollis():
     return render_template('vollis_stats.html', stats=stats, todays_stats=t_stats, games=games,
         all_years=all_years, minimum_games=minimum_games, year=year)
 
-
 @app.route('/add_vollis_game/', methods=('GET', 'POST'))
 def add_vollis_game():
     games = vollis_year_games('All years')
@@ -348,19 +341,41 @@ def add_vollis_game():
         winner_score = request.form['winner_score']
         loser_score = request.form['loser_score']
 
+        # Validate required fields
         if not winner or not loser or not winner_score or not loser_score:
-            flash('All fields required!')
-        else:
-            # Store timestamps in UTC
-            utc_time = datetime.now(timezone.utc)
+            flash('All fields are required!', 'danger')
+            return render_template('add_vollis_game.html', year=year, players=players, todays_stats=t_stats, 
+                           games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+        
+        # Validate numeric scores
+        try:
+            winner_score = int(winner_score)
+            loser_score = int(loser_score)
+        except ValueError:
+            flash('Scores must be numeric!', 'danger')
+            return render_template('add_vollis_game.html', year=year, players=players, todays_stats=t_stats, 
+                           games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
 
-            # Add game stats with UTC timestamps
-            add_vollis_stats([utc_time, winner, loser, winner_score, loser_score, utc_time])
-            return redirect(url_for('add_vollis_game'))
+        # Validate score logic
+        if winner_score <= loser_score:
+            #flash(f'Winner\'s score must be greater than loser\'s score! winner score: {winner_score}, loser score: {loser_score}', 'danger')
+            flash(f'Winner\'s score must be greater than loser\'s score!', 'danger')
+            return render_template('add_vollis_game.html', year=year, players=players, todays_stats=t_stats, 
+                           games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+        
+        # Validate uniqueness of players
+        if len(set([winner, loser])) < 2:
+            flash('Players must be unique!', 'danger')
+            return render_template('add_vollis_game.html', year=year, players=players, todays_stats=t_stats, 
+                           games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+
+        my_time = get_local_time()
+        add_vollis_stats([my_time, winner, loser, winner_score, loser_score, my_time])
+        flash(f'Game added!', 'success')
+        return redirect(url_for('add_vollis_game'))
 
     return render_template('add_vollis_game.html', year=year, players=players, todays_stats=t_stats, 
-                           games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, 
-                           stats=stats)
+                           games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
 
 @app.route('/edit_vollis_games/')
 def edit_vollis_games():
@@ -401,31 +416,16 @@ def update_vollis_game(id):
         loser = request.form['loser']
         winner_score = request.form['winner_score']
         loser_score = request.form['loser_score']
-        actual_time = request.form['actual_time']
-
+        
         if not winner or not loser or not winner_score or not loser_score:
-            flash('All fields required!')
+            flash('All fields are required!', 'danger')
         else:
-            # Only process the date/time if it's provided
-            if actual_time:
-                try:
-                    # Parse the actual_time string from "YYYY-MM-DDTHH:MM" format
-                    formatted_time = datetime.strptime(actual_time, "%Y-%m-%dT%H:%M").strftime("%Y-%m-%d %H:%M:%S")
-                except ValueError as e:
-                    print(f"Date parsing error: {e}")
-                    formatted_time = None  # In case of parsing error, you can handle it as needed
-            else:
-                # If no time is provided, fallback to existing game date
-                formatted_time = game[1]
-
-            # Update the game record with the UTC timestamp or preformatted actual_time
-            utc_time = datetime.now(timezone.utc)
-            edit_vollis_game(game_id, game[1], winner, winner_score, loser, loser_score, formatted_time, game_id)
-
+            my_time = get_local_time()
+            edit_vollis_game(game_id, game[1], winner, winner_score, loser, loser_score, my_time, game_id)
+            flash(f'Game updated!', 'success')
             return redirect(url_for('edit_vollis_games'))
 
-    return render_template('edit_vollis_game.html', game=game, players=players, 
-                           year=str(date.today().year))
+    return render_template('edit_vollis_game.html', game=game, players=players, year=str(date.today().year))
 
 
 @app.route('/delete_vollis_game/<int:id>/',methods = ['GET','POST'])

@@ -1,14 +1,14 @@
 {% extends 'base_admin.html' %}
 
 {% block content %}
-	<h1>{% block title %} Edit Game {% endblock %}</h1>
+	<h1>{% block title %} Edit game {% endblock %}</h1>
 	
 	<table>
 	   <thead>
 			<tr>
 				<th scope="col" colspan="1">Date/Updated</th>
-				<th scope="col" colspan="1">Winner</th>
-				<th scope="col" colspan="1">Loser</th>
+				<th scope="col" colspan="1">Winners</th>
+				<th scope="col" colspan="1">Losers</th>
 			</tr>
 		</thead>
 	   	<tbody>
@@ -41,30 +41,12 @@
 							<option value= "{{ score }}">
 					 {% endfor %}
 			  </datalist>
-			  <input type="text" name="winner1"
-					 placeholder="Winner 1"
-					 value="{{ request.form['winner1'] }}"
-					 list="players">
-			  <input type="text" name="winner2"
-					 placeholder="Winner 2"
-					 value="{{ request.form['winner2'] }}"
-					 list="players">
-			  <input type="text" name="loser1"
-					 placeholder="Loser 1"
-					 value="{{ request.form['loser1'] }}"
-					 list="players">      
-			  <input type="text" name="loser2"
-					 placeholder="Loser 2"
-					 value="{{ request.form['loser2'] }}"
-					 list="players">
-			  <input type="number" pattern="[0-9]*" name="winner_score"
-					 placeholder="Winners' score"
-					 value="{{ request.form['winner_score'] }}"
-					 list="w_scores">
-			  <input type="number" pattern="[0-9]*" name="loser_score"
-					 placeholder="Losers' score"
-					 value="{{ request.form['loser_score'] }}"
-					 list="l_scores">    
+			  <input type="text" name="winner1" placeholder="Winner 1" value="{{ game[2] }}" list="players">
+			  <input type="text" name="winner2" placeholder="Winner 2" value="{{ game[3] }}" list="players">
+			  <input type="text" name="loser1" placeholder="Loser 1" value="{{ game[5] }}" list="players">
+			  <input type="text" name="loser2" placeholder="Loser 2" value="{{ game[6] }}" list="players">
+			  <input type="number" pattern="[0-9]*" name="winner_score" placeholder="Winners' score" value="{{ game[4] }}" list="w_scores">
+			  <input type="number" pattern="[0-9]*" name="loser_score" placeholder="Losers' score" value="{{ game[7] }}" list="l_scores">    
 			  <input type="submit" value="Submit">
 		   </form>
 	   </div>
