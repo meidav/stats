@@ -242,6 +242,16 @@ caption {
     background-color: #ffd5de;
 }
 
+.alert-danger {
+  color: #970020;
+  background-color: #ffd5de;
+}
+
+.alert-success {
+  color: #015c1c;
+  background-color: #aef4b4;
+}
+
 .message {
     padding: 10px;
     margin: 5px;

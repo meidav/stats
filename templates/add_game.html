@@ -29,12 +29,6 @@
         </form>
     </div>
 
-    <div id="error-message" style="color:rgb(228, 163, 163);"></div>
-
-    {% if error_message %}
-        <div id="error-message">{{ error_message }}</div>
-    {% endif %}
-
     <div>
         {% if todays_stats %}
             <table>
@@ -68,7 +62,7 @@
             </table>
         {% endif %}
 
-        <h1>{{ year }} Stats</h1>
+        <h1>{{ year }} stats</h1>
         <table>
             <thead>
                 <tr>

@@ -197,114 +197,6 @@ def games_by_year(year):
     games = year_games(year)
     return render_template('games.html', games=games, year=year, all_years=all_years, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)
 
-"""@app.route('/add_game/', methods=('GET', 'POST'))
-def add_game():
-    games = year_games(str(date.today().year))
-    
-    if games:
-        minimum_games = 1 if len(games) < 30 else len(games) // 30
-    else:
-        minimum_games = 1
-    
-    stats = stats_per_year(str(date.today().year), minimum_games)
-    rare_stats = rare_stats_per_year(str(date.today().year), minimum_games)
-
-    w_scores = winners_scores()
-    l_scores = losers_scores()
-    games = year_games('All years')
-    players = all_players(games)
-    t_stats = todays_stats()
-    games = todays_games()
-    year = str(date.today().year)
-
-    if request.method == 'POST':
-        winner1 = request.form['winner1']
-        winner2 = request.form['winner2']
-        loser1 = request.form['loser1']
-        loser2 = request.form['loser2']
-        winner_score = request.form['winner_score']
-        loser_score = request.form['loser_score']
-
-        if not winner1 or not winner2 or not loser1 or not loser2 or not winner_score or not loser_score:
-            flash('All fields required!')
-        elif int(winner_score) <= int(loser_score):
-            flash('Winner score is less than loser score!')
-        elif winner1 == winner2 or winner1 == loser1 or winner1 == loser2 or winner2 == loser1 or winner2 == loser2 or loser1 == loser2:
-            flash('Two names are the same!')
-        else:
-            # Store timestamp in UTC for consistency
-            utc_time = datetime.now(timezone.utc)
-            
-            # Save the game stats with UTC timestamp
-            add_game_stats([utc_time, winner1.strip(), winner2.strip(), loser1.strip(), loser2.strip(), 
-                            winner_score, loser_score, utc_time])
-
-            return redirect(url_for('add_game'))
-
-    return render_template('add_game.html', todays_stats=t_stats, games=games, players=players, 
-        w_scores=w_scores, l_scores=l_scores, year=year, stats=stats, rare_stats=rare_stats, 
-        minimum_games=minimum_games, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)"""
-
-
-"""@app.route('/add_game/', methods=('GET', 'POST'))
-def add_game():
-    games = year_games(str(date.today().year))
-
-    if games:
-        minimum_games = 1 if len(games) < 30 else len(games) // 30
-    else:
-        minimum_games = 1
-
-    stats = stats_per_year(str(date.today().year), minimum_games)
-    rare_stats = rare_stats_per_year(str(date.today().year), minimum_games)
-
-    w_scores = winners_scores()
-    l_scores = losers_scores()
-    games = year_games('All years')
-    players = all_players(games)
-    t_stats = todays_stats()
-    games = todays_games()
-    year = str(date.today().year)
-
-    if request.method == 'POST':
-        winner1 = request.form['winner1']
-        winner2 = request.form['winner2']
-        loser1 = request.form['loser1']
-        loser2 = request.form['loser2']
-        winner_score = request.form['winner_score']
-        loser_score = request.form['loser_score']
-
-        # Check for missing fields
-        if not winner1 or not winner2 or not loser1 or not loser2 or not winner_score or not loser_score:
-            return jsonify({'error': 'All fields required!'}), 400
-        
-        # Validate the scores
-        elif int(winner_score) <= int(loser_score):
-            return jsonify({'error': 'Winner score is less than loser score!'}), 400
-        
-        # Ensure no player is listed twice
-        elif winner1 == winner2 or winner1 == loser1 or winner1 == loser2 or winner2 == loser1 or winner2 == loser2 or loser1 == loser2:
-            return jsonify({'error': 'Two names are the same!'}), 400
-
-        else:
-            # Ensure the timestamp is consistent and formatted correctly
-            # utc_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")  # Format without microseconds
-            utc_time = datetime.now()
-            print(f"Game time: {utc_time}")  # Debug the timestamp
-
-            try:
-                # Save the game stats with UTC timestamp
-                add_game_stats([utc_time, winner1.strip(), winner2.strip(), loser1.strip(), loser2.strip(),
-                                winner_score, loser_score, utc_time])
-                return jsonify({'message': 'Game successfully added!'}), 200
-
-            except Exception as e:
-                return jsonify({'error': f'Error saving game stats: {str(e)}'}), 500
-
-    return render_template('add_game.html', todays_stats=t_stats, games=games, players=players, 
-        w_scores=w_scores, l_scores=l_scores, year=year, stats=stats, rare_stats=rare_stats, 
-        minimum_games=minimum_games, convertGametimeToUserLocalTime=convertGametimeToUserLocalTime)"""
-
 @app.route('/add_game/', methods=('GET', 'POST'))
 def add_game():
     current_year = str(date.today().year)
@@ -332,34 +224,54 @@ def add_game():
 
             # Validate required fields
             if not all([winner1, winner2, loser1, loser2, winner_score, loser_score]):
-                return jsonify({'error': 'All fields are required!'}), 400
-
+                flash('All fields are required!', 'danger')
+                return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
+                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                    minimum_games=minimum_games, winner1='', winner2='', loser1='', loser2='', winner_score='', loser_score='')
+                
             # Validate numeric scores
             try:
                 winner_score = int(winner_score)
                 loser_score = int(loser_score)
             except ValueError:
-                return jsonify({'error': 'Scores must be numeric!'}), 400
-
+                flash('Scores must be numeric!', 'danger')
+                return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
+                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                    minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score='', loser_score='')
+                
             # Validate score logic
             if winner_score <= loser_score:
-                return jsonify({'error': 'Winner score must be greater than loser score!'}), 400
-
+                flash('Winner score must be greater than loser score!', 'danger')
+                return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
+                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                    minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score=winner_score, loser_score=loser_score)
+                
             # Validate uniqueness of players
             if len(set([winner1, winner2, loser1, loser2])) < 4:
-                return jsonify({'error': 'Each player must be unique!'}), 400
+                flash('Each player must be unique!', 'danger')
+                return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
+                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                    minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score=winner_score, loser_score=loser_score)
+                
+            # Save the game stats only if validation passed
+            utc_time = datetime.now()
+            add_game_stats([utc_time, winner1, winner2, loser1, loser2, winner_score, loser_score, utc_time])
 
-            # Save the game stats
-            utc_time = datetime.now(timezone.utc)
-            add_game_stats([
-                utc_time, winner1, winner2, loser1, loser2, winner_score, loser_score, utc_time
-            ])
-            return jsonify({'message': 'Game successfully added!'}), 200
+            # After successfully adding the game, re-render the template with updated data
+            games_current_year = year_games(current_year)  # Re-fetch games data for the current year
+            stats = stats_per_year(current_year, minimum_games)  # Re-fetch the updated stats
+            rare_stats = rare_stats_per_year(current_year, minimum_games)
+            t_stats = todays_stats()
+
+            flash('Game added', 'success')  # Flash success message with custom category
+            return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
+                w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                minimum_games=minimum_games, winner1='', winner2='', loser1='', loser2='', winner_score='', loser_score='')
 
         except Exception as e:
             # Log the error for debugging
             app.logger.error(f"Error in add_game: {e}")
-            return jsonify({'error': f'Error saving game stats: {str(e)}'}), 500
+            flash(f'Error saving game stats: {str(e)}', 'danger')
 
     return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
         w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
