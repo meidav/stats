@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action='' method="post">
+    <div><h2>Are you sure about deleting this match?</h2></div>
+    <div><input type="submit" value="Yes!" class="delete_input"></div>
+    <div><a href="/edit_tennis_matches"><button type="button">Nah...</button></a></div>
+</form>
+{% endblock %}

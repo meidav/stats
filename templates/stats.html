@@ -47,8 +47,8 @@
         console.log("last_30_stats:", last30Stats);
     </script>
     
-    <h1>Last 30 Days</h1>
     {% if last_30_stats %}
+    <h1>Last 30 days</h1>
     <table id="last-30-days-stats">
         <thead>
             <tr>
@@ -73,11 +73,9 @@
             {% endfor %}
         </tbody>
     </table>
-    {% else %}
-    <p>No data available for the last 30 days.</p>
     {% endif %}
 
-    <h1>{{ year }} Stats</h1>
+    <h1>{{ year }} stats</h1>
     <table id="yearly-stats">
         <thead>
             <tr>

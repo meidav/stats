@@ -28,17 +28,17 @@ def create_table(conn, create_table_sql):
     except Error as e:
         print(e)
 
-def create_vollis_game(conn, game):
-    sql = ''' INSERT INTO vollis_games(game_date, winner, winner_score, loser, loser_score, updated_at)
+def create_tennis_match(conn, match):
+    sql = ''' INSERT INTO tennis_matches(match_date, winner, winner_score, loser, loser_score, updated_at)
               VALUES(?,?,?,?,?,?) '''
     cur = conn.cursor()
-    cur.execute(sql, game)
+    cur.execute(sql, match)
     conn.commit()
 
-"""def database_update_vollis_game(conn, game):
-    sql = ''' UPDATE vollis_games
+def database_update_tennis_match(conn, match):
+    sql = ''' UPDATE tennis_matches
               SET id = ? ,
-                    game_date = ?,
+                    match_date = ?,
                     winner = ?,
                     winner_score = ?,
                     loser = ?,
@@ -46,36 +46,21 @@ def create_vollis_game(conn, game):
                     updated_at = ? 
               WHERE id = ?'''
     cur = conn.cursor()
-    cur.execute(sql, game)
-    conn.commit()
-"""
-def database_update_vollis_game(conn, game):
-    sql = ''' UPDATE vollis_games
-              SET id = ?,
-                  game_date = ?,
-                  winner = ?,
-                  winner_score = ?,
-                  loser = ?,
-                  loser_score = ?,
-                  updated_at = ?,
-                  actual_time = ?  -- This is the missing part!
-              WHERE id = ?'''
-    cur = conn.cursor()
-    cur.execute(sql, game)
+    cur.execute(sql, match)
     conn.commit()
 
-def database_delete_vollis_game(conn, game_id):
-    sql = 'DELETE FROM vollis_games WHERE id=?'
+def database_delete_tennis_match(conn, match_id):
+    sql = 'DELETE FROM tennis_matches WHERE id=?'
     cur = conn.cursor()
-    cur.execute(sql, (game_id,))
+    cur.execute(sql, (match_id,))
     conn.commit()
 
 def main():
     database = r"stats.db"
 
-    sql_create_vollis_games_table = """CREATE TABLE IF NOT EXISTS vollis_games (
+    sql_create_tennis_matches_table = """CREATE TABLE IF NOT EXISTS tennis_matches (
                                     id integer PRIMARY KEY,
-                                    game_date DATETIME NOT NULL,
+                                    match_date DATETIME NOT NULL,
                                     winner text NOT NULL,
                                     winner_score integer NOT NULL,
                                     loser text NOT NULL,
@@ -88,8 +73,8 @@ def main():
 
     # create tables
     if conn is not None:
-        # create games table
-        create_table(conn, sql_create_vollis_games_table)
+        # create matches table
+        create_table(conn, sql_create_tennis_matches_table)
     else:
         print("Error! cannot create the database connection.")
 

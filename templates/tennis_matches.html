@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <nav>
+        <div class="dropdown">
+            <button class="dropbtn">Select a year
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                {% for year in all_years %}
+                    <a href="{{ url_for('tennis_matches_by_year', year=year) }}">{{ year }}</a>
+                {% endfor %}
+            </div>
+        </div>       
+    </nav>
+    <h1>{% block title %} {{ year }} Tennis matches {% endblock %}</h1>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="rank" scope="col" colspan="1">#</th>
+                        <th scope="col" colspan="1">Date</th>
+                        <th scope="col" colspan="1">Winner</th>
+                        <th scope="col" colspan="1"></th>
+                        <th scope="col" colspan="1">Loser</th>
+                        <th scope="col" colspan="1"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for match in matches %}
+                    <tr class="table-double-row">
+                        <td class="rank">{{ loop.index }}</td>
+                        <td>{{ convertToUserLocalTime(match[1])[0:10] }}<br>{{ convertToUserLocalTime(match[1])[11:19] }}</td>
+                        <td><a href="{{ url_for('player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
+                        <td>{{ match[3] }}</td>
+                        <td><a href="{{ url_for('player_stats', year=year, name=match[0][5] ) }}">{{ match[4] }}</a></td>
+                        <td>{{ match[5] }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+{% endblock %}

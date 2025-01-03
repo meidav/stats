@@ -1,0 +1,136 @@
+
+<script>
+    window.sortTable = function(columnIndex, tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            console.error(`Table with ID ${tableId} not found.`);
+            return;
+        }
+
+        const rows = Array.from(table.tBodies[0].rows);
+        const isNumeric = !isNaN(rows[0].cells[columnIndex].innerText.trim());
+        const direction = table.dataset.sortDirection === "asc" ? -1 : 1;
+        table.dataset.sortDirection = table.dataset.sortDirection === "asc" ? "desc" : "asc";
+
+        rows.sort((a, b) => {
+            const aValue = isNumeric
+                ? parseFloat(a.cells[columnIndex].innerText.trim()) || 0
+                : a.cells[columnIndex].textContent.trim().toLowerCase();
+            const bValue = isNumeric
+                ? parseFloat(b.cells[columnIndex].innerText.trim()) || 0
+                : b.cells[columnIndex].textContent.trim().toLowerCase();
+            return aValue > bValue ? direction : aValue < bValue ? -direction : 0;
+        });
+
+        // Re-append rows to the table body after sorting
+        rows.forEach(row => table.tBodies[0].appendChild(row));
+
+        // Force CSS reflow to re-apply styles
+        table.offsetHeight;  // This will force a reflow, re-apply styles
+    };
+</script>
+    
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <nav>
+        <div class="dropdown">
+            <button class="dropbtn">Select a year
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                {% for year in all_years %}
+                    <a href="{{ url_for('tennis_stats', year=year) }}">{{ year }}</a>
+                {% endfor %}
+            </div>
+        </div>       
+    </nav>
+    <div>
+    {% if todays_stats %}
+    <table id="todaysStatsTable">
+        <h1>Today's tennis stats</h1>
+        <thead>
+            <tr>
+                <th class="rank clickable" scope="col" colspan="1" onclick="sortTable(0, 'todaysStatsTable')">#</th>
+                <th class="player_name clickable" scope="col" colspan="1" onclick="sortTable(1, 'todaysStatsTable')">Player</th>
+                <th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(2, 'todaysStatsTable')">Wins</th>
+                <th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(3, 'todaysStatsTable')">Losses</th>
+                <th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(4, 'todaysStatsTable')">Win %</th>
+                <th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(5, 'todaysStatsTable')">+/-</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in todays_stats %}
+            <tr>
+                <td class="rank">{{ loop.index }}</td>
+                <td class="player_name"><a href="{{ url_for('tennis_player_stats', year=year, name=stat[0] ) }}">{{ stat[0] }}</a></td>
+                <td>{{ stat[1] }}</td>
+                <td>{{ stat[2] }}</td>
+                <td>{{ "{:.2f}".format(stat[3]*100) }}</td>
+                {% if stat[4] > 0 %}
+                    <td>+{{ stat[4] }}</td>
+                {% else %}
+                    <td>{{ stat[4] }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table id="matchesTable">
+        <h1>Today's tennis matches</h1>
+        <thead>
+            <tr>
+                <th class="rank clickable" scope="col" colspan="1" onclick="sortTable(0, 'matchesTable')">#</th>
+                <th class="clickable" scope="col" colspan="1" onclick="sortTable(1, 'matchesTable')">Date/Updated</th>
+                <th class="clickable" scope="col" colspan="1" onclick="sortTable(2, 'matchesTable')">Winner</th>
+                <th class="clickable" scope="col" colspan="1" onclick="sortTable(3, 'matchesTable')">Loser</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+                <tr class="table-double-row">
+                    <td class="rank" style="vertical-align: bottom;">{{ loop.index }}</td>
+                    <td>{{ convertToUserLocalTime(match[1])[0:10] }}<br>{{ convertToUserLocalTime(match[1])[11:19] }}</td>
+                    <td><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
+                    <td><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
+                </tr>
+                <tr class="table-double-row">
+                    <td class="rank"> </td>
+                    <td>{{ convertToUserLocalTime(match[6])[0:10] }}<br>{{ convertToUserLocalTime(match[6])[11:19] }}</td>
+                    <td>{{ match[3] }}</td>
+                    <td>{{ match[5] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    </div>
+    <h1>{% block title %} {{ year }} Tennis stats {% endblock %}</h1>
+        <div>
+        	<table id="yearlyStatsTable">
+        		<thead>
+    				<tr>
+                        <th class="rank clickable" scope="col" colspan="1" onclick="sortTable(0, 'yearlyStatsTable')">#</th>
+      					<th class="player_name clickable" scope="col" colspan="1" onclick="sortTable(1, 'yearlyStatsTable')">Player</th>
+      					<th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(2, 'yearlyStatsTable')">Wins</th>
+      					<th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(3, 'yearlyStatsTable')">Losses</th>
+      					<th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(4, 'yearlyStatsTable')">Win %</th>
+      					<th class="numbered_stats clickable" scope="col" colspan="1" onclick="sortTable(5, 'yearlyStatsTable')">matches</th>
+    				</tr>
+  				</thead>
+        		<tbody>
+        			{% for player in stats %}
+        			<tr>
+                        <td class="rank">{{ loop.index }}</td>
+            			<td class="player_name"><a href="{{ url_for('tennis_player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+            			<td>{{ player[1] }}</td>
+            			<td>{{ player[2] }}</td>
+            			<td>{{ "{:.2f}".format(player[3]*100) }}</td>
+            			<td>{{ player[1] + player[2] }}</td>
+            		</tr>
+            		{% endfor %}
+            	</tbody>
+            </table>
+        </div>
+{% endblock %}
