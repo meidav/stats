@@ -70,17 +70,6 @@ def find_vollis_game(game_id):
     row = cur.fetchall()
     return row
 
-"""def edit_vollis_game(game_id, game_date, winner, winner_score, loser, loser_score, updated_at, game_id2):
-    database = '/home/Idynkydnk/stats/stats.db'
-    conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
-    with conn: 
-        game = (game_id, game_date, winner, winner_score, loser, loser_score, updated_at, game_id2);
-        database_update_vollis_game(conn, game)
-"""
-
 def edit_vollis_game(game_id, game_date, winner, winner_score, loser, loser_score, updated_at, game_id2):
     database = '/home/Idynkydnk/stats/stats.db'
     conn = create_connection(database)

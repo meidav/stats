@@ -57,8 +57,7 @@ def database_update_vollis_game(conn, game):
                   winner_score = ?,
                   loser = ?,
                   loser_score = ?,
-                  updated_at = ?,
-                  actual_time = ?  -- This is the missing part!
+                  updated_at = ?
               WHERE id = ?'''
     cur = conn.cursor()
     cur.execute(sql, game)
