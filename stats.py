@@ -27,7 +27,13 @@ def get_local_time():
     utc_now = datetime.now()
     local_time = utc_now + timedelta(hours=TIME_OFFSET)
     return local_time
-    
+
+def get_min_delta():
+    # this delta function represents the number of games which will be divided by to determine the min games for rare games calculations
+    # so if the db has 55 games, the calc would be 55 / [this number], and it floors (rounds down) that result
+    # return 30 for the old default delta
+    return 30
+
 # Helper function to get stats for the last 30 days
 def last_30_days_stats():
     try:
@@ -48,11 +54,12 @@ def last_30_days_stats():
 def index():
     try:
         games = year_games(str(date.today().year))
+        tot_games = len(games)
         if games:
-            if len(games) < 30:
+            if tot_games < get_min_delta():
                 minimum_games = 1
             else:
-                minimum_games = len(games) // 30
+                minimum_games = tot_games // get_min_delta()
         else:
             minimum_games = 1
         all_years = grab_all_years()
@@ -61,25 +68,29 @@ def index():
         stats = stats_per_year(str(date.today().year), minimum_games)
         rare_stats = rare_stats_per_year(str(date.today().year), minimum_games)
         
+        #flash(f'Total games for rare stats: "{tot_games}"', 'info')
+        #flash(f'Minimum games for rare stats: "{minimum_games}"', 'info')
+
         # Get last 30 days stats
         last_30_stats = last_30_days_stats()
 
         return render_template('stats.html', todays_stats=t_stats, stats=stats, games=games, rare_stats=rare_stats, minimum_games=minimum_games,
-                               year=str(date.today().year), all_years=all_years, last_30_stats=last_30_stats)  # Pass last 30 days stats
+                               year=str(date.today().year), all_years=all_years, last_30_stats=last_30_stats, tot_games=tot_games)
 
     except Exception as e:
         print(f"Error in the index route: {e}")
-        return redirect(url_for('error_page'))  # Optionally redirect to an error page
+        return redirect(('error.html'))  # Optionally redirect to an error page
 
 
 @app.route('/stats/<year>/')
 def stats(year):
     games = year_games(year)
+    tot_games = len(games)
     if games:
-        if len(games) < 30:
+        if tot_games < get_min_delta():
             minimum_games = 1
         else:
-            minimum_games = len(games) // 30
+            minimum_games = tot_games // get_min_delta()
     else:
         minimum_games = 1
     all_years = grab_all_years()
@@ -88,7 +99,7 @@ def stats(year):
     rare_stats = rare_stats_per_year(year, minimum_games)
     last_30_stats = None
     return render_template('stats.html', todays_stats=t_stats, all_years=all_years, stats=stats, rare_stats=rare_stats, minimum_games=minimum_games, year=year, 
-                           last_30_stats=last_30_stats)
+                           last_30_stats=last_30_stats, tot_games=tot_games)
 
 @app.route('/top_teams/')
 def top_teams():

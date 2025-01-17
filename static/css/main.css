@@ -257,6 +257,11 @@ caption {
   background-color: #015c1c;
 }
 
+.alert-info {
+  color: #97eef1;
+  background-color: #126064;
+}
+
 .message {
   padding: 10px;
   margin: 5px;

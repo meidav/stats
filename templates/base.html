@@ -38,7 +38,16 @@
     </nav>
     <div class="content">
         {% for category, message in get_flashed_messages(with_categories=True) %}
-            <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+            <div class="alert 
+                {% if category == 'success' %}
+                    alert-success
+                {% elif category == 'danger' %}
+                    alert-danger
+                {% elif category == 'info' %}
+                    alert-info
+                {% else %}
+                    alert-info
+                {% endif %}">
                 {{ message }}
             </div>
         {% endfor %}
