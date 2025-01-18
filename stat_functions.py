@@ -128,9 +128,22 @@ def team_stats_per_year(year, minimum_games, games):
 				no_wins.append(x)
 			else:
 				stats.append(x)
-	stats.sort(key=lambda x: x['win_percentage'], reverse=True)
+	
+	# original sort line
+	#stats.sort(key=lambda x: x['win_percentage'], reverse=True)
+
+	# Sort by win percentage (descending), then by wins (descending), then by losses (ascending)
+    #stats.sort(key=lambda x: (x['win_percentage'], x['wins'], -x['losses']), reverse=True)
+    
+	# attempting to address sorting issues for undefeated and winless teams
+	#stats.sort(key=lambda x: (x.get('win_percentage', 0), x.get('wins', 0), -x.get('losses', 0)), reverse=True)
+
+	# this should work but it still doesnt, but at least it's right at the top
+	stats.sort(key=lambda x: (-x.get('win_percentage', 0), -x.get('wins', 0), x.get('total_games', 0)))
+	
 	for stat in no_wins:
 		stats.append(stat)
+		    
 	return stats
 
 def teams(games):

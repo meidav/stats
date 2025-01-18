@@ -106,29 +106,33 @@ def top_teams():
     all_years = grab_all_years()
     games = year_games(str(date.today().year))
     year = str(date.today().year)
+    tot_games = len(games)
+    min_delta = 50
     if games:
-        if len(games) < 70:
+        if tot_games < min_delta:
             minimum_games = 1
         else:
-            minimum_games = len(games) // 70
+            minimum_games = tot_games // min_delta
     else:
         minimum_games = 1
     stats = team_stats_per_year(year, minimum_games, games)
-    return render_template('top_teams.html', all_years=all_years, stats=stats, minimum_games=minimum_games, year=year)
+    return render_template('top_teams.html', all_years=all_years, stats=stats, minimum_games=minimum_games, year=year, tot_games=tot_games)
 
 @app.route('/top_teams/<year>/')
 def top_teams_by_year(year):
     games = year_games(year)
+    tot_games = len(games)
+    min_delta = 50
     if games:
-        if len(games) < 70:
+        if tot_games < min_delta:
             minimum_games = 1
         else:
-            minimum_games = len(games) // 70
+            minimum_games = tot_games // min_delta
     else:
         minimum_games = 1
     all_years = grab_all_years()
     stats = team_stats_per_year(year, minimum_games, games)
-    return render_template('top_teams.html', all_years=all_years, stats=stats, minimum_games=minimum_games, year=year)
+    return render_template('top_teams.html', all_years=all_years, stats=stats, minimum_games=minimum_games, year=year, tot_games=tot_games)
 
 @app.route('/player/<year>/<name>')
 def player_stats(year, name):
@@ -171,7 +175,9 @@ def add_game():
     all_games = year_games('All years')
     today_games = todays_games()
 
-    minimum_games = 1 if not games_current_year else max(1, len(games_current_year) // 30)
+    tot_games = len(games_current_year)
+    minimum_games = 1 if not games_current_year else max(1, tot_games // get_min_delta())
+    #minimum_games = 2
 
     stats = stats_per_year(current_year, minimum_games)
     rare_stats = rare_stats_per_year(current_year, minimum_games)
@@ -193,7 +199,7 @@ def add_game():
             if not all([winner1, winner2, loser1, loser2, winner_score, loser_score]):
                 flash('All fields are required!', 'danger')
                 return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
-                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, tot_games=tot_games, 
                     minimum_games=minimum_games, winner1='', winner2='', loser1='', loser2='', winner_score='', loser_score='')
                 
             # Validate numeric scores
@@ -203,21 +209,21 @@ def add_game():
             except ValueError:
                 flash('Scores must be numeric!', 'danger')
                 return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
-                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, tot_games=tot_games, 
                     minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score='', loser_score='')
                 
             # Validate score logic
             if winner_score <= loser_score:
                 flash('Winner score must be greater than loser score!', 'danger')
                 return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
-                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, tot_games=tot_games, 
                     minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score=winner_score, loser_score=loser_score)
                 
             # Validate uniqueness of players
             if len(set([winner1, winner2, loser1, loser2])) < 4:
                 flash('Players must be unique!', 'danger')
                 return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
-                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+                    w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, tot_games=tot_games, 
                     minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score=winner_score, loser_score=loser_score)
                 
             # Save the game stats only if validation passed
@@ -234,7 +240,7 @@ def add_game():
             flash(f'Error saving game stats: {str(e)}', 'danger')
 
     return render_template('add_game.html', todays_stats=t_stats, games=today_games, players=players, 
-        w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, 
+        w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, tot_games=tot_games, 
         minimum_games=minimum_games)
 
 

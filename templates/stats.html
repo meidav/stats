@@ -102,8 +102,10 @@
     </table>
 
     {% if rare_stats %}
+    <p> </p>
     <table>
-        <h3>Less than {{ minimum_games }} games | total games: {{ tot_games }}</h3>
+        <h1>Infrequent players</h1>
+        <h3>Total games: {{tot_games}} | Min games: {{minimum_games}}</h3>
         <thead>
             <tr>
                 <th class="rank" scope="col" colspan="1">#</th>
