@@ -271,14 +271,15 @@ def update(id):
     players = all_players(games)
     
     if request.method == 'POST':
-        winner1 = request.form['winner1']
-        winner2 = request.form['winner2']
-        loser1 = request.form['loser1']
-        loser2 = request.form['loser2']
-        winner_score = request.form['winner_score']
-        loser_score = request.form['loser_score']
+        winner1 = request.form['winner1'].strip()
+        winner2 = request.form['winner2'].strip()
+        loser1 = request.form['loser1'].strip()
+        loser2 = request.form['loser2'].strip()
+        winner_score = request.form['winner_score'].strip()
+        loser_score = request.form['loser_score'].strip()
 
-        if not winner1 or not winner2 or not loser1 or not loser2 or not winner_score or not loser_score:
+        # Validate required fields
+        if not all([winner1, winner2, loser1, loser2, winner_score, loser_score]):
             flash('All fields are required!', 'danger')
         else:
             # Validate score values
@@ -287,8 +288,18 @@ def update(id):
                 loser_score = int(loser_score)
             except ValueError:
                 flash('Invalid score values!', 'danger')
-                return redirect(url_for('edit_game', id=game_id))
-
+                return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+                
+            # Validate score logic
+            if winner_score <= loser_score:
+                flash('Winner score must be greater than loser score!', 'danger')
+                return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+                
+            # Validate uniqueness of players
+            if len(set([winner1, winner2, loser1, loser2])) < 4:
+                flash('Players must be unique!', 'danger')
+                return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+                
             my_time = get_local_time()
 
             try:
