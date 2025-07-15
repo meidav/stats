@@ -8,12 +8,12 @@
             </button>
             <div class="dropdown-content">
                 {% for year in all_years %}
-                    <a href="{{ url_for('vollis_games_by_year', year=year) }}">{{ year }}</a>
+                    <a href="{{ url_for('tennis_matches_by_year', year=year) }}">{{ year }}</a>
                 {% endfor %}
             </div>
         </div>       
     </nav>
-    <h1>{% block title %} {{ year }} vollis games {% endblock %}</h1>
+    <h1>{% block title %} {{ year }} Tennis matches {% endblock %}</h1>
         <div>
             <table>
                 <thead>
@@ -27,14 +27,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                {% for game in games %}
+                {% for match in matches %}
                     <tr class="table-double-row">
                         <td class="rank">{{ loop.index }}</td>
-                        <td>{{ (game[1])[0:10] }}<br>{{ (game[1])[11:19] }}</td>
-                        <td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
-                        <td>{{ game[3] }}</td>
-                        <td><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[4] }}</a></td>
-                        <td>{{ game[5] }}</td>
+                        <td>{{ (match[1])[0:10] }}<br>{{ (match[1])[11:19] }}</td>
+                        <td><a href="{{ url_for('player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
+                        <td>{{ match[3] }}</td>
+                        <td><a href="{{ url_for('player_stats', year=year, name=match[0][5] ) }}">{{ match[4] }}</a></td>
+                        <td>{{ match[5] }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

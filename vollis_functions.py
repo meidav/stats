@@ -77,8 +77,9 @@ def edit_vollis_game(game_id, game_date, winner, winner_score, loser, loser_scor
         database = r'stats.db'
         conn = create_connection(database)
     with conn: 
-        game = (game_id, game_date, winner, winner_score, loser, loser_score, updated_at, game_id2);
+        game = (game_id, game_date, winner, winner_score, loser, loser_score, updated_at, game_id2)
         database_update_vollis_game(conn, game)
+
 
 def remove_vollis_game(game_id):
     database = '/home/Idynkydnk/stats/stats.db'

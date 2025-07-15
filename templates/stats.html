@@ -47,8 +47,8 @@
         console.log("last_30_stats:", last30Stats);
     </script>
     
-    <h1>Last 30 Days</h1>
     {% if last_30_stats %}
+    <h1>Last 30 days</h1>
     <table id="last-30-days-stats">
         <thead>
             <tr>
@@ -57,7 +57,7 @@
                 <th class="numbered_stats clickable" data-sort="number">Wins</th>
                 <th class="numbered_stats clickable" data-sort="number">Losses</th>
                 <th class="numbered_stats clickable" data-sort="number">Win %</th>
-                <th class="numbered_stats clickable" data-sort="number">+/-</th>
+                <th class="numbered_stats clickable" data-sort="number">Games</th>
             </tr>
         </thead>
         <tbody>
@@ -73,11 +73,9 @@
             {% endfor %}
         </tbody>
     </table>
-    {% else %}
-    <p>No data available for the last 30 days.</p>
     {% endif %}
 
-    <h1>{{ year }} Stats</h1>
+    <h1>{{ year }} stats</h1>
     <table id="yearly-stats">
         <thead>
             <tr>
@@ -103,6 +101,35 @@
         </tbody>
     </table>
 
+    {% if rare_stats %}
+    <p> </p>
+    <table>
+        <h1>Infrequent players</h1>
+        <h3>Total games: {{tot_games}} | Min games: {{minimum_games}}</h3>
+        <thead>
+            <tr>
+                <th class="rank" scope="col" colspan="1">#</th>
+                <th class="player_name" scope="col" colspan="1">Player</th>
+                <th class="numbered_stats" scope="col" colspan="1">Wins</th>
+                <th class="numbered_stats" scope="col" colspan="1">Losses</th>
+                <th class="numbered_stats" scope="col" colspan="1">Win %</th>
+                <th class="numbered_stats" scope="col" colspan="1">Games</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in rare_stats %}
+            <tr>
+                <td class="rank">{{ loop.index }}</td>
+                <td class="player_name"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                <td>{{ player[1] }}</td>
+                <td>{{ player[2] }}</td>
+                <td>{{ "{:.2f}".format(player[3]*100) }}</td>
+                <td>{{ player[1] + player[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 </div>
 
 <script>

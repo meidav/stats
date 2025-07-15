@@ -7,6 +7,8 @@
   --table-banding: #052a3e;
   --table-bg: #1d3644;
   --caption: #abb4bd;
+  --rounded-corners: 16px;
+  --max-width: 400px;
 }
 
 
@@ -48,7 +50,7 @@ button {
   font-size: 17px;    
   padding: 8px 16px;
   margin: 0;
-  border-radius: 12px;
+  border-radius: var(--rounded-corners);
   border: 2px solid var(--button-bg-1);
   background-color: var(--button-border-1);
   color: var(--button-bg-1);
@@ -84,7 +86,7 @@ nav a {
   color: var(--button-text-1);
   background-color: var(--button-bg-1);
   text-decoration: none;
-  border-radius: 12px;
+  border-radius: var(--rounded-corners);
   border: 2px solid var(--button-border-1);
 }
 
@@ -98,7 +100,7 @@ form {
   margin: 0 auto;
   width: 100%;
   text-align: center;
-  max-width: 400px;
+  max-width: var(--max-width);
 }
 
 .delete_input {
@@ -120,7 +122,7 @@ form {
   font-size: 17px;    
   padding: 8px 16px;
   margin: 0;
-  border-radius: 12px;
+  border-radius: var(--rounded-corners);
   border: 2px solid var(--button-bg-1);
   background-color: var(--button-border-1);
   color: var(--button-bg-1);
@@ -144,7 +146,7 @@ form {
   display: block;
   text-align: center;
   margin: 6px auto;
-  border-radius: 12px;
+  border-radius: var(--rounded-corners);
   width: 120px;
 }
 
@@ -204,11 +206,11 @@ td a {
 }
 
 table {
-  max-width: 400px;
+  max-width: var(--max-width);
   width: 100%;
   margin: 0 auto;
   background-color: var(--table-bg);
-  border-radius: 20px;
+  border-radius: var(--rounded-corners);
   padding: 8px 16px;
   border-spacing: 0;
 }
@@ -236,16 +238,34 @@ caption {
 }
 
 .alert {
-    padding: 20px;
-    margin: 5px;
-    color: #970020;
-    background-color: #ffd5de;
+  max-width: 360px;
+  font-size: 1rem;
+  padding: 20px;
+  margin: 5px auto 30px auto;
+  color: #e7b5c0;
+  background-color: #543038;
+  border-radius: var(--rounded-corners);
+}
+
+.alert-danger {
+  color: #e7b5c0;
+  background-color: #543038;
+}
+
+.alert-success {
+  color: #aef4b4;
+  background-color: #015c1c;
+}
+
+.alert-info {
+  color: #97eef1;
+  background-color: #126064;
 }
 
 .message {
-    padding: 10px;
-    margin: 5px;
-    background-color: #f3f3f3;
+  padding: 10px;
+  margin: 5px;
+  background-color: #f3f3f3;
 }
 
 .stats {
@@ -272,7 +292,7 @@ input, select {
   display: inline-block;
   box-sizing: border-box;
   font-size: 16px;
-  border-radius: 12px;
+  border-radius: var(--rounded-corners);
   
   border: 2px solid var(--button-bg-1);
   background-color: var(--table-bg);
@@ -302,7 +322,7 @@ input[type=submit] {
   display: inline-block;
   box-sizing: border-box;
   font-size: 16px;
-  border-radius: 12px;
+  border-radius: var(--rounded-corners);
     
   border: 2px solid var(--button-border-1);
   background-color: var(--button-bg-1);
