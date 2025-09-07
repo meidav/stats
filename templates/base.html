@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <title>Arbel's Stats | {% block title %} {% endblock %}</title>
     <!-- Auto-deployment test - LIVE TEST $(date) -->
-    <!-- Favicon temporarily removed to fix 404 errors -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <meta name="viewport" content="width=device-width" />
 
     <script>
         // Deployment tracking console logs
         console.log('🚀 DEPLOYMENT INFO: Site loaded at', new Date());
-        console.log('📦 Latest deployment commit:', 'Fix favicon 404 and debug deployment issues');
+        console.log('📦 Latest deployment commit:', 'Add player filter to games page');
         console.log('✅ Automated deployment is working!');
         
         document.addEventListener('click', function(event) {
