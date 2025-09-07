@@ -1,0 +1,20 @@
+<h2>Overall Result: ${{ total_result | round(2) }}</h2>
+<table border="1">
+    <tr>
+        <th>Date</th>
+        <th>Game Type</th>
+        <th>Duration (hrs)</th>
+        <th>Result ($)</th>
+        <th>$ / hr</th>
+    </tr>
+    {% for s in sessions %}
+    <tr>
+        <td>{{ s.date }}</td>
+        <td>{{ s.game_type }}</td>
+        <td>{{ s.duration_hr }}</td>
+        <td>{{ s.result | round(2) }}</td>
+        <td>{{ s.rate | round(2) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{{ url_for('add_poker_session') }}">Add New Session</a>

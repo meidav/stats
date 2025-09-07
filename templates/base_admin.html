@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Arbel's Stats | {% block title %} {% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon-admin.ico') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon-admin.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <meta name="viewport" content="width=device-width" />
 
@@ -26,6 +28,8 @@
         <div class="hamburger-menu-container">
             <input id="menu__toggle" type="checkbox" />
             <label class="menu__btn" for="menu__toggle">
+                <span></span>
+                <span></span>
                 <span></span>
             </label>
 

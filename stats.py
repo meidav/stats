@@ -857,4 +857,58 @@ def other_player_stats(year, name):
     return render_template('other_player.html', opponent_stats=opponent_stats, 
         year=year, player=name, all_years=all_years, stats=stats)
 
+#### -------------------------------- POKER APP BELOW -------------------------------- ####
 
+#from create_poker_database import main as create_poker_db
+
+#def setup_all_databases():
+ #   create_poker_db()
+
+# In-memory 'database' (replace with real DB)
+#poker_sessions = []
+
+# Game type options
+GAME_TYPES = ['nlhe', 'plo', 'mixed']
+
+@app.route('/poker')
+def poker_results():
+    # Calculate overall profit/loss
+    total_result = sum(session['result'] for session in poker_sessions)
+    # Prepare session data with $/hr
+    sessions_with_rate = []
+    for s in poker_sessions:
+        rate = s['result'] / s['duration_hr'] if s['duration_hr'] else 0
+        sessions_with_rate.append({**s, 'rate': rate})
+    return render_template('poker_results.html', total_result=total_result, sessions=sessions_with_rate)
+
+@app.route('/poker/add-session', methods=['GET', 'POST'])
+def add_poker_session():
+    if request.method == 'POST':
+        print("Form data:", request.form)
+        try: 
+            date_str = request.form['date']
+            game_type = request.form['game_type']
+            duration_hr = float(request.form['duration_hr'])
+            buy_in = float(request.form['buy_in'])
+            cash_out = float(request.form['cash_out'])
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+            result = cash_out - buy_in
+            session = {
+                'date': date_obj,
+                'game_type': game_type,
+                'duration_hr': duration_hr,
+                'buy_in': buy_in,
+                'cash_out': cash_out,
+                'result': result
+            }
+            poker_sessions.append(session)
+        except Exception as e:
+            print("Error parsing form:", e)
+            return "Form processing error", 400
+        return redirect(url_for('poker_results'))
+    return render_template('add_poker_session.html', game_types=GAME_TYPES)
+
+@app.errorhandler(500)
+def internal_error(error):
+    import traceback
+    return f"<pre>{traceback.format_exc()}</pre>", 500

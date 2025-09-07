@@ -1,0 +1,34 @@
+<!-- templates/add_poker_session.html -->
+<!--
+{% extends "poker_admin.html" %}
+
+{% block title %}Add Poker Session{% endblock %}
+
+{% block content %}
+-->
+<h2>Add Poker Session</h2>
+<form action="{{ url_for('add_poker_session') }}" method="post">
+    <label for="date">Session Date:</label>
+    <input type="date" name="date" required><br>
+
+    <label for="game_type">Game Type:</label>
+    <select name="game_type" required>
+        {% for game in game_types %}
+            <option value="{{ game }}">{{ game }}</option>
+        {% endfor %}
+    </select><br>
+
+    <label for="duration_hr">Duration (Hours):</label>
+    <input type="number" step="0.1" name="duration_hr" required><br>
+
+    <label for="buy_in">Buy-In Amount ($):</label>
+    <input type="number" step="0.01" name="buy_in" required><br>
+
+    <label for="cash_out">Cash-Out Amount ($):</label>
+    <input type="number" step="0.01" name="cash_out" required><br>
+
+    <input type="submit" value="Add Session">
+</form>
+<!--
+{% endblock %}
+-->
