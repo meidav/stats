@@ -1,0 +1,40 @@
+name: Deploy to PythonAnywhere
+
+on:
+  push:
+    branches:
+      - main  # Change to 'master' if that's your default branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Deploy to PythonAnywhere
+      run: |
+        # Update code from GitHub
+        curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/" \
+        -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "executable": "bash",
+          "arguments": ["-c", "cd /home/${{ secrets.PA_USERNAME }}/stats && git pull origin main"]
+        }'
+        
+        # Wait a moment for the pull to complete
+        sleep 5
+        
+        # Reload the web app
+        curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_DOMAIN }}/reload/" \
+        -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}"
+        
+    - name: Notify deployment success
+      if: success()
+      run: echo "✅ Successfully deployed to PythonAnywhere!"
+      
+    - name: Notify deployment failure
+      if: failure()
+      run: echo "❌ Deployment failed. Check the logs above."
