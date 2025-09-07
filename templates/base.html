@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>🚀 AUTO-DEPLOY TEST | Arbel's Stats | {% block title %} {% endblock %}</title>
+    <title>Arbel's Stats | {% block title %} {% endblock %}</title>
     <!-- Auto-deployment test - LIVE TEST $(date) -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
@@ -10,9 +10,10 @@
     <meta name="viewport" content="width=device-width" />
 
     <script>
-        // Deployment test console log
-        console.log('🚀 AUTO-DEPLOYMENT TEST: Site loaded at', new Date());
-        console.log('✅ If you see this, automated deployment is working!');
+        // Deployment tracking console logs
+        console.log('🚀 DEPLOYMENT INFO: Site loaded at', new Date());
+        console.log('📦 Latest deployment commit:', 'Remove rocket emoji from title and improve auto-reload');
+        console.log('✅ Automated deployment is working!');
         
         document.addEventListener('click', function(event) {
             var nav = document.getElementById('main-nav');

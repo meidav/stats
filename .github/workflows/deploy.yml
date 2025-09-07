@@ -21,13 +21,13 @@ jobs:
         -H "Content-Type: application/json" \
         -d '{
           "executable": "bash",
-          "arguments": ["-c", "cd /home/${{ secrets.PA_USERNAME }}/stats && git pull origin main"]
+          "arguments": ["-c", "cd /home/${{ secrets.PA_USERNAME }}/stats && git pull origin main && touch /var/www/${{ secrets.PA_USERNAME }}_pythonanywhere_com_wsgi.py"]
         }'
         
-        # Wait a moment for the pull to complete
-        sleep 5
+        # Wait for the commands to complete
+        sleep 3
         
-        # Reload the web app
+        # Also reload via API for good measure
         curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_DOMAIN }}/reload/" \
         -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}"
         
