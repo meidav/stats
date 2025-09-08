@@ -1,19 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <nav>
-        <div class="dropdown">
-            <button class="dropbtn">Select a year
-                <i class="fa fa-caret-down"></i>
-            </button>
-            <div class="dropdown-content">
-                {% for year in all_years %}
-                    <a href="{{ url_for('vollis_games_by_year', year=year) }}">{{ year }}</a>
-                {% endfor %}
+    <div class="page-header">
+        <div class="button-row">
+            <div class="dropdown">
+                <button class="dropbtn">Select a year
+                    <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="dropdown-content">
+                    {% for year in all_years %}
+                        <a href="{{ url_for('vollis_games_by_year', year=year) }}">{{ year }}</a>
+                    {% endfor %}
+                </div>
             </div>
-        </div>       
-    </nav>
-    <h1>{% block title %} {{ year }} vollis games {% endblock %}</h1>
+        </div>
+        
+        <h1 class="page-title">{% block title %} {{ year }} vollis games {% endblock %}</h1>
+    </div>
         <div>
             <table>
                 <thead>

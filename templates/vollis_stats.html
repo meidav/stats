@@ -34,7 +34,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <nav>
+<div class="page-header">
+    <div class="button-row">
         <div class="dropdown">
             <button class="dropbtn">Select a year
                 <i class="fa fa-caret-down"></i>
@@ -44,8 +45,9 @@
                     <a href="{{ url_for('vollis_stats', year=year) }}">{{ year }}</a>
                 {% endfor %}
             </div>
-        </div>       
-    </nav>
+        </div>
+    </div>
+</div>
     <div>
     {% if todays_stats %}
     <table id="todaysStatsTable">

@@ -1,26 +1,28 @@
 :root {
-  --bg: #012130;
-  --text: #88949c;
-  --button-text-1: #93b0df;
-  --button-bg-1: #4684cb;
-  --button-border-1: #374c59;
-  --table-banding: #052a3e;
-  --table-bg: #1d3644;
-  --caption: #abb4bd;
-  --rounded-corners: 12px;
+  --bg: #0d1117;
+  --text: #e6edf3;
+  --button-text-1: #ffffff;
+  --button-bg-1: #21262d;
+  --button-border-1: #30363d;
+  --button-hover: #30363d;
+  --button-active: #282e33;
+  --table-banding: #161b22;
+  --table-bg: #0d1117;
+  --caption: #7d8590;
+  --rounded-corners: 8px;
   --max-width: 400px;
   
-  /* Standardized spacing system */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 12px;
-  --space-lg: 16px;
+  /* Standardized spacing system - mobile optimized */
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 14px;
+  --space-lg: 18px;
   --space-xl: 24px;
   
   /* Layout specific spacing */
-  --header-spacing: var(--space-sm);
+  --header-spacing: var(--space-xs);
   --button-row-spacing: var(--space-sm);
-  --content-section-spacing: var(--space-md);
+  --content-section-spacing: var(--space-sm);
 }
 
 
@@ -108,8 +110,8 @@ body {
 
 .player-filter-input:focus {
   outline: none;
-  background-color: var(--button-border-1);
-  border-color: var(--button-bg-1);
+  background-color: var(--button-hover);
+  border-color: var(--button-border-1);
 }
 
 /* Navigation button styling */
@@ -127,7 +129,7 @@ body {
 
 .nav-button:hover,
 .nav-button:focus {
-  background-color: var(--button-border-1);
+  background-color: var(--button-hover);
   color: var(--button-text-1);
   text-decoration: none;
 }
@@ -237,8 +239,8 @@ form {
 }
 
 .dropdown:hover .dropbtn {
-  background-color: var(--button-border-1);
-  color: var(--button-bg-1);
+  background-color: var(--button-hover);
+  color: var(--button-text-1);
 }
 
 .dropdown-content a:hover {
