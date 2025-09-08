@@ -1,15 +1,18 @@
 :root {
-  --bg: #1a1a1a;
-  --text: #e0e0e0;
+  --bg: #0f0f0f;
+  --text: #ffffff;
   --button-text-1: #ffffff;
-  --button-bg-1: #2a2a2a;
-  --button-border-1: #404040;
-  --button-hover: #353535;
-  --button-active: #1f1f1f;
-  --table-banding: #242424;
-  --table-bg: #1a1a1a;
-  --caption: #b0b0b0;
-  --rounded-corners: 6px;
+  --button-bg-1: linear-gradient(135deg, #1a4b3a, #2d5a47);
+  --button-bg-solid: #1a4b3a;
+  --button-border-1: #2d5a47;
+  --button-hover: linear-gradient(135deg, #2d5a47, #3d6b57);
+  --button-hover-solid: #2d5a47;
+  --accent-green: #4ade80;
+  --accent-teal: #14b8a6;
+  --table-banding: #1a1a1a;
+  --table-bg: #0f0f0f;
+  --caption: #cccccc;
+  --rounded-corners: 8px;
   --max-width: 400px;
   
   /* Standardized spacing system - tight mobile layout */
@@ -80,6 +83,11 @@ body {
 .page-title {
   margin: var(--space-xs) 0;
   text-align: center;
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
 }
 
 .content-section {
@@ -96,42 +104,48 @@ body {
   width: 200px;
   padding: 8px 12px;
   font-size: 17px;
-  background-color: var(--button-bg-1);
+  background: var(--button-bg-solid);
   color: var(--button-text-1);
   border: 1px solid var(--button-border-1);
   border-radius: var(--rounded-corners);
   box-sizing: border-box;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .player-filter-input::placeholder {
-  color: var(--button-text-1);
-  opacity: 0.7;
+  color: var(--caption);
+  opacity: 0.8;
 }
 
 .player-filter-input:focus {
   outline: none;
-  background-color: var(--button-hover);
-  border-color: var(--button-border-1);
+  background: var(--button-hover-solid);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
 }
 
 /* Navigation button styling */
 .nav-button {
   font-size: 17px;
   padding: 8px 16px;
-  background-color: var(--button-bg-1);
+  background: var(--button-bg-1);
   color: var(--button-text-1);
   border: 1px solid var(--button-border-1);
   border-radius: var(--rounded-corners);
   text-decoration: none;
   display: inline-block;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .nav-button:hover,
 .nav-button:focus {
-  background-color: var(--button-hover);
+  background: var(--button-hover);
   color: var(--button-text-1);
   text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
 button {
@@ -211,10 +225,13 @@ form {
   padding: 8px 16px;
   margin: 0;
   border-radius: var(--rounded-corners);
-  border: 2px solid var(--button-bg-1);
-  background-color: var(--button-border-1);
-  color: var(--button-bg-1);
+  border: 1px solid var(--button-border-1);
+  background: var(--button-bg-1);
+  color: var(--button-text-1);
   width: 150px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .dropdown-content {
@@ -239,13 +256,15 @@ form {
 }
 
 .dropdown:hover .dropbtn {
-  background-color: var(--button-hover);
+  background: var(--button-hover);
   color: var(--button-text-1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
 
 .dropdown-content a:hover {
-  background-color: var(--button-border-1);
-  color: var(--button-bg-1);
+  background: var(--button-hover-solid);
+  color: var(--button-text-1);
 }
 
 .dropdown:hover .dropdown-content {
