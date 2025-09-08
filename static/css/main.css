@@ -523,7 +523,7 @@ input[type=number] {
   margin: 0;
   padding: 80px 0;
   list-style: none;
-  background-color: #2a3136;
+  background-color: #051d29;
   box-shadow: 2px 2px 6px rgba(0, 0, 0, .4);
   transition-duration: .25s;
   z-index: 100;
@@ -531,14 +531,18 @@ input[type=number] {
 .menu__item {
   display: block;
   padding: 12px 24px;
-  color: #333;
+  margin: 8px 16px;
+  color: var(--button-text-1);
   font-family: 'Roboto', sans-serif;
   font-size: 20px;
   font-weight: 600;
   text-decoration: none;
-  transition-duration: .25s;
+  transition: all 0.25s ease;
+  border-radius: var(--rounded-corners);
 }
 .menu__item:hover {
-  background-color: #CFD8DC;
+  background-color: var(--button-bg-1);
+  color: var(--button-text-1);
+  transform: translateX(-4px);
 }
 
