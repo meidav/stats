@@ -10,17 +10,15 @@
   --rounded-corners: 12px;
   --max-width: 400px;
   
-  /* Standardized spacing system - tight mobile layout */
-  --space-xs: 4px;
-  --space-sm: 6px;
-  --space-md: 8px;
-  --space-lg: 12px;
-  --space-xl: 16px;
+  /* Standardized spacing system - consistent mobile layout */
+  --space-xs: 10px;
+  --space-sm: 10px;
+  --space-md: 10px;
+  --space-lg: 10px;
+  --space-xl: 10px;
   
-  /* Layout specific spacing */
-  --header-spacing: var(--space-xs);
-  --button-row-spacing: var(--space-sm);
-  --content-section-spacing: var(--space-xs);
+  /* Layout specific spacing - all consistent */
+  --consistent-spacing: 10px;
 }
 
 
@@ -50,7 +48,7 @@
 
 
 body {
-  padding-top: 10px;
+  padding-top: var(--consistent-spacing);
   padding-bottom: 40px;
   font-family: 'Open Sans', Arial, Helvetica, sans-serif;
   font-size: 14px;
@@ -63,25 +61,25 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-xs);
+  gap: var(--consistent-spacing);
+  margin-bottom: var(--consistent-spacing);
 }
 
 .button-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--consistent-spacing);
   flex-wrap: wrap;
 }
 
 .page-title {
-  margin: var(--space-xs) 0;
+  margin: 0;
   text-align: center;
 }
 
 .content-section {
-  margin: var(--content-section-spacing) 0;
+  margin: var(--consistent-spacing) 0;
 }
 
 .filter-container {
