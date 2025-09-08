@@ -1,28 +1,28 @@
 :root {
-  --bg: #0d1117;
-  --text: #e6edf3;
+  --bg: #1a1a1a;
+  --text: #e0e0e0;
   --button-text-1: #ffffff;
-  --button-bg-1: #21262d;
-  --button-border-1: #30363d;
-  --button-hover: #30363d;
-  --button-active: #282e33;
-  --table-banding: #161b22;
-  --table-bg: #0d1117;
-  --caption: #7d8590;
-  --rounded-corners: 8px;
+  --button-bg-1: #2a2a2a;
+  --button-border-1: #404040;
+  --button-hover: #353535;
+  --button-active: #1f1f1f;
+  --table-banding: #242424;
+  --table-bg: #1a1a1a;
+  --caption: #b0b0b0;
+  --rounded-corners: 6px;
   --max-width: 400px;
   
-  /* Standardized spacing system - mobile optimized */
-  --space-xs: 6px;
-  --space-sm: 10px;
-  --space-md: 14px;
-  --space-lg: 18px;
-  --space-xl: 24px;
+  /* Standardized spacing system - tight mobile layout */
+  --space-xs: 4px;
+  --space-sm: 6px;
+  --space-md: 8px;
+  --space-lg: 12px;
+  --space-xl: 16px;
   
   /* Layout specific spacing */
   --header-spacing: var(--space-xs);
   --button-row-spacing: var(--space-sm);
-  --content-section-spacing: var(--space-sm);
+  --content-section-spacing: var(--space-xs);
 }
 
 
@@ -65,15 +65,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--button-row-spacing);
-  margin-bottom: var(--space-sm);
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .button-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--button-row-spacing);
+  gap: var(--space-sm);
   flex-wrap: wrap;
 }
 
@@ -89,7 +89,7 @@ body {
 .filter-container {
   display: flex;
   justify-content: center;
-  margin: var(--space-xs) 0;
+  margin: 0;
 }
 
 .player-filter-input {
