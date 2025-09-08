@@ -8,6 +8,8 @@ from one_v_one_functions import *
 from other_functions import *
 import pytz
 import logging
+import subprocess
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b83880e869f054bfc465a6f46125ac715e7286ed25e88537'
@@ -907,6 +909,24 @@ def add_poker_session():
             return "Form processing error", 400
         return redirect(url_for('poker_results'))
     return render_template('add_poker_session.html', game_types=GAME_TYPES)
+
+@app.route('/deploy', methods=['POST'])
+def deploy():
+    """Webhook endpoint for automated deployment"""
+    try:
+        # Change to the stats directory
+        os.chdir('/home/arbel/stats')
+        
+        # Pull latest changes
+        subprocess.run(['git', 'fetch', 'origin'], check=True)
+        subprocess.run(['git', 'reset', '--hard', 'origin/main'], check=True)
+        
+        # Reload the web app
+        subprocess.run(['touch', '/var/www/arbel_pythonanywhere_com_wsgi.py'], check=True)
+        
+        return 'Deployment successful', 200
+    except Exception as e:
+        return f'Deployment failed: {str(e)}', 500
 
 @app.errorhandler(500)
 def internal_error(error):

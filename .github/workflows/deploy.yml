@@ -15,21 +15,10 @@ jobs:
       
     - name: Deploy to PythonAnywhere
       run: |
-        # Update code from GitHub using more reliable fetch/reset
-        curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/" \
-        -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+        # Deploy using webhook endpoint (more reliable than API console)
+        curl -X POST "https://${{ secrets.PA_DOMAIN }}/deploy" \
         -H "Content-Type: application/json" \
-        -d '{
-          "executable": "bash",
-          "arguments": ["-c", "cd /home/${{ secrets.PA_USERNAME }}/stats && git fetch origin && git reset --hard origin/main && touch /var/www/${{ secrets.PA_USERNAME }}_pythonanywhere_com_wsgi.py"]
-        }'
-        
-        # Wait for the commands to complete
-        sleep 3
-        
-        # Also reload via API for good measure
-        curl -X POST "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_DOMAIN }}/reload/" \
-        -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}"
+        --fail --show-error
         
     - name: Notify deployment success
       if: success()
