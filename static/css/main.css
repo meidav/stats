@@ -11,16 +11,16 @@
   --max-width: 400px;
   
   /* Standardized spacing system */
-  --space-xs: 8px;
-  --space-sm: 15px;
-  --space-md: 25px;
-  --space-lg: 35px;
-  --space-xl: 50px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
   
   /* Layout specific spacing */
-  --header-spacing: var(--space-md);
+  --header-spacing: var(--space-sm);
   --button-row-spacing: var(--space-sm);
-  --content-section-spacing: var(--space-lg);
+  --content-section-spacing: var(--space-md);
 }
 
 
@@ -64,7 +64,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: var(--button-row-spacing);
-  margin-bottom: var(--content-section-spacing);
+  margin-bottom: var(--space-sm);
 }
 
 .button-row {
@@ -76,7 +76,7 @@ body {
 }
 
 .page-title {
-  margin: var(--header-spacing) 0;
+  margin: var(--space-xs) 0;
   text-align: center;
 }
 
@@ -87,7 +87,7 @@ body {
 .filter-container {
   display: flex;
   justify-content: center;
-  margin: var(--button-row-spacing) 0;
+  margin: var(--space-xs) 0;
 }
 
 .player-filter-input {
