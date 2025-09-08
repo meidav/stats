@@ -48,21 +48,21 @@
 
 
 body {
-  padding-top: var(--consistent-spacing);
-  padding-bottom: 40px;
+  padding: 0;
+  margin: 0;
   font-family: 'Open Sans', Arial, Helvetica, sans-serif;
   font-size: 14px;
   background-color: var(--bg);
   color: var(--text);
 }
 
-/* Standardized layout system */
+/* Simple spacing system - no overlapping margins */
 .page-header {
+  padding: var(--consistent-spacing);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--consistent-spacing);
-  margin-bottom: var(--consistent-spacing);
 }
 
 .button-row {
@@ -75,17 +75,17 @@ body {
 
 .page-title {
   margin: 0;
+  padding: 0;
   text-align: center;
 }
 
 .content-section {
-  margin: var(--consistent-spacing) 0;
+  padding: 0 var(--consistent-spacing);
 }
 
 .filter-container {
   display: flex;
   justify-content: center;
-  margin: 0;
 }
 
 .player-filter-input {
@@ -149,15 +149,15 @@ a, a:hover, a:focus, a:visited {
 
 h1 {
   max-width: 100vw;
-  padding: 10px 5px;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
   text-align: center;
 }
 
 h2 {
   max-width: 100%;
-  padding: 8px;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
   text-align: center;
   font-size: 15px;
 }
@@ -197,7 +197,6 @@ form {
 
 .dropdown {
   overflow: hidden;
-  margin: 0 auto;
   width: 200px;
 }
 }
