@@ -10,15 +10,8 @@
   --rounded-corners: 12px;
   --max-width: 400px;
   
-  /* Standardized spacing system - consistent mobile layout */
-  --space-xs: 10px;
-  --space-sm: 10px;
-  --space-md: 10px;
-  --space-lg: 10px;
-  --space-xl: 10px;
-  
-  /* Layout specific spacing - all consistent */
-  --consistent-spacing: 10px;
+  /* Simple spacing */
+  --gap: 8px;
 }
 
 
@@ -48,7 +41,7 @@
 
 
 body {
-  padding: 0;
+  padding: var(--gap) var(--gap) 40px var(--gap);
   margin: 0;
   font-family: 'Open Sans', Arial, Helvetica, sans-serif;
   font-size: 14px;
@@ -56,31 +49,30 @@ body {
   color: var(--text);
 }
 
-/* Simple spacing system - no overlapping margins */
+/* Simple layout */
 .page-header {
-  padding: var(--consistent-spacing);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--consistent-spacing);
+  gap: var(--gap);
+  margin-bottom: var(--gap);
 }
 
 .button-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--consistent-spacing);
+  gap: var(--gap);
   flex-wrap: wrap;
 }
 
 .page-title {
   margin: 0;
-  padding: 0;
   text-align: center;
 }
 
 .content-section {
-  padding: 0 var(--consistent-spacing);
+  margin: 0;
 }
 
 .filter-container {
