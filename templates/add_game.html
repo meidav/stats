@@ -1,8 +1,9 @@
 {% extends 'base_admin.html' %}
 
 {% block content %}
-    <h1>{% block title %} Add a game {% endblock %}</h1>
-    <div class="container">
+    <h1 class="page-title">{% block title %} Add a game {% endblock %}</h1>
+    
+    <div class="content-section">
         <form method="post" action="{{ url_for('add_game') }}" id="add-game-form">
             <datalist id="players">
                 {% for player in players %}
@@ -29,10 +30,10 @@
         </form>
     </div>
 
-    <div>
+    <div class="content-section">
         {% if todays_stats %}
+            <h1 class="page-title">Today's stats</h1>
             <table>
-                <h1>Today's stats</h1>
                 <thead>
                     <tr>
                         <th class="rank" scope="col" colspan="1">#</th>
@@ -60,8 +61,8 @@
                     {% endfor %}
                 </tbody>
             </table>
+			<h1 class="page-title">Today's games</h1>
 			<table>
-				<h1>Today's games</h1>
 				<thead>
 					<tr>
 						<th class="rank" scope="col" colspan="1">#</th>
@@ -92,7 +93,7 @@
 			</table>
         {% endif %}
 
-        <h1>{{ year }} stats</h1>
+        <h1 class="page-title">{{ year }} stats</h1>
         <table>
             <thead>
                 <tr>
@@ -120,8 +121,8 @@
 
         {% if rare_stats %}
         <p> </p>
+        <h1 class="page-title">Infrequent players</h1>
         <table>
-            <h1>Infrequent players</h1>
             <h3>Total games: {{tot_games}} | Min games: {{minimum_games}}</h3>
             <thead>
                 <tr>
