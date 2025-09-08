@@ -115,7 +115,8 @@ body {
   border-radius: var(--rounded-corners);
   text-decoration: none;
   display: inline-block;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 0 0px transparent;
 }
 
 .nav-button:hover,
@@ -123,6 +124,7 @@ body {
   background-color: var(--button-border-1);
   color: var(--button-text-1);
   text-decoration: none;
+  box-shadow: 0 0 0 2px var(--button-bg-1);
 }
 
 button {
