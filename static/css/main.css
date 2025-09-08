@@ -4,7 +4,8 @@
   --button-text-1: #b8d4f0;
   --button-bg-1: #2d5a87;
   --button-border-1: #1e3a52;
-  --link-color: #87ceeb;
+  --link-color: #a8d5f2;
+  --link-hover-color: #87ceeb;
   --table-banding: #052a3e;
   --table-bg: #1d3644;
   --caption: #abb4bd;
@@ -136,8 +137,13 @@ button {
   cursor: pointer;
 }
 
-a, a:hover, a:focus, a:visited {
+a, a:visited {
   color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover, a:focus {
+  color: var(--link-hover-color);
   text-decoration: none;
 }
 
@@ -197,45 +203,56 @@ form {
 
 .dropdown .dropbtn {
   font-size: 17px;    
-  padding: 8px 16px;
+  padding: 12px 16px;
   margin: 0;
-  border-radius: var(--rounded-corners);
-  border: 2px solid var(--button-bg-1);
-  background-color: var(--button-bg-1);
+  border-radius: 8px;
+  border: 1px solid var(--button-border-1);
+  background-color: var(--button-border-1);
   color: var(--button-text-1);
-  width: 150px;
+  width: 180px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
-  z-index: 1;
+  z-index: 1000;
   margin: 0 auto;
   left: 0;
   right: 0;
-  width: 200px;
-  padding-top: 4px;
+  width: 180px;
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 8px 0;
+  margin-top: 4px;
+  border: 1px solid var(--button-border-1);
 }
 
 .dropdown-content a {
-  padding: 8px 12px;
+  padding: 10px 16px;
   text-decoration: none;
   display: block;
   text-align: center;
-  margin: 6px auto;
-  border-radius: var(--rounded-corners);
-  width: 120px;
+  margin: 2px 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  color: var(--link-color);
 }
 
 .dropdown:hover .dropbtn {
-  background-color: var(--button-border-1);
-  color: var(--button-bg-1);
+  background-color: var(--button-bg-1);
+  color: var(--button-text-1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .dropdown-content a:hover {
-  background-color: var(--button-border-1);
-  color: var(--button-bg-1);
+  background-color: var(--button-bg-1);
+  color: var(--button-text-1);
+  transform: translateX(2px);
 }
 
 .dropdown:hover .dropdown-content {
