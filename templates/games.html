@@ -16,7 +16,6 @@
         <div class="player-filter-container">
             <input type="text" id="playerFilter" placeholder="Filter by player name..." 
                    class="player-filter-input" autocomplete="off">
-            <button id="clearFilter" class="player-clear-btn" style="display: none;">×</button>
         </div>
     </nav>
     <h1>{% block title %} {{ year }} games {% endblock %}</h1>
@@ -61,7 +60,7 @@
 
 .player-filter-input {
     width: 100%;
-    padding: 8px 30px 8px 12px;
+    padding: 8px 12px;
     font-size: 17px;
     background-color: var(--button-bg-1);
     color: var(--button-text-1);
@@ -81,33 +80,11 @@
     border-color: var(--button-bg-1);
 }
 
-.player-clear-btn {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    color: var(--button-text-1);
-    padding: 0;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.player-clear-btn:hover {
-    color: var(--text);
-}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const filterInput = document.getElementById('playerFilter');
-    const clearBtn = document.getElementById('clearFilter');
     const gamesTable = document.getElementById('gamesTable');
     const noResults = document.getElementById('noResults');
     const gameRows = gamesTable.querySelectorAll('tr');
@@ -134,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.style.display = '';
                 filteredCount++;
             });
-            clearBtn.style.display = 'none';
         } else {
             // Filter games
             gameRows.forEach(row => {
@@ -146,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     row.style.display = 'none';
                 }
             });
-            clearBtn.style.display = 'block';
         }
         
         // Update rank numbers
@@ -162,13 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Filter as user types
     filterInput.addEventListener('input', filterGames);
-    
-    // Clear filter
-    clearBtn.addEventListener('click', function() {
-        filterInput.value = '';
-        filterGames();
-        filterInput.focus();
-    });
     
     // Clear filter on Escape key
     filterInput.addEventListener('keydown', function(e) {
