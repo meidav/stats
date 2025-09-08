@@ -420,6 +420,13 @@ input, select {
   cursor: pointer;
 }
 
+/* Remove dropdown arrow from select elements for better text centering */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 input::placeholder {
   color: var(--button-text-1);
   opacity: 0.7;
