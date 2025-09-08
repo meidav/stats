@@ -431,6 +431,7 @@ input[type=number] {
 
 #menu__toggle {
   opacity: 0;
+  display: none;
 }
 #menu__toggle:checked ~ .menu__box {
   right: 0 !important;
