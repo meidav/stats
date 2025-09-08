@@ -1,9 +1,10 @@
 :root {
   --bg: #012130;
   --text: #88949c;
-  --button-text-1: #93b0df;
+  --button-text-1: #b8d4f0;
   --button-bg-1: #2d5a87;
   --button-border-1: #1e3a52;
+  --link-color: #87ceeb;
   --table-banding: #052a3e;
   --table-bg: #1d3644;
   --caption: #abb4bd;
@@ -136,7 +137,7 @@ button {
 }
 
 a, a:hover, a:focus, a:visited {
-  color: var(--button-text-1);
+  color: var(--link-color);
   text-decoration: none;
 }
 
