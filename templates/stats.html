@@ -1,18 +1,20 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<nav>
-    <div class="dropdown">
-        <button class="dropbtn">Select a year
-            <i class="fa fa-caret-down"></i>
-        </button>
-        <div class="dropdown-content">
-            {% for year in all_years %}
-                <a href="{{ url_for('stats', year=year) }}">{{ year }}</a>
-            {% endfor %}
+<div class="page-header">
+    <div class="button-row">
+        <div class="dropdown">
+            <button class="dropbtn">Select a year
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <div class="dropdown-content">
+                {% for year in all_years %}
+                    <a href="{{ url_for('stats', year=year) }}">{{ year }}</a>
+                {% endfor %}
+            </div>
         </div>
     </div>
-</nav>
+</div>
 <div>
     {% if todays_stats %}
     <table id="todays-stats">

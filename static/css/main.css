@@ -9,6 +9,18 @@
   --caption: #abb4bd;
   --rounded-corners: 12px;
   --max-width: 400px;
+  
+  /* Standardized spacing system */
+  --space-xs: 8px;
+  --space-sm: 15px;
+  --space-md: 25px;
+  --space-lg: 35px;
+  --space-xl: 50px;
+  
+  /* Layout specific spacing */
+  --header-spacing: var(--space-md);
+  --button-row-spacing: var(--space-sm);
+  --content-section-spacing: var(--space-lg);
 }
 
 
@@ -44,6 +56,80 @@ body {
   font-size: 14px;
   background-color: var(--bg);
   color: var(--text);
+}
+
+/* Standardized layout system */
+.page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--button-row-spacing);
+  margin-bottom: var(--content-section-spacing);
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--button-row-spacing);
+  flex-wrap: wrap;
+}
+
+.page-title {
+  margin: var(--header-spacing) 0;
+  text-align: center;
+}
+
+.content-section {
+  margin: var(--content-section-spacing) 0;
+}
+
+.filter-container {
+  display: flex;
+  justify-content: center;
+  margin: var(--button-row-spacing) 0;
+}
+
+.player-filter-input {
+  width: 200px;
+  padding: 8px 12px;
+  font-size: 17px;
+  background-color: var(--button-bg-1);
+  color: var(--button-text-1);
+  border: 1px solid var(--button-border-1);
+  border-radius: var(--rounded-corners);
+  box-sizing: border-box;
+}
+
+.player-filter-input::placeholder {
+  color: var(--button-text-1);
+  opacity: 0.7;
+}
+
+.player-filter-input:focus {
+  outline: none;
+  background-color: var(--button-border-1);
+  border-color: var(--button-bg-1);
+}
+
+/* Navigation button styling */
+.nav-button {
+  font-size: 17px;
+  padding: 8px 16px;
+  background-color: var(--button-bg-1);
+  color: var(--button-text-1);
+  border: 1px solid var(--button-border-1);
+  border-radius: var(--rounded-corners);
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+}
+
+.nav-button:hover,
+.nav-button:focus {
+  background-color: var(--button-border-1);
+  color: var(--button-text-1);
+  text-decoration: none;
 }
 
 button {
@@ -113,9 +199,9 @@ form {
 
 .dropdown {
   overflow: hidden;
-  margin: 0px auto 0 auto;
+  margin: 0 auto;
   width: 200px;
-  padding-bottom: 10px;
+}
 }
 
 .dropdown .dropbtn {

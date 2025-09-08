@@ -11,7 +11,7 @@
     <script>
         // Deployment tracking console logs
         console.log('🚀 DEPLOYMENT INFO: Site loaded at', new Date());
-        console.log('📦 Latest deployment commit:', 'Fix player filter spacing and alignment');
+        console.log('📦 Latest deployment commit:', 'Standardize layout spacing and alignment across all pages');
         console.log('✅ Automated deployment is working!');
         
         document.addEventListener('click', function(event) {
@@ -29,7 +29,10 @@
 </head>
 <body>
     <nav id="main-nav">
-        <h1><a href="{{ url_for('index') }}">Doubles</a> <a href="{{ url_for('vollis') }}">Vollis</a></h1>
+        <div class="button-row">
+            <a href="{{ url_for('index') }}" class="nav-button">Doubles</a>
+            <a href="{{ url_for('vollis') }}" class="nav-button">Vollis</a>
+        </div>
         <div class="hamburger-menu-container">
             <input id="menu__toggle" type="checkbox" />
             <label class="menu__btn" for="menu__toggle">
