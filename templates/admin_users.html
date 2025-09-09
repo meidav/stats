@@ -52,17 +52,14 @@
                             </a>
                             {% endif %}
                             
-                            <form method="POST" action="{{ url_for('toggle_user_admin', user_id=user[0]) }}" style="display: inline;">
-                                <input type="hidden" name="is_admin" value="{{ 'false' if user[3] else 'true' }}">
-                                <button type="submit" class="btn btn-sm nav-style-btn {{ 'btn-warning' if user[3] else 'btn-success' }}">
-                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                        <circle cx="8.5" cy="7" r="4"/>
-                                        <path d="M20 8v6M23 11h-6"/>
-                                    </svg>
-                                    {{ 'Remove admin' if user[3] else 'Make admin' }}
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-sm nav-style-btn {{ 'btn-warning' if user[3] else 'btn-success' }}" onclick="confirmToggleAdmin({{ user[0] }}, '{{ user[1] }}', {{ 'true' if user[3] else 'false' }})">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="8.5" cy="7" r="4"/>
+                                    <path d="M20 8v6M23 11h-6"/>
+                                </svg>
+                                {{ 'Remove admin' if user[3] else 'Make admin' }}
+                            </button>
                             
                             {% if user[0] != current_user.id %}
                             <button type="button" class="btn btn-sm btn-danger" onclick="confirmDeleteUser({{ user[0] }}, '{{ user[1] }}')">
@@ -82,7 +79,7 @@
     </div>
 </div>
 
-<!-- Confirmation Modal -->
+<!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="modal">
     <div class="modal-content">
         <h3>Confirm user deletion</h3>
@@ -96,6 +93,28 @@
                         <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
                     </svg>
                     Delete user
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Toggle Confirmation Modal -->
+<div id="adminToggleModal" class="modal">
+    <div class="modal-content">
+        <h3>Confirm admin status change</h3>
+        <p>Are you sure you want to <strong id="adminAction"></strong> for user <strong id="adminUserToToggle"></strong>?</p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeAdminToggleModal()">Cancel</button>
+            <form id="adminToggleForm" method="POST" style="display: inline;">
+                <input type="hidden" name="is_admin" id="adminToggleValue">
+                <button type="submit" class="btn btn-warning">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <path d="M20 8v6M23 11h-6"/>
+                    </svg>
+                    <span id="adminToggleButtonText">Confirm</span>
                 </button>
             </form>
         </div>
@@ -477,11 +496,32 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').style.display = 'none';
 }
 
+function confirmToggleAdmin(userId, username, isCurrentlyAdmin) {
+    const action = isCurrentlyAdmin === 'true' ? 'remove admin privileges from' : 'grant admin privileges to';
+    const buttonText = isCurrentlyAdmin === 'true' ? 'Remove admin' : 'Make admin';
+    const newAdminValue = isCurrentlyAdmin === 'true' ? 'false' : 'true';
+    
+    document.getElementById('adminAction').textContent = action;
+    document.getElementById('adminUserToToggle').textContent = username;
+    document.getElementById('adminToggleValue').value = newAdminValue;
+    document.getElementById('adminToggleButtonText').textContent = buttonText;
+    document.getElementById('adminToggleForm').action = "{{ url_for('toggle_user_admin', user_id=0) }}".replace('/0', '/' + userId);
+    document.getElementById('adminToggleModal').style.display = 'block';
+}
+
+function closeAdminToggleModal() {
+    document.getElementById('adminToggleModal').style.display = 'none';
+}
+
 // Close modal when clicking outside of it
 window.onclick = function(event) {
-    const modal = document.getElementById('deleteModal');
-    if (event.target === modal) {
+    const deleteModal = document.getElementById('deleteModal');
+    const adminToggleModal = document.getElementById('adminToggleModal');
+    
+    if (event.target === deleteModal) {
         closeDeleteModal();
+    } else if (event.target === adminToggleModal) {
+        closeAdminToggleModal();
     }
 }
 </script>
