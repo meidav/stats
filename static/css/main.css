@@ -580,28 +580,57 @@ input[type=time]::-webkit-calendar-picker-indicator {
     box-sizing: border-box !important;
     -webkit-appearance: none;
     appearance: none;
+    text-align: center !important; /* Keep all inputs centered */
+    margin: 8px auto !important; /* Center the inputs themselves */
+    display: block !important; /* Ensure proper block display for centering */
   }
   
   input[type=date], input[type=time] {
     line-height: 1.4;
     vertical-align: middle;
     text-align: center !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 12px 8px;
     font-size: 16px !important; /* Prevents zoom on iOS */
+    /* Don't override display here, let it inherit from input, select */
   }
   
   input[type=date]::-webkit-datetime-edit,
   input[type=time]::-webkit-datetime-edit {
     line-height: 1.4;
     vertical-align: middle;
-    height: 100%;
+    width: 100%;
+    text-align: center !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
+  }
+  
+  /* Better placeholder centering for mobile */
+  input[type=date]::-webkit-datetime-edit-fields-wrapper,
+  input[type=time]::-webkit-datetime-edit-fields-wrapper {
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  /* Center individual date/time field components on mobile */
+  input[type=date]::-webkit-datetime-edit-month-field,
+  input[type=date]::-webkit-datetime-edit-day-field,
+  input[type=date]::-webkit-datetime-edit-year-field,
+  input[type=time]::-webkit-datetime-edit-hour-field,
+  input[type=time]::-webkit-datetime-edit-minute-field {
+    text-align: center !important;
+    flex: 1;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Fix placeholder text centering on mobile */
+  input[type=date]::-webkit-input-placeholder,
+  input[type=time]::-webkit-input-placeholder {
+    text-align: center !important;
   }
   
   /* Ensure text inputs are also properly sized */
