@@ -589,8 +589,9 @@ input[type=time]::-webkit-calendar-picker-indicator {
     line-height: 1.4;
     vertical-align: middle;
     text-align: center !important;
-    padding: 12px 8px;
+    padding: 12px 16px !important; /* More padding for better centering */
     font-size: 16px !important; /* Prevents zoom on iOS */
+    position: relative;
     /* Don't override display here, let it inherit from input, select */
   }
   
@@ -627,10 +628,36 @@ input[type=time]::-webkit-calendar-picker-indicator {
     margin: 0 !important;
   }
   
-  /* Fix placeholder text centering on mobile */
+  /* Aggressive placeholder text centering on mobile */
   input[type=date]::-webkit-input-placeholder,
   input[type=time]::-webkit-input-placeholder {
     text-align: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Additional webkit centering attempts */
+  input[type=date]::-webkit-datetime-edit-text,
+  input[type=time]::-webkit-datetime-edit-text {
+    text-align: center !important;
+    padding: 0 !important;
+  }
+  
+  /* Force webkit datetime components to center */
+  input[type=date]::-webkit-datetime-edit-month-field:first-child,
+  input[type=date]::-webkit-datetime-edit-day-field:first-child,
+  input[type=date]::-webkit-datetime-edit-year-field:first-child,
+  input[type=time]::-webkit-datetime-edit-hour-field:first-child,
+  input[type=time]::-webkit-datetime-edit-minute-field:first-child {
+    margin-left: auto !important;
+  }
+  
+  input[type=date]::-webkit-datetime-edit-month-field:last-child,
+  input[type=date]::-webkit-datetime-edit-day-field:last-child,
+  input[type=date]::-webkit-datetime-edit-year-field:last-child,
+  input[type=time]::-webkit-datetime-edit-hour-field:last-child,
+  input[type=time]::-webkit-datetime-edit-minute-field:last-child {
+    margin-right: auto !important;
   }
   
   /* Ensure text inputs are also properly sized */
@@ -644,6 +671,23 @@ input[type=time]::-webkit-calendar-picker-indicator {
     max-width: 280px !important;
     min-height: 48px !important;
     font-size: 18px !important;
+  }
+  
+  /* Fix mobile header spacing */
+  .page-header {
+    gap: 2px !important;
+    margin-bottom: 4px !important;
+  }
+  
+  /* Increase mobile form field spacing */
+  input, select {
+    margin: 12px auto !important; /* Increase from 8px to 12px */
+  }
+  
+  /* Better mobile label spacing */
+  label.optional-label {
+    margin-top: 16px !important;
+    margin-bottom: 6px !important;
   }
 }
 
