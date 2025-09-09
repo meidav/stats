@@ -873,16 +873,62 @@ input[type=number] {
 }
 
 /* Admin menu items */
+.menu-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.admin-section {
+  margin: 15px 0 10px 0;
+}
+
+.admin-divider {
+  position: relative;
+  text-align: center;
+  margin: 0 20px;
+}
+
+.admin-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-color);
+}
+
+.admin-divider span {
+  background: var(--bg);
+  padding: 0 15px;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+}
+
 .menu__item.admin-item {
-  background-color: var(--admin-bg);
-  color: var(--admin-text);
-  border: 1px solid var(--admin-border);
-  font-weight: 700;
+  background: var(--button-bg-1);
+  color: var(--button-text-1);
+  border: 1px solid var(--button-border-1);
+  margin: 2px 0;
+  font-weight: 600;
 }
 
 .menu__item.admin-item:hover {
-  background-color: var(--admin-border);
-  color: var(--admin-text);
+  background: var(--button-bg-1-hover);
+  color: var(--button-text-1);
   transform: translateX(-4px);
 }
 
