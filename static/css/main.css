@@ -500,36 +500,122 @@ input[type=date], input[type=time] {
   cursor: pointer;
 }
 
-/* Fix mobile date/time input alignment */
+/* Comprehensive mobile date/time input fixes */
 input[type=date]::-webkit-datetime-edit {
   text-align: center;
   width: 100%;
   padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
 }
 
 input[type=time]::-webkit-datetime-edit {
   text-align: center;
   width: 100%;
   padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+}
+
+/* Individual date/time components centering */
+input[type=date]::-webkit-datetime-edit-fields-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+input[type=time]::-webkit-datetime-edit-fields-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Center individual date components */
+input[type=date]::-webkit-datetime-edit-month-field,
+input[type=date]::-webkit-datetime-edit-day-field,
+input[type=date]::-webkit-datetime-edit-year-field,
+input[type=time]::-webkit-datetime-edit-hour-field,
+input[type=time]::-webkit-datetime-edit-minute-field {
+  text-align: center;
+  padding: 0;
+  margin: 0;
 }
 
 /* Hide native date/time picker icons on mobile to improve centering */
 input[type=date]::-webkit-calendar-picker-indicator {
   opacity: 0;
   position: absolute;
-  right: 0;
+  right: 8px;
   width: 20px;
   height: 20px;
   cursor: pointer;
+  z-index: 1;
 }
 
 input[type=time]::-webkit-calendar-picker-indicator {
   opacity: 0;
   position: absolute;
-  right: 0;
+  right: 8px;
   width: 20px;
   height: 20px;
   cursor: pointer;
+  z-index: 1;
+}
+
+/* Mobile-specific fixes for iOS Safari */
+@media screen and (max-width: 768px) {
+  /* Ensure all form inputs have consistent styling on mobile */
+  input, select {
+    max-width: 280px !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  
+  input[type=date], input[type=time] {
+    line-height: 1.4;
+    vertical-align: middle;
+    text-align: center !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  input[type=date]::-webkit-datetime-edit,
+  input[type=time]::-webkit-datetime-edit {
+    line-height: 1.4;
+    vertical-align: middle;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  /* Ensure text inputs are also properly sized */
+  input[type=text], input[type=number] {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    min-height: 44px !important; /* Apple touch target recommendation */
+  }
+  
+  /* Submit button mobile optimization */
+  input[type=submit] {
+    max-width: 280px !important;
+    min-height: 48px !important;
+    font-size: 18px !important;
+  }
 }
 
 /* Labels for date/time inputs */
