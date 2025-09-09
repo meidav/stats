@@ -107,7 +107,7 @@ body {
 
 /* Navigation button styling */
 .nav-button {
-  font-size: 17px;
+  font-size: 22px;
   padding: 8px 16px;
   background-color: var(--button-bg-1);
   color: var(--button-text-1);
@@ -128,7 +128,7 @@ body {
 }
 
 button {
-  font-size: 17px;    
+  font-size: 22px;    
   padding: 8px 16px;
   margin: 0;
   border-radius: var(--rounded-corners);
@@ -226,7 +226,7 @@ form {
 }
 
 .dropdown .dropbtn {
-  font-size: 16px;
+  font-size: 22px;
   padding: 8px 12px;
   margin: 8px;
   border-radius: var(--rounded-corners);
@@ -275,7 +275,6 @@ form {
   text-align: center;
   margin: 8px;
   border-radius: var(--rounded-corners);
-  transition: all 0.2s ease;
   color: var(--button-text-1);
   background-color: var(--button-bg-1);
   border: 1px solid var(--button-border-1);
@@ -345,6 +344,7 @@ table {
   margin: 0 auto;
   background-color: var(--table-bg);
   border-radius: var(--rounded-corners);
+  font-size: 14px;
   padding: 8px 16px;
   border-spacing: 0;
 }
