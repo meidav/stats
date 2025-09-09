@@ -62,11 +62,7 @@
                     Top teams
                 </a></li>
                 {% if current_user.is_authenticated and current_user.is_admin %}
-                <li class="admin-section">
-                    <div class="admin-divider">
-                        <span>Admin</span>
-                    </div>
-                </li>
+                <li class="admin-divider"></li>
                 <li><a class="menu__item admin-item" href="{{ url_for('admin_dashboard') }}">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"/>
