@@ -14,6 +14,11 @@
         console.log('📦 Latest deployment commit:', 'Add confirmation modal for admin toggle and create admin restore script');
         console.log('✅ Automated deployment is working!');
         
+        // DEBUG: Check current user status
+        console.log('🔍 DEBUG: Current user:', '{{ current_user.username if current_user.is_authenticated else "Not logged in" }}');
+        console.log('🔍 DEBUG: Is authenticated:', '{{ current_user.is_authenticated }}');
+        console.log('🔍 DEBUG: Is admin:', '{{ current_user.is_admin if current_user.is_authenticated else "N/A" }}');
+        
         document.addEventListener('click', function(event) {
             var nav = document.getElementById('main-nav');
             var targetElement = event.target; // Clicked element
@@ -66,6 +71,7 @@
                     Top teams
                 </a></li>
                 {% if current_user.is_authenticated and current_user.is_admin %}
+                <!-- DEBUG: Admin user detected -->
                 <li class="admin-divider"></li>
                 <li><a class="menu__item admin-item" href="{{ url_for('admin_dashboard') }}">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
