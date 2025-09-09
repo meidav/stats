@@ -399,7 +399,7 @@ caption {
   max-width: 360px;
   font-size: 1rem;
   padding: 20px;
-  margin: 5px auto 30px auto;
+  margin: 5px auto 8px auto;
   color: #e7b5c0;
   background-color: #543038;
   border-radius: var(--rounded-corners);
@@ -504,6 +504,11 @@ label.optional-label {
   opacity: 0.8;
   margin-top: 12px;
   margin-bottom: 2px;
+}
+
+/* Enhanced tooltips for date cells */
+td[title] {
+  cursor: help;
 }
 
 input[type=submit] {
