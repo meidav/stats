@@ -262,6 +262,9 @@ def delete_user_admin(user_id):
 def admin_players():
     """Manage players"""
     search_query = request.args.get('search', '')
+    sort_by = request.args.get('sort', 'name')
+    sort_order = request.args.get('order', 'asc')
+    
     if search_query:
         players = search_players(search_query)
     else:
@@ -276,7 +279,47 @@ def admin_players():
             'game_count': game_count
         })
     
-    return render_template('admin_players.html', players=player_data, search_query=search_query)
+    # Sort players
+    if sort_by == 'games':
+        player_data.sort(key=lambda x: x['game_count'], reverse=(sort_order == 'desc'))
+    else:  # sort by name
+        player_data.sort(key=lambda x: x['name'].lower(), reverse=(sort_order == 'desc'))
+    
+    return render_template('admin_players.html', players=player_data, search_query=search_query, sort_by=sort_by, sort_order=sort_order)
+
+@app.route('/admin/change-password', methods=['GET', 'POST'])
+@admin_required
+def change_password():
+    """Change admin password"""
+    if request.method == 'POST':
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+        
+        # Verify current password
+        if not verify_password(current_user, current_password):
+            flash('Current password is incorrect', 'danger')
+            return render_template('change_password.html')
+        
+        # Check if new passwords match
+        if new_password != confirm_password:
+            flash('New passwords do not match', 'danger')
+            return render_template('change_password.html')
+        
+        # Update password
+        from werkzeug.security import generate_password_hash
+        cur = set_cur()
+        try:
+            password_hash = generate_password_hash(new_password, method='pbkdf2:sha256')
+            cur.execute('UPDATE users SET password_hash = ? WHERE id = ?', (password_hash, current_user.id))
+            cur.connection.commit()
+            flash('Password updated successfully!', 'success')
+            return redirect(url_for('admin_dashboard'))
+        except Exception as e:
+            flash('Failed to update password', 'danger')
+            print(f"Error updating password: {e}")
+    
+    return render_template('change_password.html')
 
 @app.route('/admin/players/edit', methods=['GET', 'POST'])
 @admin_required

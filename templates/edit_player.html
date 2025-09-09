@@ -1,44 +1,43 @@
-{% extends "base_admin.html" %}
+{% extends "base.html" %}
 
-{% block title %}Edit Player: {{ player_name }}{% endblock %}
+{% block title %}Edit player: {{ player_name }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Edit Player: {{ player_name }}</h1>
-    
-    <div class="admin-actions">
-        <a href="{{ url_for('admin_players') }}" class="btn btn-secondary">← Back to Players</a>
+<div class="edit-player">
+    <div class="admin-header">
+        <h1>Edit player: {{ player_name }}</h1>
+        <a href="{{ url_for('admin_players') }}" class="btn btn-secondary">← Back to players</a>
     </div>
     
     <div class="player-stats">
-        <h2>Current Player Statistics</h2>
+        <h2>Current player statistics</h2>
         <div class="stats-grid">
             <div class="stat-item">
-                <h3>Total Games</h3>
+                <h3>Total games</h3>
                 <div class="stat-number">{{ stats.total_games }}</div>
             </div>
             <div class="stat-item">
-                <h3>Doubles Games</h3>
+                <h3>Doubles games</h3>
                 <div class="stat-number">{{ stats.games.wins + stats.games.losses }}</div>
                 <div class="stat-detail">{{ stats.games.wins }}W - {{ stats.games.losses }}L</div>
             </div>
             <div class="stat-item">
-                <h3>Vollis Games</h3>
+                <h3>Vollis games</h3>
                 <div class="stat-number">{{ stats.vollis.wins + stats.vollis.losses }}</div>
                 <div class="stat-detail">{{ stats.vollis.wins }}W - {{ stats.vollis.losses }}L</div>
             </div>
             <div class="stat-item">
-                <h3>Tennis Matches</h3>
+                <h3>Tennis matches</h3>
                 <div class="stat-number">{{ stats.tennis.wins + stats.tennis.losses }}</div>
                 <div class="stat-detail">{{ stats.tennis.wins }}W - {{ stats.tennis.losses }}L</div>
             </div>
             <div class="stat-item">
-                <h3>One v One Games</h3>
+                <h3>One v one games</h3>
                 <div class="stat-number">{{ stats.one_v_one.wins + stats.one_v_one.losses }}</div>
                 <div class="stat-detail">{{ stats.one_v_one.wins }}W - {{ stats.one_v_one.losses }}L</div>
             </div>
             <div class="stat-item">
-                <h3>Other Games</h3>
+                <h3>Other games</h3>
                 <div class="stat-number">{{ stats.other.wins + stats.other.losses }}</div>
                 <div class="stat-detail">{{ stats.other.wins }}W - {{ stats.other.losses }}L</div>
             </div>
@@ -46,7 +45,7 @@
     </div>
     
     <div class="edit-form">
-        <h2>Edit Player Name</h2>
+        <h2>Edit player name</h2>
         <div class="warning-box">
             <strong>⚠️ Warning:</strong> Changing a player's name will update all games across all game types where this player appears. This action cannot be undone.
         </div>
@@ -55,14 +54,14 @@
             <input type="hidden" name="old_name" value="{{ player_name }}">
             
             <div class="form-group">
-                <label for="new_name">New Player Name:</label>
+                <label for="new_name">New player name:</label>
                 <input type="text" id="new_name" name="new_name" value="{{ player_name }}" required>
                 <small class="form-help">Enter the new name for this player</small>
             </div>
             
             <div class="form-actions">
                 <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to change this player\'s name? This will affect {{ stats.total_games }} games.')">
-                    Update Player Name
+                    Update player name
                 </button>
                 <a href="{{ url_for('admin_players') }}" class="btn btn-secondary">Cancel</a>
             </div>
@@ -71,33 +70,68 @@
 </div>
 
 <style>
-.admin-actions {
-    margin: 20px 0;
+.edit-player {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: var(--bg);
+    min-height: 100vh;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.admin-header h1 {
+    color: var(--button-text-1);
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--button-text-1), var(--link-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .btn-secondary {
-    background: #6c757d;
-    color: white;
-    padding: 8px 16px;
+    background: var(--button-bg-2);
+    color: var(--button-text-2);
+    padding: 12px 20px;
     text-decoration: none;
-    border-radius: 4px;
-    font-size: 14px;
+    border-radius: var(--rounded-corners);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--button-border-2);
 }
 
 .btn-secondary:hover {
-    background: #545b62;
+    background: var(--button-bg-2-hover);
+    color: var(--button-text-2);
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .player-stats {
-    margin: 30px 0;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: var(--rounded-corners);
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
 }
 
 .player-stats h2 {
-    margin: 0 0 20px 0;
-    color: #333;
+    margin: 0 0 25px 0;
+    color: var(--button-text-1);
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
 .stats-grid {
@@ -107,112 +141,176 @@
 }
 
 .stat-item {
-    background: white;
+    background: var(--bg);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: var(--rounded-corners);
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
 }
 
 .stat-item h3 {
     margin: 0 0 10px 0;
-    color: #666;
-    font-size: 14px;
+    color: var(--text);
+    font-size: 0.9rem;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .stat-number {
-    font-size: 2em;
-    font-weight: bold;
-    color: #007bff;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--link-color);
     margin: 10px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stat-detail {
-    font-size: 12px;
-    color: #666;
+    font-size: 0.85rem;
+    color: var(--text);
+    opacity: 0.8;
+    font-weight: 500;
 }
 
 .edit-form {
-    margin: 30px 0;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: var(--rounded-corners);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
 }
 
 .edit-form h2 {
-    margin: 0 0 20px 0;
-    color: #333;
+    margin: 0 0 25px 0;
+    color: var(--button-text-1);
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
 .warning-box {
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    color: #856404;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
     padding: 15px;
-    border-radius: 4px;
-    margin-bottom: 20px;
+    border-radius: var(--rounded-corners);
+    margin-bottom: 25px;
+    font-size: 0.95rem;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text);
+    font-size: 1rem;
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--rounded-corners);
+    font-size: 1rem;
+    background: var(--input-bg);
+    color: var(--text);
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 3px rgba(168, 213, 242, 0.1);
 }
 
 .form-help {
     display: block;
-    margin-top: 5px;
-    color: #666;
-    font-size: 14px;
+    margin-top: 8px;
+    color: var(--text);
+    font-size: 0.9rem;
+    opacity: 0.7;
 }
 
 .form-actions {
     display: flex;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
 }
 
 .btn {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--rounded-corners);
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .btn-danger {
-    background: #dc3545;
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
     color: white;
 }
 
 .btn-danger:hover {
-    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
 }
 
 .btn-secondary {
-    background: #6c757d;
-    color: white;
+    background: var(--button-bg-2);
+    color: var(--button-text-2);
+    border: 1px solid var(--button-border-2);
 }
 
 .btn-secondary:hover {
-    background: #545b62;
+    background: var(--button-bg-2-hover);
+    color: var(--button-text-2);
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .edit-player {
+        padding: 15px;
+    }
+    
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .admin-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
 }
 </style>
 {% endblock %}

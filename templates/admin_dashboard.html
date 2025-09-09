@@ -1,138 +1,204 @@
-{% extends "base_admin.html" %}
+{% extends "base.html" %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin dashboard{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Admin Dashboard</h1>
+<div class="admin-dashboard">
+    <div class="admin-header">
+        <h1>Admin dashboard</h1>
+    </div>
     
     <div class="admin-stats">
         <div class="stat-card">
             <h3>Users</h3>
             <div class="stat-number">{{ users|length }}</div>
-            <a href="{{ url_for('admin_users') }}" class="btn btn-sm">Manage Users</a>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-primary">Manage users</a>
         </div>
         
         <div class="stat-card">
             <h3>Players</h3>
             <div class="stat-number">{{ players|length }}</div>
-            <a href="{{ url_for('admin_players') }}" class="btn btn-sm">Manage Players</a>
+            <a href="{{ url_for('admin_players') }}" class="btn btn-primary">Manage players</a>
         </div>
     </div>
     
-    <div class="admin-actions">
-        <h2>Quick Actions</h2>
+    <div class="quick-actions">
+        <h3>Quick actions</h3>
         <div class="action-grid">
             <a href="{{ url_for('add_game') }}" class="action-card">
-                <h3>Add Game</h3>
+                <h4>Add game</h4>
                 <p>Add a new doubles game</p>
             </a>
             
             <a href="{{ url_for('add_vollis_game') }}" class="action-card">
-                <h3>Add Vollis Game</h3>
+                <h4>Add vollis game</h4>
                 <p>Add a new vollis game</p>
             </a>
             
-            <a href="{{ url_for('add_tennis_match') }}" class="action-card">
-                <h3>Add Tennis Match</h3>
-                <p>Add a new tennis match</p>
-            </a>
-            
-            <a href="{{ url_for('add_one_v_one_game') }}" class="action-card">
-                <h3>Add One v One Game</h3>
-                <p>Add a new one-on-one game</p>
-            </a>
-            
-            <a href="{{ url_for('add_other_game') }}" class="action-card">
-                <h3>Add Other Game</h3>
-                <p>Add a new other type game</p>
-            </a>
-            
             <a href="{{ url_for('edit_games') }}" class="action-card">
-                <h3>Edit Games</h3>
-                <p>Edit existing games</p>
+                <h4>Edit games</h4>
+                <p>Edit existing doubles games</p>
+            </a>
+            
+            <a href="{{ url_for('edit_vollis_games') }}" class="action-card">
+                <h4>Edit vollis games</h4>
+                <p>Edit existing vollis games</p>
             </a>
         </div>
     </div>
 </div>
 
 <style>
+.admin-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: var(--bg);
+    min-height: 100vh;
+}
+
+.admin-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.admin-header h1 {
+    color: var(--button-text-1);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--button-text-1), var(--link-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 .admin-stats {
-    display: flex;
-    gap: 20px;
-    margin: 30px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
 }
 
 .stat-card {
-    flex: 1;
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: var(--rounded-corners);
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .stat-card h3 {
-    margin: 0 0 10px 0;
-    color: #333;
+    margin: 0 0 15px 0;
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 600;
 }
 
 .stat-number {
-    font-size: 2em;
-    font-weight: bold;
-    color: #007bff;
-    margin: 10px 0;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--link-color);
+    margin: 20px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.btn-sm {
+.btn-primary {
     display: inline-block;
-    padding: 8px 16px;
-    background: #007bff;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--button-bg-1), var(--link-color));
     color: white;
     text-decoration: none;
-    border-radius: 4px;
-    font-size: 14px;
+    border-radius: var(--rounded-corners);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
 }
 
-.btn-sm:hover {
-    background: #0056b3;
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(45, 90, 135, 0.4);
+    color: white;
+    text-decoration: none;
 }
 
-.admin-actions h2 {
-    margin: 40px 0 20px 0;
-    color: #333;
+.quick-actions {
+    margin-top: 40px;
+}
+
+.quick-actions h3 {
+    color: var(--button-text-1);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: center;
 }
 
 .action-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
 }
 
 .action-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: var(--rounded-corners);
     text-decoration: none;
     color: inherit;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .action-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    color: inherit;
+    text-decoration: none;
 }
 
-.action-card h3 {
+.action-card h4 {
     margin: 0 0 10px 0;
-    color: #007bff;
+    color: var(--link-color);
+    font-size: 1.3rem;
+    font-weight: 600;
 }
 
 .action-card p {
     margin: 0;
-    color: #666;
-    font-size: 14px;
+    color: var(--text);
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 15px;
+    }
+    
+    .admin-header h1 {
+        font-size: 2rem;
+    }
+    
+    .admin-stats {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
 }
 </style>
 {% endblock %}
