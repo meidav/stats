@@ -684,6 +684,29 @@ input[type=time]::-webkit-calendar-picker-indicator {
     padding-top: 8px !important; /* Reduce from 16px */
   }
   
+  /* Ensure no hidden elements take up space on mobile */
+  nav {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* Remove any extra space from hamburger container */
+  .hamburger-menu-container {
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Ensure webkit calendar indicators don't affect layout */
+  input[type=date]::-webkit-calendar-picker-indicator,
+  input[type=time]::-webkit-calendar-picker-indicator {
+    position: absolute !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
   /* Increase mobile form field spacing */
   input, select {
     margin: 12px auto !important; /* Increase from 8px to 12px */
