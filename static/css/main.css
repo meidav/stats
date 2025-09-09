@@ -675,8 +675,13 @@ input[type=time]::-webkit-calendar-picker-indicator {
   
   /* Fix mobile header spacing */
   .page-header {
-    gap: 2px !important;
-    margin-bottom: 4px !important;
+    gap: 8px !important; /* Restore reasonable gap */
+    margin-bottom: 8px !important; /* Restore reasonable margin */
+  }
+  
+  /* Reduce button-row padding on mobile */
+  .button-row {
+    padding-top: 8px !important; /* Reduce from 16px */
   }
   
   /* Increase mobile form field spacing */
