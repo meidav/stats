@@ -469,7 +469,7 @@
 <script>
 function confirmDeleteUser(userId, username) {
     document.getElementById('userToDelete').textContent = username;
-    document.getElementById('deleteForm').action = "{{ url_for('delete_user_admin', user_id='USER_ID_PLACEHOLDER') }}".replace('USER_ID_PLACEHOLDER', userId);
+    document.getElementById('deleteForm').action = "{{ url_for('delete_user_admin', user_id=0) }}".replace('/0', '/' + userId);
     document.getElementById('deleteModal').style.display = 'block';
 }
 
