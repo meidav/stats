@@ -312,6 +312,56 @@ def refresh_user():
             flash('User not found', 'danger')
     return redirect(url_for('index'))
 
+@app.route('/fix-admin')
+def fix_admin():
+    """Emergency fix for admin users"""
+    try:
+        from werkzeug.security import generate_password_hash
+        
+        # Ensure users table exists
+        create_users_table()
+        
+        # Create/fix admin user
+        cur = set_cur()
+        
+        # Check if admin exists
+        cur.execute("SELECT id, is_admin FROM users WHERE username = 'admin'")
+        admin_user = cur.fetchone()
+        
+        if admin_user:
+            user_id, is_admin = admin_user
+            if not is_admin:
+                # Fix admin status
+                cur.execute("UPDATE users SET is_admin = 1 WHERE username = 'admin'")
+                cur.connection.commit()
+                print("Fixed admin user privileges")
+        
+        # Create arbel admin if it doesn't exist
+        cur.execute("SELECT id FROM users WHERE username = 'arbel'")
+        arbel_user = cur.fetchone()
+        
+        if not arbel_user:
+            password_hash = generate_password_hash('Caleb00!!', method='pbkdf2:sha256')
+            cur.execute('''
+                INSERT INTO users (username, email, password_hash, is_admin)
+                VALUES (?, ?, ?, ?)
+            ''', ('arbel', 'arbel@example.com', password_hash, True))
+            cur.connection.commit()
+            print("Created arbel admin user")
+        
+        # Show all users
+        cur.execute("SELECT id, username, is_admin FROM users")
+        users = cur.fetchall()
+        
+        result = "Users in database:<br>"
+        for user in users:
+            result += f"ID: {user[0]}, Username: {user[1]}, Is Admin: {user[2]}<br>"
+        
+        return result
+        
+    except Exception as e:
+        return f"Error: {str(e)}"
+
 @app.route('/admin/change-password', methods=['GET', 'POST'])
 @admin_required
 def change_password():
