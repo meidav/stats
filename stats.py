@@ -181,6 +181,25 @@ def games_by_year(year):
 # Authentication routes
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Ensure users table exists and admin user is created
+    create_users_table()
+    
+    # Check if admin user exists, if not create it
+    admin_user = get_user_by_username('admin')
+    if not admin_user:
+        from werkzeug.security import generate_password_hash
+        cur = set_cur()
+        password_hash = generate_password_hash('admin123', method='pbkdf2:sha256')
+        try:
+            cur.execute('''
+                INSERT INTO users (username, email, password_hash, is_admin)
+                VALUES (?, ?, ?, ?)
+            ''', ('admin', 'admin@example.com', password_hash, True))
+            cur.connection.commit()
+            print("Admin user created successfully")
+        except Exception as e:
+            print(f"Error creating admin user: {e}")
+    
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']

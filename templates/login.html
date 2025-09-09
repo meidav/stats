@@ -1,8 +1,13 @@
-{% extends "base.html" %}
-
-{% block title %}Login{% endblock %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login - Arbel's Stats</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <meta name="viewport" content="width=device-width" />
+</head>
+<body>
 <div class="login-container">
     <div class="login-background">
         <div class="tech-grid"></div>
@@ -25,6 +30,16 @@
                 <p>Login to your admin account to continue</p>
             </div>
             
+            {% set messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <div class="alerts">
+                    {% for category, message in messages %}
+                        <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
             
             <form method="POST" class="login-form">
                 <div class="form-group">
@@ -446,4 +461,5 @@ function togglePassword() {
     }
 }
 </script>
-{% endblock %}
+</body>
+</html>
