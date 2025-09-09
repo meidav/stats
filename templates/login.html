@@ -3,104 +3,391 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="login-form">
-        <h1>Login</h1>
-        
-        {% set messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-            <div class="alerts">
-                {% for category, message in messages %}
-                    <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
-                        {{ message }}
+<div class="login-container">
+    <div class="login-background">
+        <div class="bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+        </div>
+    </div>
+    
+    <div class="login-content">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Welcome Back</h1>
+                <p>Login to your admin account to continue</p>
+            </div>
+            
+            {% set messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <div class="alerts">
+                    {% for category, message in messages %}
+                        <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form method="POST" class="login-form">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
                     </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        
-        <form method="POST">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <span>Login</span>
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </form>
             
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+            <div class="login-footer">
+                <a href="{{ url_for('index') }}" class="back-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Stats
+                </a>
             </div>
-            
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-        
-        <div class="login-help">
-            <p><a href="{{ url_for('index') }}">← Back to Stats</a></p>
         </div>
     </div>
 </div>
 
 <style>
-.login-form {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 30px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+.login-container {
+    min-height: 100vh;
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-.login-form h1 {
+.login-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.bg-shapes {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--button-bg-1), var(--link-color));
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite;
+}
+
+.shape-1 {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 150px;
+    height: 150px;
+    top: 20%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.shape-3 {
+    width: 100px;
+    height: 100px;
+    bottom: 20%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+.shape-4 {
+    width: 250px;
+    height: 250px;
+    bottom: 10%;
+    right: 10%;
+    animation-delay: 1s;
+}
+
+.shape-5 {
+    width: 80px;
+    height: 80px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 3s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.login-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-card {
+    background: rgba(29, 54, 68, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(168, 213, 242, 0.2);
+}
+
+.login-header {
     text-align: center;
+    margin-bottom: 40px;
+}
+
+.login-header h1 {
+    color: var(--button-text-1);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    background: linear-gradient(135deg, var(--button-text-1), var(--link-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login-header p {
+    color: var(--text);
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.login-form {
     margin-bottom: 30px;
-    color: #333;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    width: 20px;
+    height: 20px;
+    color: var(--link-color);
+    z-index: 3;
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 15px 15px 15px 50px;
+    background: rgba(13, 33, 48, 0.8);
+    border: 2px solid rgba(168, 213, 242, 0.2);
+    border-radius: 12px;
+    color: var(--button-text-1);
     font-size: 16px;
+    transition: all 0.3s ease;
+    outline: none;
 }
 
-.btn {
-    width: 100%;
-    padding: 12px;
-    background: #007bff;
-    color: white;
+.form-group input:focus {
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 3px rgba(168, 213, 242, 0.1);
+    background: rgba(13, 33, 48, 0.9);
+}
+
+.form-group input::placeholder {
+    color: var(--text);
+    opacity: 0.6;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    background: none;
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
     cursor: pointer;
-    transition: background 0.3s;
+    padding: 5px;
+    z-index: 3;
 }
 
-.btn:hover {
-    background: #0056b3;
+.eye-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--link-color);
+    transition: color 0.3s ease;
 }
 
-.login-help {
+.password-toggle:hover .eye-icon {
+    color: var(--link-hover-color);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, var(--button-bg-1), var(--link-color));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(45, 90, 135, 0.4);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.login-btn:hover .btn-icon {
+    transform: translateX(3px);
+}
+
+.login-footer {
     text-align: center;
-    margin-top: 20px;
 }
 
-.login-help a {
-    color: #007bff;
+.back-link {
+    color: var(--link-color);
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+    border-radius: 8px;
+    background: rgba(168, 213, 242, 0.1);
 }
 
-.login-help a:hover {
-    text-decoration: underline;
+.back-link:hover {
+    color: var(--link-hover-color);
+    background: rgba(168, 213, 242, 0.2);
+    transform: translateX(-3px);
+}
+
+.back-link svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+}
+
+.back-link:hover svg {
+    transform: translateX(-3px);
+}
+
+.alerts {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.2);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    color: #28a745;
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.2);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #dc3545;
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 30px 20px;
+        margin: 10px;
+    }
+    
+    .login-header h1 {
+        font-size: 2rem;
+    }
+    
+    .shape {
+        opacity: 0.05;
+    }
 }
 </style>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.querySelector('.eye-icon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+}
+</script>
 {% endblock %}
