@@ -71,3 +71,40 @@ class DatabaseManager:
 db_manager = DatabaseManager(
     os.environ.get('FLASK_ENV', 'development')
 )
+
+class CursorWrapper:
+    """Wrapper class to mimic the old set_cur() functionality"""
+    def __init__(self, db_manager):
+        self.db_manager = db_manager
+        self.connection = None
+    
+    def execute(self, query, params=None):
+        """Execute a query and store results"""
+        if params:
+            self.last_result = self.db_manager.execute_query(query, params)
+        else:
+            self.last_result = self.db_manager.execute_query(query)
+        return self
+    
+    def fetchone(self):
+        """Fetch one result"""
+        if hasattr(self, 'last_result') and self.last_result:
+            return self.last_result[0] if isinstance(self.last_result, list) else self.last_result
+        return None
+    
+    def fetchall(self):
+        """Fetch all results"""
+        if hasattr(self, 'last_result'):
+            return self.last_result if isinstance(self.last_result, list) else [self.last_result]
+        return []
+    
+    @property
+    def rowcount(self):
+        """Get row count"""
+        if hasattr(self, 'last_result'):
+            return len(self.last_result) if isinstance(self.last_result, list) else 1
+        return 0
+
+def set_cur():
+    """Compatibility function for old database code"""
+    return CursorWrapper(db_manager)

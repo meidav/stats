@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Flask, render_template, request, url_for, flash, redirect, session
 from database_functions import *
 from stat_functions import *
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from vollis_functions import *
 from tennis_functions import *
 from one_v_one_functions import *
 from other_functions import *
+from auth import init_auth, create_users_table, get_user_by_username, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user
+from player_management import get_all_players, get_player_games_count, update_player_name, search_players, get_player_stats
 import pytz
 import logging
 import subprocess
@@ -14,6 +16,10 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b83880e869f054bfc465a6f46125ac715e7286ed25e88537'
 app.debug = True
+
+# Initialize authentication
+login_manager = init_auth(app)
+create_users_table()
 
 # Set up Flask logging to console
 @app.before_first_request
@@ -170,7 +176,123 @@ def games_by_year(year):
     games = year_games(year)
     return render_template('games.html', games=games, year=year, all_years=all_years)
 
+# Authentication routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        user = get_user_by_username(username)
+        if user and verify_password(user, password):
+            login_user(user)
+            flash('Successfully logged in!', 'success')
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('index'))
+        else:
+            flash('Invalid username or password', 'danger')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    flash('You have been logged out', 'info')
+    return redirect(url_for('index'))
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    """Admin dashboard"""
+    users = get_all_users()
+    players = get_all_players()
+    return render_template('admin_dashboard.html', users=users, players=players)
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    """Manage users"""
+    users = get_all_users()
+    return render_template('admin_users.html', users=users)
+
+@app.route('/admin/users/<int:user_id>/toggle_admin', methods=['POST'])
+@admin_required
+def toggle_user_admin(user_id):
+    """Toggle admin status for a user"""
+    is_admin = request.form.get('is_admin') == 'true'
+    if update_user_admin_status(user_id, is_admin):
+        flash(f'User admin status updated', 'success')
+    else:
+        flash('Failed to update user admin status', 'danger')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/users/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def delete_user_admin(user_id):
+    """Delete a user"""
+    if delete_user(user_id):
+        flash('User deleted successfully', 'success')
+    else:
+        flash('Failed to delete user', 'danger')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/players')
+@admin_required
+def admin_players():
+    """Manage players"""
+    search_query = request.args.get('search', '')
+    if search_query:
+        players = search_players(search_query)
+    else:
+        players = get_all_players()
+    
+    # Get game counts for each player
+    player_data = []
+    for player in players:
+        game_count = get_player_games_count(player)
+        player_data.append({
+            'name': player,
+            'game_count': game_count
+        })
+    
+    return render_template('admin_players.html', players=player_data, search_query=search_query)
+
+@app.route('/admin/players/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_player():
+    """Edit player name"""
+    if request.method == 'POST':
+        old_name = request.form['old_name']
+        new_name = request.form['new_name'].strip()
+        
+        if not new_name:
+            flash('New player name cannot be empty', 'danger')
+            return redirect(url_for('admin_players'))
+        
+        if old_name == new_name:
+            flash('New name is the same as the old name', 'info')
+            return redirect(url_for('admin_players'))
+        
+        success, result = update_player_name(old_name, new_name)
+        if success:
+            updated_tables = ', '.join(result)
+            flash(f'Player name updated successfully! Updated tables: {updated_tables}', 'success')
+        else:
+            flash(f'Failed to update player name: {result}', 'danger')
+        
+        return redirect(url_for('admin_players'))
+    
+    player_name = request.args.get('player')
+    if not player_name:
+        flash('No player specified', 'danger')
+        return redirect(url_for('admin_players'))
+    
+    # Get player stats
+    stats = get_player_stats(player_name)
+    return render_template('edit_player.html', player_name=player_name, stats=stats)
+
 @app.route('/add_game/', methods=('GET', 'POST'))
+@admin_required
 def add_game():
     current_year = str(date.today().year)
     games_current_year = year_games(current_year)
@@ -266,12 +388,14 @@ def add_game():
 
 
 @app.route('/edit_games/')
+@admin_required
 def edit_games():
     all_years = grab_all_years()
     games = year_games(str(date.today().year))
     return render_template('edit_games.html', games=games, year=str(date.today().year), all_years=all_years)
 
 @app.route('/edit_games/<year>')
+@admin_required
 def edit_games_by_year(year):
     #flash("Received request to edit games with year: " + year)
     all_years = grab_all_years()
@@ -279,6 +403,7 @@ def edit_games_by_year(year):
     return render_template('edit_games.html', games=games, year=year, all_years=all_years)
 
 @app.route('/edit_game/<int:id>/', methods=['GET', 'POST'])
+@admin_required
 def update(id):
     #flash(f'Received request to edit game with ID: "{id}"', 'danger')
     game_id = id
@@ -352,6 +477,7 @@ def update(id):
     
 
 @app.route('/delete/<int:id>/',methods = ['GET','POST'])
+@admin_required
 def delete_game(id):
     game_id = id
     game = find_game(id)
@@ -390,6 +516,7 @@ def vollis():
         all_years=all_years, minimum_games=minimum_games, year=year)
 
 @app.route('/add_vollis_game/', methods=('GET', 'POST'))
+@admin_required
 def add_vollis_game():
     games = vollis_year_games('All years')
     players = all_vollis_players(games)
@@ -462,6 +589,7 @@ def add_vollis_game():
                            games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
 
 @app.route('/edit_vollis_games/')
+@admin_required
 def edit_vollis_games():
     all_years = all_vollis_years()
     games = vollis_year_games(str(date.today().year))
@@ -470,6 +598,7 @@ def edit_vollis_games():
 
 
 @app.route('/edit_past_year_vollis_games/<year>')
+@admin_required
 def edit_vollis_games_by_year(year):
     all_years = all_vollis_years()
     games = vollis_year_games(year)
@@ -488,6 +617,7 @@ def vollis_games_by_year(year):
     return render_template('vollis_games.html', all_years=all_years, games=games, year=year)
 
 @app.route('/edit_vollis_game/<int:id>/', methods=['GET', 'POST'])
+@admin_required
 def update_vollis_game(id):
     game_id = id
     x = find_vollis_game(game_id)  # We continue using find_vollis_game
@@ -530,6 +660,7 @@ def update_vollis_game(id):
 
 
 @app.route('/delete_vollis_game/<int:id>/',methods = ['GET','POST'])
+@admin_required
 def delete_vollis_game(id):
     game_id = id
     game = find_vollis_game(id)
@@ -574,6 +705,7 @@ def tennis():
 
 
 @app.route('/add_tennis_match/', methods=('GET', 'POST'))
+@admin_required
 def add_tennis_match():
     matches = tennis_year_matches('All years')
     players = all_tennis_players(matches)
@@ -607,6 +739,7 @@ def add_tennis_match():
                            stats=stats)
 
 @app.route('/edit_tennis_matches/')
+@admin_required
 def edit_tennis_matches():
     all_years = all_tennis_years()
     matches = tennis_year_matches(str(date.today().year))
@@ -615,6 +748,7 @@ def edit_tennis_matches():
 
 
 @app.route('/edit_past_year_tennis_matches/<year>')
+@admin_required
 def edit_tennis_matches_by_year(year):
     all_years = all_tennis_years()
     matches = tennis_year_matches(year)
@@ -634,6 +768,7 @@ def tennis_matches_by_year(year):
 
 
 @app.route('/edit_tennis_match/<int:id>/', methods=['GET', 'POST'])
+@admin_required
 def update_tennis_match(id):
     match_id = id
     x = find_tennis_match(match_id)
@@ -662,6 +797,7 @@ def update_tennis_match(id):
 
 
 @app.route('/delete_tennis_match/<int:id>/',methods = ['GET','POST'])
+@admin_required
 def delete_tennis_match(id):
     match_id = id
     match = find_tennis_match(match_id)
@@ -706,6 +842,7 @@ def one_v_one():
 
 
 @app.route('/add_one_v_one_game/', methods=('GET', 'POST'))
+@admin_required
 def add_one_v_one_game():
     games = one_v_one_year_games('All years')
     game_types = one_v_one_game_types(games)
@@ -734,12 +871,14 @@ def add_one_v_one_game():
 
 
 @app.route('/edit_one_v_one_games/')
+@admin_required
 def edit_one_v_one_games():
     all_years = all_one_v_one_years()
     games = one_v_one_year_games(str(date.today().year))
     return render_template('edit_one_v_one_games.html', games=games, all_years=all_years, year=str(date.today().year))
 
 @app.route('/edit_past_year_one_v_one_games/<year>')
+@admin_required
 def edit_one_v_one_games_by_year(year):
     all_years = all_one_v_one_years()
     games = one_v_one_year_games(year)
@@ -759,6 +898,7 @@ def one_v_one_games_by_year(year):
 
 
 @app.route('/edit_one_v_one_game/<int:id>/',methods = ['GET','POST'])
+@admin_required
 def update_one_v_one_game(id):
     game_id = id
     x = find_one_v_one_game(game_id)
@@ -781,6 +921,7 @@ def update_one_v_one_game(id):
 
 
 @app.route('/delete_one_v_one_game/<int:id>/',methods = ['GET','POST'])
+@admin_required
 def delete_one_v_one_game(id):
     game_id = id
     game = find_one_v_one_game(id)
@@ -836,6 +977,7 @@ def other():
 
 
 @app.route('/add_other_game/', methods=('GET', 'POST'))
+@admin_required
 def add_other_game():
     games = other_year_games('All years')
     game_types = other_game_types(games)
@@ -864,12 +1006,14 @@ def add_other_game():
 
 
 @app.route('/edit_other_games/')
+@admin_required
 def edit_other_games():
     all_years = all_other_years()
     games = other_year_games(str(date.today().year))
     return render_template('edit_other_games.html', games=games, all_years=all_years, year=str(date.today().year))
 
 @app.route('/edit_past_year_other_games/<year>')
+@admin_required
 def edit_other_games_by_year(year):
     all_years = all_other_years()
     games = other_year_games(year)
@@ -889,6 +1033,7 @@ def other_games_by_year(year):
 
 
 @app.route('/edit_other_game/<int:id>/',methods = ['GET','POST'])
+@admin_required
 def update_other_game(id):
     game_id = id
     x = find_other_game(game_id)
@@ -911,6 +1056,7 @@ def update_other_game(id):
 
 
 @app.route('/delete_other_game/<int:id>/',methods = ['GET','POST'])
+@admin_required
 def delete_other_game(id):
     game_id = id
     game = find_other_game(id)
@@ -937,7 +1083,7 @@ def other_player_stats(year, name):
  #   create_poker_db()
 
 # In-memory 'database' (replace with real DB)
-#poker_sessions = []
+poker_sessions = []
 
 # Game type options
 GAME_TYPES = ['nlhe', 'plo', 'mixed']

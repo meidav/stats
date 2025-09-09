@@ -12,6 +12,11 @@
   --rounded-corners: 12px;
   --max-width: 400px;
   
+  /* Admin colors */
+  --admin-bg: #2d4a2d;
+  --admin-text: #90ee90;
+  --admin-border: #4a7c4a;
+  
   /* Simple spacing */
   --gap: 8px;
 }
@@ -866,6 +871,20 @@ input[type=number] {
 .menu__item:hover {
   background-color: var(--button-bg-1);
   color: var(--button-text-1);
+  transform: translateX(-4px);
+}
+
+/* Admin menu items */
+.menu__item.admin-item {
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
+  font-weight: 700;
+}
+
+.menu__item.admin-item:hover {
+  background-color: var(--admin-border);
+  color: var(--admin-text);
   transform: translateX(-4px);
 }
 

@@ -45,6 +45,17 @@
                 <li><a class="menu__item" href="{{ url_for('games') }}">Games</a></li>
                 <li><a class="menu__item" href="{{ url_for('vollis_games') }}">Vollis games</a></li>
                 <li><a class="menu__item" href="{{ url_for('top_teams') }}">Top teams</a></li>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <li><a class="menu__item admin-item" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('admin_players') }}">Manage Players</a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('add_game') }}">Add Game</a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('edit_games') }}">Edit Games</a></li>
+                {% endif %}
+                {% if current_user.is_authenticated %}
+                <li><a class="menu__item" href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a></li>
+                {% else %}
+                <li><a class="menu__item" href="{{ url_for('login') }}">Login</a></li>
+                {% endif %}
             </ul>
         </div>
     </nav>
