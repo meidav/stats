@@ -905,8 +905,14 @@ input[type=number] {
   box-sizing: border-box;
 }
 
+.menu__item:hover {
+  background: rgba(45, 90, 135, 0.7);
+  color: var(--button-text-1);
+  transform: translateX(-4px);
+}
+
 .menu__item.admin-item:hover {
-  background: rgba(45, 90, 135, 0.8);
+  background: rgba(45, 90, 135, 0.7);
   color: var(--button-text-1);
   transform: translateX(-4px);
 }
