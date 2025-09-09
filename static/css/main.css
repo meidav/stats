@@ -269,14 +269,17 @@ form {
 }
 
 .dropdown-content a {
-  padding: 10px 16px;
+  padding: 8px 16px;
   text-decoration: none;
   display: block;
   text-align: center;
-  margin: 2px 8px;
-  border-radius: 6px;
+  margin: 8px;
+  border-radius: var(--rounded-corners);
   transition: all 0.2s ease;
-  color: var(--link-color);
+  color: var(--button-text-1);
+  background-color: var(--button-bg-1);
+  border: 1px solid var(--button-border-1);
+  box-sizing: border-box;
 }
 
 .dropdown:hover .dropbtn {
@@ -288,7 +291,7 @@ form {
 .dropdown-content a:hover {
   background-color: var(--button-bg-1);
   color: var(--button-text-1);
-  transform: translateX(2px);
+  box-shadow: 0 0 0 2px var(--button-bg-1);
 }
 
 .dropdown:hover .dropdown-content {
