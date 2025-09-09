@@ -30,10 +30,10 @@
             <input type="number" pattern="[0-9]*" name="loser_score" placeholder="Losers' score" value="{{ request.form['loser_score'] }}" list="l_scores" autocomplete="on">
             
             <!-- Optional Date/Time Override -->
-            <label for="date_played" class="optional-label">Date played</label>
+            <label for="date_played" class="optional-label">Date played (edit if needed)</label>
             <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}">
             
-            <label for="time_played" class="optional-label">Time played</label>
+            <label for="time_played" class="optional-label">Time played (edit if needed)</label>
             <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}">
             
             <input type="submit" value="Submit">
@@ -162,6 +162,26 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Pre-populate date and time fields with current device time
+    const now = new Date();
+    const dateInput = document.getElementById('date_played');
+    const timeInput = document.getElementById('time_played');
+    
+    if (dateInput && !dateInput.value) {
+        // Format date as YYYY-MM-DD for HTML date input
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}`;
+    }
+    
+    if (timeInput && !timeInput.value) {
+        // Format time as HH:MM for HTML time input
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        timeInput.value = `${hours}:${minutes}`;
+    }
+    
     const tables = document.querySelectorAll('table');
 
     tables.forEach(table => {
