@@ -199,7 +199,6 @@ nav a {
 }
 
 nav a:hover {
-  border: 2px solid var(--button-bg-1);
   background-color: var(--button-border-1);
   color: var(--button-bg-1);
 }
@@ -279,6 +278,7 @@ form {
   background-color: var(--button-bg-1);
   border: 1px solid var(--button-border-1);
   box-sizing: border-box;
+  font-size: 18px;
 }
 
 .dropdown:hover .dropbtn {
