@@ -355,12 +355,17 @@ th, td {
 }
 
 th {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
 }
 
 td {
   font-size: 16px;
+}
+
+/* Player name cells should be slightly smaller */
+td.player_name, td.player_name a {
+  font-size: 14px;
 }
 
 /* Clickable table headers for sorting */
