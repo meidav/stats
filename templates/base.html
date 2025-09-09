@@ -18,6 +18,8 @@
         console.log('🔍 DEBUG: Current user:', '{{ current_user.username if current_user.is_authenticated else "Not logged in" }}');
         console.log('🔍 DEBUG: Is authenticated:', '{{ current_user.is_authenticated }}');
         console.log('🔍 DEBUG: Is admin:', '{{ current_user.is_admin if current_user.is_authenticated else "N/A" }}');
+        console.log('🔍 DEBUG: User ID:', '{{ current_user.id if current_user.is_authenticated else "N/A" }}');
+        console.log('🔍 DEBUG: Full user object:', '{{ current_user }}');
         
         document.addEventListener('click', function(event) {
             var nav = document.getElementById('main-nav');

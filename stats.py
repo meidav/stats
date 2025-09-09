@@ -287,6 +287,19 @@ def admin_players():
     
     return render_template('admin_players.html', players=player_data, search_query=search_query, sort_by=sort_by, sort_order=sort_order)
 
+@app.route('/refresh-user')
+def refresh_user():
+    """Force refresh user data from database"""
+    if current_user.is_authenticated:
+        # Reload user from database
+        user = get_user_by_id(current_user.id)
+        if user:
+            login_user(user, remember=True)
+            flash('User data refreshed', 'success')
+        else:
+            flash('User not found', 'danger')
+    return redirect(url_for('index'))
+
 @app.route('/admin/change-password', methods=['GET', 'POST'])
 @admin_required
 def change_password():
