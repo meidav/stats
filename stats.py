@@ -22,11 +22,13 @@ login_manager = init_auth(app)
 create_users_table()
 
 # Set up Flask logging to console
-@app.before_first_request
 def setup_logging():
     handler = logging.StreamHandler()  # This will log to the console
     handler.setLevel(logging.ERROR)  # Set the logging level to ERROR
     app.logger.addHandler(handler)
+
+# Set up logging when app starts
+setup_logging()
 
 # TIME OFFSET
 TIME_OFFSET = -8 #set this to the difference between your timezone and utc
