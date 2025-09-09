@@ -204,13 +204,25 @@ def login():
         username = request.form['username']
         password = request.form['password']
         
+        print(f"DEBUG: Login attempt - Username: {username}")
+        
         user = get_user_by_username(username)
-        if user and verify_password(user, password):
-            login_user(user)
-            flash('Successfully logged in!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
+        if user:
+            print(f"DEBUG: User found - ID: {user.id}, Username: {user.username}, Is Admin: {user.is_admin}")
+            password_valid = verify_password(user, password)
+            print(f"DEBUG: Password valid: {password_valid}")
+            
+            if password_valid:
+                login_user(user)
+                flash('Successfully logged in!', 'success')
+                print(f"DEBUG: User {username} logged in successfully")
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('index'))
+            else:
+                print(f"DEBUG: Invalid password for user {username}")
+                flash('Invalid username or password', 'danger')
         else:
+            print(f"DEBUG: User {username} not found")
             flash('Invalid username or password', 'danger')
     
     return render_template('login.html')
