@@ -497,6 +497,15 @@ label {
   text-align: center;
 }
 
+/* Subtle styling for optional date/time labels */
+label.optional-label {
+  font-size: 14px;
+  color: var(--caption);
+  opacity: 0.8;
+  margin-top: 12px;
+  margin-bottom: 2px;
+}
+
 input[type=submit] {
   max-width: 260px;
   width: 100%;

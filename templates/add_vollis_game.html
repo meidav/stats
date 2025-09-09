@@ -46,6 +46,14 @@
                     list="losing_scores_list"
                     id="losing_scores"
                     autocomplete>
+            
+            <!-- Optional Date/Time Override -->
+            <label for="date_played" class="optional-label">Date played</label>
+            <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}">
+            
+            <label for="time_played" class="optional-label">Time played</label>
+            <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}">
+            
             <input type="submit" value="Submit">
         </form>
     </div>

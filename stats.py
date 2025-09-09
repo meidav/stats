@@ -406,6 +406,10 @@ def add_vollis_game():
         loser = request.form['loser']
         winner_score = request.form['winner_score']
         loser_score = request.form['loser_score']
+        
+        # Get optional date/time played from form
+        date_played = request.form.get('date_played', '').strip()
+        time_played = request.form.get('time_played', '').strip()
 
         # Validate required fields
         if not winner or not loser or not winner_score or not loser_score:
@@ -435,8 +439,22 @@ def add_vollis_game():
             return render_template('add_vollis_game.html', year=year, players=players, todays_stats=t_stats, 
                            games=t_games, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
 
-        my_time = get_local_time()
-        add_vollis_stats([my_time, winner, loser, winner_score, loser_score, my_time])
+        # Handle date/time played - use provided date/time or default to current time
+        my_time = get_local_time()  # For updated_at field
+        
+        if date_played and time_played:
+            # Use provided date and time
+            date_time_played = f"{date_played} {time_played}:00"
+        elif date_played:
+            # Use provided date with current time
+            from datetime import datetime
+            current_time = datetime.now().strftime('%H:%M:%S')
+            date_time_played = f"{date_played} {current_time}"
+        else:
+            # Use current date/time for both
+            date_time_played = my_time
+        
+        add_vollis_stats([date_time_played, winner, loser, winner_score, loser_score, my_time])
         flash(f'Game added!', 'success')
         return redirect(url_for('add_vollis_game'))
 
@@ -483,11 +501,28 @@ def update_vollis_game(id):
         winner_score = request.form['winner_score']
         loser_score = request.form['loser_score']
         
+        # Get date/time played from form
+        date_played = request.form.get('date_played', '').strip()
+        time_played = request.form.get('time_played', '').strip()
+        
         if not winner or not loser or not winner_score or not loser_score:
             flash('All fields are required!', 'danger')
         else:
+            # Handle date/time played
+            if date_played and time_played:
+                # Combine date and time
+                date_time_played = f"{date_played} {time_played}:00"
+            elif date_played:
+                # Use date with current time
+                from datetime import datetime
+                current_time = datetime.now().strftime('%H:%M:%S')
+                date_time_played = f"{date_played} {current_time}"
+            else:
+                # Use existing game date if no new date provided
+                date_time_played = game[1]
+                
             my_time = get_local_time()
-            edit_vollis_game(game_id, game[1], winner, winner_score, loser, loser_score, my_time, game_id)
+            edit_vollis_game(game_id, date_time_played, winner, winner_score, loser, loser_score, my_time, game_id)
             flash(f'Game updated!', 'success')
             return redirect(url_for('edit_vollis_games'))
 
