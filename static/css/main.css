@@ -447,11 +447,9 @@ caption {
 }
 
 input, select {
-  max-width: 260px;
   width: 100%;
   text-align: center;
   padding: 8px 12px;
-  margin: 8px;
   display: inline-block;
   box-sizing: border-box;
   font-size: 16px;
