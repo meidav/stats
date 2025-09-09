@@ -344,7 +344,7 @@ table {
   margin: 0 auto;
   background-color: var(--table-bg);
   border-radius: var(--rounded-corners);
-  font-size: 14px;
+  font-size: 16px;
   padding: 8px 16px;
   border-spacing: 0;
 }
@@ -352,7 +352,26 @@ table {
 th, td {
   height: 30px;
   text-align: center;
-  font-size: 12px;
+}
+
+th {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+td {
+  font-size: 16px;
+}
+
+/* Clickable table headers for sorting */
+th.clickable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+th.clickable:hover {
+  background-color: var(--button-bg-1);
 }
 
 p {

@@ -110,12 +110,12 @@
         <h3>Total games: {{tot_games}} | Min games: {{minimum_games}}</h3>
         <thead>
             <tr>
-                <th class="rank" scope="col" colspan="1">#</th>
-                <th class="player_name" scope="col" colspan="1">Player</th>
-                <th class="numbered_stats" scope="col" colspan="1">Wins</th>
-                <th class="numbered_stats" scope="col" colspan="1">Losses</th>
-                <th class="numbered_stats" scope="col" colspan="1">Win %</th>
-                <th class="numbered_stats" scope="col" colspan="1">Games</th>
+                <th class="rank clickable" data-sort="number">#</th>
+                <th class="player_name clickable" data-sort="string">Player</th>
+                <th class="numbered_stats clickable" data-sort="number">Wins</th>
+                <th class="numbered_stats clickable" data-sort="number">Losses</th>
+                <th class="numbered_stats clickable" data-sort="number">Win %</th>
+                <th class="numbered_stats clickable" data-sort="number">Games</th>
             </tr>
         </thead>
         <tbody>
