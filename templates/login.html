@@ -25,16 +25,6 @@
                 <p>Login to your admin account to continue</p>
             </div>
             
-            {% set messages = get_flashed_messages(with_categories=True) %}
-            {% if messages %}
-                <div class="alerts">
-                    {% for category, message in messages %}
-                        <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
             
             <form method="POST" class="login-form">
                 <div class="form-group">
@@ -235,7 +225,7 @@
 
 .login-header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .login-header h1 {
@@ -257,11 +247,11 @@
 }
 
 .login-form {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .form-group {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .input-wrapper {
@@ -372,8 +362,9 @@
 .back-link {
     color: var(--link-color);
     text-decoration: none;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     font-size: 16px;
     transition: all 0.3s ease;
@@ -383,6 +374,7 @@
     background: rgba(168, 213, 242, 0.1);
     border: 2px solid rgba(168, 213, 242, 0.2);
     box-sizing: border-box;
+    width: 100%;
 }
 
 .back-link:hover {
