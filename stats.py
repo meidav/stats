@@ -362,6 +362,45 @@ def fix_admin():
     except Exception as e:
         return f"Error: {str(e)}"
 
+@app.route('/admin/edit-user/<int:user_id>', methods=['POST'])
+@admin_required
+def edit_user_admin(user_id):
+    """Edit user details"""
+    try:
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form.get('password', '')
+        is_admin = 'is_admin' in request.form
+        
+        cur = set_cur()
+        
+        # Update user
+        if password:
+            # Update with new password
+            from werkzeug.security import generate_password_hash
+            password_hash = generate_password_hash(password, method='pbkdf2:sha256')
+            cur.execute('''
+                UPDATE users 
+                SET username = ?, email = ?, password_hash = ?, is_admin = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (username, email, password_hash, is_admin, user_id))
+        else:
+            # Update without changing password
+            cur.execute('''
+                UPDATE users 
+                SET username = ?, email = ?, is_admin = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (username, email, is_admin, user_id))
+        
+        cur.connection.commit()
+        flash('User updated successfully!', 'success')
+        
+    except Exception as e:
+        flash('Failed to update user', 'danger')
+        print(f"Error updating user: {e}")
+    
+    return redirect(url_for('admin_users'))
+
 @app.route('/admin/change-password', methods=['GET', 'POST'])
 @admin_required
 def change_password():

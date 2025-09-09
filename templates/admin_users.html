@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% block title %}Manage users{% endblock %}
-
 {% block content %}
 <div class="admin-users">
     <div class="admin-header">
@@ -13,69 +11,71 @@
             Back to dashboard
         </a>
     </div>
-    
-    <div class="users-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Admin</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user[0] }}</td>
-                    <td>{{ user[1] }}</td>
-                    <td>{{ user[2] }}</td>
-                    <td>
-                        {% if user[3] %}
-                            <span class="badge badge-success">Yes</span>
-                        {% else %}
-                            <span class="badge badge-secondary">No</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ user[4] }}</td>
-                    <td>
-                        <div class="action-buttons">
-                            {% if user[0] == current_user.id %}
-                            <a href="{{ url_for('change_password') }}" class="btn btn-sm nav-style-btn">
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                                </svg>
-                                Change password
-                            </a>
-                            {% endif %}
-                            
-                            <button type="button" class="btn btn-sm nav-style-btn {{ 'btn-warning' if user[3] else 'btn-success' }}" onclick="confirmToggleAdmin({{ user[0] }}, '{{ user[1] }}', {{ 'true' if user[3] else 'false' }})">
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="8.5" cy="7" r="4"/>
-                                    <path d="M20 8v6M23 11h-6"/>
-                                </svg>
-                                {{ 'Remove admin' if user[3] else 'Make admin' }}
-                            </button>
-                            
-                            {% if user[0] != current_user.id %}
-                            <button type="button" class="btn btn-sm btn-danger" onclick="confirmDeleteUser({{ user[0] }}, '{{ user[1] }}')">
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3,6 5,6 21,6"/>
-                                    <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
-                                </svg>
-                                Delete
-                            </button>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="users-table-container">
+        <div class="table-wrapper">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Admin</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td class="user-id">{{ user[0] }}</td>
+                        <td class="username">{{ user[1] }}</td>
+                        <td class="email">{{ user[2] }}</td>
+                        <td class="admin-status">
+                            <span class="admin-badge {{ 'admin-yes' if user[3] else 'admin-no' }}">
+                                {{ 'YES' if user[3] else 'NO' }}
+                            </span>
+                        </td>
+                        <td class="created-date">
+                            <span class="date-text">{{ user[4].split(' ')[0] if user[4] else 'N/A' }}</span>
+                            <span class="time-text">{{ user[4].split(' ')[1] if user[4] and ' ' in user[4] else '' }}</span>
+                        </td>
+                        <td class="actions">
+                            <div class="action-buttons">
+                                {% if user[0] == current_user.id %}
+                                <a href="{{ url_for('change_password') }}" class="btn btn-sm nav-style-btn">
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                    </svg>
+                                    Change password
+                                </a>
+                                {% endif %}
+                                
+                                <button type="button" class="btn btn-sm nav-style-btn" onclick="openEditUserModal({{ user[0] }}, '{{ user[1] }}', '{{ user[2] }}', {{ 'true' if user[3] else 'false' }})">
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                    Edit user
+                                </button>
+                                
+                                {% if user[0] != current_user.id %}
+                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDeleteUser({{ user[0] }}, '{{ user[1] }}')">
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3,6 5,6 21,6"/>
+                                        <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                                    </svg>
+                                    Delete user
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -99,229 +99,196 @@
     </div>
 </div>
 
-<!-- Admin Toggle Confirmation Modal -->
-<div id="adminToggleModal" class="modal">
+<!-- Edit User Modal -->
+<div id="editUserModal" class="modal">
     <div class="modal-content">
-        <h3>Confirm admin status change</h3>
-        <p>Are you sure you want to <strong id="adminAction"></strong> for user <strong id="adminUserToToggle"></strong>?</p>
-        <div class="modal-actions">
-            <button type="button" class="btn btn-secondary" onclick="closeAdminToggleModal()">Cancel</button>
-            <form id="adminToggleForm" method="POST" style="display: inline;">
-                <input type="hidden" name="is_admin" id="adminToggleValue">
-                <button type="submit" class="btn btn-warning">
+        <h3>Edit user</h3>
+        <form id="editUserForm" method="POST">
+            <div class="form-group">
+                <label for="editUsername">Username</label>
+                <input type="text" id="editUsername" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="editEmail">Email</label>
+                <input type="email" id="editEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="editPassword">New Password (leave blank to keep current)</label>
+                <input type="password" id="editPassword" name="password">
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="editIsAdmin" name="is_admin">
+                    <span class="checkmark"></span>
+                    Admin privileges
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeEditUserModal()">Cancel</button>
+                <button type="submit" class="btn nav-style-btn">
                     <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="8.5" cy="7" r="4"/>
-                        <path d="M20 8v6M23 11h-6"/>
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
-                    <span id="adminToggleButtonText">Confirm</span>
+                    Save changes
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 
 <style>
 .admin-users {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
-    background: var(--bg);
-    min-height: 100vh;
 }
 
 .admin-header {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .admin-header h1 {
     color: var(--button-text-1);
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     font-weight: 700;
-    margin: 0 0 20px 0;
+    margin: 0;
     background: linear-gradient(135deg, var(--button-text-1), var(--link-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.nav-style-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: var(--button-bg-1);
-    color: var(--button-text-1);
-    text-decoration: none;
-    border-radius: var(--rounded-corners);
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    border: 1px solid var(--button-border-1);
-    cursor: pointer;
+.users-table-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
 }
 
-.nav-style-btn:hover {
-    background: rgba(45, 90, 135, 0.7);
-    color: var(--button-text-1);
-    text-decoration: none;
-    transform: translateX(-4px);
-}
-
-.btn-icon {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 16px;
 }
 
 .users-table {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: var(--rounded-corners);
-    overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    margin: 0 auto;
-    max-width: 100%;
-}
-
-.users-table table {
     width: 100%;
     border-collapse: collapse;
+    margin: 0;
+    background: transparent;
 }
 
-.users-table th,
-.users-table td {
-    padding: 15px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
+.users-table thead {
+    background: rgba(45, 90, 135, 0.3);
 }
 
 .users-table th {
-    background: var(--button-bg-1);
-    color: var(--button-text-1);
+    padding: 16px 12px;
+    text-align: left;
     font-weight: 600;
-    font-size: 1rem;
+    color: var(--button-text-1);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .users-table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--text);
-    font-size: 0.95rem;
+    vertical-align: middle;
 }
 
-.users-table tr:hover {
-    background: rgba(168, 213, 242, 0.05);
+.users-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
 }
 
-.users-table tr:last-child td {
-    border-bottom: none;
+.user-id {
+    font-weight: 600;
+    color: var(--link-color);
+    width: 60px;
 }
 
-.badge {
-    padding: 6px 12px;
+.username {
+    font-weight: 600;
+    color: var(--button-text-1);
+    min-width: 120px;
+}
+
+.email {
+    color: var(--text);
+    min-width: 200px;
+}
+
+.admin-status {
+    text-align: center;
+    width: 80px;
+}
+
+.admin-badge {
+    display: inline-block;
+    padding: 4px 12px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.badge-success {
+.admin-badge.admin-yes {
     background: rgba(40, 167, 69, 0.2);
     color: #28a745;
     border: 1px solid rgba(40, 167, 69, 0.3);
 }
 
-.badge-secondary {
+.admin-badge.admin-no {
     background: rgba(108, 117, 125, 0.2);
     color: #6c757d;
     border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.created-date {
+    min-width: 140px;
+    text-align: center;
+}
+
+.date-text {
+    display: block;
+    font-weight: 600;
+    color: var(--button-text-1);
+    font-size: 0.9rem;
+}
+
+.time-text {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text);
+    opacity: 0.7;
+}
+
+.actions {
+    width: 200px;
+    text-align: right;
 }
 
 .action-buttons {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
-.btn-sm {
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    border: none;
-    border-radius: var(--rounded-corners);
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.btn-success {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    color: white;
-}
-
-.btn-warning {
-    background: linear-gradient(135deg, #ffc107, #fd7e14);
-    color: #212529;
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #dc3545, #e83e8c);
-    color: white;
-}
-
-.btn-info {
-    background: linear-gradient(135deg, #17a2b8, #20c997);
-    color: white;
-}
-
-.btn-sm {
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    border: none;
-    border-radius: var(--rounded-corners);
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.btn-sm.nav-style-btn {
-    background: var(--button-bg-1);
-    color: var(--button-text-1);
-    border: 1px solid var(--button-border-1);
-}
-
-.btn-sm.nav-style-btn:hover {
-    background: rgba(45, 90, 135, 0.7);
-    color: var(--button-text-1);
-    text-decoration: none;
-    transform: translateX(-4px);
-}
-
-.btn-sm.btn-success {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    color: white;
-}
-
-.btn-sm.btn-warning {
-    background: linear-gradient(135deg, #ffc107, #fd7e14);
-    color: #212529;
-}
-
-.btn-sm.btn-danger {
-    background: linear-gradient(135deg, #dc3545, #e83e8c);
-    color: white;
-}
-
-.btn-sm:hover {
-    transform: translateX(-4px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+.action-buttons .btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    white-space: nowrap;
 }
 
 /* Modal Styles */
@@ -338,149 +305,149 @@
 }
 
 .modal-content {
-    background: rgba(255, 255, 255, 0.1);
-    margin: 15% auto;
+    background: rgba(20, 35, 45, 0.95);
+    margin: 5% auto;
     padding: 30px;
-    border-radius: var(--rounded-corners);
+    border-radius: 16px;
     width: 90%;
     max-width: 500px;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(168, 213, 242, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .modal-content h3 {
     color: var(--button-text-1);
-    margin: 0 0 15px 0;
+    margin: 0 0 20px 0;
     font-size: 1.5rem;
-}
-
-.modal-content p {
-    color: var(--text);
-    margin: 0 0 25px 0;
-    font-size: 1rem;
+    font-weight: 600;
 }
 
 .modal-actions {
     display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 20px;
 }
 
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: var(--rounded-corners);
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1rem;
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: var(--button-text-1);
     font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(13, 33, 48, 0.8);
+    border: 2px solid rgba(168, 213, 242, 0.2);
+    border-radius: 8px;
+    color: var(--button-text-1);
+    font-size: 14px;
     transition: all 0.3s ease;
+    outline: none;
+    box-sizing: border-box;
 }
 
-.btn-secondary {
-    background: var(--button-bg-2);
-    color: var(--button-text-2);
-    border: 1px solid var(--button-border-2);
+.form-group input:focus {
+    border-color: var(--link-color);
+    box-shadow: 0 0 0 3px rgba(168, 213, 242, 0.1);
 }
 
-.btn-secondary:hover {
-    background: var(--button-bg-2-hover);
-    color: var(--button-text-2);
-    text-decoration: none;
-    transform: translateX(-4px);
+.checkbox-label {
+    display: flex !important;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 
-.btn-danger {
-    background: linear-gradient(135deg, #dc3545, #e83e8c);
-    color: white;
+.checkbox-label input[type="checkbox"] {
+    margin-right: 8px;
+    width: auto;
 }
 
-.btn-danger:hover {
-    transform: translateX(-4px);
-    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
-}
-
+/* Mobile Responsive */
 @media (max-width: 768px) {
     .admin-users {
         padding: 15px;
     }
     
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
     .admin-header h1 {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
     
-    .users-table {
-        overflow: visible;
-    }
-    
-    .users-table table {
-        display: block;
-        width: 100%;
-    }
-    
-    .users-table thead,
-    .users-table tbody,
-    .users-table tr {
-        display: block;
+    .users-table-container {
+        border-radius: 12px;
     }
     
     .users-table th,
     .users-table td {
-        display: block;
-        padding: 12px;
-        text-align: left;
-        border: none;
-        border-bottom: 1px solid var(--border-color);
+        padding: 12px 8px;
+        font-size: 0.85rem;
     }
     
     .users-table th {
-        background: var(--button-bg-1);
-        color: var(--button-text-1);
-        font-weight: 600;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .users-table td {
-        background: transparent;
-        color: var(--text);
-    }
-    
-    .users-table tr:last-child td {
-        border-bottom: none;
+        font-size: 0.8rem;
     }
     
     .action-buttons {
         flex-direction: column;
-        gap: 8px;
-        margin-top: 10px;
+        gap: 6px;
     }
     
-    .btn-sm {
-        font-size: 0.8rem;
-        padding: 10px 16px;
+    .action-buttons .btn {
         width: 100%;
         justify-content: center;
     }
     
     .modal-content {
-        margin: 20% auto;
+        margin: 10% auto;
         padding: 20px;
+        width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    .users-table {
+        font-size: 0.8rem;
     }
     
-    .modal-actions {
-        flex-direction: column;
+    .users-table th,
+    .users-table td {
+        padding: 8px 6px;
     }
     
-    .btn {
-        width: 100%;
-        justify-content: center;
+    .user-id {
+        width: 40px;
+    }
+    
+    .username {
+        min-width: 100px;
+    }
+    
+    .email {
+        min-width: 150px;
+    }
+    
+    .created-date {
+        min-width: 120px;
+    }
+    
+    .actions {
+        width: 150px;
     }
 }
 </style>
@@ -496,32 +463,28 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').style.display = 'none';
 }
 
-function confirmToggleAdmin(userId, username, isCurrentlyAdmin) {
-    const action = isCurrentlyAdmin === 'true' ? 'remove admin privileges from' : 'grant admin privileges to';
-    const buttonText = isCurrentlyAdmin === 'true' ? 'Remove admin' : 'Make admin';
-    const newAdminValue = isCurrentlyAdmin === 'true' ? 'false' : 'true';
-    
-    document.getElementById('adminAction').textContent = action;
-    document.getElementById('adminUserToToggle').textContent = username;
-    document.getElementById('adminToggleValue').value = newAdminValue;
-    document.getElementById('adminToggleButtonText').textContent = buttonText;
-    document.getElementById('adminToggleForm').action = "{{ url_for('toggle_user_admin', user_id=0) }}".replace('/0', '/' + userId);
-    document.getElementById('adminToggleModal').style.display = 'block';
+function openEditUserModal(userId, username, email, isAdmin) {
+    document.getElementById('editUsername').value = username;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editPassword').value = '';
+    document.getElementById('editIsAdmin').checked = isAdmin;
+    document.getElementById('editUserForm').action = "{{ url_for('edit_user_admin', user_id=0) }}".replace('/0', '/' + userId);
+    document.getElementById('editUserModal').style.display = 'block';
 }
 
-function closeAdminToggleModal() {
-    document.getElementById('adminToggleModal').style.display = 'none';
+function closeEditUserModal() {
+    document.getElementById('editUserModal').style.display = 'none';
 }
 
 // Close modal when clicking outside of it
 window.onclick = function(event) {
     const deleteModal = document.getElementById('deleteModal');
-    const adminToggleModal = document.getElementById('adminToggleModal');
+    const editModal = document.getElementById('editUserModal');
     
     if (event.target === deleteModal) {
         closeDeleteModal();
-    } else if (event.target === adminToggleModal) {
-        closeAdminToggleModal();
+    } else if (event.target === editModal) {
+        closeEditUserModal();
     }
 }
 </script>
