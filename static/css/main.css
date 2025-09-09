@@ -226,18 +226,15 @@ form {
 }
 
 .dropdown .dropbtn {
-  font-size: 16px;
-  padding: 8px 12px;
-  margin: 8px;
+  font-size: 17px;
+  padding: 8px 16px;
+  margin: 0;
   border-radius: var(--rounded-corners);
-  border: 1px solid var(--button-border-1);
-  background-color: var(--button-bg-1);
-  color: var(--button-text-1);
-  width: 180px;
+  border: 2px solid var(--button-bg-1);
+  background-color: var(--button-border-1);
+  color: var(--button-bg-1);
+  width: 150px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  max-width: 260px;
 }
 
 .dropdown-content {
@@ -279,11 +276,7 @@ form {
   color: var(--link-color);
 }
 
-.dropdown:hover .dropbtn {
-  background-color: var(--button-bg-1);
-  color: var(--button-text-1);
-  box-shadow: 0 0 0 2px var(--button-bg-1);
-}
+/* No hover state change for dropdown button to match regular buttons */
 
 .dropdown-content a:hover {
   background-color: var(--button-bg-1);
