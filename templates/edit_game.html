@@ -42,6 +42,15 @@
 							<option value= "{{ score }}">
 					 {% endfor %}
 			  </datalist>
+			  
+			  <!-- Date/Time Played -->
+			  <label for="date_played">Date Played:</label>
+			  <input type="date" name="date_played" id="date_played" value="{{ game[9] if game[9] else game[1][:10] }}">
+			  
+			  <label for="time_played">Time Played:</label>
+			  <input type="time" name="time_played" id="time_played" value="{{ game[10] if game[10] else game[1][11:16] }}">
+			  
+			  <!-- Player inputs -->
 			  <input type="text" name="winner1" placeholder="Winner 1" value="{{ game[2] }}" list="players">
 			  <input type="text" name="winner2" placeholder="Winner 2" value="{{ game[3] }}" list="players">
 			  <input type="text" name="loser1" placeholder="Loser 1" value="{{ game[5] }}" list="players">

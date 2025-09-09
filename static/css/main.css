@@ -483,8 +483,18 @@ input:focus-visible {
   outline-color: var(--button-bg-1);
 }
 
-input[type=date] {
+input[type=date], input[type=time] {
   min-height: 2.5rem;
+}
+
+/* Labels for date/time inputs */
+label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-size: 16px;
+  color: var(--button-text-1);
+  text-align: center;
 }
 
 input[type=submit] {

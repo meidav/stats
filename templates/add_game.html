@@ -20,6 +20,14 @@
                     <option value="{{ score }}"></option>
                 {% endfor %}
             </datalist>
+            <!-- Optional Date/Time Override -->
+            <label for="date_played">Date Played (optional - defaults to now):</label>
+            <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}">
+            
+            <label for="time_played">Time Played (optional - defaults to now):</label>
+            <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}">
+            
+            <!-- Player Inputs -->
             <input type="text" name="winner1" placeholder="Winner 1" value="{{ request.form['winner1'] }}" list="players" autocomplete="on">
             <input type="text" name="winner2" placeholder="Winner 2" value="{{ request.form['winner2'] }}" list="players" autocomplete="on">
             <input type="text" name="loser1" placeholder="Loser 1" value="{{ request.form['loser1'] }}" list="players" autocomplete="on">      

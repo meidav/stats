@@ -196,6 +196,10 @@ def add_game():
             loser2 = request.form['loser2'].strip()
             winner_score = request.form['winner_score'].strip()
             loser_score = request.form['loser_score'].strip()
+            
+            # Get optional date/time played from form
+            date_played = request.form.get('date_played', '').strip()
+            time_played = request.form.get('time_played', '').strip()
 
             # Validate required fields
             if not all([winner1, winner2, loser1, loser2, winner_score, loser_score]):
@@ -228,9 +232,23 @@ def add_game():
                     w_scores=w_scores, l_scores=l_scores, year=current_year, stats=stats, rare_stats=rare_stats, tot_games=tot_games, 
                     minimum_games=minimum_games, winner1=winner1, winner2=winner2, loser1=loser1, loser2=loser2, winner_score=winner_score, loser_score=loser_score)
                 
+            # Handle date/time played - use provided date/time or default to current time
+            my_time = get_local_time()  # For updated_at field
+            
+            if date_played and time_played:
+                # Use provided date and time
+                date_time_played = f"{date_played} {time_played}:00"
+            elif date_played:
+                # Use provided date with current time
+                from datetime import datetime
+                current_time = datetime.now().strftime('%H:%M:%S')
+                date_time_played = f"{date_played} {current_time}"
+            else:
+                # Use current date/time for both
+                date_time_played = my_time
+            
             # Save the game stats only if validation passed
-            my_time = get_local_time()
-            add_game_stats([my_time, winner1, winner2, loser1, loser2, winner_score, loser_score, my_time])
+            add_game_stats([date_time_played, winner1, winner2, loser1, loser2, winner_score, loser_score, my_time])
 
             #flash(f'Game added! date/time in db: "{my_time}"', 'success')  # Flash success message with custom category
             flash(f'Game added!', 'success')
@@ -279,6 +297,10 @@ def update(id):
         loser2 = request.form['loser2'].strip()
         winner_score = request.form['winner_score'].strip()
         loser_score = request.form['loser_score'].strip()
+        
+        # Get date/time played from form
+        date_played = request.form.get('date_played', '').strip()
+        time_played = request.form.get('time_played', '').strip()
 
         # Validate required fields
         if not all([winner1, winner2, loser1, loser2, winner_score, loser_score]):
@@ -301,11 +323,24 @@ def update(id):
             if len(set([winner1, winner2, loser1, loser2])) < 4:
                 flash('Players must be unique!', 'danger')
                 return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+            
+            # Handle date/time played
+            if date_played and time_played:
+                # Combine date and time
+                date_time_played = f"{date_played} {time_played}:00"
+            elif date_played:
+                # Use date with current time
+                from datetime import datetime
+                current_time = datetime.now().strftime('%H:%M:%S')
+                date_time_played = f"{date_played} {current_time}"
+            else:
+                # Use existing game date if no new date provided
+                date_time_played = game[1]
                 
             my_time = get_local_time()
 
             try:
-                update_game(game_id, game[1], winner1, winner2, winner_score, loser1, loser2, loser_score, my_time, game_id)
+                update_game(game_id, date_time_played, winner1, winner2, winner_score, loser1, loser2, loser_score, my_time, game_id)
             except Exception as e:
                 flash(f'Error updating game: {str(e)}')
                 return redirect(url_for('edit_games'))
