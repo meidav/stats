@@ -6,16 +6,33 @@
 <div class="admin-players">
     <div class="admin-header">
         <h1>Manage players</h1>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Back to dashboard</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="universal-btn">
+            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to dashboard
+        </a>
     </div>
     
     <div class="search-section">
         <form method="GET" action="{{ url_for('admin_players') }}">
             <div class="search-group">
                 <input type="text" name="search" placeholder="Search players..." value="{{ search_query }}" class="search-input">
-                <button type="submit" class="btn btn-primary">Search</button>
+                <button type="submit" class="universal-btn">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    Search
+                </button>
                 {% if search_query %}
-                <a href="{{ url_for('admin_players') }}" class="btn btn-secondary">Clear</a>
+                <a href="{{ url_for('admin_players') }}" class="universal-btn">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                    Clear
+                </a>
                 {% endif %}
             </div>
         </form>
@@ -27,11 +44,19 @@
                 <tr>
                     <th class="sortable" data-sort="name">
                         Player name
-                        <span class="sort-indicator">↕</span>
+                        <span class="sort-indicator">
+                            {% if sort_by == 'name' %}
+                                {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+                            {% else %}↕{% endif %}
+                        </span>
                     </th>
                     <th class="sortable" data-sort="games">
                         Total games
-                        <span class="sort-indicator">↕</span>
+                        <span class="sort-indicator">
+                            {% if sort_by == 'games' %}
+                                {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
+                            {% else %}↕{% endif %}
+                        </span>
                     </th>
                     <th>Actions</th>
                 </tr>
@@ -46,8 +71,12 @@
                         <span class="game-count">{{ player.game_count }}</span>
                     </td>
                     <td>
-                        <a href="{{ url_for('edit_player', player=player.name) }}" class="btn btn-sm btn-primary">
-                            Edit name
+                        <a href="{{ url_for('edit_player', player=player.name) }}" class="universal-btn edit-name-btn">
+                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            <span class="edit-text">Edit name</span>
                         </a>
                     </td>
                 </tr>

@@ -2358,12 +2358,8 @@ input[type=number] {
 }
 
 .admin-players .admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
   margin-bottom: 30px;
-  flex-wrap: wrap;
-  gap: 15px;
 }
 
 .admin-players .admin-header h1 {
@@ -2378,12 +2374,12 @@ input[type=number] {
 }
 
 .search-section {
-  background: var(--card-bg);
+  background: rgba(255, 255, 255, 0.05);
   padding: 25px;
   border-radius: var(--rounded-corners);
   margin-bottom: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .search-group {
@@ -2397,10 +2393,10 @@ input[type=number] {
   flex: 1;
   min-width: 250px;
   padding: 12px 16px;
-  border: 2px solid var(--border-color);
+  border: 2px solid rgba(168, 213, 242, 0.2);
   border-radius: var(--rounded-corners);
   font-size: 1rem;
-  background: var(--input-bg);
+  background: rgba(13, 33, 48, 0.8);
   color: var(--text);
   transition: all 0.3s ease;
 }
@@ -2433,11 +2429,13 @@ input[type=number] {
 }
 
 .players-table {
-  background: var(--card-bg);
+  background: #051d29;
   border-radius: var(--rounded-corners);
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 auto;
+  max-width: 1000px;
 }
 
 .players-table table {
@@ -2495,6 +2493,28 @@ input[type=number] {
   font-size: 1.1rem;
 }
 
+/* Edit name button styling */
+.edit-name-btn {
+  font-size: 0.85rem;
+  padding: 8px 12px;
+}
+
+.edit-name-btn .edit-text {
+  display: inline;
+}
+
+/* Mobile: hide text, show only icon */
+@media (max-width: 768px) {
+  .edit-name-btn .edit-text {
+    display: none;
+  }
+  
+  .edit-name-btn {
+    padding: 8px;
+    min-width: auto;
+  }
+}
+
 .btn-sm {
   padding: 8px 16px;
   font-size: 0.85rem;
@@ -2531,11 +2551,6 @@ input[type=number] {
 @media (max-width: 768px) {
   .admin-players {
     padding: 15px;
-  }
-  
-  .admin-players .admin-header {
-    flex-direction: column;
-    align-items: flex-start;
   }
   
   .admin-players .admin-header h1 {
