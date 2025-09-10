@@ -2392,6 +2392,7 @@ input[type=number] {
   margin: 0 auto;
 }
 
+/* General search input styling */
 .search-input {
   flex: 1;
   min-width: 250px;
@@ -2404,7 +2405,26 @@ input[type=number] {
   transition: all 0.3s ease;
 }
 
+/* Specific styling for admin players search input */
+.players-search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  border: 2px solid rgba(168, 213, 242, 0.2);
+  border-radius: var(--rounded-corners);
+  font-size: 1rem;
+  background: rgba(13, 33, 48, 0.8);
+  color: var(--text);
+  transition: all 0.3s ease;
+}
+
 .search-input:focus {
+  outline: none;
+  border-color: var(--link-color);
+  box-shadow: 0 0 0 3px rgba(168, 213, 242, 0.1);
+}
+
+.players-search-input:focus {
   outline: none;
   border-color: var(--link-color);
   box-shadow: 0 0 0 3px rgba(168, 213, 242, 0.1);
@@ -2571,6 +2591,10 @@ input[type=number] {
   }
   
   .search-input {
+    min-width: auto;
+  }
+  
+  .players-search-input {
     min-width: auto;
   }
   
