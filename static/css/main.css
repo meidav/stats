@@ -995,7 +995,7 @@ input[type=number] {
     display: inline-block !important;
     width: 20px;
     height: 20px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(13, 33, 48, 0.8);
     border: 2px solid rgba(168, 213, 242, 0.3);
     border-radius: 4px;
     margin-right: 12px;
@@ -1046,7 +1046,7 @@ input[type=number] {
   display: inline-block;
   width: 20px;
   height: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(13, 33, 48, 0.8);
   border: 2px solid rgba(168, 213, 242, 0.3);
   border-radius: 4px;
   margin-right: 12px;
@@ -1074,6 +1074,11 @@ input[type=number] {
 .checkbox-label:hover .checkmark {
   border-color: var(--link-color);
   background: rgba(168, 213, 242, 0.1);
+}
+
+/* Users table styling */
+.users-table {
+  background-color: #051d29;
 }
 
 /* Fix modal button issues at larger viewports */
