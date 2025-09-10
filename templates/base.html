@@ -11,8 +11,18 @@
     <script>
         // Deployment tracking console logs
         console.log('🚀 DEPLOYMENT INFO: Site loaded at', new Date());
-        console.log('📦 Latest deployment commit:', 'Fix Back to dashboard button - use universal-btn like Edit user button');
-        console.log('✅ Automated deployment is working!');
+        
+        // Fetch latest commit dynamically
+        fetch('/api/latest-commit')
+            .then(response => response.text())
+            .then(commitMessage => {
+                console.log('📦 Latest deployment commit:', commitMessage);
+                console.log('✅ Automated deployment is working!');
+            })
+            .catch(error => {
+                console.log('📦 Latest deployment commit:', 'Fix mobile card issues - single background, proper button sizing and alignment');
+                console.log('⚠️ Could not fetch latest commit:', error);
+            });
         
         // DEBUG: Check current user status
         console.log('🔍 DEBUG: Current user:', '{{ current_user.username if current_user.is_authenticated else "Not logged in" }}');
