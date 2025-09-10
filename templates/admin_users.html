@@ -71,7 +71,12 @@
         <h3>Confirm user deletion</h3>
         <p>Are you sure you want to delete user <strong id="userToDelete"></strong>? This action cannot be undone.</p>
         <div class="modal-actions">
-            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="menu__item" onclick="closeDeleteModal()">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Cancel
+            </button>
             <form id="deleteForm" method="POST" style="display: inline;">
                 <button type="submit" class="menu__item btn-danger">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -110,7 +115,12 @@
                 </label>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeEditUserModal()">Cancel</button>
+                <button type="button" class="menu__item" onclick="closeEditUserModal()">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Cancel
+                </button>
                 <button type="submit" class="menu__item">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -251,10 +261,8 @@
     flex-wrap: wrap;
 }
 
-.action-buttons .menu__item {
-    font-size: 0.8rem;
-    padding: 6px 10px;
-    white-space: nowrap;
+/* Universal Button System - ALL buttons use this */
+.menu__item {
     background: rgba(168, 213, 242, 0.1);
     border: 2px solid rgba(168, 213, 242, 0.2);
     border-radius: 12px;
@@ -266,24 +274,39 @@
     align-items: center;
     gap: 8px;
     cursor: pointer;
+    padding: 12px 16px;
+    font-size: 14px;
+    white-space: nowrap;
     margin: 2px;
 }
 
-.action-buttons .menu__item:hover {
+.menu__item:hover {
     background: rgba(45, 90, 135, 0.7);
     color: var(--link-hover-color);
     transform: translateX(-3px);
 }
 
-.action-buttons .menu__item.btn-danger {
+.menu__item.btn-danger {
     background: rgba(220, 53, 69, 0.2);
     border-color: rgba(220, 53, 69, 0.3);
     color: #dc3545;
 }
 
-.action-buttons .menu__item.btn-danger:hover {
+.menu__item.btn-danger:hover {
     background: rgba(220, 53, 69, 0.7);
     color: #fff;
+}
+
+.menu-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Action buttons specific sizing */
+.action-buttons .menu__item {
+    font-size: 0.8rem;
+    padding: 6px 10px;
 }
 
 /* Modal Styles */
@@ -324,38 +347,7 @@
     margin-top: 20px;
 }
 
-.modal-actions .menu__item {
-    background: rgba(168, 213, 242, 0.1);
-    border: 2px solid rgba(168, 213, 242, 0.2);
-    border-radius: 12px;
-    color: var(--link-color);
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    padding: 12px 16px;
-    font-size: 14px;
-}
-
-.modal-actions .menu__item:hover {
-    background: rgba(45, 90, 135, 0.7);
-    color: var(--link-hover-color);
-    transform: translateX(-3px);
-}
-
-.modal-actions .menu__item.btn-danger {
-    background: rgba(220, 53, 69, 0.2);
-    border-color: rgba(220, 53, 69, 0.3);
-    color: #dc3545;
-}
-
-.modal-actions .menu__item.btn-danger:hover {
-    background: rgba(220, 53, 69, 0.7);
-    color: #fff;
-}
+/* Modal actions use universal button system */
 
 .form-group {
     margin-bottom: 20px;
