@@ -220,7 +220,7 @@
 }
 
 .created-date {
-    text-align: center;
+    text-align: left;
 }
 
 .date-text {
@@ -442,6 +442,10 @@
         text-align: left;
     }
     
+    .created-date {
+        text-align: left !important;
+    }
+    
     .users-table td:last-child:before {
         display: none;
     }
@@ -456,18 +460,18 @@
     
     .action-buttons .universal-btn {
         flex: 1;
-        min-width: 120px;
-        padding: 8px 12px;
-        font-size: 0.85rem;
+        min-width: 100px;
+        padding: 6px 10px;
+        font-size: 0.8rem;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 6px;
+        justify-content: flex-start;
+        gap: 4px;
     }
     
     .action-buttons .universal-btn .menu-icon {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         flex-shrink: 0;
     }
     
