@@ -1043,37 +1043,37 @@ input[type=number] {
 }
 
 .checkbox-label .checkmark {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  background: rgba(13, 33, 48, 0.8);
-  border: 2px solid rgba(168, 213, 242, 0.3);
-  border-radius: 4px;
-  margin-right: 12px;
-  position: relative;
-  transition: all 0.2s ease;
+  display: inline-block !important;
+  width: 20px !important;
+  height: 20px !important;
+  background: rgba(13, 33, 48, 0.8) !important;
+  border: 2px solid rgba(168, 213, 242, 0.3) !important;
+  border-radius: 4px !important;
+  margin-right: 12px !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
-  background: var(--link-color);
-  border-color: var(--link-color);
+  background: #4a9eff !important;
+  border-color: #4a9eff !important;
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 6px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  content: '' !important;
+  position: absolute !important;
+  left: 6px !important;
+  top: 2px !important;
+  width: 6px !important;
+  height: 10px !important;
+  border: solid white !important;
+  border-width: 0 2px 2px 0 !important;
+  transform: rotate(45deg) !important;
 }
 
 .checkbox-label:hover .checkmark {
-  border-color: var(--link-color);
-  background: rgba(168, 213, 242, 0.1);
+  border-color: #4a9eff !important;
+  background: rgba(74, 158, 255, 0.1) !important;
 }
 
 /* Users table styling */
