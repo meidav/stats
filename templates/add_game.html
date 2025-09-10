@@ -1,6 +1,6 @@
 {% extends 'base_admin.html' %}
 
-{% block content %}
+{% block admin_content %}
     <h1 class="page-title">{% block title %} Add a game {% endblock %}</h1>
     
     <div class="content-section">
@@ -22,21 +22,26 @@
             </datalist>
             
             <!-- Player Inputs -->
-            <input type="text" name="winner1" placeholder="Winner 1" value="{{ request.form['winner1'] }}" list="players" autocomplete="on">
-            <input type="text" name="winner2" placeholder="Winner 2" value="{{ request.form['winner2'] }}" list="players" autocomplete="on">
-            <input type="text" name="loser1" placeholder="Loser 1" value="{{ request.form['loser1'] }}" list="players" autocomplete="on">      
-            <input type="text" name="loser2" placeholder="Loser 2" value="{{ request.form['loser2'] }}" list="players" autocomplete="on">
-            <input type="number" pattern="[0-9]*" name="winner_score" placeholder="Winners' score" value="{{ request.form['winner_score'] }}" list="w_scores" autocomplete="on">
-            <input type="number" pattern="[0-9]*" name="loser_score" placeholder="Losers' score" value="{{ request.form['loser_score'] }}" list="l_scores" autocomplete="on">
+            <input type="text" name="winner1" placeholder="Winner 1" value="{{ request.form['winner1'] }}" list="players" autocomplete="on" class="form-input">
+            <input type="text" name="winner2" placeholder="Winner 2" value="{{ request.form['winner2'] }}" list="players" autocomplete="on" class="form-input">
+            <input type="text" name="loser1" placeholder="Loser 1" value="{{ request.form['loser1'] }}" list="players" autocomplete="on" class="form-input">      
+            <input type="text" name="loser2" placeholder="Loser 2" value="{{ request.form['loser2'] }}" list="players" autocomplete="on" class="form-input">
+            <input type="number" pattern="[0-9]*" name="winner_score" placeholder="Winners' score" value="{{ request.form['winner_score'] }}" list="w_scores" autocomplete="on" class="form-input">
+            <input type="number" pattern="[0-9]*" name="loser_score" placeholder="Losers' score" value="{{ request.form['loser_score'] }}" list="l_scores" autocomplete="on" class="form-input">
             
             <!-- Optional Date/Time Override -->
             <label for="date_played" class="optional-label">Date played (edit if needed)</label>
-            <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}">
+            <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}" class="form-input">
             
             <label for="time_played" class="optional-label">Time played (edit if needed)</label>
-            <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}">
+            <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}" class="form-input">
             
-            <input type="submit" value="Submit">
+            <button type="submit" class="universal-btn">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Submit
+            </button>
         </form>
     </div>
 

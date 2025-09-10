@@ -1,76 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Arbel's Stats | {% block title %} {% endblock %}</title>
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon-admin.ico') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon-admin.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <meta name="viewport" content="width=device-width" />
+{% extends "base.html" %}
 
-    <script>
-        document.addEventListener('click', function(event) {
-            var nav = document.getElementById('main-nav');
-            var targetElement = event.target; // Clicked element
-
-            // Check if the clicked element is outside of the nav menu and not the menu toggle button
-            if (!nav.contains(targetElement) && targetElement.id !== 'menu__toggle') {
-                // Hide the nav menu
-                var menuToggle = document.getElementById('menu__toggle');
-                menuToggle.checked = false; // Uncheck the menu toggle checkbox
-            }
-        });
-    </script>
-</head>
-<body>
-    <nav id="main-nav">
-        <div class="button-row">
-            <a href="{{ url_for('index') }}" class="nav-button">Doubles</a>
-            <a href="{{ url_for('vollis') }}" class="nav-button">Vollis</a>
-        </div>
-        <div class="hamburger-menu-container">
-            <input id="menu__toggle" type="checkbox" />
-            <label class="menu__btn" for="menu__toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </label>
-
-            <ul class="menu__box">
-                <li><a class="menu__item" href="{{ url_for('games') }}">Games</a></li>
-                <li><a class="menu__item" href="{{ url_for('vollis_games') }}">Vollis games</a></li>
-                <li><a class="menu__item" href="{{ url_for('top_teams') }}">Top teams</a></li>
-            </ul>
-        </div>
-    </nav>
-    <div class="page-header">
-        {% set messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-            <div class="alerts">
-                {% for category, message in messages %}
-                    <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-        <div class="button-row">
-            <div class="dropdown">
-                <button class="dropbtn">Add/Edit
-                    <i class="fa fa-caret-down"></i>
-                </button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('add_game') }}">Add game</a>
-                    <a href="{{ url_for('add_vollis_game') }}">Add vollis game</a>
-                    <a href="{{ url_for('edit_games') }}">Edit games</a>
-                    <a href="{{ url_for('edit_vollis_games') }}">Edit vollis games</a>
+{% block content %}
+    {% set messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+        <div class="alerts">
+            {% for category, message in messages %}
+                <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                    {{ message }}
                 </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <div class="button-row">
+        <div class="dropdown">
+            <button class="universal-btn dropbtn">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Add/Edit
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            </button>
+            <div class="dropdown-content">
+                <a href="{{ url_for('add_game') }}" class="universal-btn">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Add game
+                </a>
+                <a href="{{ url_for('add_vollis_game') }}" class="universal-btn">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Add vollis game
+                </a>
+                <a href="{{ url_for('edit_games') }}" class="universal-btn">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit games
+                </a>
+                <a href="{{ url_for('edit_vollis_games') }}" class="universal-btn">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit vollis games
+                </a>
             </div>
         </div>
     </div>
-    <div class="content">
-        
-        {% block content %} {% endblock %}
-    </div>    
-</body>
-</html>
+    
+    {% block admin_content %} {% endblock %}
+{% endblock %}
