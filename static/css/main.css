@@ -1896,6 +1896,38 @@ input[type=number] {
   flex-shrink: 0;
 }
 
+/* Admin dashboard specific button styling */
+.admin-dashboard .nav-style-btn {
+  background: rgba(168, 213, 242, 0.1);
+  border: 2px solid rgba(168, 213, 242, 0.2);
+  border-radius: 12px;
+  color: var(--link-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 12px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+  margin: 2px;
+}
+
+.admin-dashboard .nav-style-btn:hover {
+  background: rgba(45, 90, 135, 0.7);
+  color: var(--link-hover-color);
+  transform: translateX(-3px);
+  text-decoration: none;
+}
+
+.admin-dashboard .nav-style-btn .btn-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .quick-actions {
   margin-top: 40px;
 }
