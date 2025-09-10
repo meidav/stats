@@ -86,12 +86,16 @@ def verify_password(user, password):
 def admin_required(f):
     """Decorator to require admin access"""
     from functools import wraps
-    from flask import abort
+    from flask import redirect, url_for, flash
     
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
-            abort(403)
+        if not current_user.is_authenticated:
+            flash('Please log in to access this page.', 'info')
+            return redirect(url_for('login'))
+        elif not current_user.is_admin:
+            flash('Admin access required. Please log in with an admin account.', 'warning')
+            return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
 
