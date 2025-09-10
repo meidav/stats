@@ -384,7 +384,10 @@
     }
     
     .users-table-container {
-        padding: 15px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
     }
     
     .users-table,
@@ -412,6 +415,8 @@
         display: block;
         width: 100%;
         box-sizing: border-box;
+        position: relative;
+        z-index: 1;
     }
     
     .users-table td {
