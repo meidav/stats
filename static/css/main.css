@@ -2366,7 +2366,7 @@ input[type=number] {
   color: var(--button-text-1);
   font-size: 2.2rem;
   font-weight: 700;
-  margin: 0;
+  margin: 0 0 20px 0;
   background: linear-gradient(135deg, var(--button-text-1), var(--link-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
