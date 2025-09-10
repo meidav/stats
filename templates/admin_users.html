@@ -27,19 +27,19 @@
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td>{{ user[0] }}</td>
-                    <td>{{ user[1] }}</td>
-                    <td>{{ user[2] }}</td>
-                    <td>
+                    <td data-label="ID">{{ user[0] }}</td>
+                    <td data-label="Username">{{ user[1] }}</td>
+                    <td data-label="Email">{{ user[2] }}</td>
+                    <td data-label="Admin">
                         <span class="admin-badge {{ 'admin-yes' if user[3] else 'admin-no' }}">
                             {{ 'YES' if user[3] else 'NO' }}
                         </span>
                     </td>
-                    <td class="created-date">
+                    <td class="created-date" data-label="Created">
                         <div class="date-text">{{ user[4].split(' ')[0] if user[4] else 'N/A' }}</div>
                         <div class="time-text">{{ user[4].split(' ')[1] if user[4] and ' ' in user[4] else '' }}</div>
                     </td>
-                    <td>
+                    <td data-label="Actions">
                         <div class="action-buttons">
                             <button type="button" class="universal-btn" onclick="openEditUserModal({{ user[0] }}, '{{ user[1] }}', '{{ user[2] }}', {{ 'true' if user[3] else 'false' }})">
                                 <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -387,18 +387,63 @@
         padding: 15px;
     }
     
+    .users-table,
+    .users-table thead,
+    .users-table tbody,
     .users-table th,
+    .users-table td,
+    .users-table tr {
+        display: block;
+    }
+    
+    .users-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .users-table tr {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        margin-bottom: 15px;
+        padding: 15px;
+    }
+    
     .users-table td {
-        padding: 8px 6px;
-        font-size: 0.85rem;
+        border: none;
+        position: relative;
+        padding: 8px 0;
+        padding-left: 50%;
+        text-align: left;
+    }
+    
+    .users-table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+        color: var(--link-color);
+    }
+    
+    .users-table td:last-child {
+        padding-left: 0;
+    }
+    
+    .users-table td:last-child:before {
+        display: none;
     }
     
     .action-buttons {
         flex-direction: column;
-        gap: 4px;
+        gap: 8px;
+        margin-top: 10px;
     }
     
-    .action-buttons .btn {
+    .action-buttons .universal-btn {
         width: 100%;
         justify-content: center;
     }
