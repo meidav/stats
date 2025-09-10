@@ -20,7 +20,6 @@
                 console.log('✅ Automated deployment is working!');
             })
             .catch(error => {
-                console.log('📦 Latest deployment commit:', 'Fix mobile card issues - single background, proper button sizing and alignment');
                 console.log('⚠️ Could not fetch latest commit:', error);
             });
         
@@ -47,14 +46,14 @@
 <body>
     <nav id="main-nav">
         <div class="button-row">
-            <a href="{{ url_for('index') }}" class="nav-button">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <a href="{{ url_for('index') }}" class="menu__item">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 3h18v18H3zM9 9h6v6H9z"/>
                 </svg>
                 Doubles
             </a>
-            <a href="{{ url_for('vollis') }}" class="nav-button">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <a href="{{ url_for('vollis') }}" class="menu__item">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M8 12h8M12 8v8"/>
                 </svg>
