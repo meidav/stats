@@ -1992,6 +1992,18 @@ input[type=number] {
     gap: 20px;
   }
   
+  /* Fix button margins on mobile - ensure equal left/right margins */
+  .admin-dashboard .stat-card .nav-style-btn {
+    margin: 0 15px;
+    width: calc(100% - 30px);
+    box-sizing: border-box;
+  }
+  
+  /* Fix spacing between cards and quick actions */
+  .quick-actions {
+    margin-top: 20px;
+  }
+  
   .action-grid {
     grid-template-columns: 1fr;
     gap: 20px;
