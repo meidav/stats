@@ -1293,6 +1293,7 @@ input[type=number] {
 /* Form input styling for consistent appearance */
 .form-input {
   width: 100%;
+  max-width: 400px;
   padding: 12px 16px;
   border: 2px solid rgba(168, 213, 242, 0.2);
   border-radius: var(--rounded-corners);
@@ -1302,12 +1303,32 @@ input[type=number] {
   transition: all 0.3s ease;
   box-sizing: border-box;
   margin-bottom: 15px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .form-input:focus {
   outline: none;
   border-color: var(--link-color);
   box-shadow: 0 0 0 3px rgba(168, 213, 242, 0.1);
+}
+
+/* Form submit button styling to match inputs */
+.form-submit {
+  width: 100%;
+  max-width: 400px;
+  margin: 20px auto 30px auto;
+  display: block;
+}
+
+/* Form labels styling */
+.optional-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-weight: 500;
+  text-align: center;
 }
 
 .universal-btn:hover {

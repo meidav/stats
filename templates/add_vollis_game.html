@@ -27,34 +27,43 @@
                     value="{{ request.form['winner'] }}"
                     list="players_list"
                     id="winner_players"
-                    autocomplete>
+                    autocomplete
+                    class="form-input">
             <input type="text" name="loser"
                     placeholder="Loser"
                     value="{{ request.form['loser'] }}"
                     list="players_list"
                     id="loser_players"
-                    autocomplete>
+                    autocomplete
+                    class="form-input">
             <input type="number" pattern="[0-9]*" name="winner_score"
                     placeholder="Winner's score"
                     value="{{ request.form['winner_score'] }}"
                     list="winning_scores_list"
                     id="winner_scores"
-                    autocomplete>
+                    autocomplete
+                    class="form-input">
             <input type="number" pattern="[0-9]*" name="loser_score"
                     placeholder="Loser's score"
                     value="{{ request.form['loser_score'] }}"
                     list="losing_scores_list"
                     id="losing_scores"
-                    autocomplete>
+                    autocomplete
+                    class="form-input">
             
             <!-- Optional Date/Time Override -->
             <label for="date_played" class="optional-label">Date played (edit if needed)</label>
-            <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}">
+            <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}" class="form-input">
             
             <label for="time_played" class="optional-label">Time played (edit if needed)</label>
-            <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}">
+            <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}" class="form-input">
             
-            <input type="submit" value="Submit">
+            <button type="submit" class="universal-btn form-submit">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Submit
+            </button>
         </form>
     </div>
 
