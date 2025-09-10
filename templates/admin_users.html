@@ -481,18 +481,21 @@
     }
     
     .modal-content {
-        margin: 5% auto;
-        padding: 15px;
-        width: 95%;
+        margin: 8px;
+        padding: 20px;
+        width: calc(100% - 16px);
+        max-width: 400px;
     }
     
     .modal-actions {
-        flex-direction: column;
-        gap: 10px;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
     }
     
     .modal-actions .universal-btn {
-        width: 100%;
+        flex: 1;
+        max-width: 140px;
         padding: 8px 12px;
         font-size: 0.85rem;
         justify-content: center;
@@ -506,10 +509,11 @@
     .modal-content input[type="text"],
     .modal-content input[type="email"],
     .modal-content input[type="password"] {
-        width: 100%;
+        width: calc(100% - 20px);
         padding: 10px;
         font-size: 16px; /* Prevents zoom on iOS */
         margin-bottom: 15px;
+        box-sizing: border-box;
     }
     
     .modal-content h3 {
