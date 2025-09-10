@@ -928,14 +928,14 @@ input[type=number] {
 /* Mobile Modal Styles */
 @media (max-width: 768px) {
   .modal-content {
-    margin: 0;
-    padding: 20px;
-    width: calc(100vw - 20px);
-    max-width: calc(100vw - 20px);
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    margin: 0 !important;
+    padding: 20px !important;
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
   }
   
   .modal-actions {
