@@ -938,21 +938,10 @@ input[type=number] {
     transform: translate(-50%, -50%) !important;
   }
   
-  .modal-actions {
-    flex-direction: row;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
-  }
-  
   .modal-actions .universal-btn {
     flex: 1;
     max-width: 150px;
-    padding: 10px 20px;
     font-size: 0.9rem;
-    justify-content: center;
-    display: flex;
-    align-items: center;
   }
   
   .modal-actions .universal-btn .menu-icon {
@@ -1085,22 +1074,27 @@ input[type=number] {
   background-color: #051d29;
 }
 
+/* Modal actions base styling */
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.modal-actions .universal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+}
+
 /* Fix modal button issues at larger viewports */
 @media (min-width: 769px) {
-  .modal-actions {
-    flex-direction: row;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
-  }
-  
   .modal-actions .universal-btn {
     max-width: 150px;
     min-width: 120px;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 
