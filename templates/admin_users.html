@@ -405,17 +405,20 @@
     .users-table tr {
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        margin-bottom: 15px;
-        padding: 15px;
+        border-radius: var(--rounded-corners);
+        margin-bottom: 20px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
     
     .users-table td {
         border: none;
         position: relative;
-        padding: 8px 0;
+        padding: 12px 0;
         padding-left: 50%;
         text-align: left;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .users-table td:before {
@@ -427,10 +430,12 @@
         white-space: nowrap;
         font-weight: bold;
         color: var(--link-color);
+        font-size: 0.9rem;
     }
     
     .users-table td:last-child {
         padding-left: 0;
+        padding-top: 15px;
     }
     
     .users-table td:last-child:before {
@@ -439,13 +444,15 @@
     
     .action-buttons {
         flex-direction: column;
-        gap: 8px;
-        margin-top: 10px;
+        gap: 10px;
+        margin-top: 15px;
+        width: 100%;
     }
     
     .action-buttons .universal-btn {
         width: 100%;
         justify-content: center;
+        padding: 12px 16px;
     }
     
     .modal-content {
