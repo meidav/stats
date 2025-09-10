@@ -1329,6 +1329,18 @@ input[type=number] {
   padding: 10px 20px;
 }
 
+/* Specific modal button adjustments */
+.modal-actions .universal-btn:first-child {
+  /* Cancel button - move X icon further left */
+  justify-content: flex-start;
+  padding-left: 16px;
+}
+
+.modal-actions .universal-btn:last-child {
+  /* Save changes button - add more left/right padding */
+  padding: 10px 28px;
+}
+
 /* Mobile responsive for admin users page */
 @media (max-width: 768px) {
   .admin-users {
