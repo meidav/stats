@@ -1650,14 +1650,14 @@ input[type="time"].form-input:focus {
   background: rgba(13, 33, 48, 0.95);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 40px;
+  padding: 35px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(168, 213, 242, 0.2);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 
 .login-header h1 {
@@ -1680,6 +1680,14 @@ input[type="time"].form-input:focus {
 
 .login-form {
   margin-bottom: 20px;
+}
+
+.login-form .form-group {
+  margin-bottom: 20px;
+}
+
+.login-form .form-group:last-of-type {
+  margin-bottom: 30px;
 }
 
 .input-wrapper {
@@ -1711,6 +1719,10 @@ input[type="time"].form-input:focus {
   box-sizing: border-box;
 }
 
+.login-form .form-group:has(.password-toggle) input {
+  padding-right: 60px;
+}
+
 .login-form .form-group input:focus {
   border-color: var(--link-color);
   box-shadow: 0 0 0 3px rgba(168, 213, 242, 0.1);
@@ -1724,8 +1736,9 @@ input[type="time"].form-input:focus {
 
 .password-toggle {
   position: absolute;
-  right: -50px;
-  top: 13px;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
