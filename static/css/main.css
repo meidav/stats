@@ -1720,7 +1720,7 @@ input[type="time"].form-input:focus {
 }
 
 .login-form .form-group:has(.password-toggle) input {
-  padding-right: 60px;
+  padding-right: 45px;
 }
 
 .login-form .form-group input:focus {
@@ -1742,11 +1742,11 @@ input[type="time"].form-input:focus {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
+  padding: 0;
+  margin: 0;
   z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 .eye-icon {
