@@ -1,49 +1,85 @@
 :root {
-  --bg: #012130;
-  --text: #88949c;
-  --button-text-1: #b8d4f0;
-  --button-bg-1: #2d5a87;
-  --button-border-1: #1e3a52;
-  --link-color: #a8d5f2;
-  --link-hover-color: #87ceeb;
-  --table-banding: #052a3e;
-  --table-bg: #1d3644;
-  --caption: #abb4bd;
+  /* Base theme colors - using the gradient palette */
+  --bg: #464849;                    /* Dark gray background */
+  --text: #A7F78E;                  /* Light lime green for primary text */
+  --text-secondary: #49EDB9;        /* Mint green for secondary text */
+  --text-muted: #58B0EF;            /* Light blue for muted text */
+  
+  /* Button colors using gradient palette */
+  --button-bg-1: #00C9F3;           /* Vibrant cyan for primary buttons */
+  --button-text-1: #464849;         /* Dark gray text on bright buttons */
+  --button-border-1: #00DDDF;       /* Electric cyan for borders */
+  --button-hover: #00DDDF;          /* Electric cyan for hover states */
+  
+  /* Link colors */
+  --link-color: #49EDB9;            /* Mint green for links */
+  --link-hover-color: #A7F78E;      /* Light lime for link hover */
+  
+  /* Table colors */
+  --table-bg: #464849;              /* Dark gray table background */
+  --table-banding: rgba(87, 240, 142, 0.1); /* Subtle mint green banding */
+  --table-border: #00C9F3;          /* Cyan table borders */
+  
+  /* Caption and labels */
+  --caption: #58B0EF;               /* Light blue for captions */
+  
+  /* Accent colors from gradient */
+  --accent-1: #58B0EF;              /* Light blue accent */
+  --accent-2: #00C9F3;              /* Vibrant cyan accent */
+  --accent-3: #00DDDF;              /* Electric cyan accent */
+  --accent-4: #49EDB9;              /* Mint green accent */
+  --accent-5: #A7F78E;              /* Light lime accent */
+  --accent-6: #F9F871;              /* Pale yellow accent */
+  
+  /* Admin colors - using gradient theme */
+  --admin-bg: rgba(73, 237, 185, 0.1); /* Subtle mint green admin background */
+  --admin-text: #49EDB9;            /* Mint green admin text */
+  --admin-border: #00DDDF;          /* Electric cyan admin borders */
+  
+  /* Status colors */
+  --success: #49EDB9;               /* Mint green for success */
+  --warning: #F9F871;               /* Pale yellow for warnings */
+  --error: #00C9F3;                 /* Vibrant cyan for errors */
+  --info: #58B0EF;                  /* Light blue for info */
+  
+  /* UI elements */
   --rounded-corners: 12px;
   --max-width: 400px;
-  
-  /* Admin colors */
-  --admin-bg: #2d4a2d;
-  --admin-text: #90ee90;
-  --admin-border: #4a7c4a;
-  
-  /* Simple spacing */
   --gap: 8px;
+  
+  /* Shadows and effects */
+  --shadow-light: rgba(87, 240, 142, 0.2);
+  --shadow-medium: rgba(0, 201, 243, 0.3);
+  --shadow-dark: rgba(0, 0, 0, 0.5);
 }
 
 
-/* Dark mode */
+/* Dark mode - enhanced gradient theme */
 :root[color-mode="dark"] {
-  --bg: #012130;
-  --text: #88949c;
-  --button-text-1: #93b0df;
-  --button-bg-1: #4684cb;
-  --button-border-1: #374c59;
-  --table-banding: #455a6d;
-  --table-bg: #1d3644;
-  --caption: #abb4bd;
+  --bg: #464849;                    /* Dark gray background */
+  --text: #A7F78E;                  /* Light lime green for primary text */
+  --text-secondary: #49EDB9;        /* Mint green for secondary text */
+  --text-muted: #58B0EF;            /* Light blue for muted text */
+  --button-bg-1: #00C9F3;           /* Vibrant cyan for primary buttons */
+  --button-text-1: #464849;         /* Dark gray text on bright buttons */
+  --button-border-1: #00DDDF;       /* Electric cyan for borders */
+  --table-banding: rgba(87, 240, 142, 0.15); /* Slightly more visible banding */
+  --table-bg: #464849;              /* Dark gray table background */
+  --caption: #58B0EF;               /* Light blue for captions */
 }
 
-/* Dark mode */
+/* Light mode - inverted gradient theme */
 :root[color-mode="light"] {
-  --bg: #88949c; 
-  --text: #012130;
-  --button-text-1: #93b0df;
-  --button-bg-1: #4684cb;
-  --button-border-1: #374c59;
-  --table-banding: #455a6d;
-  --table-bg: #1d3644;
-  --caption: #abb4bd;
+  --bg: #F9F871;                    /* Pale yellow background */
+  --text: #464849;                  /* Dark gray text */
+  --text-secondary: #00C9F3;        /* Vibrant cyan for secondary text */
+  --text-muted: #00DDDF;            /* Electric cyan for muted text */
+  --button-bg-1: #464849;           /* Dark gray for primary buttons */
+  --button-text-1: #F9F871;         /* Pale yellow text on dark buttons */
+  --button-border-1: #00C9F3;       /* Vibrant cyan for borders */
+  --table-banding: rgba(0, 201, 243, 0.1); /* Subtle cyan banding */
+  --table-bg: #F9F871;              /* Pale yellow table background */
+  --caption: #00C9F3;               /* Vibrant cyan for captions */
 }
 
 
@@ -92,10 +128,11 @@ body {
 }
 
 .button-row .menu__item:hover {
-  background: rgba(45, 90, 135, 0.7);
+  background: var(--button-hover);
   color: var(--button-text-1);
   transform: translateX(-4px);
   text-decoration: none;
+  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .button-row .menu__item .menu-icon {
@@ -158,10 +195,10 @@ body {
 
 .nav-button:hover,
 .nav-button:focus {
-  background-color: var(--button-border-1);
+  background-color: var(--button-hover);
   color: var(--button-text-1);
   text-decoration: none;
-  box-shadow: 0 0 0 2px var(--button-bg-1);
+  box-shadow: 0 0 0 2px var(--button-bg-1), 0 4px 12px var(--shadow-medium);
 }
 
 .nav-icon {
@@ -390,6 +427,8 @@ table {
   font-size: 16px;
   padding: 8px 16px;
   border-spacing: 0;
+  border: 1px solid var(--table-border);
+  box-shadow: 0 4px 20px var(--shadow-dark);
 }
 
 th, td {
@@ -400,6 +439,9 @@ th, td {
 th {
   font-size: 16px;
   font-weight: bold;
+  color: var(--text-secondary);
+  background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+  border-bottom: 2px solid var(--table-border);
 }
 
 td {
@@ -443,24 +485,29 @@ caption {
   font-size: 1rem;
   padding: 20px;
   margin: 5px auto 8px auto;
-  color: #e7b5c0;
-  background-color: #543038;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
   border-radius: var(--rounded-corners);
+  border: 1px solid var(--accent-3);
+  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .alert-danger {
-  color: #e7b5c0;
-  background-color: #543038;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--error), var(--accent-2));
+  border-color: var(--error);
 }
 
 .alert-success {
-  color: #aef4b4;
-  background-color: #015c1c;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--success), var(--accent-4));
+  border-color: var(--success);
 }
 
 .alert-info {
-  color: #97eef1;
-  background-color: #126064;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--info), var(--accent-1));
+  border-color: var(--info);
 }
 
 .message {
@@ -796,25 +843,25 @@ input[type=submit] {
   font-weight: 600;
   border-radius: var(--rounded-corners);
   
-  border: 2px solid #1e90ff;
-  background-color: #1e90ff;
-  color: white;
+  border: 2px solid var(--accent-2);
+  background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+  color: var(--button-text-1);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(30, 144, 255, 0.3);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px var(--shadow-medium);
+  transition: all 0.3s ease;
 }
 
 input[type=submit]:hover {
-  border: 2px solid #0066cc;
-  background-color: #0066cc;
-  color: white;
-  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.4);
-  transform: translateY(-1px);
+  border: 2px solid var(--accent-3);
+  background: linear-gradient(135deg, var(--accent-3), var(--accent-4));
+  color: var(--button-text-1);
+  box-shadow: 0 6px 16px var(--shadow-medium);
+  transform: translateY(-2px);
 }
 
 input[type=submit]:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(30, 144, 255, 0.3);
+  box-shadow: 0 2px 8px var(--shadow-medium);
 }
 
 div {
@@ -1526,12 +1573,12 @@ input[type="time"].form-input:focus {
 }
 
 .login-card {
-  background: rgba(13, 33, 48, 0.95);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 35px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(168, 213, 242, 0.2);
+  box-shadow: 0 20px 40px var(--shadow-dark);
+  border: 2px solid var(--accent-3);
 }
 
 .login-header {
@@ -1540,14 +1587,15 @@ input[type="time"].form-input:focus {
 }
 
 .login-header h1 {
-  color: var(--button-text-1);
+  color: var(--text);
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 10px 0;
-  background: linear-gradient(135deg, var(--button-text-1), var(--link-color));
+  background: linear-gradient(135deg, var(--accent-4), var(--accent-5));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 2px 4px var(--shadow-light);
 }
 
 .login-header p {
@@ -1587,15 +1635,16 @@ input[type="time"].form-input:focus {
 .login-form .form-group input {
   width: 100%;
   padding: 15px 50px 15px 50px;
-  background: var(--button-bg-1);
-  border: 1px solid var(--button-border-1);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border: 2px solid var(--accent-3);
   border-radius: 12px;
-  color: var(--button-text-1);
+  color: var(--text);
   font-size: 16px;
   transition: all 0.3s ease;
   outline: none;
   height: 56px;
   box-sizing: border-box;
+  box-shadow: 0 2px 8px var(--shadow-light);
 }
 
 .login-form .form-group:has(.password-toggle) input {
@@ -1603,9 +1652,9 @@ input[type="time"].form-input:focus {
 }
 
 .login-form .form-group input:focus {
-  border-color: var(--link-color);
-  box-shadow: 0 0 0 3px rgba(168, 213, 242, 0.1);
-  background: var(--button-border-1);
+  border-color: var(--accent-4);
+  box-shadow: 0 0 0 3px var(--shadow-light), 0 4px 12px var(--shadow-medium);
+  background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
 }
 
 .login-form .form-group input::placeholder {
@@ -1662,8 +1711,8 @@ input[type="time"].form-input:focus {
   width: 100%;
   height: 56px;
   padding: 0 20px;
-  background: var(--button-bg-1);
-  border: 1px solid var(--button-border-1);
+  background: linear-gradient(135deg, var(--accent-4), var(--accent-5));
+  border: 2px solid var(--accent-6);
   border-radius: 12px;
   color: var(--button-text-1);
   font-size: 18px;
@@ -1677,12 +1726,14 @@ input[type="time"].form-input:focus {
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
+  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
 .login-btn:hover {
-  background: rgba(45, 90, 135, 0.7);
+  background: linear-gradient(135deg, var(--accent-5), var(--accent-6));
   color: var(--button-text-1);
   transform: translateX(-4px);
+  box-shadow: 0 6px 16px var(--shadow-medium);
 }
 
 .login-btn:active {
@@ -1787,14 +1838,15 @@ input[type="time"].form-input:focus {
 }
 
 .admin-dashboard .admin-header h1 {
-  color: var(--button-text-1);
+  color: var(--text);
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, var(--button-text-1), var(--link-color));
+  background: linear-gradient(135deg, var(--accent-4), var(--accent-5));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: 0 2px 4px var(--shadow-light);
 }
 
 .admin-stats {
@@ -1805,18 +1857,19 @@ input[type="time"].form-input:focus {
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
   padding: 30px;
   border-radius: var(--rounded-corners);
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px var(--shadow-dark);
+  border: 2px solid var(--accent-3);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 30px var(--shadow-medium);
+  border-color: var(--accent-4);
 }
 
 .stat-card h3 {
@@ -1829,9 +1882,13 @@ input[type="time"].form-input:focus {
 .stat-number {
   font-size: 3rem;
   font-weight: 700;
-  color: var(--link-color);
+  color: var(--accent-5);
   margin: 20px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 2px 4px var(--shadow-light);
+  background: linear-gradient(135deg, var(--accent-4), var(--accent-6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .nav-style-btn {
