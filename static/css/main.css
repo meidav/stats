@@ -1,85 +1,85 @@
 :root {
-  /* Base theme colors - using the gradient palette */
-  --bg: #1a1a1a;                    /* Very dark background like drawer nav */
-  --text: #A7F78E;                  /* Light lime green for primary text */
-  --text-secondary: #49EDB9;        /* Mint green for secondary text */
-  --text-muted: #58B0EF;            /* Light blue for muted text */
+  /* Cursor-inspired subtle color palette */
+  --bg: #22272e;                    /* Dark blue-gray background like Cursor */
+  --text: #c9d1d9;                  /* Soft light gray for primary text */
+  --text-secondary: #8b949e;        /* Muted gray-green for secondary text */
+  --text-muted: #6a737d;            /* Medium gray for muted text */
   
-  /* Button colors - DARK backgrounds with light tinted text */
-  --button-bg-1: #2a3a4a;           /* Dark blue-gray for primary buttons */
-  --button-text-1: #A7F78E;         /* Light lime green text on dark buttons */
-  --button-border-1: #49EDB9;        /* Mint green for borders */
-  --button-hover: #1e2a35;          /* Even darker for hover states */
+  /* Button colors - subtle and professional */
+  --button-bg-1: #2d333b;           /* Slightly lighter dark blue-gray for buttons */
+  --button-text-1: #c9d1d9;         /* Soft light gray text on dark buttons */
+  --button-border-1: #30363d;        /* Subtle border color */
+  --button-hover: #373e47;          /* Slightly lighter for hover states */
   
-  /* Link colors */
-  --link-color: #49EDB9;            /* Mint green for links */
-  --link-hover-color: #A7F78E;      /* Light lime for link hover */
+  /* Link colors - subtle blue tints */
+  --link-color: #79c0ff;            /* Light desaturated blue for links */
+  --link-hover-color: #c9d1d9;      /* Soft gray for link hover */
   
   /* Table colors */
-  --table-bg: #2a2a2a;              /* Dark table background */
-  --table-banding: rgba(167, 247, 142, 0.05); /* Very subtle mint green banding */
-  --table-border: #3a3a3a;          /* Super subtle border - just slightly lighter than bg */
+  --table-bg: #2d333b;              /* Dark table background */
+  --table-banding: rgba(201, 209, 217, 0.05); /* Very subtle gray banding */
+  --table-border: #30363d;          /* Subtle border - slightly lighter than bg */
   
   /* Caption and labels */
-  --caption: #58B0EF;               /* Light blue for captions */
+  --caption: #8b949e;               /* Muted gray-green for captions */
   
-  /* Accent colors from gradient */
-  --accent-1: #58B0EF;              /* Light blue accent */
-  --accent-2: #00C9F3;              /* Vibrant cyan accent */
-  --accent-3: #00DDDF;              /* Electric cyan accent */
-  --accent-4: #49EDB9;              /* Mint green accent */
-  --accent-5: #A7F78E;              /* Light lime accent */
-  --accent-6: #F9F871;              /* Pale yellow accent */
+  /* Accent colors - subtle and professional */
+  --accent-1: #79c0ff;              /* Light desaturated blue accent */
+  --accent-2: #d2a8ff;              /* Light purple/pink accent */
+  --accent-3: #8b949e;              /* Muted gray-green accent */
+  --accent-4: #c9d1d9;              /* Soft light gray accent */
+  --accent-5: #56d364;              /* Subtle green accent */
+  --accent-6: #f85149;              /* Subtle red accent */
   
-  /* Admin colors - using gradient theme */
-  --admin-bg: rgba(73, 237, 185, 0.1); /* Subtle mint green admin background */
-  --admin-text: #49EDB9;            /* Mint green admin text */
-  --admin-border: #00DDDF;          /* Electric cyan admin borders */
+  /* Admin colors - subtle theme */
+  --admin-bg: rgba(201, 209, 217, 0.1); /* Subtle gray admin background */
+  --admin-text: #c9d1d9;            /* Soft gray admin text */
+  --admin-border: #30363d;          /* Subtle admin borders */
   
-  /* Status colors */
-  --success: #49EDB9;               /* Mint green for success */
-  --warning: #F9F871;               /* Pale yellow for warnings */
-  --error: #00C9F3;                 /* Vibrant cyan for errors */
-  --info: #58B0EF;                  /* Light blue for info */
+  /* Status colors - subtle and professional */
+  --success: #56d364;               /* Subtle green for success */
+  --warning: #d29922;               /* Muted orange for warnings */
+  --error: #f85149;                 /* Subtle red for errors */
+  --info: #79c0ff;                  /* Light blue for info */
   
   /* UI elements */
   --rounded-corners: 12px;
   --max-width: 400px;
   --gap: 8px;
   
-  /* Shadows and effects */
-  --shadow-light: rgba(87, 240, 142, 0.2);
-  --shadow-medium: rgba(0, 201, 243, 0.3);
-  --shadow-dark: rgba(0, 0, 0, 0.5);
+  /* Shadows and effects - subtle */
+  --shadow-light: rgba(201, 209, 217, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.3);
+  --shadow-dark: rgba(0, 0, 0, 0.6);
 }
 
 
-/* Dark mode - enhanced gradient theme */
+/* Dark mode - Cursor-inspired subtle theme */
 :root[color-mode="dark"] {
-  --bg: #1a1a1a;                    /* Very dark background like drawer nav */
-  --text: #A7F78E;                  /* Light lime green for primary text */
-  --text-secondary: #49EDB9;        /* Mint green for secondary text */
-  --text-muted: #58B0EF;            /* Light blue for muted text */
-  --button-bg-1: #2a3a4a;           /* Dark blue-gray for primary buttons */
-  --button-text-1: #A7F78E;         /* Light lime green text on dark buttons */
-  --button-border-1: #49EDB9;        /* Mint green for borders */
-  --table-banding: rgba(167, 247, 142, 0.05); /* Very subtle banding */
-  --table-bg: #2a2a2a;              /* Dark table background */
-  --caption: #58B0EF;               /* Light blue for captions */
+  --bg: #22272e;                    /* Dark blue-gray background like Cursor */
+  --text: #c9d1d9;                  /* Soft light gray for primary text */
+  --text-secondary: #8b949e;        /* Muted gray-green for secondary text */
+  --text-muted: #6a737d;            /* Medium gray for muted text */
+  --button-bg-1: #2d333b;           /* Slightly lighter dark blue-gray for buttons */
+  --button-text-1: #c9d1d9;         /* Soft light gray text on dark buttons */
+  --button-border-1: #30363d;        /* Subtle border color */
+  --table-banding: rgba(201, 209, 217, 0.05); /* Very subtle gray banding */
+  --table-bg: #2d333b;              /* Dark table background */
+  --caption: #8b949e;               /* Muted gray-green for captions */
 }
 
-/* Light mode - inverted gradient theme */
+/* Light mode - subtle inverted theme */
 :root[color-mode="light"] {
-  --bg: #F9F871;                    /* Pale yellow background */
-  --text: #464849;                  /* Dark gray text */
-  --text-secondary: #00C9F3;        /* Vibrant cyan for secondary text */
-  --text-muted: #00DDDF;            /* Electric cyan for muted text */
-  --button-bg-1: #464849;           /* Dark gray for primary buttons */
-  --button-text-1: #F9F871;         /* Pale yellow text on dark buttons */
-  --button-border-1: #00C9F3;       /* Vibrant cyan for borders */
-  --table-banding: rgba(0, 201, 243, 0.1); /* Subtle cyan banding */
-  --table-bg: #F9F871;              /* Pale yellow table background */
-  --caption: #00C9F3;               /* Vibrant cyan for captions */
+  --bg: #f6f8fa;                    /* Light gray background */
+  --text: #24292f;                  /* Dark gray text */
+  --text-secondary: #656d76;        /* Muted gray for secondary text */
+  --text-muted: #8b949e;            /* Medium gray for muted text */
+  --button-bg-1: #f6f8fa;           /* Light background for buttons */
+  --button-text-1: #24292f;         /* Dark text on light buttons */
+  --button-border-1: #d0d7de;       /* Subtle light border */
+  --table-banding: rgba(36, 41, 47, 0.05); /* Very subtle dark banding */
+  --table-bg: #f6f8fa;              /* Light table background */
+  --caption: #656d76;               /* Muted gray for captions */
 }
 
 
