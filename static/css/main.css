@@ -229,9 +229,9 @@ a:hover, a:focus {
   text-decoration: none;
 }
 
-/* Table links - dodger blue */
+/* Table links - using link color */
 td a, td a:visited {
-  color: #1e90ff !important;
+  color: var(--link-color) !important;
   text-decoration: none;
 }
 
@@ -242,7 +242,7 @@ td a:hover, td a:focus {
 
 /* SVG icons in table links */
 td a svg path {
-  fill: #1e90ff !important;
+  fill: var(--link-color) !important;
   transition: fill 0.2s ease;
 }
 
@@ -439,8 +439,8 @@ th, td {
 th {
   font-size: 16px;
   font-weight: bold;
-  color: var(--bg);
-  background: #58B0EF;               /* Blue-ish value color from image */
+  color: var(--link-color);
+  background: transparent;
   border-bottom: 2px solid var(--button-border-1);
 }
 
