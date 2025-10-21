@@ -5,11 +5,11 @@
   --text-secondary: #49EDB9;        /* Mint green for secondary text */
   --text-muted: #58B0EF;            /* Light blue for muted text */
   
-  /* Button colors using gradient palette */
-  --button-bg-1: #00C9F3;           /* Vibrant cyan for primary buttons */
-  --button-text-1: #464849;         /* Dark gray text on bright buttons */
-  --button-border-1: #00DDDF;       /* Electric cyan for borders */
-  --button-hover: #00DDDF;          /* Electric cyan for hover states */
+  /* Button colors - DARK backgrounds with light tinted text */
+  --button-bg-1: #2a3a4a;           /* Dark blue-gray for primary buttons */
+  --button-text-1: #A7F78E;         /* Light lime green text on dark buttons */
+  --button-border-1: #49EDB9;        /* Mint green for borders */
+  --button-hover: #1e2a35;          /* Even darker for hover states */
   
   /* Link colors */
   --link-color: #49EDB9;            /* Mint green for links */
@@ -439,9 +439,9 @@ th, td {
 th {
   font-size: 16px;
   font-weight: bold;
-  color: var(--text-secondary);
-  background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
-  border-bottom: 2px solid var(--table-border);
+  color: var(--text);
+  background: var(--button-bg-1);
+  border-bottom: 2px solid var(--button-border-1);
 }
 
 td {
@@ -486,27 +486,27 @@ caption {
   padding: 20px;
   margin: 5px auto 8px auto;
   color: var(--text);
-  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  background: var(--button-bg-1);
   border-radius: var(--rounded-corners);
-  border: 1px solid var(--accent-3);
-  box-shadow: 0 4px 12px var(--shadow-medium);
+  border: 1px solid var(--button-border-1);
+  box-shadow: 0 4px 12px var(--shadow-dark);
 }
 
 .alert-danger {
   color: var(--text);
-  background: linear-gradient(135deg, var(--error), var(--accent-2));
+  background: var(--button-bg-1);
   border-color: var(--error);
 }
 
 .alert-success {
   color: var(--text);
-  background: linear-gradient(135deg, var(--success), var(--accent-4));
+  background: var(--button-bg-1);
   border-color: var(--success);
 }
 
 .alert-info {
   color: var(--text);
-  background: linear-gradient(135deg, var(--info), var(--accent-1));
+  background: var(--button-bg-1);
   border-color: var(--info);
 }
 
@@ -843,19 +843,19 @@ input[type=submit] {
   font-weight: 600;
   border-radius: var(--rounded-corners);
   
-  border: 2px solid var(--accent-2);
-  background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+  border: 2px solid var(--button-border-1);
+  background: var(--button-bg-1);
   color: var(--button-text-1);
   cursor: pointer;
-  box-shadow: 0 4px 12px var(--shadow-medium);
+  box-shadow: 0 4px 12px var(--shadow-dark);
   transition: all 0.3s ease;
 }
 
 input[type=submit]:hover {
-  border: 2px solid var(--accent-3);
-  background: linear-gradient(135deg, var(--accent-3), var(--accent-4));
+  border: 2px solid var(--button-border-1);
+  background: var(--button-hover);
   color: var(--button-text-1);
-  box-shadow: 0 6px 16px var(--shadow-medium);
+  box-shadow: 0 6px 16px var(--shadow-dark);
   transform: translateY(-2px);
 }
 
@@ -1573,12 +1573,12 @@ input[type="time"].form-input:focus {
 }
 
 .login-card {
-  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  background: var(--button-bg-1);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 35px;
   box-shadow: 0 20px 40px var(--shadow-dark);
-  border: 2px solid var(--accent-3);
+  border: 2px solid var(--button-border-1);
 }
 
 .login-header {
@@ -1591,10 +1591,6 @@ input[type="time"].form-input:focus {
   font-size: 2rem;
   font-weight: 700;
   margin: 0 0 10px 0;
-  background: linear-gradient(135deg, var(--accent-4), var(--accent-5));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   text-shadow: 0 2px 4px var(--shadow-light);
 }
 
@@ -1635,8 +1631,8 @@ input[type="time"].form-input:focus {
 .login-form .form-group input {
   width: 100%;
   padding: 15px 50px 15px 50px;
-  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-  border: 2px solid var(--accent-3);
+  background: var(--bg);
+  border: 2px solid var(--button-border-1);
   border-radius: 12px;
   color: var(--text);
   font-size: 16px;
@@ -1644,7 +1640,7 @@ input[type="time"].form-input:focus {
   outline: none;
   height: 56px;
   box-sizing: border-box;
-  box-shadow: 0 2px 8px var(--shadow-light);
+  box-shadow: 0 2px 8px var(--shadow-dark);
 }
 
 .login-form .form-group:has(.password-toggle) input {
@@ -1652,9 +1648,9 @@ input[type="time"].form-input:focus {
 }
 
 .login-form .form-group input:focus {
-  border-color: var(--accent-4);
-  box-shadow: 0 0 0 3px var(--shadow-light), 0 4px 12px var(--shadow-medium);
-  background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+  border-color: var(--button-border-1);
+  box-shadow: 0 0 0 3px var(--shadow-light), 0 4px 12px var(--shadow-dark);
+  background: var(--button-bg-1);
 }
 
 .login-form .form-group input::placeholder {
@@ -1711,8 +1707,8 @@ input[type="time"].form-input:focus {
   width: 100%;
   height: 56px;
   padding: 0 20px;
-  background: linear-gradient(135deg, var(--accent-4), var(--accent-5));
-  border: 2px solid var(--accent-6);
+  background: var(--button-bg-1);
+  border: 2px solid var(--button-border-1);
   border-radius: 12px;
   color: var(--button-text-1);
   font-size: 18px;
@@ -1726,14 +1722,14 @@ input[type="time"].form-input:focus {
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px var(--shadow-medium);
+  box-shadow: 0 4px 12px var(--shadow-dark);
 }
 
 .login-btn:hover {
-  background: linear-gradient(135deg, var(--accent-5), var(--accent-6));
+  background: var(--button-hover);
   color: var(--button-text-1);
   transform: translateX(-4px);
-  box-shadow: 0 6px 16px var(--shadow-medium);
+  box-shadow: 0 6px 16px var(--shadow-dark);
 }
 
 .login-btn:active {
@@ -1842,10 +1838,6 @@ input[type="time"].form-input:focus {
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, var(--accent-4), var(--accent-5));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   text-shadow: 0 2px 4px var(--shadow-light);
 }
 
@@ -1857,19 +1849,19 @@ input[type="time"].form-input:focus {
 }
 
 .stat-card {
-  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  background: var(--button-bg-1);
   padding: 30px;
   border-radius: var(--rounded-corners);
   text-align: center;
   box-shadow: 0 4px 20px var(--shadow-dark);
-  border: 2px solid var(--accent-3);
+  border: 2px solid var(--button-border-1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 30px var(--shadow-medium);
-  border-color: var(--accent-4);
+  box-shadow: 0 8px 30px var(--shadow-dark);
+  border-color: var(--button-border-1);
 }
 
 .stat-card h3 {
@@ -1882,13 +1874,9 @@ input[type="time"].form-input:focus {
 .stat-number {
   font-size: 3rem;
   font-weight: 700;
-  color: var(--accent-5);
+  color: var(--text);
   margin: 20px 0;
   text-shadow: 0 2px 4px var(--shadow-light);
-  background: linear-gradient(135deg, var(--accent-4), var(--accent-6));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .nav-style-btn {
