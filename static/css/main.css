@@ -1,6 +1,6 @@
 :root {
   /* Base theme colors - using the gradient palette */
-  --bg: #464849;                    /* Dark gray background */
+  --bg: #1a1a1a;                    /* Very dark background like drawer nav */
   --text: #A7F78E;                  /* Light lime green for primary text */
   --text-secondary: #49EDB9;        /* Mint green for secondary text */
   --text-muted: #58B0EF;            /* Light blue for muted text */
@@ -16,9 +16,9 @@
   --link-hover-color: #A7F78E;      /* Light lime for link hover */
   
   /* Table colors */
-  --table-bg: #464849;              /* Dark gray table background */
-  --table-banding: rgba(87, 240, 142, 0.1); /* Subtle mint green banding */
-  --table-border: #00C9F3;          /* Cyan table borders */
+  --table-bg: #2a2a2a;              /* Dark table background */
+  --table-banding: rgba(167, 247, 142, 0.05); /* Very subtle mint green banding */
+  --table-border: #3a3a3a;          /* Super subtle border - just slightly lighter than bg */
   
   /* Caption and labels */
   --caption: #58B0EF;               /* Light blue for captions */
@@ -56,15 +56,15 @@
 
 /* Dark mode - enhanced gradient theme */
 :root[color-mode="dark"] {
-  --bg: #464849;                    /* Dark gray background */
+  --bg: #1a1a1a;                    /* Very dark background like drawer nav */
   --text: #A7F78E;                  /* Light lime green for primary text */
   --text-secondary: #49EDB9;        /* Mint green for secondary text */
   --text-muted: #58B0EF;            /* Light blue for muted text */
-  --button-bg-1: #00C9F3;           /* Vibrant cyan for primary buttons */
-  --button-text-1: #464849;         /* Dark gray text on bright buttons */
-  --button-border-1: #00DDDF;       /* Electric cyan for borders */
-  --table-banding: rgba(87, 240, 142, 0.15); /* Slightly more visible banding */
-  --table-bg: #464849;              /* Dark gray table background */
+  --button-bg-1: #2a3a4a;           /* Dark blue-gray for primary buttons */
+  --button-text-1: #A7F78E;         /* Light lime green text on dark buttons */
+  --button-border-1: #49EDB9;        /* Mint green for borders */
+  --table-banding: rgba(167, 247, 142, 0.05); /* Very subtle banding */
+  --table-bg: #2a2a2a;              /* Dark table background */
   --caption: #58B0EF;               /* Light blue for captions */
 }
 
@@ -439,9 +439,9 @@ th, td {
 th {
   font-size: 16px;
   font-weight: bold;
-  color: var(--text);
-  background: var(--button-bg-1);
-  border-bottom: 2px solid var(--button-border-1);
+  color: var(--bg);
+  background: var(--text);
+  border-bottom: 2px solid var(--text-muted);
 }
 
 td {
