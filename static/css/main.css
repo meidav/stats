@@ -11,8 +11,8 @@
   --button-border-1: #30363d;        /* Subtle border color */
   --button-hover: #373e47;          /* Slightly lighter for hover states */
   
-  /* Link colors - subtle grayish green */
-  --link-color: #8b949e;            /* Muted grayish green - subtle */
+  /* Link colors - subtle but with color */
+  --link-color: #7dd3fc;            /* Subtle light blue - has color but not bright */
   --link-hover-color: #c9d1d9;      /* Light gray for link hover */
   
   /* Table colors */
@@ -439,16 +439,9 @@ th, td {
 th {
   font-size: 16px;
   font-weight: bold;
-  color: var(--bg);
-  background: #6a737d;              /* Light gray/blue background */
+  color: var(--text);
+  background: transparent;
   border-bottom: 2px solid var(--button-border-1);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-th:hover {
-  background: var(--link-color);
-  color: var(--bg);
 }
 
 td {
