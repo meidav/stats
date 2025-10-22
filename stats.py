@@ -922,17 +922,56 @@ def add_tennis_match():
         loser = request.form['loser']
         winner_score = request.form['winner_score']
         loser_score = request.form['loser_score']
+        
+        # Get optional date/time played from form
+        date_played = request.form.get('date_played', '').strip()
+        time_played = request.form.get('time_played', '').strip()
 
+        # Validate required fields
         if not winner or not loser or not winner_score or not loser_score:
-            flash('All fields required!')
+            flash('All fields are required!', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+        
+        # Validate numeric scores
+        try:
+            winner_score = int(winner_score)
+            loser_score = int(loser_score)
+        except ValueError:
+            flash('Scores must be numeric!', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+
+        # Validate score logic
+        if winner_score <= loser_score:
+            flash('Winner\'s score must be greater than loser\'s score!', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+        
+        # Validate uniqueness of players
+        if len(set([winner, loser])) < 2:
+            flash('Players must be unique!', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+
+        # Handle date/time played - use provided date/time or default to current time
+        my_time = get_local_time()  # For updated_at field
+        
+        if date_played and time_played:
+            # Use provided date and time
+            date_time_played = f"{date_played} {time_played}:00"
+        elif date_played:
+            # Use provided date with current time
+            from datetime import datetime
+            current_time = datetime.now().strftime('%H:%M:%S')
+            date_time_played = f"{date_played} {current_time}"
         else:
-            # Store timestamps in UTC
-            #utc_time = datetime.now(timezone.utc)
-            utc_time = 3
-            flash('trying to add a tennis match with utc_time: ' + utc_time)
-            # Add game stats with UTC timestamps
-            #add_tennis_stats([utc_time, winner, loser, winner_score, loser_score, utc_time])
-            #return redirect(url_for('add_tennis_match'))
+            # Use current date/time for both
+            date_time_played = my_time
+        
+        add_tennis_stats([date_time_played, winner, loser, winner_score, loser_score, my_time])
+        flash(f'Match added!', 'success')
+        return redirect(url_for('add_tennis_match'))
 
     return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
                            matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, 

@@ -46,6 +46,12 @@
                     list="losing_scores_list"
                     id="losing_scores"
                     autocomplete>
+            <div class="date-time-inputs">
+                <label for="date_played">Date played (optional):</label>
+                <input type="date" name="date_played" id="date_played" value="{{ request.form.get('date_played', '') }}">
+                <label for="time_played">Time played (optional):</label>
+                <input type="time" name="time_played" id="time_played" value="{{ request.form.get('time_played', '') }}">
+            </div>
             <input type="submit" value="Submit">
         </form>
     </div>
