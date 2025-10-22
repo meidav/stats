@@ -61,29 +61,6 @@
             }
         });
         
-        // Collapsible navigation function
-        window.toggleCollapsible = function(sectionId) {
-            const content = document.getElementById(sectionId);
-            const button = content.previousElementSibling;
-            const isOpen = content.classList.contains('open');
-            
-            // Close all other collapsible sections
-            document.querySelectorAll('.menu-collapsible-content.open').forEach(section => {
-                if (section.id !== sectionId) {
-                    section.classList.remove('open');
-                    section.previousElementSibling.setAttribute('aria-expanded', 'false');
-                }
-            });
-            
-            // Toggle current section
-            if (isOpen) {
-                content.classList.remove('open');
-                button.setAttribute('aria-expanded', 'false');
-            } else {
-                content.classList.add('open');
-                button.setAttribute('aria-expanded', 'true');
-            }
-        };
     </script>
 </head>
 <body>
@@ -97,10 +74,6 @@
             </label>
 
             <ul class="menu__box">
-                <!-- Public Stats Section -->
-                <li class="menu-section-header">
-                    <span class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Stats</span>
-                </li>
                 <li><a class="menu__item" href="{{ url_for('index') }}">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 3h18v18H3zM9 9h6v6H9z"/>
@@ -153,10 +126,6 @@
                 </a></li>
                 
                 {% if current_user.is_authenticated and current_user.is_admin %}
-                <!-- Admin Section -->
-                <li class="menu-section-header">
-                    <span class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Admin</span>
-                </li>
                 <li><a class="menu__item admin-item" href="{{ url_for('admin_dashboard') }}">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"/>
@@ -166,101 +135,50 @@
                     </svg>
                     Dashboard
                 </a></li>
-                
-                <!-- Collapsible Doubles Admin -->
-                <li class="menu-collapsible">
-                    <button class="menu-collapsible-btn" onclick="toggleCollapsible('doubles-admin')">
-                        <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 3h18v18H3zM9 9h6v6H9z"/>
-                        </svg>
-                        <span>Doubles</span>
-                        <svg class="menu-collapsible-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6,9 12,15 18,9"/>
-                        </svg>
-                    </button>
-                    <ul class="menu-collapsible-content" id="doubles-admin">
-                        <li><a class="menu__item admin-item" href="{{ url_for('add_game') }}">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="M12 8v8M8 12h8"/>
-                            </svg>
-                            Add game
-                        </a></li>
-                        <li><a class="menu__item admin-item" href="{{ url_for('edit_games') }}">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                            Edit games
-                        </a></li>
-                    </ul>
-                </li>
-                
-                <!-- Collapsible Vollis Admin -->
-                <li class="menu-collapsible">
-                    <button class="menu-collapsible-btn" onclick="toggleCollapsible('vollis-admin')">
-                        <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 6v6l4 2"/>
-                        </svg>
-                        <span>Vollis</span>
-                        <svg class="menu-collapsible-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6,9 12,15 18,9"/>
-                        </svg>
-                    </button>
-                    <ul class="menu-collapsible-content" id="vollis-admin">
-                        <li><a class="menu__item admin-item" href="{{ url_for('add_vollis_game') }}">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="M12 8v8M8 12h8"/>
-                            </svg>
-                            Add game
-                        </a></li>
-                        <li><a class="menu__item admin-item" href="{{ url_for('edit_vollis_games') }}">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                            Edit games
-                        </a></li>
-                    </ul>
-                </li>
-                
-                <!-- Collapsible Tennis Admin -->
-                <li class="menu-collapsible">
-                    <button class="menu-collapsible-btn" onclick="toggleCollapsible('tennis-admin')">
-                        <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="8"/>
-                            <path d="M12 4v16M4 12h16"/>
-                        </svg>
-                        <span>Tennis</span>
-                        <svg class="menu-collapsible-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6,9 12,15 18,9"/>
-                        </svg>
-                    </button>
-                    <ul class="menu-collapsible-content" id="tennis-admin">
-                        <li><a class="menu__item admin-item" href="{{ url_for('add_tennis_match') }}">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="8"/>
-                                <path d="M12 8v8M8 12h8"/>
-                            </svg>
-                            Add match
-                        </a></li>
-                        <li><a class="menu__item admin-item" href="{{ url_for('edit_tennis_matches') }}">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                            Edit matches
-                        </a></li>
-                    </ul>
-                </li>
+                <li><a class="menu__item admin-item" href="{{ url_for('add_game') }}">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 8v8M8 12h8"/>
+                    </svg>
+                    Add game
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('edit_games') }}">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit games
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('add_vollis_game') }}">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 8v8M8 12h8"/>
+                    </svg>
+                    Add vollis game
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('edit_vollis_games') }}">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit vollis games
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('add_tennis_match') }}">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="8"/>
+                        <path d="M12 8v8M8 12h8"/>
+                    </svg>
+                    Add tennis match
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('edit_tennis_matches') }}">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit tennis matches
+                </a></li>
                 {% endif %}
                 
-                <!-- User Section -->
-                <li class="menu-section-header">
-                    <span class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Account</span>
-                </li>
                 {% if current_user.is_authenticated %}
                 <li><a class="menu__item" href="{{ url_for('logout') }}">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

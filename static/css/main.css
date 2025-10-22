@@ -253,25 +253,12 @@ td a:focus svg path {
 
 h1 {
   max-width: 100vw;
-  margin: 30px 0;
+  margin: 20px 0;
   padding: 0;
   text-align: center;
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text-primary);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  letter-spacing: 0.5px;
-}
-
-/* Special styling for prominent headers like "Last 30 days" */
-h1.prominent-header {
-  font-size: 36px;
-  font-weight: 800;
-  color: var(--accent-color);
-  margin: 40px 0;
-  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text);
 }
 
 h2 {
@@ -318,31 +305,28 @@ form {
   position: relative;
   display: inline-block;
   width: 200px;
-  margin: 20px auto;
-  text-align: center;
+  margin: 8px;
 }
 
 .dropdown .dropbtn {
-  font-size: 18px;
-  font-weight: 600;
-  padding: 12px 20px;
-  margin: 0;
-  border-radius: 12px;
-  border: 2px solid var(--accent-color);
-  background-color: var(--card-bg);
-  color: var(--text-primary);
-  width: 200px;
+  font-size: 22px;
+  padding: 8px 12px;
+  margin: 8px;
+  border-radius: var(--rounded-corners);
+  border: 1px solid var(--button-border-1);
+  background-color: var(--button-bg-1);
+  color: var(--button-text-1);
+  width: 180px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   box-sizing: border-box;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 260px;
 }
 
 .dropdown .dropbtn:hover {
-  background-color: var(--accent-color);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  background-color: var(--button-bg-1);
+  color: var(--button-text-1);
+  box-shadow: 0 0 0 2px var(--button-bg-1);
 }
 
 .dropdown-content {
@@ -352,13 +336,13 @@ form {
   margin: 0 auto;
   left: 0;
   right: 0;
-  width: 200px;
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  width: 180px;
+  background-color: var(--table-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   padding: 8px 0;
-  margin-top: 8px;
-  border: 2px solid var(--accent-color);
+  margin-top: 2px;
+  border: 1px solid var(--button-border-1);
   top: 100%;
 }
 
@@ -374,25 +358,23 @@ form {
 }
 
 .dropdown-content a {
-  padding: 12px 16px;
+  padding: 8px 16px;
   text-decoration: none;
   display: block;
   text-align: center;
-  margin: 4px 8px;
-  border-radius: 8px;
-  color: var(--text-primary);
-  background-color: transparent;
-  border: none;
+  margin: 8px;
+  border-radius: var(--rounded-corners);
+  color: var(--button-text-1);
+  background-color: var(--button-bg-1);
+  border: 1px solid var(--button-border-1);
   box-sizing: border-box;
-  font-size: 16px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-size: 18px;
 }
 
 .dropdown-content a:hover {
-  background-color: var(--accent-color);
-  color: white;
-  transform: translateX(4px);
+  background-color: var(--button-bg-1);
+  color: var(--button-text-1);
+  box-shadow: 0 0 0 2px var(--button-bg-1);
 }
 
 .dropdown:hover .dropbtn {
@@ -460,17 +442,14 @@ table {
   border-radius: var(--rounded-corners);
   font-size: 16px;
   padding: 8px 16px;
-  border-spacing: 8px;
-  border: none;
+  border-spacing: 0;
+  border: 1px solid var(--table-border);
   box-shadow: 0 4px 20px var(--shadow-dark);
 }
 
 th, td {
   height: 30px;
   text-align: center;
-  border-radius: 6px;
-  border: 1px solid var(--button-border-1);
-  background-color: var(--card-bg);
   padding: 8px 12px;
 }
 
@@ -478,13 +457,12 @@ th {
   font-size: 16px;
   font-weight: bold;
   color: var(--text);
-  background: var(--accent-color);
-  border: 1px solid var(--accent-color);
+  background: transparent;
+  border-bottom: 2px solid var(--button-border-1);
 }
 
 td {
   font-size: 16px;
-  background-color: var(--table-bg);
 }
 
 /* Player name cells should be slightly smaller */
