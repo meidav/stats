@@ -108,7 +108,7 @@
                     </thead>
                     <tbody>
                         {% for player in todays_stats %}
-                        <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                        <tr class="hover:bg-gray-800 transition-colors">
                             <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
                             <td class="py-3 px-4"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
                             <td class="py-3 px-4 text-primary">{{ player[1] }}</td>
@@ -140,7 +140,7 @@
                     </thead>
                     <tbody>
                         {% for game in games %}
-                            <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                            <tr class="hover:bg-gray-800 transition-colors">
                                 <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
                                 <td class="py-3 px-4 text-primary" title="Time: {{ (game[1])[11:19] }}">{{ (game[1])[0:10] }}</td>
                                 <td class="py-3 px-4">
@@ -157,7 +157,7 @@
                                     </a>
                                 </td>
                             </tr>
-                            <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                            <tr class="hover:bg-gray-800 transition-colors">
                                 <td class="py-3 px-4 text-primary font-medium"> </td>
                                 <td class="py-3 px-4 text-primary" title="Last edited: {{ (game[8])[11:19] }}">{{ (game[8])[0:10] }}</td>
                                 <td class="py-3 px-4 text-primary">{{ game[4] }}</td>
@@ -191,7 +191,7 @@
                     </thead>
                     <tbody>
                         {% for player in stats %}
-                        <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                        <tr class="hover:bg-gray-800 transition-colors">
                             <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
                             <td class="py-3 px-4"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
                             <td class="py-3 px-4 text-primary">{{ player[1] }}</td>
@@ -223,7 +223,7 @@
                     </thead>
                     <tbody>
                         {% for player in rare_stats %}
-                        <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                        <tr class="hover:bg-gray-800 transition-colors">
                             <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
                             <td class="py-3 px-4"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
                             <td class="py-3 px-4 text-primary">{{ player[1] }}</td>

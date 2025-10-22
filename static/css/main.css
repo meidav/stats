@@ -443,7 +443,7 @@ table {
   font-size: 16px;
   padding: 8px 16px;
   border-spacing: 0;
-  border: 1px solid var(--table-border);
+  border: none;
   box-shadow: 0 4px 20px var(--shadow-dark);
 }
 
@@ -451,6 +451,7 @@ th, td {
   height: 30px;
   text-align: center;
   padding: 8px 12px;
+  border: none;
 }
 
 th {
@@ -458,11 +459,12 @@ th {
   font-weight: bold;
   color: var(--text);
   background: transparent;
-  border-bottom: 2px solid var(--button-border-1);
+  border: none;
 }
 
 td {
   font-size: 16px;
+  border: none;
 }
 
 /* Player name cells should be slightly smaller */

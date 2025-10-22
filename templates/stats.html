@@ -66,7 +66,7 @@
                 </thead>
                 <tbody>
                     {% for player in last_30_stats %}
-                    <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                    <tr class="hover:bg-gray-800 transition-colors">
                         <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
                         <td class="py-3 px-4"><a href="{{ url_for('player_stats', year=year, name=player[0]) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
                         <td class="py-3 px-4 text-primary">{{ player[1] }}</td>
