@@ -16,22 +16,25 @@
             
             <!-- Match Format Selection -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-primary mb-4">Match Format</h3>
+                <h3 class="text-lg font-semibold text-primary mb-4">Match format</h3>
                 <div class="flex flex-wrap gap-6">
                     <label class="flex items-center space-x-3 cursor-pointer group">
                         <input type="radio" name="match_format" value="single_set" checked 
-                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2">
-                        <span class="text-primary group-hover:text-accent transition-colors">Single Set</span>
+                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2"
+                               onchange="toggleSetFields()">
+                        <span class="text-primary group-hover:text-accent transition-colors">Single set</span>
                     </label>
                     <label class="flex items-center space-x-3 cursor-pointer group">
                         <input type="radio" name="match_format" value="best_of_3" 
-                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2">
-                        <span class="text-primary group-hover:text-accent transition-colors">Best of 3 Sets</span>
+                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2"
+                               onchange="toggleSetFields()">
+                        <span class="text-primary group-hover:text-accent transition-colors">Best of 3 sets</span>
                     </label>
                     <label class="flex items-center space-x-3 cursor-pointer group">
                         <input type="radio" name="match_format" value="best_of_5" 
-                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2">
-                        <span class="text-primary group-hover:text-accent transition-colors">Best of 5 Sets</span>
+                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2"
+                               onchange="toggleSetFields()">
+                        <span class="text-primary group-hover:text-accent transition-colors">Best of 5 sets</span>
                     </label>
                 </div>
             </div>
@@ -61,10 +64,10 @@
 
             <!-- Set Scores -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-primary mb-4">Set Scores</h3>
+                <h3 class="text-lg font-semibold text-primary mb-4">Set scores</h3>
                 <div class="space-y-4">
                     <!-- Set 1 -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4 set-field" id="set1">
                         <label class="w-16 text-sm font-medium text-primary">Set 1</label>
                         <div class="flex items-center space-x-3">
                             <input type="number" name="winner_set1" placeholder="W" min="0" max="7" 
@@ -78,7 +81,7 @@
                     </div>
                     
                     <!-- Set 2 -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4 set-field hidden" id="set2">
                         <label class="w-16 text-sm font-medium text-primary">Set 2</label>
                         <div class="flex items-center space-x-3">
                             <input type="number" name="winner_set2" placeholder="W" min="0" max="7"
@@ -92,7 +95,7 @@
                     </div>
                     
                     <!-- Set 3 -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4 set-field hidden" id="set3">
                         <label class="w-16 text-sm font-medium text-primary">Set 3</label>
                         <div class="flex items-center space-x-3">
                             <input type="number" name="winner_set3" placeholder="W" min="0" max="7"
@@ -106,7 +109,7 @@
                     </div>
                     
                     <!-- Set 4 -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4 set-field hidden" id="set4">
                         <label class="w-16 text-sm font-medium text-primary">Set 4</label>
                         <div class="flex items-center space-x-3">
                             <input type="number" name="winner_set4" placeholder="W" min="0" max="7"
@@ -120,7 +123,7 @@
                     </div>
                     
                     <!-- Set 5 -->
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4 set-field hidden" id="set5">
                         <label class="w-16 text-sm font-medium text-primary">Set 5</label>
                         <div class="flex items-center space-x-3">
                             <input type="number" name="winner_set5" placeholder="W" min="0" max="7"
@@ -137,7 +140,7 @@
 
             <!-- Date/Time -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-primary mb-4">Match Details</h3>
+                <h3 class="text-lg font-semibold text-primary mb-4">Match details</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="date_played" class="block text-sm font-medium text-primary mb-2">Date played (optional)</label>
@@ -254,4 +257,34 @@
         </table>
     </div>
     {% endif %}
+
+<script>
+function toggleSetFields() {
+    const selectedFormat = document.querySelector('input[name="match_format"]:checked').value;
+    const setFields = document.querySelectorAll('.set-field');
+    
+    // Hide all set fields first
+    setFields.forEach(field => field.classList.add('hidden'));
+    
+    // Show appropriate set fields based on selection
+    if (selectedFormat === 'single_set') {
+        document.getElementById('set1').classList.remove('hidden');
+    } else if (selectedFormat === 'best_of_3') {
+        document.getElementById('set1').classList.remove('hidden');
+        document.getElementById('set2').classList.remove('hidden');
+        document.getElementById('set3').classList.remove('hidden');
+    } else if (selectedFormat === 'best_of_5') {
+        document.getElementById('set1').classList.remove('hidden');
+        document.getElementById('set2').classList.remove('hidden');
+        document.getElementById('set3').classList.remove('hidden');
+        document.getElementById('set4').classList.remove('hidden');
+        document.getElementById('set5').classList.remove('hidden');
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleSetFields();
+});
+</script>
 {% endblock %}
