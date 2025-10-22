@@ -399,12 +399,12 @@ tr:nth-child(even) {
 
 th.clickable {
   cursor: pointer;
-  color: var(--button-bg-1); /* Matches button color for consistency */
+  color: var(--link-color);
   transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 th.clickable:hover {
-  color: var(--button-text-1);
+  color: var(--link-hover-color);
   text-decoration: none;
 }
 
@@ -457,11 +457,13 @@ td.player_name, td.player_name a {
 th.clickable {
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.2s ease;
+  color: var(--link-color);
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 th.clickable:hover {
-  background-color: var(--button-bg-1);
+  color: var(--link-hover-color);
+  background-color: transparent;
 }
 
 p {
