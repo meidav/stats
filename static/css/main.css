@@ -2640,3 +2640,179 @@ input[type="time"].form-input:focus {
   }
 }
 
+/* Tennis Form Styles */
+.tennis-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.tennis-match-form {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+  margin-bottom: 30px;
+}
+
+.form-section h3 {
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.radio-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.radio-label input[type="radio"] {
+  margin: 0;
+  accent-color: var(--accent-color);
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.input-group input[type="text"],
+.input-group input[type="date"],
+.input-group input[type="time"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.input-group input[type="text"]:focus,
+.input-group input[type="date"]:focus,
+.input-group input[type="time"]:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.sets-container {
+  display: grid;
+  gap: 15px;
+}
+
+.set-score {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.set-score label {
+  min-width: 60px;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.score-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-inputs input[type="number"] {
+  width: 80px;
+  padding: 10px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.score-inputs input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.score-inputs span {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.form-actions {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.submit-btn {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: var(--accent-hover);
+}
+
+.submit-btn:active {
+  transform: translateY(1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tennis-form-container {
+    padding: 10px;
+  }
+  
+  .tennis-match-form {
+    padding: 20px;
+  }
+  
+  .radio-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .set-score {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .score-inputs {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

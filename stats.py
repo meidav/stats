@@ -920,37 +920,73 @@ def add_tennis_match():
     if request.method == 'POST':
         winner = request.form['winner']
         loser = request.form['loser']
-        winner_score = request.form['winner_score']
-        loser_score = request.form['loser_score']
+        match_format = request.form.get('match_format', 'single_set')
         
         # Get optional date/time played from form
         date_played = request.form.get('date_played', '').strip()
         time_played = request.form.get('time_played', '').strip()
 
         # Validate required fields
-        if not winner or not loser or not winner_score or not loser_score:
-            flash('All fields are required!', 'danger')
-            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
-                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
-        
-        # Validate numeric scores
-        try:
-            winner_score = int(winner_score)
-            loser_score = int(loser_score)
-        except ValueError:
-            flash('Scores must be numeric!', 'danger')
-            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
-                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
-
-        # Validate score logic
-        if winner_score <= loser_score:
-            flash('Winner\'s score must be greater than loser\'s score!', 'danger')
+        if not winner or not loser:
+            flash('Winner and loser are required!', 'danger')
             return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
                            matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
         
         # Validate uniqueness of players
         if len(set([winner, loser])) < 2:
             flash('Players must be unique!', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+
+        # Collect set scores
+        sets = []
+        for i in range(1, 6):  # Up to 5 sets
+            winner_set = request.form.get(f'winner_set{i}', '').strip()
+            loser_set = request.form.get(f'loser_set{i}', '').strip()
+            
+            if winner_set and loser_set:
+                try:
+                    winner_games = int(winner_set)
+                    loser_games = int(loser_set)
+                    
+                    # Basic validation for tennis scoring
+                    if winner_games < 0 or loser_games < 0 or winner_games > 7 or loser_games > 7:
+                        flash(f'Set {i} scores must be between 0-7!', 'danger')
+                        return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                               matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+                    
+                    # Validate set winner logic
+                    if winner_games == loser_games:
+                        flash(f'Set {i} cannot be a tie!', 'danger')
+                        return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                               matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+                    
+                    sets.append((winner_games, loser_games))
+                except ValueError:
+                    flash(f'Set {i} scores must be numeric!', 'danger')
+                    return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+
+        # Validate match format requirements
+        if match_format == 'single_set' and len(sets) != 1:
+            flash('Single set matches must have exactly 1 set!', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+        elif match_format == 'best_of_3' and len(sets) < 2:
+            flash('Best of 3 matches must have at least 2 sets!', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+        elif match_format == 'best_of_5' and len(sets) < 3:
+            flash('Best of 5 matches must have at least 3 sets!', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
+
+        # Validate match winner
+        winner_sets = sum(1 for w, l in sets if w > l)
+        loser_sets = sum(1 for w, l in sets if l > w)
+        
+        if winner_sets <= loser_sets:
+            flash('Winner must win more sets than loser!', 'danger')
             return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
                            matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
 
@@ -969,8 +1005,13 @@ def add_tennis_match():
             # Use current date/time for both
             date_time_played = my_time
         
-        add_tennis_stats([date_time_played, winner, loser, winner_score, loser_score, my_time])
-        flash(f'Match added!', 'success')
+        # For now, store as simple winner/loser with total games won
+        # TODO: Update database schema to store individual set scores
+        total_winner_games = sum(w for w, l in sets)
+        total_loser_games = sum(l for w, l in sets)
+        
+        add_tennis_stats([date_time_played, winner, loser, total_winner_games, total_loser_games, my_time])
+        flash(f'Tennis match added! Format: {match_format.replace("_", " ").title()}', 'success')
         return redirect(url_for('add_tennis_match'))
 
     return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
