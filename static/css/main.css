@@ -2793,6 +2793,79 @@ input[type="time"].form-input:focus {
   transform: translateY(1px);
 }
 
+/* Navigation Collapsible Styles */
+.menu-section-header {
+  padding: 12px 20px 8px 20px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 8px;
+}
+
+.menu-collapsible {
+  position: relative;
+}
+
+.menu-collapsible-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+}
+
+.menu-collapsible-btn:hover {
+  background-color: var(--hover-bg);
+}
+
+.menu-collapsible-btn .menu-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.menu-collapsible-btn span {
+  flex: 1;
+}
+
+.menu-collapsible-arrow {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.menu-collapsible-btn[aria-expanded="true"] .menu-collapsible-arrow {
+  transform: rotate(180deg);
+}
+
+.menu-collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.menu-collapsible-content.open {
+  max-height: 200px; /* Adjust based on content */
+}
+
+.menu-collapsible-content .menu__item {
+  padding-left: 52px; /* Align with main menu items */
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.menu-collapsible-content .menu__item:hover {
+  color: var(--text-primary);
+  background-color: var(--hover-bg);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .tennis-form-container {
@@ -2817,6 +2890,27 @@ input[type="time"].form-input:focus {
   .score-inputs {
     width: 100%;
     justify-content: center;
+  }
+  
+  /* Mobile navigation improvements */
+  .menu__box {
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  
+  .menu-section-header {
+    padding: 8px 16px 6px 16px;
+    font-size: 12px;
+  }
+  
+  .menu-collapsible-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .menu-collapsible-content .menu__item {
+    padding-left: 44px;
+    font-size: 13px;
   }
 }
 
