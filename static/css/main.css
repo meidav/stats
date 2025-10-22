@@ -2703,10 +2703,10 @@ input[type="time"].form-input:focus {
 .input-group input[type="time"] {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid var(--border-color);
+  border: 2px solid #555;
   border-radius: 8px;
-  background: var(--input-bg);
-  color: var(--text-primary);
+  background: #2a2a2a;
+  color: #fff;
   font-size: 1rem;
   transition: border-color 0.2s ease;
 }
@@ -2745,10 +2745,10 @@ input[type="time"].form-input:focus {
 .score-inputs input[type="number"] {
   width: 80px;
   padding: 10px 12px;
-  border: 2px solid var(--border-color);
+  border: 2px solid #555;
   border-radius: 6px;
-  background: var(--input-bg);
-  color: var(--text-primary);
+  background: #2a2a2a;
+  color: #fff;
   text-align: center;
   font-size: 1rem;
   font-weight: 500;
