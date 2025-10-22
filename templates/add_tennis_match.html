@@ -4,9 +4,10 @@
 
 {% block content %}
 
-    <h1>Add a tennis match</h1>
-    <div class="tennis-form-container">
-        <form method="post" class="tennis-match-form">
+    <h1 class="text-3xl font-bold text-white mb-8 text-center">Add a tennis match</h1>
+    
+    <div class="max-w-2xl mx-auto p-6">
+        <form method="post" class="bg-card-bg rounded-xl p-8 shadow-2xl border border-border-color">
             <datalist id="players_list">
                 {% for player in players %}
                     <option value="{{ player }}"></option>
@@ -14,126 +15,149 @@
             </datalist>
             
             <!-- Match Format Selection -->
-            <div class="form-section">
-                <h3>Match Format</h3>
-                <div class="radio-group">
-                    <label class="radio-label">
-                        <input type="radio" name="match_format" value="single_set" checked>
-                        <span>Single Set</span>
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-primary mb-4">Match Format</h3>
+                <div class="flex flex-wrap gap-6">
+                    <label class="flex items-center space-x-3 cursor-pointer group">
+                        <input type="radio" name="match_format" value="single_set" checked 
+                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2">
+                        <span class="text-primary group-hover:text-accent transition-colors">Single Set</span>
                     </label>
-                    <label class="radio-label">
-                        <input type="radio" name="match_format" value="best_of_3">
-                        <span>Best of 3 Sets</span>
+                    <label class="flex items-center space-x-3 cursor-pointer group">
+                        <input type="radio" name="match_format" value="best_of_3" 
+                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2">
+                        <span class="text-primary group-hover:text-accent transition-colors">Best of 3 Sets</span>
                     </label>
-                    <label class="radio-label">
-                        <input type="radio" name="match_format" value="best_of_5">
-                        <span>Best of 5 Sets</span>
+                    <label class="flex items-center space-x-3 cursor-pointer group">
+                        <input type="radio" name="match_format" value="best_of_5" 
+                               class="w-4 h-4 text-accent bg-input-bg border-border-color focus:ring-accent focus:ring-2">
+                        <span class="text-primary group-hover:text-accent transition-colors">Best of 5 Sets</span>
                     </label>
                 </div>
             </div>
 
             <!-- Players -->
-            <div class="form-section">
-                <h3>Players</h3>
-                <div class="input-group">
-                    <label for="winner">Winner</label>
-                    <input type="text" name="winner" id="winner" 
-                           placeholder="Winner's name"
-                           value="{{ request.form['winner'] }}"
-                           list="players_list" required>
-                </div>
-                <div class="input-group">
-                    <label for="loser">Loser</label>
-                    <input type="text" name="loser" id="loser"
-                           placeholder="Loser's name"
-                           value="{{ request.form['loser'] }}"
-                           list="players_list" required>
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-primary mb-4">Players</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="winner" class="block text-sm font-medium text-primary mb-2">Winner</label>
+                        <input type="text" name="winner" id="winner" 
+                               placeholder="Winner's name"
+                               value="{{ request.form['winner'] }}"
+                               list="players_list" required
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="loser" class="block text-sm font-medium text-primary mb-2">Loser</label>
+                        <input type="text" name="loser" id="loser"
+                               placeholder="Loser's name"
+                               value="{{ request.form['loser'] }}"
+                               list="players_list" required
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
                 </div>
             </div>
 
             <!-- Set Scores -->
-            <div class="form-section">
-                <h3>Set Scores</h3>
-                <div class="sets-container">
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-primary mb-4">Set Scores</h3>
+                <div class="space-y-4">
                     <!-- Set 1 -->
-                    <div class="set-score">
-                        <label>Set 1</label>
-                        <div class="score-inputs">
-                            <input type="number" name="winner_set1" placeholder="Winner" min="0" max="7" 
-                                   value="{{ request.form.get('winner_set1', '') }}">
-                            <span>-</span>
-                            <input type="number" name="loser_set1" placeholder="Loser" min="0" max="7"
-                                   value="{{ request.form.get('loser_set1', '') }}">
+                    <div class="flex items-center space-x-4">
+                        <label class="w-16 text-sm font-medium text-primary">Set 1</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" name="winner_set1" placeholder="W" min="0" max="7" 
+                                   value="{{ request.form.get('winner_set1', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <span class="text-secondary font-medium">-</span>
+                            <input type="number" name="loser_set1" placeholder="L" min="0" max="7"
+                                   value="{{ request.form.get('loser_set1', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
                     </div>
                     
                     <!-- Set 2 -->
-                    <div class="set-score">
-                        <label>Set 2</label>
-                        <div class="score-inputs">
-                            <input type="number" name="winner_set2" placeholder="Winner" min="0" max="7"
-                                   value="{{ request.form.get('winner_set2', '') }}">
-                            <span>-</span>
-                            <input type="number" name="loser_set2" placeholder="Loser" min="0" max="7"
-                                   value="{{ request.form.get('loser_set2', '') }}">
+                    <div class="flex items-center space-x-4">
+                        <label class="w-16 text-sm font-medium text-primary">Set 2</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" name="winner_set2" placeholder="W" min="0" max="7"
+                                   value="{{ request.form.get('winner_set2', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <span class="text-secondary font-medium">-</span>
+                            <input type="number" name="loser_set2" placeholder="L" min="0" max="7"
+                                   value="{{ request.form.get('loser_set2', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
                     </div>
                     
                     <!-- Set 3 -->
-                    <div class="set-score">
-                        <label>Set 3</label>
-                        <div class="score-inputs">
-                            <input type="number" name="winner_set3" placeholder="Winner" min="0" max="7"
-                                   value="{{ request.form.get('winner_set3', '') }}">
-                            <span>-</span>
-                            <input type="number" name="loser_set3" placeholder="Loser" min="0" max="7"
-                                   value="{{ request.form.get('loser_set3', '') }}">
+                    <div class="flex items-center space-x-4">
+                        <label class="w-16 text-sm font-medium text-primary">Set 3</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" name="winner_set3" placeholder="W" min="0" max="7"
+                                   value="{{ request.form.get('winner_set3', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <span class="text-secondary font-medium">-</span>
+                            <input type="number" name="loser_set3" placeholder="L" min="0" max="7"
+                                   value="{{ request.form.get('loser_set3', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
                     </div>
                     
                     <!-- Set 4 -->
-                    <div class="set-score">
-                        <label>Set 4</label>
-                        <div class="score-inputs">
-                            <input type="number" name="winner_set4" placeholder="Winner" min="0" max="7"
-                                   value="{{ request.form.get('winner_set4', '') }}">
-                            <span>-</span>
-                            <input type="number" name="loser_set4" placeholder="Loser" min="0" max="7"
-                                   value="{{ request.form.get('loser_set4', '') }}">
+                    <div class="flex items-center space-x-4">
+                        <label class="w-16 text-sm font-medium text-primary">Set 4</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" name="winner_set4" placeholder="W" min="0" max="7"
+                                   value="{{ request.form.get('winner_set4', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <span class="text-secondary font-medium">-</span>
+                            <input type="number" name="loser_set4" placeholder="L" min="0" max="7"
+                                   value="{{ request.form.get('loser_set4', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
                     </div>
                     
                     <!-- Set 5 -->
-                    <div class="set-score">
-                        <label>Set 5</label>
-                        <div class="score-inputs">
-                            <input type="number" name="winner_set5" placeholder="Winner" min="0" max="7"
-                                   value="{{ request.form.get('winner_set5', '') }}">
-                            <span>-</span>
-                            <input type="number" name="loser_set5" placeholder="Loser" min="0" max="7"
-                                   value="{{ request.form.get('loser_set5', '') }}">
+                    <div class="flex items-center space-x-4">
+                        <label class="w-16 text-sm font-medium text-primary">Set 5</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" name="winner_set5" placeholder="W" min="0" max="7"
+                                   value="{{ request.form.get('winner_set5', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                            <span class="text-secondary font-medium">-</span>
+                            <input type="number" name="loser_set5" placeholder="L" min="0" max="7"
+                                   value="{{ request.form.get('loser_set5', '') }}"
+                                   class="w-20 px-3 py-2 bg-input-bg border border-border-color rounded-lg text-primary text-center focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Date/Time -->
-            <div class="form-section">
-                <h3>Match Details</h3>
-                <div class="input-group">
-                    <label for="date_played">Date played (optional)</label>
-                    <input type="date" name="date_played" id="date_played" 
-                           value="{{ request.form.get('date_played', '') }}">
-                </div>
-                <div class="input-group">
-                    <label for="time_played">Time played (optional)</label>
-                    <input type="time" name="time_played" id="time_played"
-                           value="{{ request.form.get('time_played', '') }}">
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-primary mb-4">Match Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="date_played" class="block text-sm font-medium text-primary mb-2">Date played (optional)</label>
+                        <input type="date" name="date_played" id="date_played" 
+                               value="{{ request.form.get('date_played', '') }}"
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="time_played" class="block text-sm font-medium text-primary mb-2">Time played (optional)</label>
+                        <input type="time" name="time_played" id="time_played"
+                               value="{{ request.form.get('time_played', '') }}"
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
                 </div>
             </div>
 
-            <div class="form-actions">
-                <button type="submit" class="submit-btn">Add Match</button>
+            <div class="text-center">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-card-bg">
+                    Add Match
+                </button>
             </div>
         </form>
     </div>

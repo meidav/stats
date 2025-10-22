@@ -6,6 +6,25 @@
     <!-- Auto-deployment test - LIVE TEST $(date) -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: 'var(--text-primary)',
+                        secondary: 'var(--text-secondary)',
+                        accent: 'var(--accent-color)',
+                        'accent-hover': 'var(--accent-hover)',
+                        'card-bg': 'var(--card-bg)',
+                        'input-bg': 'var(--input-bg)',
+                        'border-color': 'var(--border-color)',
+                    }
+                }
+            }
+        }
+    </script>
     <meta name="viewport" content="width=device-width" />
 
     <script>
