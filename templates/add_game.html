@@ -4,7 +4,7 @@
     <h1 class="text-3xl font-bold text-white mb-8 text-center">{% block title %} Add a game {% endblock %}</h1>
     
     <div class="max-w-2xl mx-auto p-6">
-        <form method="post" action="{{ url_for('add_game') }}" id="add-game-form" class="bg-card-bg rounded-xl p-8 shadow-2xl border border-border-color">
+        <form method="post" action="{{ url_for('add_game') }}" id="add-game-form" class="bg-card-bg rounded-xl p-8 shadow-2xl">
             <datalist id="players">
                 {% for player in players %}
                     <option value="{{ player }}"></option>
@@ -92,7 +92,7 @@
 
     <div class="space-y-8">
         {% if todays_stats %}
-        <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
             <h1 class="text-2xl font-bold text-primary mb-4">Today's stats</h1>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -125,7 +125,7 @@
                 </table>
             </div>
         </div>
-        <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
             <h1 class="text-2xl font-bold text-primary mb-4">Today's games</h1>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -175,7 +175,7 @@
         </div>
         {% endif %}
 
-        <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
             <h1 class="text-2xl font-bold text-primary mb-4">{{ year }} stats</h1>
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -206,7 +206,7 @@
         </div>
 
         {% if rare_stats %}
-        <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
             <h1 class="text-2xl font-bold text-primary mb-4">Infrequent players</h1>
             <p class="text-secondary mb-4">Total games: {{tot_games}} | Min games: {{minimum_games}}</p>
             <div class="overflow-x-auto">

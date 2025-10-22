@@ -48,7 +48,7 @@
     </nav>
     <div class="space-y-8">
     {% if todays_stats %}
-    <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
         <h1 class="text-2xl font-bold text-primary mb-4">Today's tennis stats</h1>
         <div class="overflow-x-auto">
             <table id="todaysStatsTable" class="w-full">
@@ -81,7 +81,7 @@
             </table>
         </div>
     </div>
-    <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
         <h1 class="text-2xl font-bold text-primary mb-4">Today's tennis matches</h1>
         <div class="overflow-x-auto">
             <table id="matchesTable" class="w-full">
@@ -114,7 +114,7 @@
     </div>
     {% endif %}
     </div>
-    <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
         <h1 class="text-2xl font-bold text-primary mb-4">{% block title %} {{ year }} Tennis stats {% endblock %}</h1>
         <div class="overflow-x-auto">
             <table id="yearlyStatsTable" class="w-full">
