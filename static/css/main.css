@@ -2648,11 +2648,11 @@ input[type="time"].form-input:focus {
 }
 
 .tennis-match-form {
-  background: #f8f9fa;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 30px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid #dee2e6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
 }
 
 .form-section {
@@ -2660,7 +2660,7 @@ input[type="time"].form-input:focus {
 }
 
 .form-section h3 {
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 15px;
   font-size: 1.1rem;
   font-weight: 600;
@@ -2677,13 +2677,13 @@ input[type="time"].form-input:focus {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  color: #333;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
 .radio-label input[type="radio"] {
   margin: 0;
-  accent-color: #007bff;
+  accent-color: var(--accent-color);
 }
 
 .input-group {
@@ -2693,7 +2693,7 @@ input[type="time"].form-input:focus {
 .input-group label {
   display: block;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -2703,10 +2703,10 @@ input[type="time"].form-input:focus {
 .input-group input[type="time"] {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #ccc;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
-  background: white;
-  color: #333;
+  background: var(--input-bg);
+  color: var(--text-primary);
   font-size: 1rem;
   transition: border-color 0.2s ease;
 }
@@ -2715,7 +2715,7 @@ input[type="time"].form-input:focus {
 .input-group input[type="date"]:focus,
 .input-group input[type="time"]:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--accent-color);
 }
 
 .sets-container {
@@ -2731,7 +2731,7 @@ input[type="time"].form-input:focus {
 
 .set-score label {
   min-width: 60px;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -2745,10 +2745,10 @@ input[type="time"].form-input:focus {
 .score-inputs input[type="number"] {
   width: 80px;
   padding: 10px 12px;
-  border: 2px solid #ccc;
+  border: 2px solid var(--border-color);
   border-radius: 6px;
-  background: white;
-  color: #333;
+  background: var(--input-bg);
+  color: var(--text-primary);
   text-align: center;
   font-size: 1rem;
   font-weight: 500;
@@ -2756,11 +2756,11 @@ input[type="time"].form-input:focus {
 
 .score-inputs input[type="number"]:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--accent-color);
 }
 
 .score-inputs span {
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 1.1rem;
 }
@@ -2771,7 +2771,7 @@ input[type="time"].form-input:focus {
 }
 
 .submit-btn {
-  background: #007bff;
+  background: var(--accent-color);
   color: white;
   border: none;
   padding: 14px 30px;
@@ -2779,11 +2779,14 @@ input[type="time"].form-input:focus {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .submit-btn:hover {
-  background: #0056b3;
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .submit-btn:active {
