@@ -3,63 +3,132 @@
 {% block content %}
 	<h1>{% block title %} Edit game {% endblock %}</h1>
 	
-	<table>
-	   <thead>
-			<tr>
-				<th scope="col" colspan="1">Date/Updated</th>
-				<th scope="col" colspan="1">Winners</th>
-				<th scope="col" colspan="1">Losers</th>
-			</tr>
-		</thead>
-	   	<tbody>
-			<tr>
-				<td>{{ (game[1])[0:10] }}<br>{{ (game[1])[11:19] }}</td>
-				<td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
-				<td><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[5] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a></td>
-			</tr>
-			<tr>
-				<td>{{ (game[8])[0:10] }}<br>{{ (game[8])[11:19] }}</td>
-				<td>{{ game[4] }}</td>
-				<td>{{ game[7] }}</td>
-			</tr>
-		</tbody>
-	</table>
-	<div>
-		<h3>Update game details below</h3>
-	   <form method="post">
-			  <datalist id="players">
-					 {% for player in players %}
-							<option value= "{{ player }}">
-					 {% endfor %}
-			  </datalist>
-			  <datalist id="w_scores">
-					 {% for score in w_scores %}
-							<option value= "{{ score }}">
-					 {% endfor %}
-			  </datalist>
-			  <datalist id="l_scores">
-					 {% for score in l_scores %}
-							<option value= "{{ score }}">
-					 {% endfor %}
-			  </datalist>
-			  
-			  <!-- Player inputs -->
-			  <input type="text" name="winner1" placeholder="Winner 1" value="{{ game[2] }}" list="players">
-			  <input type="text" name="winner2" placeholder="Winner 2" value="{{ game[3] }}" list="players">
-			  <input type="text" name="loser1" placeholder="Loser 1" value="{{ game[5] }}" list="players">
-			  <input type="text" name="loser2" placeholder="Loser 2" value="{{ game[6] }}" list="players">
-			  <input type="number" pattern="[0-9]*" name="winner_score" placeholder="Winners' score" value="{{ game[4] }}" list="w_scores">
-			  <input type="number" pattern="[0-9]*" name="loser_score" placeholder="Losers' score" value="{{ game[7] }}" list="l_scores">
-			  
-			  <!-- Date/Time Played -->
-			  <label for="date_played" class="optional-label">Date played</label>
-			  <input type="date" name="date_played" id="date_played" value="{{ game[9] if game[9] else game[1][:10] }}">
-			  
-			  <label for="time_played" class="optional-label">Time played</label>
-			  <input type="time" name="time_played" id="time_played" value="{{ game[10] if game[10] else game[1][11:16] }}">
-			  
-			  <input type="submit" value="Submit">
-		   </form>
-	   </div>
+	<!-- Current Game Info -->
+	<div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color max-w-4xl mx-auto mb-8">
+		<h3 class="text-lg font-semibold text-primary mb-4">Current game details</h3>
+		<div class="overflow-x-auto">
+			<table class="w-full">
+				<thead>
+					<tr>
+						<th class="text-left py-3 px-4 text-primary font-semibold">Date/Updated</th>
+						<th class="text-left py-3 px-4 text-primary font-semibold">Winners</th>
+						<th class="text-left py-3 px-4 text-primary font-semibold">Losers</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="hover:bg-gray-800 transition-colors">
+						<td class="py-3 px-4 text-primary">
+							<div class="font-medium">{{ (game[1])[0:10] }}</div>
+							<div class="text-sm text-secondary">{{ (game[1])[11:19] }}</div>
+						</td>
+						<td class="py-3 px-4">
+							<a href="{{ url_for('player_stats', year=year, name=game[2] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ game[2] }}</a><br>
+							<a href="{{ url_for('player_stats', year=year, name=game[3] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ game[3] }}</a>
+						</td>
+						<td class="py-3 px-4">
+							<a href="{{ url_for('player_stats', year=year, name=game[5] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ game[5] }}</a><br>
+							<a href="{{ url_for('player_stats', year=year, name=game[6] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ game[6] }}</a>
+						</td>
+					</tr>
+					<tr class="hover:bg-gray-800 transition-colors">
+						<td class="py-3 px-4 text-primary">
+							<div class="font-medium">{{ (game[8])[0:10] }}</div>
+							<div class="text-sm text-secondary">{{ (game[8])[11:19] }}</div>
+						</td>
+						<td class="py-3 px-4 text-primary font-bold text-lg">{{ game[4] }}</td>
+						<td class="py-3 px-4 text-primary font-bold text-lg">{{ game[7] }}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- Edit Form -->
+	<div class="max-w-2xl mx-auto p-6">
+		<form method="post" class="bg-card-bg rounded-xl p-8 shadow-2xl border border-border-color">
+			<datalist id="players">
+				{% for player in players %}
+					<option value="{{ player }}">
+				{% endfor %}
+			</datalist>
+			<datalist id="w_scores">
+				{% for score in w_scores %}
+					<option value="{{ score }}">
+				{% endfor %}
+			</datalist>
+			<datalist id="l_scores">
+				{% for score in l_scores %}
+					<option value="{{ score }}">
+				{% endfor %}
+			</datalist>
+			
+			<!-- Players Section -->
+			<div class="mb-8">
+				<h3 class="text-lg font-semibold text-primary mb-4">Players</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<label for="winner1" class="block text-sm font-medium text-primary mb-2">Winner 1</label>
+						<input type="text" name="winner1" id="winner1" placeholder="Winner 1" value="{{ game[2] }}" list="players" 
+							   class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+					</div>
+					<div>
+						<label for="winner2" class="block text-sm font-medium text-primary mb-2">Winner 2</label>
+						<input type="text" name="winner2" id="winner2" placeholder="Winner 2" value="{{ game[3] }}" list="players" 
+							   class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+					</div>
+					<div>
+						<label for="loser1" class="block text-sm font-medium text-primary mb-2">Loser 1</label>
+						<input type="text" name="loser1" id="loser1" placeholder="Loser 1" value="{{ game[5] }}" list="players" 
+							   class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+					</div>
+					<div>
+						<label for="loser2" class="block text-sm font-medium text-primary mb-2">Loser 2</label>
+						<input type="text" name="loser2" id="loser2" placeholder="Loser 2" value="{{ game[6] }}" list="players" 
+							   class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+					</div>
+				</div>
+			</div>
+
+			<!-- Scores Section -->
+			<div class="mb-8">
+				<h3 class="text-lg font-semibold text-primary mb-4">Scores</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<label for="winner_score" class="block text-sm font-medium text-primary mb-2">Winners' score</label>
+						<input type="number" pattern="[0-9]*" name="winner_score" id="winner_score" placeholder="Winners' score" value="{{ game[4] }}" list="w_scores" 
+							   class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+					</div>
+					<div>
+						<label for="loser_score" class="block text-sm font-medium text-primary mb-2">Losers' score</label>
+						<input type="number" pattern="[0-9]*" name="loser_score" id="loser_score" placeholder="Losers' score" value="{{ game[7] }}" list="l_scores" 
+							   class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+					</div>
+				</div>
+			</div>
+			
+			<!-- Match Details -->
+			<div class="mb-8">
+				<h3 class="text-lg font-semibold text-primary mb-4">Match details</h3>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<label for="date_played" class="block text-sm font-medium text-primary mb-2">Date played</label>
+						<input type="date" name="date_played" id="date_played" value="{{ game[9] if game[9] else game[1][:10] }}" 
+							   class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+					</div>
+					<div>
+						<label for="time_played" class="block text-sm font-medium text-primary mb-2">Time played</label>
+						<input type="time" name="time_played" id="time_played" value="{{ game[10] if game[10] else game[1][11:16] }}" 
+							   class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+					</div>
+				</div>
+			</div>
+			
+			<div class="text-center">
+				<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-card-bg">
+					Submit
+				</button>
+			</div>
+		</form>
+	</div>
 	   
 {% endblock %}
