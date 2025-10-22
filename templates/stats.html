@@ -50,31 +50,35 @@
     </script>
     
     {% if last_30_stats %}
-    <h1>Last 30 days</h1>
-    <table id="last-30-days-stats">
-        <thead>
-            <tr>
-                <th class="rank clickable" data-sort="number">#</th>
-                <th class="player_name clickable" data-sort="string">Player</th>
-                <th class="numbered_stats clickable" data-sort="number">Wins</th>
-                <th class="numbered_stats clickable" data-sort="number">Losses</th>
-                <th class="numbered_stats clickable" data-sort="number">Win %</th>
-                <th class="numbered_stats clickable" data-sort="number">Games</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for player in last_30_stats %}
-            <tr>
-                <td class="rank">{{ loop.index }}</td>
-                <td class="player_name"><a href="{{ url_for('player_stats', year=year, name=player[0]) }}">{{ player[0] }}</a></td>
-                <td>{{ player[1] }}</td>
-                <td>{{ player[2] }}</td>
-                <td>{{ "{:.2f}".format(player[3]*100) }}</td>
-                <td>{{ player[1] + player[2] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h1 class="prominent-header">Last 30 days</h1>
+    <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color max-w-6xl mx-auto">
+        <div class="overflow-x-auto">
+            <table id="last-30-days-stats" class="w-full">
+                <thead>
+                    <tr>
+                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">#</th>
+                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="string">Player</th>
+                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">Wins</th>
+                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">Losses</th>
+                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">Win %</th>
+                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">Games</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in last_30_stats %}
+                    <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                        <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
+                        <td class="py-3 px-4"><a href="{{ url_for('player_stats', year=year, name=player[0]) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
+                        <td class="py-3 px-4 text-primary">{{ player[1] }}</td>
+                        <td class="py-3 px-4 text-primary">{{ player[2] }}</td>
+                        <td class="py-3 px-4 text-primary">{{ "{:.2f}".format(player[3]*100) }}</td>
+                        <td class="py-3 px-4 text-primary">{{ player[1] + player[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     {% endif %}
 
     <h1>{{ year }} stats</h1>
