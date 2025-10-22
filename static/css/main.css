@@ -2648,10 +2648,11 @@ input[type="time"].form-input:focus {
 }
 
 .tennis-match-form {
-  background: var(--card-bg);
+  background: #f8f9fa;
   border-radius: 12px;
   padding: 30px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
 }
 
 .form-section {
@@ -2659,7 +2660,7 @@ input[type="time"].form-input:focus {
 }
 
 .form-section h3 {
-  color: var(--text-primary);
+  color: #333;
   margin-bottom: 15px;
   font-size: 1.1rem;
   font-weight: 600;
@@ -2676,13 +2677,13 @@ input[type="time"].form-input:focus {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  color: var(--text-primary);
+  color: #333;
   font-size: 0.95rem;
 }
 
 .radio-label input[type="radio"] {
   margin: 0;
-  accent-color: var(--accent-color);
+  accent-color: #007bff;
 }
 
 .input-group {
@@ -2692,7 +2693,7 @@ input[type="time"].form-input:focus {
 .input-group label {
   display: block;
   margin-bottom: 8px;
-  color: var(--text-primary);
+  color: #333;
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -2702,10 +2703,10 @@ input[type="time"].form-input:focus {
 .input-group input[type="time"] {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid var(--border-color);
+  border: 2px solid #ccc;
   border-radius: 8px;
-  background: var(--input-bg);
-  color: var(--text-primary);
+  background: white;
+  color: #333;
   font-size: 1rem;
   transition: border-color 0.2s ease;
 }
@@ -2714,7 +2715,7 @@ input[type="time"].form-input:focus {
 .input-group input[type="date"]:focus,
 .input-group input[type="time"]:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: #007bff;
 }
 
 .sets-container {
@@ -2730,7 +2731,7 @@ input[type="time"].form-input:focus {
 
 .set-score label {
   min-width: 60px;
-  color: var(--text-primary);
+  color: #333;
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -2744,10 +2745,10 @@ input[type="time"].form-input:focus {
 .score-inputs input[type="number"] {
   width: 80px;
   padding: 10px 12px;
-  border: 2px solid var(--border-color);
+  border: 2px solid #ccc;
   border-radius: 6px;
-  background: var(--input-bg);
-  color: var(--text-primary);
+  background: white;
+  color: #333;
   text-align: center;
   font-size: 1rem;
   font-weight: 500;
@@ -2755,11 +2756,11 @@ input[type="time"].form-input:focus {
 
 .score-inputs input[type="number"]:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: #007bff;
 }
 
 .score-inputs span {
-  color: var(--text-secondary);
+  color: #666;
   font-weight: 500;
   font-size: 1.1rem;
 }
@@ -2770,7 +2771,7 @@ input[type="time"].form-input:focus {
 }
 
 .submit-btn {
-  background: var(--accent-color);
+  background: #007bff;
   color: white;
   border: none;
   padding: 14px 30px;
@@ -2782,7 +2783,7 @@ input[type="time"].form-input:focus {
 }
 
 .submit-btn:hover {
-  background: var(--accent-hover);
+  background: #0056b3;
 }
 
 .submit-btn:active {
