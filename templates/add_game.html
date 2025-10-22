@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1 class="page-title">{% block title %} Add a game {% endblock %}</h1>
+    <h1 class="text-3xl font-bold text-white mb-8 text-center">{% block title %} Add a game {% endblock %}</h1>
     
-    <div class="content-section">
-        <form method="post" action="{{ url_for('add_game') }}" id="add-game-form">
+    <div class="max-w-2xl mx-auto p-6">
+        <form method="post" action="{{ url_for('add_game') }}" id="add-game-form" class="bg-card-bg rounded-xl p-8 shadow-2xl border border-border-color">
             <datalist id="players">
                 {% for player in players %}
                     <option value="{{ player }}"></option>
@@ -21,147 +21,221 @@
                 {% endfor %}
             </datalist>
             
-            <!-- Player Inputs -->
-            <input type="text" name="winner1" placeholder="Winner 1" value="{{ request.form['winner1'] }}" list="players" autocomplete="on" class="form-input">
-            <input type="text" name="winner2" placeholder="Winner 2" value="{{ request.form['winner2'] }}" list="players" autocomplete="on" class="form-input">
-            <input type="text" name="loser1" placeholder="Loser 1" value="{{ request.form['loser1'] }}" list="players" autocomplete="on" class="form-input">      
-            <input type="text" name="loser2" placeholder="Loser 2" value="{{ request.form['loser2'] }}" list="players" autocomplete="on" class="form-input">
-            <input type="number" pattern="[0-9]*" name="winner_score" placeholder="Winners' score" value="{{ request.form['winner_score'] }}" list="w_scores" autocomplete="on" class="form-input">
-            <input type="number" pattern="[0-9]*" name="loser_score" placeholder="Losers' score" value="{{ request.form['loser_score'] }}" list="l_scores" autocomplete="on" class="form-input">
+            <!-- Players Section -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-primary mb-4">Players</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="winner1" class="block text-sm font-medium text-primary mb-2">Winner 1</label>
+                        <input type="text" name="winner1" id="winner1" placeholder="Winner 1" value="{{ request.form['winner1'] }}" list="players" autocomplete="on" 
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="winner2" class="block text-sm font-medium text-primary mb-2">Winner 2</label>
+                        <input type="text" name="winner2" id="winner2" placeholder="Winner 2" value="{{ request.form['winner2'] }}" list="players" autocomplete="on" 
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="loser1" class="block text-sm font-medium text-primary mb-2">Loser 1</label>
+                        <input type="text" name="loser1" id="loser1" placeholder="Loser 1" value="{{ request.form['loser1'] }}" list="players" autocomplete="on" 
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="loser2" class="block text-sm font-medium text-primary mb-2">Loser 2</label>
+                        <input type="text" name="loser2" id="loser2" placeholder="Loser 2" value="{{ request.form['loser2'] }}" list="players" autocomplete="on" 
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scores Section -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-primary mb-4">Scores</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="winner_score" class="block text-sm font-medium text-primary mb-2">Winners' score</label>
+                        <input type="number" pattern="[0-9]*" name="winner_score" id="winner_score" placeholder="Winners' score" value="{{ request.form['winner_score'] }}" list="w_scores" autocomplete="on" 
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="loser_score" class="block text-sm font-medium text-primary mb-2">Losers' score</label>
+                        <input type="number" pattern="[0-9]*" name="loser_score" id="loser_score" placeholder="Losers' score" value="{{ request.form['loser_score'] }}" list="l_scores" autocomplete="on" 
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary placeholder-secondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                </div>
+            </div>
             
-            <!-- Optional Date/Time Override -->
-            <label for="date_played" class="optional-label">Date played (edit if needed)</label>
-            <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}" class="form-input">
+            <!-- Match Details -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-primary mb-4">Match details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="date_played" class="block text-sm font-medium text-primary mb-2">Date played (edit if needed)</label>
+                        <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}" 
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="time_played" class="block text-sm font-medium text-primary mb-2">Time played (edit if needed)</label>
+                        <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}" 
+                               class="w-full px-4 py-3 bg-input-bg border border-border-color rounded-lg text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all">
+                    </div>
+                </div>
+            </div>
             
-            <label for="time_played" class="optional-label">Time played (edit if needed)</label>
-            <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}" class="form-input">
-            
-            <button type="submit" class="universal-btn form-submit">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14"/>
-                </svg>
-                Submit
-            </button>
+            <div class="text-center">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-card-bg">
+                    Submit
+                </button>
+            </div>
         </form>
     </div>
 
-    <div class="content-section">
+    <div class="space-y-8">
         {% if todays_stats %}
-            <h1 class="page-title">Today's stats</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th class="rank" scope="col" colspan="1">#</th>
-                        <th class="player_name" scope="col" colspan="1">Player</th>
-                        <th class="numbered_stats" scope="col" colspan="1">Wins</th>
-                        <th class="numbered_stats" scope="col" colspan="1">Losses</th>
-                        <th class="numbered_stats" scope="col" colspan="1">Win %</th>
-                        <th class="numbered_stats" scope="col" colspan="1">+/-</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for player in todays_stats %}
-                    <tr>
-                        <td class="rank">{{ loop.index }}</td>
-                        <td class="player_name"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
-                        <td>{{ player[1] }}</td>
-                        <td>{{ player[2] }}</td>
-                        <td>{{ "{:.2f}".format(player[3]*100) }}</td>
-                        {% if player[4] > 0 %}
-                            <td>+{{ player[4] }}</td>
-                        {% else %}
-                            <td>{{ player[4] }}</td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-			<h1 class="page-title">Today's games</h1>
-			<table>
-				<thead>
-					<tr>
-						<th class="rank" scope="col" colspan="1">#</th>
-						<th scope="col" colspan="1">Date/Updated</th>
-						<th scope="col" colspan="1">Winner</th>
-						<th scope="col" colspan="1">Loser</th>
-						<th scope="col" colspan="1">Update</th>
-					</tr>
-					</thead>
-				<tbody>
-				{% for game in games %}
-					<tr class="table-double-row">
-						<td class="rank" style="vertical-align: bottom;">{{ loop.index }}</td>
-						<td title="Time: {{ (game[1])[11:19] }}">{{ (game[1])[0:10] }}</td>
-						<td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
-						<td><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[5] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a></td>
-						<td><a href="{{ url_for('update', id=game[0]) }}"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="26"><path d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75l1.83-1.83z" fill="var(--button-bg-1)"></path></svg></a></td>
-					</tr>
-					<tr class="table-double-row">
-						<td class="rank"> </td>
-						<td title="Last edited: {{ (game[8])[11:19] }}">{{ (game[8])[0:10] }}</td>
-						<td>{{ game[4] }}</td>
-						<td>{{ game[7] }}</td>
-						<td><a href="{{ url_for('delete_game', id=game[0]) }}"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="30"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v10zM18 4h-2.5l-.71-.71c-.18-.18-.44-.29-.7-.29H9.91c-.26 0-.52.11-.7.29L8.5 4H6c-.55 0-1 .45-1 1s.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1z" fill="var(--button-bg-1)"></path></svg></a></td>
-					</tr>
-				{% endfor %}
-				</tbody>
-			</table>
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+            <h1 class="text-2xl font-bold text-primary mb-4">Today's stats</h1>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-border-color">
+                            <th class="text-left py-3 px-4 text-primary font-semibold">#</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Player</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Wins</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Losses</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Win %</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in todays_stats %}
+                        <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                            <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
+                            <td class="py-3 px-4"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
+                            <td class="py-3 px-4 text-primary">{{ player[1] }}</td>
+                            <td class="py-3 px-4 text-primary">{{ player[2] }}</td>
+                            <td class="py-3 px-4 text-primary">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            {% if player[4] > 0 %}
+                                <td class="py-3 px-4 text-green-400">+{{ player[4] }}</td>
+                            {% else %}
+                                <td class="py-3 px-4 text-red-400">{{ player[4] }}</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+            <h1 class="text-2xl font-bold text-primary mb-4">Today's games</h1>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-border-color">
+                            <th class="text-left py-3 px-4 text-primary font-semibold">#</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Date/Updated</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Winner</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Loser</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in games %}
+                            <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                                <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
+                                <td class="py-3 px-4 text-primary" title="Time: {{ (game[1])[11:19] }}">{{ (game[1])[0:10] }}</td>
+                                <td class="py-3 px-4">
+                                    <a href="{{ url_for('player_stats', year=year, name=game[2] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ game[2] }}</a><br>
+                                    <a href="{{ url_for('player_stats', year=year, name=game[3] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ game[3] }}</a>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ game[5] }}</a><br>
+                                    <a href="{{ url_for('player_stats', year=year, name=game[6] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ game[6] }}</a>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <a href="{{ url_for('update', id=game[0]) }}" class="text-accent hover:text-accent-hover transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="26"><path d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75l1.83-1.83z" fill="currentColor"></path></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                                <td class="py-3 px-4 text-primary font-medium"> </td>
+                                <td class="py-3 px-4 text-primary" title="Last edited: {{ (game[8])[11:19] }}">{{ (game[8])[0:10] }}</td>
+                                <td class="py-3 px-4 text-primary">{{ game[4] }}</td>
+                                <td class="py-3 px-4 text-primary">{{ game[7] }}</td>
+                                <td class="py-3 px-4">
+                                    <a href="{{ url_for('delete_game', id=game[0]) }}" class="text-red-400 hover:text-red-300 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="30"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v10zM18 4h-2.5l-.71-.71c-.18-.18-.44-.29-.7-.29H9.91c-.26 0-.52.11-.7.29L8.5 4H6c-.55 0-1 .45-1 1s.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1z" fill="currentColor"></path></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
         {% endif %}
 
-        <h1 class="page-title">{{ year }} stats</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th class="rank" scope="col" colspan="1">#</th>
-                    <th class="player_name" scope="col" colspan="1">Player</th>
-                    <th class="numbered_stats" scope="col" colspan="1">Wins</th>
-                    <th class="numbered_stats" scope="col" colspan="1">Losses</th>
-                    <th class="numbered_stats" scope="col" colspan="1">Win %</th>
-                    <th class="numbered_stats" scope="col" colspan="1">Games</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in stats %}
-                <tr>
-                    <td class="rank">{{ loop.index }}</td>
-                    <td class="player_name"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
-                    <td>{{ player[1] }}</td>
-                    <td>{{ player[2] }}</td>
-                    <td>{{ "{:.2f}".format(player[3]*100) }}</td>
-                    <td>{{ player[1] + player[2] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+            <h1 class="text-2xl font-bold text-primary mb-4">{{ year }} stats</h1>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-border-color">
+                            <th class="text-left py-3 px-4 text-primary font-semibold">#</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Player</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Wins</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Losses</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Win %</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold">Games</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in stats %}
+                        <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                            <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
+                            <td class="py-3 px-4"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
+                            <td class="py-3 px-4 text-primary">{{ player[1] }}</td>
+                            <td class="py-3 px-4 text-primary">{{ player[2] }}</td>
+                            <td class="py-3 px-4 text-primary">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            <td class="py-3 px-4 text-primary">{{ player[1] + player[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         {% if rare_stats %}
-        <p> </p>
-        <h1 class="page-title">Infrequent players</h1>
-        <table>
-            <h3>Total games: {{tot_games}} | Min games: {{minimum_games}}</h3>
-            <thead>
-                <tr>
-                    <th class="rank clickable" data-sort="number">#</th>
-                    <th class="player_name clickable" data-sort="string">Player</th>
-                    <th class="numbered_stats clickable" data-sort="number">Wins</th>
-                    <th class="numbered_stats clickable" data-sort="number">Losses</th>
-                    <th class="numbered_stats clickable" data-sort="number">Win %</th>
-                    <th class="numbered_stats clickable" data-sort="number">Games</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in rare_stats %}
-                <tr>
-                    <td class="rank">{{ loop.index }}</td>
-                    <td class="player_name"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
-                    <td>{{ player[1] }}</td>
-                    <td>{{ player[2] }}</td>
-                    <td>{{ "{:.2f}".format(player[3]*100) }}</td>
-                    <td>{{ player[1] + player[2] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="bg-card-bg rounded-xl p-6 shadow-lg border border-border-color">
+            <h1 class="text-2xl font-bold text-primary mb-4">Infrequent players</h1>
+            <p class="text-secondary mb-4">Total games: {{tot_games}} | Min games: {{minimum_games}}</p>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-border-color">
+                            <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">#</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="string">Player</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">Wins</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">Losses</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">Win %</th>
+                            <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" data-sort="number">Games</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in rare_stats %}
+                        <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
+                            <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
+                            <td class="py-3 px-4"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
+                            <td class="py-3 px-4 text-primary">{{ player[1] }}</td>
+                            <td class="py-3 px-4 text-primary">{{ player[2] }}</td>
+                            <td class="py-3 px-4 text-primary">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            <td class="py-3 px-4 text-primary">{{ player[1] + player[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
         {% endif %}
     </div>
 
