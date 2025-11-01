@@ -24,37 +24,32 @@
             <!-- Players Section -->
             <div class="form-section">
                 <h3>Players</h3>
-                <label for="winner1" class="form-label">Winner 1</label>
-                <input type="text" name="winner1" id="winner1" placeholder="Winner 1" value="{{ request.form['winner1'] }}" list="players" autocomplete="on" class="form-field">
-                
-                <label for="winner2" class="form-label">Winner 2</label>
-                <input type="text" name="winner2" id="winner2" placeholder="Winner 2" value="{{ request.form['winner2'] }}" list="players" autocomplete="on" class="form-field">
-                
-                <label for="loser1" class="form-label">Loser 1</label>
-                <input type="text" name="loser1" id="loser1" placeholder="Loser 1" value="{{ request.form['loser1'] }}" list="players" autocomplete="on" class="form-field">
-                
-                <label for="loser2" class="form-label">Loser 2</label>
-                <input type="text" name="loser2" id="loser2" placeholder="Loser 2" value="{{ request.form['loser2'] }}" list="players" autocomplete="on" class="form-field">
+                <div class="form-row">
+                    <input type="text" name="winner1" id="winner1" placeholder="Winner 1" value="{{ request.form['winner1'] }}" list="players" autocomplete="on" class="form-field-compact">
+                    <input type="text" name="winner2" id="winner2" placeholder="Winner 2" value="{{ request.form['winner2'] }}" list="players" autocomplete="on" class="form-field-compact">
+                </div>
+                <div class="form-row">
+                    <input type="text" name="loser1" id="loser1" placeholder="Loser 1" value="{{ request.form['loser1'] }}" list="players" autocomplete="on" class="form-field-compact">
+                    <input type="text" name="loser2" id="loser2" placeholder="Loser 2" value="{{ request.form['loser2'] }}" list="players" autocomplete="on" class="form-field-compact">
+                </div>
             </div>
 
             <!-- Scores Section -->
             <div class="form-section">
                 <h3>Scores</h3>
-                <label for="winner_score" class="form-label">Winners' score</label>
-                <input type="number" pattern="[0-9]*" name="winner_score" id="winner_score" placeholder="Winners' score" value="{{ request.form['winner_score'] }}" list="w_scores" autocomplete="on" class="form-field">
-                
-                <label for="loser_score" class="form-label">Losers' score</label>
-                <input type="number" pattern="[0-9]*" name="loser_score" id="loser_score" placeholder="Losers' score" value="{{ request.form['loser_score'] }}" list="l_scores" autocomplete="on" class="form-field">
+                <div class="form-row">
+                    <input type="number" pattern="[0-9]*" name="winner_score" id="winner_score" placeholder="Winners' score" value="{{ request.form['winner_score'] }}" list="w_scores" autocomplete="on" class="form-field-compact">
+                    <input type="number" pattern="[0-9]*" name="loser_score" id="loser_score" placeholder="Losers' score" value="{{ request.form['loser_score'] }}" list="l_scores" autocomplete="on" class="form-field-compact">
+                </div>
             </div>
             
             <!-- Match Details -->
             <div class="form-section">
                 <h3>Match details</h3>
-                <label for="date_played" class="form-label">Date played (edit if needed)</label>
-                <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}" class="form-field">
-                
-                <label for="time_played" class="form-label">Time played (edit if needed)</label>
-                <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}" class="form-field">
+                <div class="form-row">
+                    <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}" class="form-field-compact">
+                    <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}" class="form-field-compact">
+                </div>
             </div>
             
             <div style="text-align: center; margin-top: 24px;">
