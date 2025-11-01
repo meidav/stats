@@ -598,9 +598,8 @@ table {
   border-spacing: 0;
   border: none;
   box-shadow: 0 4px 20px var(--shadow-dark);
-  table-layout: fixed;
-  overflow-x: auto;
-  display: block;
+  table-layout: auto;
+  display: table;
 }
 
 @media (max-width: 768px) {
@@ -614,9 +613,8 @@ th, td {
   padding: 6px 4px;
   text-align: left;
   border: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 th {
@@ -1126,13 +1124,15 @@ input[type=number] {
   position: fixed;
   top: 0;
   right: -100%;
+  bottom: 0;
   width: 280px;
   max-width: 85vw;
-  height: 100%;
+  height: 100vh;
+  min-height: 100vh;
   margin: 0;
-  padding: 80px 0;
+  padding: 80px 0 20px 0;
   list-style: none;
-  background-color: #051d29;
+  background-color: rgba(0, 0, 0, 0.9);
   box-shadow: 2px 2px 6px rgba(0, 0, 0, .4);
   transition-duration: .25s;
   z-index: 100;
