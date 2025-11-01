@@ -154,6 +154,28 @@ body > * {
   padding: 16px;
 }
 
+.submit-button {
+  padding: 12px 32px;
+  background-color: #0969da;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-button:hover {
+  background-color: #0860ca;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(9, 105, 218, 0.4);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 768px) {
   .form-field {
     padding: 10px 14px;
