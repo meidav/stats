@@ -4,7 +4,7 @@
 	<h1>{% block title %} Edit match {% endblock %}</h1>
 	
 	<!-- Current Match Info -->
-	<div class="bg-card-bg rounded-xl p-6 shadow-lg max-w-4xl mx-auto mb-8">
+	<div class="bg-card-bg rounded-xl p-6 shadow-lg mx-auto mb-8" style="max-width: 100%">
 		<h3 class="text-lg font-semibold text-primary mb-4">Current match details</h3>
 		<div class="overflow-x-auto">
 			<table class="w-full">
@@ -42,7 +42,7 @@
 	</div>
 
 	<!-- Edit Form -->
-	<div class="max-w-2xl mx-auto p-6">
+	<div class="form-container">
 		<form method="post" class="bg-card-bg rounded-xl p-8 shadow-2xl">
 			<datalist id="players">
 				{% for player in players %}
