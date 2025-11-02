@@ -236,15 +236,14 @@ body {
   font-size: 14px;
   background-color: var(--bg);
   color: var(--text);
-  display: flex;
-  justify-content: center;
   min-height: 100vh;
 }
 
-/* Main content wrapper - constrained to mobile width */
-body > * {
+/* Main content wrapper - constrained to mobile width and centered */
+.content {
   width: 100%;
   max-width: 450px;
+  margin: 0 auto;
   padding: var(--gap) var(--gap) 40px var(--gap);
   box-sizing: border-box;
 }
@@ -1157,11 +1156,11 @@ input[type=number] {
   pointer-events: auto !important;
 }
 
-/* Hamburger button */
+/* Hamburger button - positioned relative to centered content */
 .menu__btn {
   position: fixed;
   top: 12px;
-  right: max(12px, calc(50% - 450px/2 + 12px));
+  right: calc(50vw - 450px/2 + 12px);
   width: 36px;
   height: 36px;
   background-color: var(--button-bg-1);
@@ -1178,10 +1177,10 @@ input[type=number] {
   transition: all 0.3s ease;
 }
 
-/* On very wide screens, keep button within the content area */
-@media (min-width: 470px) {
+/* On smaller screens, just use standard right positioning */
+@media (max-width: 450px) {
   .menu__btn {
-    right: calc(50% - 450px/2 + 12px);
+    right: 12px;
   }
 }
 
