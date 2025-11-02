@@ -598,7 +598,7 @@ table {
   border-spacing: 0;
   border: none;
   box-shadow: 0 4px 20px var(--shadow-dark);
-  table-layout: fixed;
+  table-layout: auto;
   display: table;
 }
 
@@ -642,6 +642,70 @@ td {
 /* Player name cells should be slightly smaller */
 td.player_name, td.player_name a {
   font-size: 14px;
+}
+
+/* Common table column classes for consistent styling */
+/* Rank column - narrow and centered */
+.table-col-rank {
+  width: 40px !important;
+  max-width: 40px !important;
+  min-width: 40px !important;
+  text-align: center !important;
+  padding: 4px 2px !important;
+  white-space: nowrap !important;
+}
+
+/* Player column - wider with smart wrapping */
+.table-col-player {
+  width: auto !important;
+  min-width: 120px !important;
+  text-align: left !important;
+  padding: 4px 8px !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  hyphens: none !important;
+}
+
+.table-col-player a {
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Stats columns - narrow, centered, no wrapping */
+.table-col-stat {
+  width: 60px !important;
+  max-width: 60px !important;
+  min-width: 60px !important;
+  text-align: center !important;
+  padding: 4px 2px !important;
+  white-space: nowrap !important;
+}
+
+/* Mobile adjustments for table columns */
+@media (max-width: 768px) {
+  .table-col-rank {
+    width: 30px !important;
+    max-width: 30px !important;
+    min-width: 30px !important;
+    padding: 3px 1px !important;
+    font-size: 10px !important;
+  }
+  
+  .table-col-player {
+    min-width: 100px !important;
+    padding: 3px 6px !important;
+    font-size: 13px !important;
+  }
+  
+  .table-col-stat {
+    width: 50px !important;
+    max-width: 50px !important;
+    min-width: 50px !important;
+    padding: 3px 1px !important;
+    font-size: 10px !important;
+  }
 }
 
 /* Clickable table headers for sorting */

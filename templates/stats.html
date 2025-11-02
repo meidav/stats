@@ -21,23 +21,23 @@
         <h1>Today's stats</h1>
         <thead>
             <tr>
-                <th class="rank clickable" data-sort="number">#</th>
-                <th class="player_name clickable" data-sort="string">Player</th>
-                <th class="numbered_stats clickable" data-sort="number">Wins</th>
-                <th class="numbered_stats clickable" data-sort="number">Losses</th>
-                <th class="numbered_stats clickable" data-sort="number">Win %</th>
-                <th class="numbered_stats clickable" data-sort="number">+/-</th>
+                <th class="table-col-rank clickable" data-sort="number">#</th>
+                <th class="table-col-player clickable" data-sort="string">Player</th>
+                <th class="table-col-stat clickable" data-sort="number">Wins</th>
+                <th class="table-col-stat clickable" data-sort="number">Losses</th>
+                <th class="table-col-stat clickable" data-sort="number">Win&nbsp;%</th>
+                <th class="table-col-stat clickable" data-sort="number">+/-</th>
             </tr>
         </thead>
         <tbody>
             {% for player in todays_stats %}
             <tr>
-                <td class="rank">{{ loop.index }}</td>
-                <td class="player_name"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
-                <td>{{ player[1] }}</td>
-                <td>{{ player[2] }}</td>
-                <td>{{ "{:.2f}".format(player[3]*100) }}</td>
-                <td>{{ "+{}".format(player[4]) if player[4] > 0 else player[4] }}</td>
+                <td class="table-col-rank">{{ loop.index }}</td>
+                <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                <td class="table-col-stat">{{ player[1] }}</td>
+                <td class="table-col-stat">{{ player[2] }}</td>
+                <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                <td class="table-col-stat">{{ "+{}".format(player[4]) if player[4] > 0 else player[4] }}</td>
             </tr>
             {% endfor %}
         </tbody>
