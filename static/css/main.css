@@ -1138,15 +1138,18 @@ input[type=number] {
 
 /* Full screen overlay menu */
 .menu__box {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 80px 20px 20px 20px;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 70px 20px 20px 20px !important;
   list-style: none;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(20, 20, 30, 0.98) 100%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(20, 20, 30, 0.98) 100%) !important;
   backdrop-filter: blur(10px);
   z-index: 1000;
   
@@ -1158,13 +1161,12 @@ input[type=number] {
   /* Smooth animation */
   transition: opacity 0.4s ease, visibility 0.4s ease;
   
-  /* Grid layout for nav items */
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* Grid layout for nav items - ALWAYS 2 columns */
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: 12px;
   align-content: center;
-  max-width: 600px;
-  margin: 0 auto;
+  justify-content: center;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -1192,8 +1194,10 @@ input[type=number] {
   background: var(--button-bg-1);
   border: 1px solid var(--button-border-1);
   transition: all 0.3s ease;
-  white-space: nowrap;
+  white-space: normal;
+  word-wrap: break-word;
   box-sizing: border-box;
+  min-width: 0;
   
   /* Staggered entrance animation */
   animation: menuItemFadeIn 0.5s ease forwards;
@@ -3139,20 +3143,20 @@ input[type="time"].form-input:focus {
   
   /* Mobile navigation improvements */
   .menu__box {
-    max-width: 100%;
-    padding: 70px 15px 15px 15px;
-    gap: 10px;
+    padding: 70px 10px 20px 10px !important;
+    gap: 8px !important;
+    /* Keep 2 columns - do NOT override grid-template-columns */
   }
   
   .menu__item {
-    font-size: 13px;
-    padding: 12px 12px;
-    gap: 8px;
+    font-size: 12px !important;
+    padding: 10px 8px !important;
+    gap: 6px !important;
   }
   
   .menu-icon {
-    width: 14px;
-    height: 14px;
+    width: 14px !important;
+    height: 14px !important;
   }
   
   .menu-section-header {
@@ -3171,16 +3175,23 @@ input[type="time"].form-input:focus {
   }
 }
 
-/* Extra small screens - single column if needed */
+/* Extra small screens - keep 2 columns, just make items even smaller */
 @media (max-width: 400px) {
   .menu__box {
-    grid-template-columns: 1fr;
-    max-width: 300px;
-    gap: 8px;
+    padding: 70px 8px 20px 8px !important;
+    gap: 6px !important;
+    /* Still 2 columns - never override to 1 column */
   }
   
   .menu__item {
-    font-size: 14px;
+    font-size: 11px !important;
+    padding: 8px 6px !important;
+    gap: 4px !important;
+  }
+  
+  .menu-icon {
+    width: 12px !important;
+    height: 12px !important;
   }
 }
 
