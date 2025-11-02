@@ -688,6 +688,36 @@ td.player_name, td.player_name a {
   white-space: nowrap !important;
 }
 
+/* Date column - narrow, centered, no wrapping */
+.table-col-date {
+  width: 90px !important;
+  max-width: 90px !important;
+  min-width: 90px !important;
+  text-align: center !important;
+  padding: 4px 4px !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+}
+
+/* Players column - for game tables with multiple players */
+.table-col-players {
+  width: auto !important;
+  min-width: 100px !important;
+  text-align: left !important;
+  padding: 4px 6px !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  hyphens: none !important;
+  line-height: 1.4 !important;
+}
+
+.table-col-players a {
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+
 /* Mobile adjustments for table columns */
 @media (max-width: 768px) {
   .table-col-rank {
@@ -710,6 +740,20 @@ td.player_name, td.player_name a {
     min-width: 50px !important;
     padding: 3px 1px !important;
     font-size: 10px !important;
+  }
+  
+  .table-col-date {
+    width: 80px !important;
+    max-width: 80px !important;
+    min-width: 80px !important;
+    padding: 3px 2px !important;
+    font-size: 10px !important;
+  }
+  
+  .table-col-players {
+    min-width: 85px !important;
+    padding: 3px 4px !important;
+    font-size: 11px !important;
   }
 }
 
