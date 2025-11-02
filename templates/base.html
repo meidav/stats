@@ -52,13 +52,24 @@
         document.addEventListener('click', function(event) {
             var nav = document.getElementById('main-nav');
             var targetElement = event.target; // Clicked element
+            var menuToggle = document.getElementById('menu__toggle');
 
             // Check if the clicked element is outside of the nav menu and not the menu toggle button
             if (!nav.contains(targetElement) && targetElement.id !== 'menu__toggle') {
-                // Hide the nav menu
-                var menuToggle = document.getElementById('menu__toggle');
                 menuToggle.checked = false; // Uncheck the menu toggle checkbox
             }
+        });
+        
+        // Close menu when clicking on any menu item for better UX
+        document.addEventListener('DOMContentLoaded', function() {
+            var menuItems = document.querySelectorAll('.menu__item');
+            var menuToggle = document.getElementById('menu__toggle');
+            
+            menuItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    menuToggle.checked = false; // Close the menu
+                });
+            });
         });
         
     </script>
