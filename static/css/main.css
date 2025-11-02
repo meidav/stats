@@ -1177,6 +1177,32 @@ input[type=number] {
   margin: 0;
   padding: 0;
 }
+
+/* Menu separator - spans both columns */
+.menu-separator {
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0 12px 0;
+  margin: 8px 0;
+}
+
+.separator-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--button-border-1), transparent);
+  opacity: 0.5;
+}
+
+.separator-text {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+}
 /* Menu items - optimized for 2-column grid */
 .menu__item {
   display: flex;
@@ -3157,6 +3183,15 @@ input[type="time"].form-input:focus {
   .menu-icon {
     width: 14px !important;
     height: 14px !important;
+  }
+  
+  .menu-separator {
+    padding: 16px 0 10px 0 !important;
+    gap: 8px !important;
+  }
+  
+  .separator-text {
+    font-size: 11px !important;
   }
   
   .menu-section-header {

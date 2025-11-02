@@ -137,6 +137,13 @@
                 </a></li>
                 
                 {% if current_user.is_authenticated and current_user.is_admin %}
+                <!-- Admin section separator -->
+                <li class="menu-separator">
+                    <div class="separator-line"></div>
+                    <span class="separator-text">Admin</span>
+                    <div class="separator-line"></div>
+                </li>
+                
                 <li><a class="menu__item admin-item" href="{{ url_for('admin_dashboard') }}">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="7" height="7"/>
@@ -144,7 +151,7 @@
                         <rect x="14" y="14" width="7" height="7"/>
                         <rect x="3" y="14" width="7" height="7"/>
                     </svg>
-                    Dashboard
+                    Admin Dashboard
                 </a></li>
                 <li><a class="menu__item admin-item" href="{{ url_for('add_game') }}">
                     <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
