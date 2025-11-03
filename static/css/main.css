@@ -593,8 +593,9 @@ td a {
 }
 
 table {
-  width: auto;
-  margin: 0 15px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
   background-color: var(--table-bg);
   border-radius: var(--rounded-corners);
   font-size: 14px;
@@ -604,7 +605,6 @@ table {
   box-shadow: 0 4px 20px var(--shadow-dark);
   table-layout: auto;
   display: table;
-  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
