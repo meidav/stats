@@ -48,7 +48,8 @@ def set_cur():
     return cur  
 
 def add_tennis_stats(match):
-    # match[6] is the set_scores if provided
+    # match array: [date, winner, loser, winner_score, loser_score, updated_at, set_scores]
+    # Rearrange to match new_tennis_match signature: (date, winner, winner_score, loser, loser_score, updated_at, set_scores)
     set_scores = match[6] if len(match) > 6 else None
     new_tennis_match(match[0], match[1], match[3], match[2], match[4], match[5], set_scores)
 
@@ -63,16 +64,8 @@ def new_tennis_match(match_date, winner, winner_score, loser, loser_score, updat
         database = r'stats.db'
         conn = create_connection(database)
     with conn:
-        # Check if set_scores column exists in database
-        cur = conn.cursor()
-        cur.execute("PRAGMA table_info(tennis_matches)")
-        columns = [column[1] for column in cur.fetchall()]
-        
-        if 'set_scores' in columns and set_scores is not None:
-            match = (match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
-        else:
-            match = (match_date, winner, winner_score, loser, loser_score, updated_at)
-        
+        # Always pass 7 parameters (set_scores can be None for old/simple matches)
+        match = (match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
         create_tennis_match(conn, match)
 
 def find_tennis_match(match_id):

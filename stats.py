@@ -1005,13 +1005,18 @@ def add_tennis_match():
             # Use current date/time for both
             date_time_played = my_time
         
-        # For now, store as simple winner/loser with total games won
-        # TODO: Update database schema to store individual set scores
+        # Store actual set scores as text (e.g., "6-3, 6-4")
+        set_scores_text = ", ".join([f"{w}-{l}" for w, l in sets])
         total_winner_games = sum(w for w, l in sets)
         total_loser_games = sum(l for w, l in sets)
         
-        add_tennis_stats([date_time_played, winner, loser, total_winner_games, total_loser_games, my_time])
-        flash(f'Tennis match added! Format: {match_format.replace("_", " ").title()}', 'success')
+        # Debug logging
+        print(f"DEBUG: Set scores text = {set_scores_text}")
+        print(f"DEBUG: Sets = {sets}")
+        
+        # Store both totals (for backwards compatibility) and actual set scores
+        add_tennis_stats([date_time_played, winner, loser, total_winner_games, total_loser_games, my_time, set_scores_text])
+        flash(f'Tennis match added! {set_scores_text}', 'success')
         return redirect(url_for('add_tennis_match'))
 
     return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
