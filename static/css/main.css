@@ -682,9 +682,9 @@ td.player_name, td.player_name a {
 
 /* Stats columns - narrow, centered, no wrapping */
 .table-col-stat {
-  width: 60px !important;
-  max-width: 60px !important;
-  min-width: 60px !important;
+  width: 40px !important;
+  max-width: 40px !important;
+  min-width: 40px !important;
   text-align: center !important;
   padding: 4px 2px !important;
   white-space: nowrap !important;
@@ -692,11 +692,11 @@ td.player_name, td.player_name a {
 
 /* Date column - narrow, centered, no wrapping */
 .table-col-date {
-  width: 90px !important;
-  max-width: 90px !important;
-  min-width: 90px !important;
+  width: 75px !important;
+  max-width: 75px !important;
+  min-width: 75px !important;
   text-align: center !important;
-  padding: 4px 4px !important;
+  padding: 4px 2px !important;
   white-space: nowrap !important;
   font-size: 13px !important;
 }
@@ -704,9 +704,9 @@ td.player_name, td.player_name a {
 /* Players column - for game tables with multiple players */
 .table-col-players {
   width: auto !important;
-  min-width: 100px !important;
+  min-width: 90px !important;
   text-align: left !important;
-  padding: 4px 6px !important;
+  padding: 4px 4px !important;
   white-space: normal !important;
   word-break: normal !important;
   overflow-wrap: break-word !important;
@@ -737,24 +737,24 @@ td.player_name, td.player_name a {
   }
   
   .table-col-stat {
-    width: 50px !important;
-    max-width: 50px !important;
-    min-width: 50px !important;
-    padding: 4px 2px !important;
+    width: 35px !important;
+    max-width: 35px !important;
+    min-width: 35px !important;
+    padding: 4px 1px !important;
     font-size: 11px !important;
   }
   
   .table-col-date {
-    width: 80px !important;
-    max-width: 80px !important;
-    min-width: 80px !important;
+    width: 70px !important;
+    max-width: 70px !important;
+    min-width: 70px !important;
     padding: 4px 2px !important;
     font-size: 11px !important;
   }
   
   .table-col-players {
-    min-width: 85px !important;
-    padding: 4px 4px !important;
+    min-width: 75px !important;
+    padding: 4px 3px !important;
     font-size: 11px !important;
   }
 }
