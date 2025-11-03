@@ -48,99 +48,87 @@
     </nav>
     <div class="space-y-8">
     {% if todays_stats %}
-        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
-        <h1 class="text-2xl font-bold text-primary mb-4">Today's tennis stats</h1>
-        <div class="overflow-x-auto">
-            <table id="todaysStatsTable" class="w-full">
-                <thead>
-                    <tr class="border-b border-border-color">
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(0, 'todaysStatsTable')">#</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(1, 'todaysStatsTable')">Player</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(2, 'todaysStatsTable')">Wins</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(3, 'todaysStatsTable')">Losses</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(4, 'todaysStatsTable')">Win %</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(5, 'todaysStatsTable')">+/-</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for stat in todays_stats %}
-                    <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
-                        <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
-                        <td class="py-3 px-4"><a href="{{ url_for('tennis_player_stats', year=year, name=stat[0] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ stat[0] }}</a></td>
-                        <td class="py-3 px-4 text-primary">{{ stat[1] }}</td>
-                        <td class="py-3 px-4 text-primary">{{ stat[2] }}</td>
-                        <td class="py-3 px-4 text-primary">{{ "{:.2f}".format(stat[3]*100) }}</td>
-                        {% if stat[4] > 0 %}
-                            <td class="py-3 px-4 text-green-400">+{{ stat[4] }}</td>
-                        {% else %}
-                            <td class="py-3 px-4 text-red-400">{{ stat[4] }}</td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
-        <h1 class="text-2xl font-bold text-primary mb-4">Today's tennis matches</h1>
-        <div class="overflow-x-auto">
-            <table id="matchesTable" class="w-full">
-                <thead>
-                    <tr class="border-b border-border-color">
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(0, 'matchesTable')">#</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(1, 'matchesTable')">Date/Updated</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(2, 'matchesTable')">Winner</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(3, 'matchesTable')">Loser</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for match in matches %}
-                        <tr class="hover:bg-gray-800 transition-colors">
-                            <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
-                            <td class="py-3 px-4 text-primary">{{ (match[1])[0:10] }}<br>{{ (match[1])[11:19] }}</td>
-                            <td class="py-3 px-4"><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ match[2] }}</a></td>
-                            <td class="py-3 px-4"><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ match[4] }}</a></td>
-                        </tr>
-                        <tr class="hover:bg-gray-800 transition-colors">
-                            <td class="py-3 px-4 text-primary font-medium"> </td>
-                            <td class="py-3 px-4 text-primary">{{ (match[6])[0:10] }}<br>{{ (match[6])[11:19] }}</td>
-                            <td class="py-3 px-4 text-primary">{{ match[3] }}</td>
-                            <td class="py-3 px-4 text-primary">{{ match[5] }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <table id="todaysStatsTable">
+        <h1>Today's tennis stats</h1>
+        <thead>
+            <tr>
+                <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'todaysStatsTable')">#</th>
+                <th class="table-col-player clickable" scope="col" onclick="sortTable(1, 'todaysStatsTable')">Player</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(2, 'todaysStatsTable')">Wins</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(3, 'todaysStatsTable')">Losses</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(4, 'todaysStatsTable')">Win&nbsp;%</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(5, 'todaysStatsTable')">+/-</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in todays_stats %}
+            <tr>
+                <td class="table-col-rank">{{ loop.index }}</td>
+                <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=stat[0] ) }}">{{ stat[0] }}</a></td>
+                <td class="table-col-stat">{{ stat[1] }}</td>
+                <td class="table-col-stat">{{ stat[2] }}</td>
+                <td class="table-col-stat">{{ "{:.2f}".format(stat[3]*100) }}</td>
+                {% if stat[4] > 0 %}
+                    <td class="table-col-stat">+{{ stat[4] }}</td>
+                {% else %}
+                    <td class="table-col-stat">{{ stat[4] }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table id="matchesTable">
+        <h1>Today's tennis matches</h1>
+        <thead>
+            <tr>
+                <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'matchesTable')">#</th>
+                <th class="table-col-date clickable" scope="col" onclick="sortTable(1, 'matchesTable')">Date/Updated</th>
+                <th class="table-col-player clickable" scope="col" onclick="sortTable(2, 'matchesTable')">Winner</th>
+                <th class="table-col-player clickable" scope="col" onclick="sortTable(3, 'matchesTable')">Loser</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+                <tr class="table-double-row">
+                    <td class="table-col-rank" style="vertical-align: bottom;">{{ loop.index }}</td>
+                    <td class="table-col-date">{{ (match[1])[0:10] }}<br>{{ (match[1])[11:19] }}</td>
+                    <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
+                    <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
+                </tr>
+                <tr class="table-double-row">
+                    <td class="table-col-rank"> </td>
+                    <td class="table-col-date">{{ (match[6])[0:10] }}<br>{{ (match[6])[11:19] }}</td>
+                    <td class="table-col-player">{{ match[3] }}</td>
+                    <td class="table-col-player">{{ match[5] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% endif %}
     </div>
-        <div class="bg-card-bg rounded-xl p-6 shadow-lg">
-        <h1 class="text-2xl font-bold text-primary mb-4">{% block title %} {{ year }} Tennis stats {% endblock %}</h1>
-        <div class="overflow-x-auto">
-            <table id="yearlyStatsTable" class="w-full">
-                <thead>
-                    <tr class="border-b border-border-color">
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(0, 'yearlyStatsTable')">#</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(1, 'yearlyStatsTable')">Player</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(2, 'yearlyStatsTable')">Wins</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(3, 'yearlyStatsTable')">Losses</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(4, 'yearlyStatsTable')">Win %</th>
-                        <th class="text-left py-3 px-4 text-primary font-semibold cursor-pointer hover:text-accent transition-colors" scope="col" onclick="sortTable(5, 'yearlyStatsTable')">Matches</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for player in stats %}
-                    <tr class="border-b border-border-color hover:bg-gray-800 transition-colors">
-                        <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
-                        <td class="py-3 px-4"><a href="{{ url_for('tennis_player_stats', year=year, name=player[0] ) }}" class="text-accent hover:text-accent-hover transition-colors">{{ player[0] }}</a></td>
-                        <td class="py-3 px-4 text-primary">{{ player[1] }}</td>
-                        <td class="py-3 px-4 text-primary">{{ player[2] }}</td>
-                        <td class="py-3 px-4 text-primary">{{ "{:.2f}".format(player[3]*100) }}</td>
-                        <td class="py-3 px-4 text-primary">{{ player[1] + player[2] }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <h1>{% block title %} {{ year }} Tennis stats {% endblock %}</h1>
+    <table id="yearlyStatsTable">
+        <thead>
+            <tr>
+                <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'yearlyStatsTable')">#</th>
+                <th class="table-col-player clickable" scope="col" onclick="sortTable(1, 'yearlyStatsTable')">Player</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(2, 'yearlyStatsTable')">Wins</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(3, 'yearlyStatsTable')">Losses</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(4, 'yearlyStatsTable')">Win&nbsp;%</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(5, 'yearlyStatsTable')">Matches</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in stats %}
+            <tr>
+                <td class="table-col-rank">{{ loop.index }}</td>
+                <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                <td class="table-col-stat">{{ player[1] }}</td>
+                <td class="table-col-stat">{{ player[2] }}</td>
+                <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

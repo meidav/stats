@@ -14,39 +14,28 @@
         </div>       
     </nav>
     <h1>{% block title %} {{ year }} Tennis matches {% endblock %}</h1>
-        <div class="bg-card-bg rounded-xl p-6 shadow-lg mx-auto" style="max-width: 100%">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr>
-                            <th class="text-left py-3 px-4 text-primary font-semibold">#</th>
-                            <th class="text-left py-3 px-4 text-primary font-semibold">Date & Time</th>
-                            <th class="text-left py-3 px-4 text-primary font-semibold">Winner</th>
-                            <th class="text-left py-3 px-4 text-primary font-semibold">Score</th>
-                            <th class="text-left py-3 px-4 text-primary font-semibold">Loser</th>
-                            <th class="text-left py-3 px-4 text-primary font-semibold">Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for match in matches %}
-                            <tr class="hover:bg-gray-800 transition-colors">
-                                <td class="py-3 px-4 text-primary font-medium">{{ loop.index }}</td>
-                                <td class="py-3 px-4 text-primary">
-                                    <div class="font-medium">{{ (match[1])[0:10] }}</div>
-                                    <div class="text-sm text-secondary">{{ (match[1])[11:19] }}</div>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <a href="{{ url_for('player_stats', year=year, name=match[2] ) }}" class="text-accent hover:text-accent-hover transition-colors font-medium">{{ match[2] }}</a>
-                                </td>
-                                <td class="py-3 px-4 text-primary font-bold text-lg">{{ match[3] }}</td>
-                                <td class="py-3 px-4">
-                                    <a href="{{ url_for('player_stats', year=year, name=match[4] ) }}" class="text-accent hover:text-accent-hover transition-colors font-medium">{{ match[4] }}</a>
-                                </td>
-                                <td class="py-3 px-4 text-primary font-bold text-lg">{{ match[5] }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <table>
+        <thead>
+            <tr>
+                <th class="table-col-rank" scope="col">#</th>
+                <th class="table-col-date" scope="col">Date & Time</th>
+                <th class="table-col-player" scope="col">Winner</th>
+                <th class="table-col-stat" scope="col">Score</th>
+                <th class="table-col-player" scope="col">Loser</th>
+                <th class="table-col-stat" scope="col">Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+                <tr>
+                    <td class="table-col-rank">{{ loop.index }}</td>
+                    <td class="table-col-date">{{ (match[1])[0:10] }}<br>{{ (match[1])[11:19] }}</td>
+                    <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
+                    <td class="table-col-stat">{{ match[3] }}</td>
+                    <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
+                    <td class="table-col-stat">{{ match[5] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
