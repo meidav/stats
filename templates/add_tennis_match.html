@@ -15,7 +15,7 @@
             </datalist>
             
             <!-- Players -->
-            <div class="form-section" style="margin-bottom: 12px;">
+            <div class="form-section" style="margin-bottom: 0;">
                 <h3>Players</h3>
                 <div class="form-row">
                     <input type="text" name="winner" placeholder="Winner" value="{{ request.form['winner'] }}" list="players_list" required class="form-field-compact">
@@ -24,8 +24,16 @@
             </div>
 
             <!-- Set Scores -->
-            <div class="form-section" style="margin-bottom: 12px;">
+            <div class="form-section" style="margin-bottom: 0;">
                 <h3>Set scores</h3>
+                
+                <!-- Match Format Buttons -->
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <button type="button" onclick="showSets(1)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">1 Set</button>
+                    <button type="button" onclick="showSets(3)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 3</button>
+                    <button type="button" onclick="showSets(5)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 5</button>
+                </div>
+                
                 <div class="form-row" id="set1">
                     <input type="number" name="winner_set1" placeholder="Set 1 - W" min="0" max="7" value="{{ request.form.get('winner_set1', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set1" placeholder="Set 1 - L" min="0" max="7" value="{{ request.form.get('loser_set1', '') }}" class="form-field-compact">
@@ -50,17 +58,10 @@
                     <input type="number" name="winner_set5" placeholder="Set 5 - W" min="0" max="7" value="{{ request.form.get('winner_set5', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set5" placeholder="Set 5 - L" min="0" max="7" value="{{ request.form.get('loser_set5', '') }}" class="form-field-compact">
                 </div>
-                
-                <!-- Match Format Buttons -->
-                <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
-                    <button type="button" onclick="showSets(1)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">1 Set</button>
-                    <button type="button" onclick="showSets(3)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 3</button>
-                    <button type="button" onclick="showSets(5)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 5</button>
-                </div>
             </div>
             
             <!-- Optional Date/Time -->
-            <div class="form-section">
+            <div class="form-section" style="margin-bottom: 0;">
                 <h3>Match details (optional)</h3>
                 <div class="form-row">
                     <input type="date" name="date_played" id="date_played" value="{{ request.form.get('date_played', '') }}" class="form-field-compact">
@@ -68,7 +69,7 @@
                 </div>
             </div>
 
-            <input type="submit" value="Add match" class="submit-button">
+            <input type="submit" value="Add match" style="background-color: #0969da !important; color: white !important; border: none !important;">
         </form>
     </div>
 
