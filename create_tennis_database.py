@@ -29,8 +29,13 @@ def create_table(conn, create_table_sql):
         print(e)
 
 def create_tennis_match(conn, match):
-    sql = ''' INSERT INTO tennis_matches(match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
-              VALUES(?,?,?,?,?,?,?) '''
+    # Handle both old format (6 items) and new format (7 items with set_scores)
+    if len(match) == 7:
+        sql = ''' INSERT INTO tennis_matches(match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
+                  VALUES(?,?,?,?,?,?,?) '''
+    else:
+        sql = ''' INSERT INTO tennis_matches(match_date, winner, winner_score, loser, loser_score, updated_at)
+                  VALUES(?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, match)
     conn.commit()
