@@ -702,6 +702,17 @@ td.player_name, td.player_name a {
   font-size: 13px !important;
 }
 
+/* Tennis score column - for set scores like "6-3, 6-4" */
+.table-col-tennis-score {
+  width: auto !important;
+  min-width: 80px !important;
+  max-width: 120px !important;
+  text-align: center !important;
+  padding: 4px 4px !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+}
+
 /* Players column - for game tables with multiple players */
 .table-col-players {
   width: auto !important;
@@ -760,6 +771,13 @@ td.player_name, td.player_name a {
     min-width: 75px !important;
     padding: 4px 3px !important;
     font-size: 10px !important;
+  }
+  
+  .table-col-tennis-score {
+    min-width: 70px !important;
+    max-width: 100px !important;
+    padding: 4px 3px !important;
+    font-size: 11px !important;
   }
 }
 

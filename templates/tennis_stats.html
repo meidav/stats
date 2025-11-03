@@ -82,24 +82,20 @@
         <thead>
             <tr>
                 <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'matchesTable')">#</th>
-                <th class="table-col-date clickable" scope="col" onclick="sortTable(1, 'matchesTable')">Date/Updated</th>
+                <th class="table-col-date clickable" scope="col" onclick="sortTable(1, 'matchesTable')">Date</th>
                 <th class="table-col-player clickable" scope="col" onclick="sortTable(2, 'matchesTable')">Winner</th>
                 <th class="table-col-player clickable" scope="col" onclick="sortTable(3, 'matchesTable')">Loser</th>
+                <th class="table-col-tennis-score clickable" scope="col" onclick="sortTable(4, 'matchesTable')">Sets</th>
             </tr>
         </thead>
         <tbody>
             {% for match in matches %}
-                <tr class="table-double-row">
-                    <td class="table-col-rank" style="vertical-align: bottom;">{{ loop.index }}</td>
-                    <td class="table-col-date">{{ (match[1])[0:10] }}<br>{{ (match[1])[11:19] }}</td>
+                <tr>
+                    <td class="table-col-rank">{{ loop.index }}</td>
+                    <td class="table-col-date" title="Time: {{ (match[1])[11:19] }}">{{ (match[1])[0:10] }}</td>
                     <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
                     <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
-                </tr>
-                <tr class="table-double-row">
-                    <td class="table-col-rank"> </td>
-                    <td class="table-col-date">{{ (match[6])[0:10] }}<br>{{ (match[6])[11:19] }}</td>
-                    <td class="table-col-player">{{ match[3] }}</td>
-                    <td class="table-col-player">{{ match[5] }}</td>
+                    <td class="table-col-tennis-score">{{ match[7] if match[7] else (match[3]|string + '-' + match[5]|string) }}</td>
                 </tr>
             {% endfor %}
         </tbody>

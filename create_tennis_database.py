@@ -29,8 +29,8 @@ def create_table(conn, create_table_sql):
         print(e)
 
 def create_tennis_match(conn, match):
-    sql = ''' INSERT INTO tennis_matches(match_date, winner, winner_score, loser, loser_score, updated_at)
-              VALUES(?,?,?,?,?,?) '''
+    sql = ''' INSERT INTO tennis_matches(match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
+              VALUES(?,?,?,?,?,?,?) '''
     cur = conn.cursor()
     cur.execute(sql, match)
     conn.commit()

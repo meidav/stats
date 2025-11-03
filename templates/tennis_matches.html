@@ -18,22 +18,20 @@
         <thead>
             <tr>
                 <th class="table-col-rank" scope="col">#</th>
-                <th class="table-col-date" scope="col">Date & Time</th>
+                <th class="table-col-date" scope="col">Date</th>
                 <th class="table-col-player" scope="col">Winner</th>
-                <th class="table-col-stat" scope="col">Score</th>
                 <th class="table-col-player" scope="col">Loser</th>
-                <th class="table-col-stat" scope="col">Score</th>
+                <th class="table-col-tennis-score" scope="col">Sets</th>
             </tr>
         </thead>
         <tbody>
             {% for match in matches %}
                 <tr>
                     <td class="table-col-rank">{{ loop.index }}</td>
-                    <td class="table-col-date">{{ (match[1])[0:10] }}<br>{{ (match[1])[11:19] }}</td>
+                    <td class="table-col-date" title="Time: {{ (match[1])[11:19] }}">{{ (match[1])[0:10] }}</td>
                     <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
-                    <td class="table-col-stat">{{ match[3] }}</td>
                     <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
-                    <td class="table-col-stat">{{ match[5] }}</td>
+                    <td class="table-col-tennis-score">{{ match[7] if match[7] else (match[3]|string + '-' + match[5]|string) }}</td>
                 </tr>
             {% endfor %}
         </tbody>

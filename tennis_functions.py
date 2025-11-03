@@ -48,20 +48,22 @@ def set_cur():
     return cur  
 
 def add_tennis_stats(match):
-    new_tennis_match(match[0], match[1], match[3], match[2], match[4], match[5])
+    # match[6] is the set_scores if provided
+    set_scores = match[6] if len(match) > 6 else None
+    new_tennis_match(match[0], match[1], match[3], match[2], match[4], match[5], set_scores)
 
 def enter_data_into_database(matches_data):
     for x in matches_data:
-        new_tennis_match(x[4], x[2], 0, x[3], 0, x[4])
+        new_tennis_match(x[4], x[2], 0, x[3], 0, x[4], None)
 
-def new_tennis_match(match_date, winner, winner_score, loser, loser_score, updated_at):
+def new_tennis_match(match_date, winner, winner_score, loser, loser_score, updated_at, set_scores=None):
     database = '/home/Idynkydnk/stats/stats.db'
     conn = create_connection(database)
     if conn is None:
         database = r'stats.db'
         conn = create_connection(database)
     with conn: 
-        match = (match_date, winner, winner_score, loser, loser_score, updated_at);
+        match = (match_date, winner, winner_score, loser, loser_score, updated_at, set_scores);
         create_tennis_match(conn, match)
 
 def find_tennis_match(match_id):
