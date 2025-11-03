@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <h1>Add a tennis match</h1>
+    <h1 style="margin-bottom: 16px;">Add a tennis match</h1>
     
     <div class="form-container">
         <form method="post">
@@ -15,7 +15,7 @@
             </datalist>
             
             <!-- Players -->
-            <div class="form-section">
+            <div class="form-section" style="margin-bottom: 12px;">
                 <h3>Players</h3>
                 <div class="form-row">
                     <input type="text" name="winner" placeholder="Winner" value="{{ request.form['winner'] }}" list="players_list" required class="form-field-compact">
@@ -24,7 +24,7 @@
             </div>
 
             <!-- Set Scores -->
-            <div class="form-section">
+            <div class="form-section" style="margin-bottom: 12px;">
                 <h3>Set scores</h3>
                 <div class="form-row" id="set1">
                     <input type="number" name="winner_set1" placeholder="Set 1 - W" min="0" max="7" value="{{ request.form.get('winner_set1', '') }}" class="form-field-compact">
@@ -52,7 +52,7 @@
                 </div>
                 
                 <!-- Match Format Buttons -->
-                <div style="text-align: center; margin-top: 16px;">
+                <div style="text-align: center; margin-top: 16px; margin-bottom: 12px;">
                     <button type="button" onclick="showSets(1)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">1 Set</button>
                     <button type="button" onclick="showSets(3)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 3</button>
                     <button type="button" onclick="showSets(5)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 5</button>
@@ -63,12 +63,12 @@
             <div class="form-section">
                 <h3>Match details (optional)</h3>
                 <div class="form-row">
-                    <input type="date" name="date_played" value="{{ request.form.get('date_played', '') }}" class="form-field-compact">
-                    <input type="time" name="time_played" value="{{ request.form.get('time_played', '') }}" class="form-field-compact">
+                    <input type="date" name="date_played" id="date_played" value="{{ request.form.get('date_played', '') }}" class="form-field-compact">
+                    <input type="time" name="time_played" id="time_played" value="{{ request.form.get('time_played', '') }}" class="form-field-compact">
                 </div>
             </div>
 
-            <input type="submit" value="Add Match">
+            <input type="submit" value="Add match" class="submit-button">
         </form>
     </div>
 
@@ -179,5 +179,27 @@ function showSets(numSets) {
         document.getElementById('set5').style.display = 'flex';
     }
 }
+
+// Auto-fill date and time with current values on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('date_played');
+    const timeInput = document.getElementById('time_played');
+    
+    // Only set if fields are empty
+    if (!dateInput.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}`;
+    }
+    
+    if (!timeInput.value) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        timeInput.value = `${hours}:${minutes}`;
+    }
+});
 </script>
 {% endblock %}
