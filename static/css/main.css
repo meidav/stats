@@ -595,9 +595,7 @@ td a {
 table {
   width: calc(100% - 30px);
   max-width: calc(100% - 30px);
-  margin: 0 auto;
-  margin-left: 15px;
-  margin-right: 15px;
+  margin: 0 15px;
   background-color: var(--table-bg);
   border-radius: var(--rounded-corners);
   font-size: 14px;
@@ -673,12 +671,14 @@ td.player_name, td.player_name a {
   word-break: normal !important;
   overflow-wrap: break-word !important;
   hyphens: none !important;
+  font-size: 12px !important;
 }
 
 .table-col-player a {
   white-space: normal !important;
   word-break: normal !important;
   overflow-wrap: break-word !important;
+  font-size: 12px !important;
 }
 
 /* Stats columns - narrow, centered, no wrapping */
@@ -713,12 +713,14 @@ td.player_name, td.player_name a {
   overflow-wrap: break-word !important;
   hyphens: none !important;
   line-height: 1.4 !important;
+  font-size: 12px !important;
 }
 
 .table-col-players a {
   white-space: normal !important;
   word-break: normal !important;
   overflow-wrap: break-word !important;
+  font-size: 12px !important;
 }
 
 /* Mobile adjustments for table columns */
@@ -735,7 +737,7 @@ td.player_name, td.player_name a {
     min-width: 85px !important;
     max-width: 130px !important;
     padding: 4px 4px !important;
-    font-size: 13px !important;
+    font-size: 11px !important;
   }
   
   .table-col-stat {
@@ -757,7 +759,7 @@ td.player_name, td.player_name a {
   .table-col-players {
     min-width: 75px !important;
     padding: 4px 3px !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
   }
 }
 
