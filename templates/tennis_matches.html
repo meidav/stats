@@ -31,7 +31,7 @@
                     <td class="table-col-date" title="Time: {{ (match[1])[11:19] }}">{{ (match[1])[0:10] }}</td>
                     <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
                     <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
-                    <td class="table-col-tennis-score">{{ match[7] if match[7] else (match[3]|string + '-' + match[5]|string) }}</td>
+                    <td class="table-col-tennis-score">{{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}</td>
                 </tr>
             {% endfor %}
         </tbody>

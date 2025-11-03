@@ -62,8 +62,17 @@ def new_tennis_match(match_date, winner, winner_score, loser, loser_score, updat
     if conn is None:
         database = r'stats.db'
         conn = create_connection(database)
-    with conn: 
-        match = (match_date, winner, winner_score, loser, loser_score, updated_at, set_scores);
+    with conn:
+        # Check if set_scores column exists in database
+        cur = conn.cursor()
+        cur.execute("PRAGMA table_info(tennis_matches)")
+        columns = [column[1] for column in cur.fetchall()]
+        
+        if 'set_scores' in columns and set_scores is not None:
+            match = (match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
+        else:
+            match = (match_date, winner, winner_score, loser, loser_score, updated_at)
+        
         create_tennis_match(conn, match)
 
 def find_tennis_match(match_id):
