@@ -593,11 +593,8 @@ td a {
 }
 
 table {
-  width: calc(100% - 30px);
-  max-width: calc(100% - 30px);
-  margin: 0 auto;
-  margin-left: 15px;
-  margin-right: 15px;
+  width: auto;
+  margin: 0 15px;
   background-color: var(--table-bg);
   border-radius: var(--rounded-corners);
   font-size: 14px;
