@@ -21,23 +21,23 @@
             <table>
                 <thead>
                     <tr>
-                        <th class="rank" scope="col" colspan="1">#</th>
-                        <th scope="col" colspan="1">Date</th>
-                        <th scope="col" colspan="1">Winner</th>
-                        <th scope="col" colspan="1"></th>
-                        <th scope="col" colspan="1">Loser</th>
-                        <th scope="col" colspan="1"></th>
+                        <th class="table-col-rank" scope="col">#</th>
+                        <th class="table-col-date" scope="col">Date</th>
+                        <th class="table-col-player" scope="col">Winner</th>
+                        <th class="table-col-stat" scope="col"></th>
+                        <th class="table-col-player" scope="col">Loser</th>
+                        <th class="table-col-stat" scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for game in games %}
                     <tr class="table-double-row">
-                        <td class="rank">{{ loop.index }}</td>
-                        <td title="Time: {{ (game[1])[11:19] }}">{{ (game[1])[0:10] }}</td>
-                        <td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
-                        <td>{{ game[3] }}</td>
-                        <td><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[4] }}</a></td>
-                        <td>{{ game[5] }}</td>
+                        <td class="table-col-rank">{{ loop.index }}</td>
+                        <td class="table-col-date" title="Time: {{ (game[1])[11:19] }}">{{ (game[1])[0:10] }}</td>
+                        <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
+                        <td class="table-col-stat">{{ game[3] }}</td>
+                        <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[4] }}</a></td>
+                        <td class="table-col-stat">{{ game[5] }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
