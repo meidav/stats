@@ -593,13 +593,15 @@ td a {
 }
 
 table {
-  width: 100%;
-  max-width: 100%;
+  width: calc(100% - 30px);
+  max-width: calc(100% - 30px);
   margin: 0 auto;
+  margin-left: 15px;
+  margin-right: 15px;
   background-color: var(--table-bg);
   border-radius: var(--rounded-corners);
-  font-size: 13px;
-  padding: 2px 4px;
+  font-size: 14px;
+  padding: 15px 8px;
   border-spacing: 0;
   border: none;
   box-shadow: 0 4px 20px var(--shadow-dark);
@@ -609,13 +611,13 @@ table {
 
 @media (max-width: 768px) {
   table {
-    font-size: 11px;
-    padding: 2px 2px;
+    font-size: 12px;
+    padding: 12px 6px;
   }
 }
 
 th, td {
-  padding: 4px 2px;
+  padding: 6px 4px;
   text-align: left;
   border: none;
   word-wrap: break-word;
@@ -626,13 +628,13 @@ th, td {
 
 @media (max-width: 768px) {
   th, td {
-    padding: 3px 1px;
-    font-size: 10px;
+    padding: 4px 2px;
+    font-size: 11px;
   }
 }
 
 th {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: bold;
   color: var(--text);
   background: transparent;
@@ -640,13 +642,13 @@ th {
 }
 
 td {
-  font-size: 12px;
+  font-size: 13px;
   border: none;
 }
 
-/* Player name cells should be slightly smaller */
+/* Player name cells - keep slightly larger */
 td.player_name, td.player_name a {
-  font-size: 14px;
+  font-size: 15px;
 }
 
 /* Common table column classes for consistent styling */
@@ -696,7 +698,7 @@ td.player_name, td.player_name a {
   text-align: center !important;
   padding: 4px 4px !important;
   white-space: nowrap !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
 }
 
 /* Players column - for game tables with multiple players */
@@ -724,13 +726,13 @@ td.player_name, td.player_name a {
     width: 30px !important;
     max-width: 30px !important;
     min-width: 30px !important;
-    padding: 3px 1px !important;
-    font-size: 10px !important;
+    padding: 4px 2px !important;
+    font-size: 11px !important;
   }
   
   .table-col-player {
     min-width: 100px !important;
-    padding: 3px 6px !important;
+    padding: 4px 6px !important;
     font-size: 13px !important;
   }
   
@@ -738,21 +740,21 @@ td.player_name, td.player_name a {
     width: 50px !important;
     max-width: 50px !important;
     min-width: 50px !important;
-    padding: 3px 1px !important;
-    font-size: 10px !important;
+    padding: 4px 2px !important;
+    font-size: 11px !important;
   }
   
   .table-col-date {
     width: 80px !important;
     max-width: 80px !important;
     min-width: 80px !important;
-    padding: 3px 2px !important;
-    font-size: 10px !important;
+    padding: 4px 2px !important;
+    font-size: 11px !important;
   }
   
   .table-col-players {
     min-width: 85px !important;
-    padding: 3px 4px !important;
+    padding: 4px 4px !important;
     font-size: 11px !important;
   }
 }
