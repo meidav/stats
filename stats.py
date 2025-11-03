@@ -920,7 +920,6 @@ def add_tennis_match():
     if request.method == 'POST':
         winner = request.form['winner']
         loser = request.form['loser']
-        match_format = request.form.get('match_format', 'single_set')
         
         # Get optional date/time played from form
         date_played = request.form.get('date_played', '').strip()
@@ -967,17 +966,9 @@ def add_tennis_match():
                     return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
                            matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
 
-        # Validate match format requirements
-        if match_format == 'single_set' and len(sets) != 1:
-            flash('Single set matches must have exactly 1 set!', 'danger')
-            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
-                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
-        elif match_format == 'best_of_3' and len(sets) < 2:
-            flash('Best of 3 matches must have at least 2 sets!', 'danger')
-            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
-                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
-        elif match_format == 'best_of_5' and len(sets) < 3:
-            flash('Best of 5 matches must have at least 3 sets!', 'danger')
+        # Validate at least one set was entered
+        if len(sets) == 0:
+            flash('At least one set is required!', 'danger')
             return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
                            matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
 
@@ -1016,7 +1007,7 @@ def add_tennis_match():
         
         # Store both totals (for backwards compatibility) and actual set scores
         add_tennis_stats([date_time_played, winner, loser, total_winner_games, total_loser_games, my_time, set_scores_text])
-        flash(f'Tennis match added! {set_scores_text}', 'success')
+        flash(f'Match added: {set_scores_text}', 'success')
         return redirect(url_for('add_tennis_match'))
 
     return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 

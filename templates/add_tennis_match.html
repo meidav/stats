@@ -6,103 +6,71 @@
 
     <h1>Add a tennis match</h1>
     
-    <form method="post">
-        <datalist id="players_list">
-            {% for player in players %}
-                <option value="{{ player }}"></option>
-            {% endfor %}
-        </datalist>
-        
-        <!-- Match Format Selection -->
-        <div class="form-section">
-            <h3>Match format</h3>
-            <div class="radio-group">
-                <label class="radio-label">
-                    <input type="radio" name="match_format" value="single_set" checked onchange="toggleSetFields()">
-                    Single set
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="match_format" value="best_of_3" onchange="toggleSetFields()">
-                    Best of 3 sets
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="match_format" value="best_of_5" onchange="toggleSetFields()">
-                    Best of 5 sets
-                </label>
+    <div class="form-container">
+        <form method="post">
+            <datalist id="players_list">
+                {% for player in players %}
+                    <option value="{{ player }}"></option>
+                {% endfor %}
+            </datalist>
+            
+            <!-- Players -->
+            <div class="form-section">
+                <h3>Players</h3>
+                <div class="form-row">
+                    <input type="text" name="winner" placeholder="Winner" value="{{ request.form['winner'] }}" list="players_list" required class="form-field-compact">
+                    <input type="text" name="loser" placeholder="Loser" value="{{ request.form['loser'] }}" list="players_list" required class="form-field-compact">
+                </div>
             </div>
-        </div>
 
-        <!-- Players -->
-        <div class="form-section">
-            <h3>Players</h3>
-            <label class="form-label">Winner</label>
-            <input type="text" name="winner" id="winner" placeholder="Winner's name" value="{{ request.form['winner'] }}" list="players_list" required class="form-field">
+            <!-- Set Scores -->
+            <div class="form-section">
+                <h3>Set scores</h3>
+                <div class="form-row" id="set1">
+                    <input type="number" name="winner_set1" placeholder="Set 1 - W" min="0" max="7" value="{{ request.form.get('winner_set1', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set1" placeholder="Set 1 - L" min="0" max="7" value="{{ request.form.get('loser_set1', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row" id="set2" style="display: none;">
+                    <input type="number" name="winner_set2" placeholder="Set 2 - W" min="0" max="7" value="{{ request.form.get('winner_set2', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set2" placeholder="Set 2 - L" min="0" max="7" value="{{ request.form.get('loser_set2', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row" id="set3" style="display: none;">
+                    <input type="number" name="winner_set3" placeholder="Set 3 - W" min="0" max="7" value="{{ request.form.get('winner_set3', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set3" placeholder="Set 3 - L" min="0" max="7" value="{{ request.form.get('loser_set3', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row" id="set4" style="display: none;">
+                    <input type="number" name="winner_set4" placeholder="Set 4 - W" min="0" max="7" value="{{ request.form.get('winner_set4', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set4" placeholder="Set 4 - L" min="0" max="7" value="{{ request.form.get('loser_set4', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row" id="set5" style="display: none;">
+                    <input type="number" name="winner_set5" placeholder="Set 5 - W" min="0" max="7" value="{{ request.form.get('winner_set5', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set5" placeholder="Set 5 - L" min="0" max="7" value="{{ request.form.get('loser_set5', '') }}" class="form-field-compact">
+                </div>
+                
+                <!-- Match Format Buttons -->
+                <div style="text-align: center; margin-top: 16px;">
+                    <button type="button" onclick="showSets(1)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">1 Set</button>
+                    <button type="button" onclick="showSets(3)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 3</button>
+                    <button type="button" onclick="showSets(5)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 5</button>
+                </div>
+            </div>
             
-            <label class="form-label">Loser</label>
-            <input type="text" name="loser" id="loser" placeholder="Loser's name" value="{{ request.form['loser'] }}" list="players_list" required class="form-field">
-        </div>
+            <!-- Optional Date/Time -->
+            <div class="form-section">
+                <h3>Match details (optional)</h3>
+                <div class="form-row">
+                    <input type="date" name="date_played" value="{{ request.form.get('date_played', '') }}" class="form-field-compact">
+                    <input type="time" name="time_played" value="{{ request.form.get('time_played', '') }}" class="form-field-compact">
+                </div>
+            </div>
 
-        <!-- Set Scores -->
-        <div class="form-section">
-            <h3>Set scores</h3>
-            <div class="set-field" id="set1">
-                <label class="form-label">Set 1</label>
-                <div class="form-row">
-                    <input type="number" name="winner_set1" placeholder="W" min="0" max="7" value="{{ request.form.get('winner_set1', '') }}" class="form-field-compact">
-                    <span style="align-self: center; color: var(--text-secondary);">-</span>
-                    <input type="number" name="loser_set1" placeholder="L" min="0" max="7" value="{{ request.form.get('loser_set1', '') }}" class="form-field-compact">
-                </div>
-            </div>
-            
-            <div class="set-field" id="set2" style="display: none;">
-                <label class="form-label">Set 2</label>
-                <div class="form-row">
-                    <input type="number" name="winner_set2" placeholder="W" min="0" max="7" value="{{ request.form.get('winner_set2', '') }}" class="form-field-compact">
-                    <span style="align-self: center; color: var(--text-secondary);">-</span>
-                    <input type="number" name="loser_set2" placeholder="L" min="0" max="7" value="{{ request.form.get('loser_set2', '') }}" class="form-field-compact">
-                </div>
-            </div>
-            
-            <div class="set-field" id="set3" style="display: none;">
-                <label class="form-label">Set 3</label>
-                <div class="form-row">
-                    <input type="number" name="winner_set3" placeholder="W" min="0" max="7" value="{{ request.form.get('winner_set3', '') }}" class="form-field-compact">
-                    <span style="align-self: center; color: var(--text-secondary);">-</span>
-                    <input type="number" name="loser_set3" placeholder="L" min="0" max="7" value="{{ request.form.get('loser_set3', '') }}" class="form-field-compact">
-                </div>
-            </div>
-            
-            <div class="set-field" id="set4" style="display: none;">
-                <label class="form-label">Set 4</label>
-                <div class="form-row">
-                    <input type="number" name="winner_set4" placeholder="W" min="0" max="7" value="{{ request.form.get('winner_set4', '') }}" class="form-field-compact">
-                    <span style="align-self: center; color: var(--text-secondary);">-</span>
-                    <input type="number" name="loser_set4" placeholder="L" min="0" max="7" value="{{ request.form.get('loser_set4', '') }}" class="form-field-compact">
-                </div>
-            </div>
-            
-            <div class="set-field" id="set5" style="display: none;">
-                <label class="form-label">Set 5</label>
-                <div class="form-row">
-                    <input type="number" name="winner_set5" placeholder="W" min="0" max="7" value="{{ request.form.get('winner_set5', '') }}" class="form-field-compact">
-                    <span style="align-self: center; color: var(--text-secondary);">-</span>
-                    <input type="number" name="loser_set5" placeholder="L" min="0" max="7" value="{{ request.form.get('loser_set5', '') }}" class="form-field-compact">
-                </div>
-            </div>
-        </div>
-
-        <!-- Date/Time -->
-        <div class="form-section">
-            <h3>Match details</h3>
-            <label class="form-label optional-label">Date played (optional)</label>
-            <input type="date" name="date_played" id="date_played" value="{{ request.form.get('date_played', '') }}" class="form-field">
-            
-            <label class="form-label optional-label">Time played (optional)</label>
-            <input type="time" name="time_played" id="time_played" value="{{ request.form.get('time_played', '') }}" class="form-field">
-        </div>
-
-        <input type="submit" value="Add Match">
-    </form>
+            <input type="submit" value="Add Match">
+        </form>
+    </div>
 
     <div>
     {% if todays_stats %}
@@ -193,33 +161,23 @@
     {% endif %}
 
 <script>
-function toggleSetFields() {
-    const selectedFormat = document.querySelector('input[name="match_format"]:checked').value;
-    
-    // Set1 is always visible
-    document.getElementById('set1').style.display = 'block';
-    
-    // Hide others by default
+function showSets(numSets) {
+    // Hide all sets first
+    document.getElementById('set1').style.display = 'flex';
     document.getElementById('set2').style.display = 'none';
     document.getElementById('set3').style.display = 'none';
     document.getElementById('set4').style.display = 'none';
     document.getElementById('set5').style.display = 'none';
     
-    // Show appropriate set fields based on selection
-    if (selectedFormat === 'best_of_3') {
-        document.getElementById('set2').style.display = 'block';
-        document.getElementById('set3').style.display = 'block';
-    } else if (selectedFormat === 'best_of_5') {
-        document.getElementById('set2').style.display = 'block';
-        document.getElementById('set3').style.display = 'block';
-        document.getElementById('set4').style.display = 'block';
-        document.getElementById('set5').style.display = 'block';
+    // Show appropriate number of sets
+    if (numSets >= 3) {
+        document.getElementById('set2').style.display = 'flex';
+        document.getElementById('set3').style.display = 'flex';
+    }
+    if (numSets >= 5) {
+        document.getElementById('set4').style.display = 'flex';
+        document.getElementById('set5').style.display = 'flex';
     }
 }
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    toggleSetFields();
-});
 </script>
 {% endblock %}
