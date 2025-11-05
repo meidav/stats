@@ -949,8 +949,8 @@ def add_tennis_match():
                     loser_games = int(loser_set)
                     
                     # Basic validation for tennis scoring
-                    if winner_games < 0 or loser_games < 0 or winner_games > 7 or loser_games > 7:
-                        flash(f'Set {i} scores must be between 0-7!', 'danger')
+                    if winner_games < 0 or loser_games < 0 or winner_games > 20 or loser_games > 20:
+                        flash(f'Set {i} scores must be between 0-20!', 'danger')
                         return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats, 
                                matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
                     
@@ -1085,8 +1085,8 @@ def update_tennis_match(id):
                     winner_games = int(winner_set)
                     loser_games = int(loser_set)
                     
-                    if winner_games < 0 or loser_games < 0 or winner_games > 7 or loser_games > 7:
-                        flash(f'Set {i} scores must be between 0-7!', 'danger')
+                    if winner_games < 0 or loser_games < 0 or winner_games > 20 or loser_games > 20:
+                        flash(f'Set {i} scores must be between 0-20!', 'danger')
                         return render_template('edit_tennis_match.html', match=match, players=players, 
                                year=str(date.today().year))
                     
