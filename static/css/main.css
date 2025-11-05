@@ -3374,3 +3374,36 @@ input[type="time"].form-input:focus {
   }
 }
 
+/* Action Icons */
+.icon-edit {
+  fill: var(--accent-1);
+  transition: fill 0.2s ease;
+}
+
+.icon-edit:hover {
+  fill: var(--link-color);
+}
+
+.icon-delete {
+  fill: var(--error);
+  transition: fill 0.2s ease;
+}
+
+.icon-delete:hover {
+  fill: #ff6b6b;
+  filter: brightness(1.2);
+}
+
+/* Action icon container - make more compact */
+.table-actions {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.table-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
