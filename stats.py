@@ -1134,9 +1134,14 @@ def update_tennis_match(id):
         total_loser_games = sum(l for w, l in sets)
         
         # Update the match with set scores
-        edit_tennis_match(match_id, date_time_played, winner, total_winner_games, loser, total_loser_games, my_time, set_scores_text, match_id)
-        flash(f'Match updated: {set_scores_text}', 'success')
-        return redirect(url_for('edit_tennis_matches'))
+        try:
+            edit_tennis_match(match_id, date_time_played, winner, total_winner_games, loser, total_loser_games, my_time, set_scores_text, match_id)
+            flash(f'Match updated: {set_scores_text}', 'success')
+            return redirect(url_for('edit_tennis_matches'))
+        except Exception as e:
+            flash(f'Error updating match: {str(e)}. If set_scores column is missing, run the migration script on PythonAnywhere.', 'danger')
+            return render_template('edit_tennis_match.html', match=match, players=players, 
+                           year=str(date.today().year))
 
     return render_template('edit_tennis_match.html', match=match, players=players, 
                            year=str(date.today().year))
