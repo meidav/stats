@@ -3385,12 +3385,12 @@ input[type="time"].form-input:focus {
 }
 
 .icon-delete {
-  fill: var(--error);
+  fill: var(--error) !important;
   transition: fill 0.2s ease;
 }
 
 .icon-delete:hover {
-  fill: #ff6b6b;
+  fill: #ff6b6b !important;
   filter: brightness(1.2);
 }
 
@@ -3419,5 +3419,11 @@ input[type="time"].form-input:focus {
 
 .table-double-row:last-child td {
   padding-bottom: 6px !important;
+}
+
+/* Center scores in second row */
+.score-cell {
+  text-align: center !important;
+  font-weight: 600;
 }
 

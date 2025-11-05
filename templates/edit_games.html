@@ -49,9 +49,9 @@
             		</tr>
             		<tr class="table-double-row">
                 		<td class="table-col-rank"></td>
-    			        <td class="table-col-date" style="font-size: 0.85em; opacity: 0.7;">{{ (game[1])[11:16] }}</td>
-                        <td class="table-col-players" style="text-align: center;">{{ game[4] }}</td>
-                		<td class="table-col-players" style="text-align: center;">{{ game[7] }}</td>
+    			        <td class="table-col-date" style="font-size: 0.85em; opacity: 0.7;">{{ (game[1])[11:16] if game[1]|length > 11 else '' }}</td>
+                        <td class="table-col-players score-cell">{{ game[4] }}</td>
+                		<td class="table-col-players score-cell">{{ game[7] }}</td>
                 		<td class="table-col-stat"></td>
             		</tr>
                 {% endfor %}
