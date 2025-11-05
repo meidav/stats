@@ -396,14 +396,14 @@ td a:hover, td a:focus {
   text-decoration: none;
 }
 
-/* SVG icons in table links */
-td a svg path {
+/* SVG icons in table links - but NOT delete icons */
+td a:not(.icon-delete):not(.icon-edit) svg path {
   fill: var(--link-color) !important;
   transition: fill 0.2s ease;
 }
 
-td a:hover svg path,
-td a:focus svg path {
+td a:not(.icon-delete):not(.icon-edit):hover svg path,
+td a:not(.icon-delete):not(.icon-edit):focus svg path {
   fill: var(--link-hover-color) !important;
 }
 
@@ -3421,9 +3421,9 @@ input[type="time"].form-input:focus {
   padding-bottom: 6px !important;
 }
 
-/* Center scores in second row */
+/* Scores in second row */
 .score-cell {
-  text-align: center !important;
+  text-align: left !important;
   font-weight: 600;
 }
 
