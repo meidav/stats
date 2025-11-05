@@ -1048,25 +1048,95 @@ def tennis_matches_by_year(year):
 def update_tennis_match(id):
     match_id = id
     x = find_tennis_match(match_id)
-    match = [x[0][0], x[0][1], x[0][2], x[0][3], x[0][4], x[0][5], x[0][6]]
+    # Extract all fields including set_scores (now 8 fields total)
+    match = [x[0][i] if i < len(x[0]) else None for i in range(8)]
     matches = tennis_year_matches(str(date.today().year))
     players = all_tennis_players(matches)
 
     if request.method == 'POST':
         winner = request.form['winner']
         loser = request.form['loser']
-        winner_score = request.form['winner_score']
-        loser_score = request.form['loser_score']
+        match_format = request.form.get('match_format', 'single_set')
+        
+        # Get optional date/time played from form
+        date_played = request.form.get('date_played', '').strip()
+        time_played = request.form.get('time_played', '').strip()
 
-        if not winner or not loser or not winner_score or not loser_score:
-            flash('All fields required!')
+        # Validate required fields
+        if not winner or not loser:
+            flash('Winner and loser are required!', 'danger')
+            return render_template('edit_tennis_match.html', match=match, players=players, 
+                           year=str(date.today().year))
+        
+        # Validate uniqueness of players
+        if len(set([winner, loser])) < 2:
+            flash('Players must be unique!', 'danger')
+            return render_template('edit_tennis_match.html', match=match, players=players, 
+                           year=str(date.today().year))
+
+        # Collect set scores (same logic as add route)
+        sets = []
+        for i in range(1, 6):
+            winner_set = request.form.get(f'winner_set{i}', '').strip()
+            loser_set = request.form.get(f'loser_set{i}', '').strip()
+            
+            if winner_set and loser_set:
+                try:
+                    winner_games = int(winner_set)
+                    loser_games = int(loser_set)
+                    
+                    if winner_games < 0 or loser_games < 0 or winner_games > 7 or loser_games > 7:
+                        flash(f'Set {i} scores must be between 0-7!', 'danger')
+                        return render_template('edit_tennis_match.html', match=match, players=players, 
+                               year=str(date.today().year))
+                    
+                    if winner_games == loser_games:
+                        flash(f'Set {i} cannot be a tie!', 'danger')
+                        return render_template('edit_tennis_match.html', match=match, players=players, 
+                               year=str(date.today().year))
+                    
+                    sets.append((winner_games, loser_games))
+                except ValueError:
+                    flash(f'Set {i} scores must be numeric!', 'danger')
+                    return render_template('edit_tennis_match.html', match=match, players=players, 
+                           year=str(date.today().year))
+
+        # Validate match format requirements
+        if not sets:
+            flash('At least one set is required!', 'danger')
+            return render_template('edit_tennis_match.html', match=match, players=players, 
+                           year=str(date.today().year))
+
+        # Validate match winner
+        winner_sets = sum(1 for w, l in sets if w > l)
+        loser_sets = sum(1 for w, l in sets if l > w)
+        
+        if winner_sets <= loser_sets:
+            flash('Winner must win more sets than loser!', 'danger')
+            return render_template('edit_tennis_match.html', match=match, players=players, 
+                           year=str(date.today().year))
+
+        # Handle date/time played
+        if date_played and time_played:
+            date_time_played = f"{date_played} {time_played}:00"
+        elif date_played:
+            from datetime import datetime
+            current_time = datetime.now().strftime('%H:%M:%S')
+            date_time_played = f"{date_played} {current_time}"
         else:
-            # Store timestamp in UTC
-            utc_time = datetime.now(timezone.utc)
-
-            # Update the match with the UTC timestamp
-            edit_tennis_match(match_id, match[1], winner, winner_score, loser, loser_score, utc_time, match_id)
-            return redirect(url_for('edit_tennis_matches'))
+            date_time_played = match[1]
+        
+        my_time = get_local_time()
+        
+        # Format set scores for storage
+        set_scores_text = ", ".join([f"{w}-{l}" for w, l in sets])
+        total_winner_games = sum(w for w, l in sets)
+        total_loser_games = sum(l for w, l in sets)
+        
+        # Update the match with set scores
+        edit_tennis_match(match_id, date_time_played, winner, total_winner_games, loser, total_loser_games, my_time, set_scores_text, match_id)
+        flash(f'Match updated: {set_scores_text}', 'success')
+        return redirect(url_for('edit_tennis_matches'))
 
     return render_template('edit_tennis_match.html', match=match, players=players, 
                            year=str(date.today().year))

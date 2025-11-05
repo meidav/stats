@@ -44,7 +44,8 @@ def database_update_tennis_match(conn, match):
                     winner_score = ?,
                     loser = ?,
                     loser_score = ?,
-                    updated_at = ? 
+                    updated_at = ?,
+                    set_scores = ?
               WHERE id = ?'''
     cur = conn.cursor()
     cur.execute(sql, match)

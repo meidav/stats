@@ -74,14 +74,14 @@ def find_tennis_match(match_id):
     row = cur.fetchall()
     return row
 
-def edit_tennis_match(match_id, match_date, winner, winner_score, loser, loser_score, updated_at, match_id2):
+def edit_tennis_match(match_id, match_date, winner, winner_score, loser, loser_score, updated_at, set_scores, match_id2):
     database = '/home/Idynkydnk/stats/stats.db'
     conn = create_connection(database)
     if conn is None:
         database = r'stats.db'
         conn = create_connection(database)
     with conn: 
-        match = (match_id, match_date, winner, winner_score, loser, loser_score, updated_at, match_id2);
+        match = (match_id, match_date, winner, winner_score, loser, loser_score, updated_at, set_scores, match_id2);
         database_update_tennis_match(conn, match)
 
 def remove_tennis_match(match_id):
