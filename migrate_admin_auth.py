@@ -89,8 +89,7 @@ def main():
     
     # Try different database paths
     db_paths = [
-        'stats.db',  # Local development
-        '/home/Idynkydnk/stats/stats.db',  # Production
+        'stats.db',  # Local and production
         os.path.join(os.path.dirname(__file__), 'stats.db')  # Relative to script
     ]
     

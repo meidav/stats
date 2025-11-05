@@ -14,11 +14,8 @@ def enter_data_into_database(matches_data):
 		new_tennis_match(x[4], x[2], 0, x[3], 0, x[4])
 
 def new_tennis_match(match_date, winner, winner_score, loser, loser_score, updated_at):
-	database = '/home/Idynkydnk/stats/stats.db'
+	database = r'stats.db'
 	conn = create_connection(database)
-	if conn is None:
-		database = r'stats.db'
-		conn = create_connection(database)
 	with conn: 
 		match = (match_date, winner, winner_score, loser, loser_score, updated_at);
 		create_tennis_match(conn, match)

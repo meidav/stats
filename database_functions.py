@@ -73,21 +73,15 @@ def enter_data_into_database(games_data):
 		new_game(x[0], x[1], x[2], x[5], x[3], x[4], x[6], x[7])
 
 def new_game(game_date, winner1, winner2, winner_score, loser1, loser2, loser_score, updated_at):
-	database = '/home/Idynkydnk/stats/stats.db'
+	database = r'stats.db'
 	conn = create_connection(database)
-	if conn is None:
-		database = r'stats.db'
-		conn = create_connection(database)
 	with conn: 
 		game = (game_date, winner1, winner2, winner_score, loser1, loser2, loser_score, updated_at);
 		create_game(conn, game)
 
 def new_poker_session(session_date, location, buy_in, cash_out, notes, updated_at):
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     with conn: 
         session = (session_date, location, buy_in, cash_out, notes, updated_at)
         create_poker_session(conn, session)

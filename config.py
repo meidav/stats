@@ -9,7 +9,7 @@ class Config:
     DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     
     # Database settings
-    DATABASE_PATH = os.environ.get('DATABASE_PATH') or '/home/Idynkydnk/stats/stats.db'
+    DATABASE_PATH = os.environ.get('DATABASE_PATH') or 'stats.db'
     DATABASE_PATH_LOCAL = os.environ.get('DATABASE_PATH_LOCAL') or 'stats.db'
     
     # Timezone settings
@@ -28,7 +28,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    DATABASE_PATH = '/home/Idynkydnk/stats/stats.db'
+    DATABASE_PATH = 'stats.db'
 
 class TestingConfig(Config):
     """Testing configuration"""

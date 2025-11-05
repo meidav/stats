@@ -148,8 +148,7 @@ def main():
     """Main migration function"""
     # Determine database path
     db_paths = [
-        '/home/Idynkydnk/stats/stats.db',  # Production
-        'stats.db'  # Local development
+        'stats.db'  # Local and production
     ]
     
     db_path = None

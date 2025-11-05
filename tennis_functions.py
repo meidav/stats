@@ -39,11 +39,8 @@ def tennis_year_matches(year):
     return row
 
 def set_cur():
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     cur = conn.cursor()
     return cur  
 
@@ -58,11 +55,8 @@ def enter_data_into_database(matches_data):
         new_tennis_match(x[4], x[2], 0, x[3], 0, x[4], None)
 
 def new_tennis_match(match_date, winner, winner_score, loser, loser_score, updated_at, set_scores=None):
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     with conn:
         # Always pass 7 parameters (set_scores can be None for old/simple matches)
         match = (match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
@@ -75,21 +69,15 @@ def find_tennis_match(match_id):
     return row
 
 def edit_tennis_match(match_id, match_date, winner, winner_score, loser, loser_score, updated_at, set_scores, match_id2):
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     with conn: 
         match = (match_id, match_date, winner, winner_score, loser, loser_score, updated_at, set_scores, match_id2);
         database_update_tennis_match(conn, match)
 
 def remove_tennis_match(match_id):
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     with conn: 
         database_delete_tennis_match(conn, match_id)
 

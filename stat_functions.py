@@ -17,30 +17,21 @@ def add_game_stats(game):
 	enter_data_into_database(all_games)
 
 def update_game(game_id, game_date, winner1, winner2, winner_score, loser1, loser2, loser_score, updated_at, game_id2):
-	database = '/home/Idynkydnk/stats/stats.db'
+	database = r'stats.db'
 	conn = create_connection(database)
-	if conn is None:
-		database = r'stats.db'
-		conn = create_connection(database)
 	with conn: 
 		game = (game_id, game_date, winner1, winner2, winner_score, loser1, loser2, loser_score, updated_at, game_id2);
 		database_update_game(conn, game)
 
 def remove_game(game_id):
-	database = '/home/Idynkydnk/stats/stats.db'
+	database = r'stats.db'
 	conn = create_connection(database)
-	if conn is None:
-		database = r'stats.db'
-		conn = create_connection(database)
 	with conn: 
 		database_delete_game(conn, game_id)
 
 def set_cur():
-	database = '/home/Idynkydnk/stats/stats.db'
+	database = r'stats.db'
 	conn = create_connection(database)
-	if conn is None:
-		database = r'stats.db'
-		conn = create_connection(database)
 	cur = conn.cursor()
 	return cur	
 

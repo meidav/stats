@@ -18,8 +18,8 @@ def create_connection(db_file):
 
 def add_set_scores_column():
     """Add set_scores column to tennis_matches table if it doesn't exist"""
-    # Try production path first, then local
-    for database in ['/home/Idynkydnk/stats/stats.db', 'stats.db']:
+    # Use local/production database path
+    for database in ['stats.db']:
         print(f"\nTrying database: {database}")
         conn = create_connection(database)
         

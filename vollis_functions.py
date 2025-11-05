@@ -39,11 +39,8 @@ def vollis_year_games(year):
     return row
 
 def set_cur():
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     cur = conn.cursor()
     return cur  
 
@@ -55,11 +52,8 @@ def enter_data_into_database(games_data):
         new_vollis_game(x[4], x[2], 0, x[3], 0, x[4])
 
 def new_vollis_game(game_date, winner, winner_score, loser, loser_score, updated_at):
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     with conn: 
         game = (game_date, winner, winner_score, loser, loser_score, updated_at);
         create_vollis_game(conn, game)
@@ -71,22 +65,16 @@ def find_vollis_game(game_id):
     return row
 
 def edit_vollis_game(game_id, game_date, winner, winner_score, loser, loser_score, updated_at, game_id2):
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     with conn: 
         game = (game_id, game_date, winner, winner_score, loser, loser_score, updated_at, game_id2)
         database_update_vollis_game(conn, game)
 
 
 def remove_vollis_game(game_id):
-    database = '/home/Idynkydnk/stats/stats.db'
+    database = r'stats.db'
     conn = create_connection(database)
-    if conn is None:
-        database = r'stats.db'
-        conn = create_connection(database)
     with conn: 
         database_delete_vollis_game(conn, game_id)
 
