@@ -3407,19 +3407,23 @@ input[type="time"].form-input:focus {
   justify-content: center;
 }
 
-/* Tighter spacing for double-row tables */
-.table-double-row td {
-  padding: 2px 4px !important;
+/* Balanced spacing for double-row tables */
+.table-double-row:nth-child(odd) td {
+  /* First row of each game pair - add some top padding */
+  padding: 4px 4px 2px 4px !important;
+  line-height: 1.2 !important;
+  vertical-align: top !important;
+}
+
+.table-double-row:nth-child(even) td {
+  /* Second row of each game pair - minimal padding */
+  padding: 0px 4px 6px 4px !important;
   line-height: 1.2 !important;
   vertical-align: top !important;
 }
 
 tr.table-double-row {
   height: auto !important;
-}
-
-tbody .table-double-row + .table-double-row {
-  margin-top: 0 !important;
 }
 
 /* Scores in second row */
