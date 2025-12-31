@@ -180,11 +180,11 @@ div, section, article {
 }
 
 .form-section {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .form-section h3 {
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .form-container {
@@ -3075,12 +3075,12 @@ input[type="time"].form-input:focus {
 }
 
 .form-section {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .form-section h3 {
   color: var(--text-primary);
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   font-size: 1.1rem;
   font-weight: 600;
 }
