@@ -29,7 +29,24 @@
                 {% for game in games %}
         			<tr class="table-double-row">
                     	<td class="table-col-rank">{{ loop.index }}</td>
-                        <td class="table-col-date">{{ (game[1])[0:10] }}</td>
+                        <td class="table-col-date">
+                            {{ (game[1])[0:10] }}
+                            {% if game[1]|length > 11 %}
+                                {% set time_str = (game[1])[11:16] %}
+                                {% set hour = time_str[:2]|int %}
+                                {% set minute = time_str[3:5] %}
+                                {% if hour == 0 %}
+                                    <div style="font-size: 0.85em; opacity: 0.7; margin-top: 2px;">12:{{ minute }}am</div>
+                                {% elif hour < 12 %}
+                                    <div style="font-size: 0.85em; opacity: 0.7; margin-top: 2px;">{{ hour }}:{{ minute }}am</div>
+                                {% elif hour == 12 %}
+                                    <div style="font-size: 0.85em; opacity: 0.7; margin-top: 2px;">12:{{ minute }}pm</div>
+                                {% else %}
+                                    {% set display_hour = hour - 12 %}
+                                    <div style="font-size: 0.85em; opacity: 0.7; margin-top: 2px;">{{ display_hour }}:{{ minute }}pm</div>
+                                {% endif %}
+                            {% endif %}
+                        </td>
     			        <td class="table-col-players"><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
                 		<td class="table-col-players"><a href="{{ url_for('player_stats', year=year, name=game[5] ) }}">{{ game[5] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a></td>
                         <td class="table-col-stat">
@@ -42,7 +59,7 @@
             		</tr>
             		<tr class="table-double-row">
                 		<td class="table-col-rank"></td>
-    			        <td class="table-col-date" style="font-size: 0.85em; opacity: 0.7;">{{ (game[1])[11:16] if game[1]|length > 11 else '' }}</td>
+    			        <td class="table-col-date"></td>
                         <td class="table-col-players score-cell">{{ game[4] }}</td>
                 		<td class="table-col-players score-cell">{{ game[7] }}</td>
                 		<td class="table-col-stat">
