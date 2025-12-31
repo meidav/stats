@@ -35,7 +35,7 @@ def tennis_year_matches(year):
     else:
         cur.execute("SELECT * FROM tennis_matches WHERE strftime('%Y',match_date)=?", (year,))
     row = cur.fetchall()
-    row.sort(reverse=True)
+    row.sort(key=lambda x: x[1] if x[1] else '', reverse=True)  # Sort by match_date (index 1), newest first
     return row
 
 def set_cur():
