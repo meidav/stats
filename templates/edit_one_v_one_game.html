@@ -2,24 +2,25 @@
 
 {% block content %}
 	<h1>{% block title %} Edit Game {% endblock %}</h1>
+	<h3 style="text-align: center; margin-bottom: 8px;">Current game details</h3>
 	<table>
 	   <thead>
 			<tr>
 				<th scope="col" colspan="1">Date/Updated</th>
-				<th scope="col" colspan="1">Winner</th>
-				<th scope="col" colspan="1">Loser</th>
+				<th scope="col" colspan="1" style="text-align: center !important;">Winner</th>
+				<th scope="col" colspan="1" style="text-align: center !important;">Loser</th>
 			</tr>
 		</thead>
 	   	<tbody>
 			<tr>
 				<td>{{ game[1][5:7] }}/{{ game[1][8:10] }}/{{ game[1][0:4] }}<br>{{ game[1][11:16] }}</td>
-                <td><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
-                <td><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[4] }}</a></td>
+                <td style="text-align: center !important;"><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
+                <td style="text-align: center !important;"><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[4] }}</a></td>
 			</tr>
 			<tr>
 				<td>{{ game[6][5:7] }}/{{ game[6][8:10] }}/{{ game[6][0:4] }}<br>{{ game[6][11:16] }}</td>
-                <td>{{ game[3] }}</td>
-                <td>{{ game[5] }}</td>
+                <td style="text-align: center !important;">{{ game[3] }}</td>
+                <td style="text-align: center !important;">{{ game[5] }}</td>
 			</tr>
 		</tbody>
 	</table>

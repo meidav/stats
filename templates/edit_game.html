@@ -5,30 +5,31 @@
 	
 	<!-- Current Game Info -->
 	<div class="overflow-x-auto" style="margin-bottom: 20px;">
+		<h3 style="text-align: center; margin-bottom: 8px;">Current game details</h3>
 		<table>
 			<thead>
 				<tr>
 					<th class="table-col-date" scope="col">Date/Updated</th>
-					<th class="table-col-players" scope="col">Winners</th>
-					<th class="table-col-players" scope="col">Losers</th>
+					<th class="table-col-players" scope="col" style="text-align: center !important;">Winners</th>
+					<th class="table-col-players" scope="col" style="text-align: center !important;">Losers</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr class="table-double-row">
 					<td class="table-col-date">{{ (game[1])[0:10] }}<br><span style="font-size: 0.85em; opacity: 0.7;">{{ (game[1])[11:19] }}</span></td>
-					<td class="table-col-players">
+					<td class="table-col-players" style="text-align: center !important;">
 						<a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br>
 						<a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a>
 					</td>
-					<td class="table-col-players">
+					<td class="table-col-players" style="text-align: center !important;">
 						<a href="{{ url_for('player_stats', year=year, name=game[5] ) }}">{{ game[5] }}</a><br>
 						<a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a>
 					</td>
 				</tr>
 				<tr class="table-double-row">
 					<td class="table-col-date"><span style="font-size: 0.85em; opacity: 0.7;">{{ (game[8])[0:10] }}<br>{{ (game[8])[11:19] }}</span></td>
-					<td class="table-col-players score-cell">{{ game[4] }}</td>
-					<td class="table-col-players score-cell">{{ game[7] }}</td>
+					<td class="table-col-players score-cell" style="text-align: center !important;">{{ game[4] }}</td>
+					<td class="table-col-players score-cell" style="text-align: center !important;">{{ game[7] }}</td>
 				</tr>
 			</tbody>
 		</table>
