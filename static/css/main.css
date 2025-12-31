@@ -1127,7 +1127,7 @@ input[type=time]::-webkit-calendar-picker-indicator {
   
   /* Increase mobile form field spacing */
   input, select {
-    margin: 12px auto !important; /* Increase from 8px to 12px */
+    margin: 2px auto !important;
   }
   
   /* Better mobile label spacing */
