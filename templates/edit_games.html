@@ -20,8 +20,8 @@
     				<tr>
                         <th class="table-col-rank" scope="col">#</th>
                         <th class="table-col-date" scope="col">Date</th>
-                        <th class="table-col-players" scope="col">Winner</th>
-                        <th class="table-col-players" scope="col">Loser</th>
+                        <th class="table-col-players" scope="col" style="text-align: center !important;">Winners</th>
+                        <th class="table-col-players" scope="col" style="text-align: center !important;">Losers</th>
                         <th class="table-col-stat" scope="col"></th>
     				</tr>
   				</thead>
@@ -47,8 +47,8 @@
                                 {% endif %}
                             {% endif %}
                         </td>
-    			        <td class="table-col-players"><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
-                		<td class="table-col-players"><a href="{{ url_for('player_stats', year=year, name=game[5] ) }}">{{ game[5] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a></td>
+    			        <td class="table-col-players" style="text-align: center !important;"><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
+                		<td class="table-col-players" style="text-align: center !important;"><a href="{{ url_for('player_stats', year=year, name=game[5] ) }}">{{ game[5] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a></td>
                         <td class="table-col-stat">
                             <a href="{{ url_for('update', id=game[0]) }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" class="icon-edit">
@@ -60,8 +60,8 @@
             		<tr class="table-double-row">
                 		<td class="table-col-rank"></td>
     			        <td class="table-col-date"></td>
-                        <td class="table-col-players score-cell">{{ game[4] }}</td>
-                		<td class="table-col-players score-cell">{{ game[7] }}</td>
+                        <td class="table-col-players score-cell" style="text-align: center !important;">{{ game[4] }}</td>
+                		<td class="table-col-players score-cell" style="text-align: center !important;">{{ game[7] }}</td>
                 		<td class="table-col-stat">
                             <a href="{{ url_for('delete_game', id=game[0]) }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" class="icon-delete">

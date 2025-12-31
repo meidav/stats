@@ -856,7 +856,9 @@ def update_vollis_game(id):
             flash(f'Game updated!', 'success')
             return redirect(url_for('edit_vollis_games'))
 
-    return render_template('edit_vollis_game.html', game=game, players=players, year=str(date.today().year))
+    winning_scores = vollis_winning_scores()
+    losing_scores = vollis_losing_scores()
+    return render_template('edit_vollis_game.html', game=game, players=players, year=str(date.today().year), winning_scores=winning_scores, losing_scores=losing_scores)
 
 
 @app.route('/delete_vollis_game/<int:id>/',methods = ['GET','POST'])
