@@ -2,23 +2,29 @@
 
 {% block content %}
 <div class="page-header">
-    <div class="button-row">
+    <h1 class="page-title-hero">{{ year }} Doubles Stats</h1>
+    <div class="header-controls">
+        <a href="{{ url_for('games_by_year', year=year) }}" class="nav-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM9 9h6v6H9z"/></svg>
+            Games
+        </a>
         <div class="dropdown">
-            <button class="dropbtn">Select a year
-                <i class="fa fa-caret-down"></i>
-            </button>
+            <button class="dropbtn">{{ year }} <i class="fa fa-caret-down"></i></button>
             <div class="dropdown-content">
-                {% for year in all_years %}
-                    <a href="{{ url_for('stats', year=year) }}">{{ year }}</a>
+                {% for y in all_years %}
+                    <a href="{{ url_for('stats', year=y) }}">{{ y }}</a>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
+<div class="search-bar-wrap">
+    <input type="text" id="playerSearch" class="search-bar" placeholder="Search players..." autocomplete="off">
+</div>
 <div>
     {% if todays_stats %}
-    <table id="todays-stats">
-        <h1>Today's stats</h1>
+    <h2 class="section-title">Today's stats</h2>
+    <table id="todays-stats" class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank clickable" data-sort="number">#</th>
@@ -50,8 +56,8 @@
     </script>
     
     {% if last_30_stats %}
-    <h1>Last 30 days</h1>
-    <table id="last-30-days-stats">
+    <h2 class="section-title">Last 30 days</h2>
+    <table id="last-30-days-stats" class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank clickable" data-sort="number">#</th>
@@ -77,8 +83,8 @@
     </table>
     {% endif %}
 
-    <h1>{{ year }} stats</h1>
-    <table id="yearly-stats">
+    <h2 class="section-title">{{ year }} stats</h2>
+    <table id="yearly-stats" class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank clickable" data-sort="number">#</th>
@@ -104,10 +110,9 @@
     </table>
 
     {% if rare_stats %}
-    <p> </p>
-    <table>
-        <h1>Infrequent players</h1>
-        <h3>Total games: {{tot_games}} | Min games: {{minimum_games}}</h3>
+    <h2 class="section-title">Fewer than {{ minimum_games }} games</h2>
+    <p class="games-count">Total games: {{ tot_games }} | Min games: {{ minimum_games }}</p>
+    <table class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank clickable" data-sort="number">#</th>
@@ -136,6 +141,18 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('playerSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.toLowerCase().trim();
+            document.querySelectorAll('.stats-table tbody tr').forEach(tr => {
+                const nameCell = tr.cells[1];
+                const name = nameCell ? nameCell.textContent.toLowerCase() : '';
+                tr.style.display = (!q || name.includes(q)) ? '' : 'none';
+            });
+        });
+    }
+
     const tables = document.querySelectorAll('table');
 
     tables.forEach(table => {

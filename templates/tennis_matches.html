@@ -1,39 +1,59 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <nav>
-        <div class="dropdown">
-            <button class="dropbtn">Select a year
-                <i class="fa fa-caret-down"></i>
-            </button>
-            <div class="dropdown-content">
-                {% for year in all_years %}
-                    <a href="{{ url_for('tennis_matches_by_year', year=year) }}">{{ year }}</a>
-                {% endfor %}
+    <div class="page-header">
+        <h1 class="page-title-hero">{{ year }} Tennis Matches</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('tennis_stats', year=year) }}" class="nav-pill">← Stats</a>
+            <div class="dropdown">
+                <button class="dropbtn">{{ year }} <i class="fa fa-caret-down"></i></button>
+                <div class="dropdown-content">
+                    {% for y in all_years %}
+                        <a href="{{ url_for('tennis_matches_by_year', year=y) }}">{{ y }}</a>
+                    {% endfor %}
+                </div>
             </div>
-        </div>       
-    </nav>
-    <h1>{% block title %} {{ year }} Tennis matches {% endblock %}</h1>
-    <table>
-        <thead>
-            <tr>
-                <th class="table-col-rank" scope="col">#</th>
-                <th class="table-col-date" scope="col">Date</th>
-                <th class="table-col-player" scope="col">Winner</th>
-                <th class="table-col-player" scope="col">Loser</th>
-                <th class="table-col-tennis-score" scope="col">Sets</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for match in matches %}
-                <tr>
-                    <td class="table-col-rank">{{ loop.index }}</td>
-                    <td class="table-col-date" title="Time: {{ (match[1])[11:19] }}">{{ (match[1])[5:7] }}/{{ (match[1])[8:10] }}/{{ (match[1])[2:4] }}</td>
-                    <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
-                    <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
-                    <td class="table-col-tennis-score">{{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    </div>
+    <div class="search-bar-wrap">
+        <input type="text" id="playerFilter" class="search-bar" placeholder="Search players or dates..." autocomplete="off">
+    </div>
+    <p class="games-count">{{ matches|length }} MATCHES</p>
+    <div class="games-list" id="gamesList">
+        {% for match in matches %}
+        <article class="game-card" data-players="{{ match[2] }}|{{ match[4] }}" data-date="{{ (match[1])[0:10] }}">
+            <div class="game-meta">{{ (match[1])[5:7] }}/{{ (match[1])[8:10] }}/{{ (match[1])[0:4] }}<br>{{ (match[1])[11:19] }}</div>
+            <div class="game-teams">
+                <div class="game-team winner">
+                    <span class="score">{{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}</span>
+                    <div class="players"><a href="{{ url_for('tennis_player_stats', year=year, name=match[2]) }}">{{ match[2] }}</a></div>
+                </div>
+                <span class="game-vs">VS</span>
+                <div class="game-team loser">
+                    <span class="score">–</span>
+                    <div class="players"><a href="{{ url_for('tennis_player_stats', year=year, name=match[4]) }}">{{ match[4] }}</a></div>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    <div id="noResults" class="no-results-message" style="display: none;">No matches found.</div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var filterInput = document.getElementById('playerFilter');
+        var cards = document.querySelectorAll('#gamesList .game-card');
+        var noResults = document.getElementById('noResults');
+        function filterMatches() {
+            var value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
+            var visible = 0;
+            cards.forEach(function(card) {
+                var show = !value || (card.getAttribute('data-players') || '').toLowerCase().indexOf(value) !== -1 || (card.getAttribute('data-date') || '').toLowerCase().indexOf(value) !== -1;
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            noResults.style.display = visible === 0 ? 'block' : 'none';
+        }
+        if (filterInput) { filterInput.addEventListener('input', filterMatches); }
+    });
+    </script>
 {% endblock %}

@@ -2,45 +2,58 @@
 
 {% block content %}
     <div class="page-header">
-        <div class="button-row">
+        <h1 class="page-title-hero">{{ year }} Vollis Games</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('vollis_stats', year=year) }}" class="nav-pill">← Stats</a>
             <div class="dropdown">
-                <button class="dropbtn">Select a year
-                    <i class="fa fa-caret-down"></i>
-                </button>
+                <button class="dropbtn">{{ year }} <i class="fa fa-caret-down"></i></button>
                 <div class="dropdown-content">
-                    {% for year in all_years %}
-                        <a href="{{ url_for('vollis_games_by_year', year=year) }}">{{ year }}</a>
+                    {% for y in all_years %}
+                        <a href="{{ url_for('vollis_games_by_year', year=y) }}">{{ y }}</a>
                     {% endfor %}
                 </div>
             </div>
         </div>
-        
-        <h1 class="page-title">{% block title %} {{ year }} vollis games {% endblock %}</h1>
     </div>
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th class="table-col-rank" scope="col">#</th>
-                        <th class="table-col-date" scope="col">Date</th>
-                        <th class="table-col-player" scope="col">Winner</th>
-                        <th class="table-col-stat" scope="col"></th>
-                        <th class="table-col-player" scope="col">Loser</th>
-                        <th class="table-col-stat" scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for game in games %}
-                    <tr class="table-double-row">
-                        <td class="table-col-rank">{{ loop.index }}</td>
-                        <td class="table-col-date" title="Time: {{ (game[1])[11:19] }}">{{ (game[1])[0:10] }}</td>
-                        <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
-                        <td class="table-col-stat">{{ game[3] }}</td>
-                        <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=game[0][5] ) }}">{{ game[4] }}</a></td>
-                        <td class="table-col-stat">{{ game[5] }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="search-bar-wrap">
+        <input type="text" id="playerFilter" class="search-bar" placeholder="Search players or dates..." autocomplete="off">
+    </div>
+    <p class="games-count">{{ games|length }} GAMES</p>
+    <div class="games-list" id="gamesList">
+        {% for game in games %}
+        <article class="game-card" data-players="{{ game[2] }}|{{ game[4] }}" data-date="{{ (game[1])[0:10] }}">
+            <div class="game-meta">{{ (game[1])[0:10] }}<br>{{ (game[1])[11:19] }}</div>
+            <div class="game-teams">
+                <div class="game-team winner">
+                    <span class="score">{{ game[3] }}</span>
+                    <div class="players"><a href="{{ url_for('vollis_player_stats', year=year, name=game[2]) }}">{{ game[2] }}</a></div>
+                </div>
+                <span class="game-vs">VS</span>
+                <div class="game-team loser">
+                    <span class="score">{{ game[5] }}</span>
+                    <div class="players"><a href="{{ url_for('vollis_player_stats', year=year, name=game[4]) }}">{{ game[4] }}</a></div>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    <div id="noResults" class="no-results-message" style="display: none;">No games found.</div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var filterInput = document.getElementById('playerFilter');
+        var cards = document.querySelectorAll('#gamesList .game-card');
+        var noResults = document.getElementById('noResults');
+        function filterGames() {
+            var value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
+            var visible = 0;
+            cards.forEach(function(card) {
+                var show = !value || (card.getAttribute('data-players') || '').toLowerCase().indexOf(value) !== -1 || (card.getAttribute('data-date') || '').toLowerCase().indexOf(value) !== -1;
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            noResults.style.display = visible === 0 ? 'block' : 'none';
+        }
+        if (filterInput) { filterInput.addEventListener('input', filterGames); }
+    });
+    </script>
 {% endblock %}

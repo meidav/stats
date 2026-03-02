@@ -2,121 +2,84 @@
 
 {% block content %}
     <div class="page-header">
-        <div class="button-row">
+        <h1 class="page-title-hero">{{ year }} Doubles Games</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('stats', year=year) }}" class="nav-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Stats
+            </a>
             <div class="dropdown">
-                <button class="dropbtn">Select a year
-                    <i class="fa fa-caret-down"></i>
-                </button>
+                <button class="dropbtn">{{ year }} <i class="fa fa-caret-down"></i></button>
                 <div class="dropdown-content">
-                    {% for year in all_years %}
-                        <a href="{{ url_for('games_by_year', year=year) }}">{{ year }}</a>
+                    {% for y in all_years %}
+                        <a href="{{ url_for('games_by_year', year=y) }}">{{ y }}</a>
                     {% endfor %}
                 </div>
             </div>
         </div>
-        
-        <div class="filter-container">
-            <input type="text" id="playerFilter" placeholder="Filter by player name..." 
-                   class="player-filter-input" autocomplete="off">
-        </div>
-        
-        <h1 class="page-title">{% block title %} {{ year }} games {% endblock %}</h1>
     </div>
-        <div>
-        	<table>
-        		<thead>
-    				<tr>
-                        <th class="table-col-rank" scope="col">#</th>
-                        <th class="table-col-date" scope="col">Date</th>
-                        <th class="table-col-players" scope="col">Winners</th>
-                        <th class="table-col-stat" scope="col"></th>
-                        <th class="table-col-players" scope="col">Losers</th>
-                        <th class="table-col-stat" scope="col"></th>
-    				</tr>
-  				</thead>
-        		<tbody id="gamesTable">
-                {% for game in games %}
-        			<tr data-players="{{ game[2] }}|{{ game[3] }}|{{ game[5] }}|{{ game[6] }}">
-            			<td class="table-col-rank">{{ loop.index }}</td>
-                        <td class="table-col-date" title="Time: {{ (game[1])[11:19] }}">{{ (game[1])[0:10] }}</td>
-            			<td class="table-col-players"><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
-            			<td class="table-col-stat">{{ game[4] }}</td>
-                        <td class="table-col-players"><a href="{{ url_for('player_stats', year=year, name=game[5] ) }}">{{ game[5] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a></td>
-                        <td class="table-col-stat">{{ game[7] }}</td>
-            		</tr>
-                {% endfor %}
-            	</tbody>
-            </table>
-        </div>
-        
-        <div id="noResults" style="display: none; text-align: center; padding: 20px; color: #666;">
-            No games found for this player.
-        </div>
 
+    <div class="search-bar-wrap">
+        <input type="text" id="playerFilter" class="search-bar" placeholder="Search players or dates..." autocomplete="off">
+    </div>
+    <p class="games-count">{{ games|length }} GAMES</p>
+
+    <div class="games-list" id="gamesList">
+        {% for game in games %}
+        <article class="game-card" data-players="{{ game[2] }}|{{ game[3] }}|{{ game[5] }}|{{ game[6] }}" data-date="{{ (game[1])[0:10] }}">
+            <div class="game-meta">
+                {{ (game[1])[0:10] }}<br>{{ (game[1])[11:19] }}
+            </div>
+            <div class="game-teams">
+                <div class="game-team winner">
+                    <span class="score">{{ game[4] }}</span>
+                    <div class="players">
+                        <a href="{{ url_for('player_stats', year=year, name=game[2]) }}">{{ game[2] }}</a><br>
+                        <a href="{{ url_for('player_stats', year=year, name=game[3]) }}">{{ game[3] }}</a>
+                    </div>
+                </div>
+                <span class="game-vs">VS</span>
+                <div class="game-team loser">
+                    <span class="score">{{ game[7] }}</span>
+                    <div class="players">
+                        <a href="{{ url_for('player_stats', year=year, name=game[5]) }}">{{ game[5] }}</a><br>
+                        <a href="{{ url_for('player_stats', year=year, name=game[6]) }}">{{ game[6] }}</a>
+                    </div>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    <div id="noResults" class="no-results-message" style="display: none;">
+        No games found for this filter.
+    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const filterInput = document.getElementById('playerFilter');
-    const gamesTable = document.getElementById('gamesTable');
+    const gameCards = document.querySelectorAll('#gamesList .game-card');
     const noResults = document.getElementById('noResults');
-    const gameRows = gamesTable.querySelectorAll('tr');
-    
-    let filteredCount = gameRows.length;
-    
-    function updateRankNumbers() {
-        const visibleRows = gamesTable.querySelectorAll('tr:not([style*="display: none"])');
-        visibleRows.forEach((row, index) => {
-            const rankCell = row.querySelector('.rank');
-            if (rankCell) {
-                rankCell.textContent = index + 1;
-            }
+
+    function filterGames() {
+        const value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
+        let visible = 0;
+        gameCards.forEach(function(card) {
+            const players = (card.getAttribute('data-players') || '').toLowerCase();
+            const date = (card.getAttribute('data-date') || '').toLowerCase();
+            const show = !value || players.includes(value) || date.includes(value);
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    if (filterInput) {
+        filterInput.addEventListener('input', filterGames);
+        filterInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { filterInput.value = ''; filterGames(); }
         });
     }
-    
-    function filterGames() {
-        const filterValue = filterInput.value.toLowerCase().trim();
-        filteredCount = 0;
-        
-        if (filterValue === '') {
-            // Show all games
-            gameRows.forEach(row => {
-                row.style.display = '';
-                filteredCount++;
-            });
-        } else {
-            // Filter games
-            gameRows.forEach(row => {
-                const players = row.getAttribute('data-players');
-                if (players && players.toLowerCase().includes(filterValue)) {
-                    row.style.display = '';
-                    filteredCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-        
-        // Update rank numbers
-        updateRankNumbers();
-        
-        // Show/hide no results message
-        if (filteredCount === 0) {
-            noResults.style.display = 'block';
-        } else {
-            noResults.style.display = 'none';
-        }
-    }
-    
-    // Filter as user types
-    filterInput.addEventListener('input', filterGames);
-    
-    // Clear filter on Escape key
-    filterInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            filterInput.value = '';
-            filterGames();
-        }
-    });
 });
 </script>
 {% endblock %}

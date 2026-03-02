@@ -35,23 +35,26 @@
 
 {% block content %}
 <div class="page-header">
-    <div class="button-row">
+    <h1 class="page-title-hero">{{ year }} Vollis Stats</h1>
+    <div class="header-controls">
+        <a href="{{ url_for('vollis_games_by_year', year=year) }}" class="nav-pill">Games</a>
         <div class="dropdown">
-            <button class="dropbtn">Select a year
-                <i class="fa fa-caret-down"></i>
-            </button>
+            <button class="dropbtn">{{ year }} <i class="fa fa-caret-down"></i></button>
             <div class="dropdown-content">
-                {% for year in all_years %}
-                    <a href="{{ url_for('vollis_stats', year=year) }}">{{ year }}</a>
+                {% for y in all_years %}
+                    <a href="{{ url_for('vollis_stats', year=y) }}">{{ y }}</a>
                 {% endfor %}
             </div>
         </div>
     </div>
 </div>
+<div class="search-bar-wrap">
+    <input type="text" id="playerSearch" class="search-bar" placeholder="Search players..." autocomplete="off">
+</div>
     <div>
     {% if todays_stats %}
-    <table id="todaysStatsTable">
-        <h1>Today's vollis stats</h1>
+    <h2 class="section-title">Today's vollis stats</h2>
+    <table id="todaysStatsTable" class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'todaysStatsTable')">#</th>
@@ -108,9 +111,9 @@
     </table>
     {% endif %}
     </div>
-    <h1>{% block title %} {{ year }} vollis stats {% endblock %}</h1>
+    <h2 class="section-title">{{ year }} vollis stats</h2>
         <div>
-        	<table id="yearlyStatsTable">
+        	<table id="yearlyStatsTable" class="stats-table">
         		<thead>
     				<tr>
                         <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'yearlyStatsTable')">#</th>
@@ -135,4 +138,16 @@
             	</tbody>
             </table>
         </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('playerSearch');
+    if (el) el.addEventListener('input', function() {
+        var q = this.value.toLowerCase().trim();
+        document.querySelectorAll('.stats-table tbody tr').forEach(function(tr) {
+            var name = (tr.cells[1] && tr.cells[1].textContent) ? tr.cells[1].textContent.toLowerCase() : '';
+            tr.style.display = (!q || name.indexOf(q) !== -1) ? '' : 'none';
+        });
+    });
+});
+</script>
 {% endblock %}
