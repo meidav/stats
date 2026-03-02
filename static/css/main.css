@@ -1555,13 +1555,6 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   flex-shrink: 0;
 }
 
-/* Full screen overlay - smooth fade in/out */
-#menu__toggle:checked ~ .menu__box {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-}
-
 /* Hamburger button - only shown when body does NOT have .has-page-header (e.g. admin pages) */
 .menu__btn {
   position: fixed;
@@ -1617,46 +1610,75 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   transform: translateY(-8px) rotate(-45deg);
 }
 
-/* Full screen overlay menu */
-.menu__box {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 80px 24px 24px 24px !important;
-  list-style: none;
-  background: var(--bg) !important;
-  backdrop-filter: blur(10px);
-  z-index: 1000;
-  
+/* Backdrop when drawer is open - click to close */
+.menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  cursor: pointer;
+}
+
+#menu__toggle:checked ~ .menu-backdrop {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Right-side drawer - slides in from the right */
+.menu__box {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 280px !important;
+  max-width: 85vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  padding-top: 56px !important;
+  padding-bottom: 24px !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  list-style: none;
+  background: var(--bg-content) !important;
+  border-left: 1px solid var(--table-border);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
   
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 16px;
-  align-content: center;
-  justify-content: center;
+  transform: translateX(100%);
+  visibility: hidden;
+  transition: transform 0.3s ease, visibility 0.3s ease;
+  
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-/* Close button - top right of overlay */
+#menu__toggle:checked ~ .menu__box {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+/* Close button - top right of drawer */
 .menu-close-row {
-  grid-column: 1 / -1 !important;
   position: absolute !important;
-  top: 16px !important;
-  right: 16px !important;
+  top: 12px !important;
+  right: 12px !important;
   left: auto !important;
   margin: 0 !important;
   padding: 0 !important;
+  flex-shrink: 0;
 }
 
 .menu-close-btn {
@@ -1684,21 +1706,22 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   height: 22px;
 }
 
-/* List items should not have default list styling */
-.menu__box li {
+/* List items - single column, full width */
+.menu__box > li {
   list-style: none;
   margin: 0;
   padding: 0;
+  width: 100%;
 }
 
-/* Menu separator - spans both columns */
+/* Menu separator - full width */
 .menu-separator {
-  grid-column: 1 / -1 !important;
   display: flex !important;
   align-items: center;
   gap: 12px;
-  padding: 20px 0 12px 0;
-  margin: 8px 0;
+  padding: 20px 0 10px 0;
+  margin: 8px 0 0 0;
+  width: 100%;
 }
 
 .separator-line {
@@ -1716,81 +1739,70 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   letter-spacing: 1px;
   opacity: 0.7;
 }
-/* Menu items - bigger text, clearer icons */
+/* Menu items - one column, left-aligned */
 .menu__item {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 14px;
-  padding: 18px 22px;
-  margin: 0;
+  padding: 14px 16px;
+  margin: 0 0 4px 0;
+  width: 100%;
+  box-sizing: border-box;
   color: var(--title-color);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 600;
   text-decoration: none;
   border-radius: var(--rounded-corners);
-  background: var(--button-bg-1);
-  border: 1px solid var(--button-border-1);
-  transition: all 0.25s ease;
-  white-space: normal;
-  word-wrap: break-word;
-  box-sizing: border-box;
-  min-width: 0;
-  animation: menuItemFadeIn 0.5s ease forwards;
-  opacity: 0;
-  transform: translateY(20px);
+  background: transparent;
+  border: none;
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
 }
 
-/* Staggered animation (first li is close button, so items start at 2) */
-.menu__box > li:nth-child(2) .menu__item { animation-delay: 0.05s; }
-.menu__box > li:nth-child(3) .menu__item { animation-delay: 0.1s; }
-.menu__box > li:nth-child(4) .menu__item { animation-delay: 0.15s; }
-.menu__box > li:nth-child(5) .menu__item { animation-delay: 0.2s; }
-.menu__box > li:nth-child(6) .menu__item { animation-delay: 0.25s; }
-.menu__box > li:nth-child(7) .menu__item { animation-delay: 0.3s; }
-.menu__box > li:nth-child(8) .menu__item { animation-delay: 0.35s; }
-.menu__box > li:nth-child(9) .menu__item { animation-delay: 0.4s; }
-.menu__box > li:nth-child(10) .menu__item { animation-delay: 0.45s; }
-.menu__box > li:nth-child(11) .menu__item { animation-delay: 0.5s; }
-.menu__box > li:nth-child(12) .menu__item { animation-delay: 0.55s; }
-.menu__box > li:nth-child(13) .menu__item { animation-delay: 0.6s; }
-.menu__box > li:nth-child(14) .menu__item { animation-delay: 0.65s; }
-.menu__box > li:nth-child(15) .menu__item { animation-delay: 0.7s; }
-.menu__box > li:nth-child(16) .menu__item { animation-delay: 0.75s; }
-
-@keyframes menuItemFadeIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.menu__item:hover {
+  background: var(--button-bg-1);
+  color: var(--title-color);
 }
 
 .menu__item:hover {
   background: var(--button-hover);
-  color: var(--button-text-1);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
-/* Menu icons - larger and clearer */
+/* Menu icons */
 .menu-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
   color: var(--title-color);
 }
 
-/* Admin items - no special styling needed, they inherit from .menu__item */
-.menu__item.admin-item {
-  background: var(--button-bg-1);
-  border-color: var(--button-border-1);
-}
-
 .menu__item.admin-item:hover {
   background: var(--button-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+/* Mobile: drawer a bit wider, comfortable tap targets */
+@media (max-width: 640px) {
+  .menu__box {
+    width: 300px !important;
+    max-width: 88vw !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .menu__item {
+    padding: 16px 16px;
+    font-size: 18px;
+  }
+
+  .menu-icon {
+    width: 22px;
+    height: 22px;
+  }
 }
 
 /* Mobile Modal Styles */
