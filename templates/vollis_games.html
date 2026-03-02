@@ -12,6 +12,7 @@
                     {% for y in all_years %}
                         <a href="{{ url_for('vollis_games_by_year', year=y) }}">{{ y }}</a>
                     {% endfor %}
+                </div>
             </div>
             <label for="menu__toggle" class="nav-pill menu-trigger" aria-label="Open menu">
                 <svg class="menu-trigger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -22,7 +23,7 @@
     <div class="search-bar-wrap">
         <input type="text" id="playerFilter" class="search-bar" placeholder="Search players or dates..." autocomplete="off">
     </div>
-    <p class="games-count">{{ games|length }} GAMES</p>
+    <p class="games-count" id="gamesCount">{{ games|length }} GAMES</p>
     <div class="games-list" id="gamesList">
         {% for game in games %}
         <article class="game-card" data-players="{{ game[2] }}|{{ game[4] }}" data-date="{{ (game[1])[0:10] }}">
@@ -47,6 +48,7 @@
         var filterInput = document.getElementById('playerFilter');
         var cards = document.querySelectorAll('#gamesList .game-card');
         var noResults = document.getElementById('noResults');
+        var countEl = document.getElementById('gamesCount');
         function filterGames() {
             var value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
             var visible = 0;
@@ -56,6 +58,7 @@
                 if (show) visible++;
             });
             noResults.style.display = visible === 0 ? 'block' : 'none';
+            if (countEl) countEl.textContent = visible + ' GAMES';
         }
         if (filterInput) { filterInput.addEventListener('input', filterGames); }
     });

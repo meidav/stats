@@ -27,7 +27,7 @@
     <div class="search-bar-wrap">
         <input type="text" id="playerFilter" class="search-bar" placeholder="Search players or dates..." autocomplete="off">
     </div>
-    <p class="games-count">{{ games|length }} GAMES</p>
+    <p class="games-count" id="gamesCount">{{ games|length }} GAMES</p>
 
     <div class="games-list" id="gamesList">
         {% for game in games %}
@@ -66,6 +66,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const gameCards = document.querySelectorAll('#gamesList .game-card');
     const noResults = document.getElementById('noResults');
 
+    const countEl = document.getElementById('gamesCount');
+
     function filterGames() {
         const value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
         let visible = 0;
@@ -77,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (show) visible++;
         });
         if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+        if (countEl) countEl.textContent = visible + ' GAMES';
     }
 
     if (filterInput) {

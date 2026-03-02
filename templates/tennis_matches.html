@@ -23,7 +23,7 @@
     <div class="search-bar-wrap">
         <input type="text" id="playerFilter" class="search-bar" placeholder="Search players or dates..." autocomplete="off">
     </div>
-    <p class="games-count">{{ matches|length }} MATCHES</p>
+    <p class="games-count" id="gamesCount">{{ matches|length }} MATCHES</p>
     <div class="games-list" id="gamesList">
         {% for match in matches %}
         <article class="game-card" data-players="{{ match[2] }}|{{ match[4] }}" data-date="{{ (match[1])[0:10] }}">
@@ -48,6 +48,7 @@
         var filterInput = document.getElementById('playerFilter');
         var cards = document.querySelectorAll('#gamesList .game-card');
         var noResults = document.getElementById('noResults');
+        var countEl = document.getElementById('gamesCount');
         function filterMatches() {
             var value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
             var visible = 0;
@@ -57,6 +58,7 @@
                 if (show) visible++;
             });
             noResults.style.display = visible === 0 ? 'block' : 'none';
+            if (countEl) countEl.textContent = visible + ' MATCHES';
         }
         if (filterInput) { filterInput.addEventListener('input', filterMatches); }
     });

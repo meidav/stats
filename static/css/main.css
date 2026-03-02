@@ -384,6 +384,8 @@ body {
   color: var(--text-muted);
   flex-shrink: 0;
   min-width: 120px;
+  width: 100%;
+  text-align: center;
 }
 
 .game-teams {
@@ -484,7 +486,7 @@ body {
   }
 
   .game-meta {
-    text-align: right;
+    text-align: center;
     min-width: 0;
   }
 
@@ -1670,15 +1672,20 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   visibility: visible;
 }
 
-/* Close button - top right of drawer */
+/* Close button - upper right of drawer with safe inset (never cut off) */
 .menu-close-row {
   position: absolute !important;
-  top: 12px !important;
-  right: 12px !important;
+  top: 16px !important;
+  right: 16px !important;
   left: auto !important;
   margin: 0 !important;
   padding: 0 !important;
   flex-shrink: 0;
+}
+
+/* Ensure only one close button shows (no duplicates) */
+.menu__box .menu-close-row ~ .menu-close-row {
+  display: none !important;
 }
 
 .menu-close-btn {
@@ -1722,6 +1729,19 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   padding: 20px 0 10px 0;
   margin: 8px 0 0 0;
   width: 100%;
+}
+
+/* Admin section: line-only divider (no "Admin" text) */
+.menu-separator--line .separator-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), var(--border-color), transparent);
+  opacity: 0.6;
+}
+
+.menu-separator--line {
+  padding: 16px 0 12px 0;
+  margin: 4px 0 0 0;
 }
 
 .separator-line {
@@ -1785,23 +1805,24 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   background: var(--button-hover);
 }
 
-/* Mobile: drawer a bit wider, comfortable tap targets */
+/* Mobile: drawer wider; nav items and icons larger for touch */
 @media (max-width: 640px) {
   .menu__box {
     width: 300px !important;
     max-width: 88vw !important;
     padding-left: 20px !important;
     padding-right: 20px !important;
+    padding-top: 60px !important;
   }
 
   .menu__item {
-    padding: 16px 16px;
-    font-size: 18px;
+    padding: 18px 16px;
+    font-size: 20px;
   }
 
   .menu-icon {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
   }
 }
 
