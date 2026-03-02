@@ -366,17 +366,26 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .game-card {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 16px 20px;
   background: var(--bg-card);
   border-radius: var(--rounded-corners);
   border: 1px solid var(--table-border);
+}
+
+@media (min-width: 769px) {
+  .game-card {
+    padding: 18px 24px;
+    gap: 20px;
+  }
 }
 
 .game-meta {
@@ -386,6 +395,7 @@ body {
   min-width: 120px;
   width: 100%;
   text-align: center;
+  order: -1; /* always on top when flex wraps */
 }
 
 .game-teams {
@@ -446,6 +456,13 @@ body {
   font-size: 12px;
   color: var(--text-secondary);
   margin-bottom: 12px;
+}
+
+@media (min-width: 769px) {
+  .games-count {
+    text-align: center;
+    margin-bottom: 16px;
+  }
 }
 
 .no-results-message {
@@ -960,6 +977,12 @@ td {
 
 .stats-table thead th:nth-child(3) { color: var(--stat-wins); }
 .stats-table thead th:nth-child(4) { color: var(--stat-losses); }
+
+/* Player summary table: 5 cols = Player, W, L, Win%, Games */
+.stats-table-summary tbody td:nth-child(2),
+.stats-table-summary thead th:nth-child(2) { color: var(--stat-wins); font-weight: 600; }
+.stats-table-summary tbody td:nth-child(3),
+.stats-table-summary thead th:nth-child(3) { color: var(--stat-losses); font-weight: 600; }
 
 /* Player name cells - keep slightly larger */
 td.player_name, td.player_name a {
@@ -1648,7 +1671,7 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   padding-top: 56px !important;
   padding-bottom: 24px !important;
   padding-left: 20px !important;
-  padding-right: 20px !important;
+  padding-right: 24px !important;
   list-style: none;
   background: var(--bg-content) !important;
   border-left: 1px solid var(--table-border);
@@ -1672,15 +1695,21 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   visibility: visible;
 }
 
-/* Close button - upper right of drawer with safe inset (never cut off) */
+/* When menu is open, hide the floating hamburger so only one close (drawer X) shows */
+#menu__toggle:checked ~ .menu__btn {
+  display: none !important;
+}
+
+/* Close button - upper RIGHT of drawer only, with safe inset so never cut off */
 .menu-close-row {
   position: absolute !important;
-  top: 16px !important;
-  right: 16px !important;
+  top: 14px !important;
+  right: 14px !important;
   left: auto !important;
   margin: 0 !important;
   padding: 0 !important;
   flex-shrink: 0;
+  direction: ltr;
 }
 
 /* Ensure only one close button shows (no duplicates) */
@@ -1811,18 +1840,18 @@ body.has-page-header .hamburger-menu-container .menu__btn {
     width: 300px !important;
     max-width: 88vw !important;
     padding-left: 20px !important;
-    padding-right: 20px !important;
-    padding-top: 60px !important;
+    padding-right: 24px !important;
+    padding-top: 64px !important;
   }
 
   .menu__item {
-    padding: 18px 16px;
-    font-size: 20px;
+    padding: 20px 16px;
+    font-size: 22px;
   }
 
   .menu-icon {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
   }
 }
 
