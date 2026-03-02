@@ -452,6 +452,26 @@ body {
   text-align: center;
 }
 
+/* Tennis match card: score below and outside green/red boxes, in its own blue card */
+.tennis-match-card .game-team .players {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.tennis-score-card {
+  width: 100%;
+  flex-basis: 100%;
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: #1a7fb4;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: var(--rounded-corners);
+  box-sizing: border-box;
+}
+
 .game-vs {
   font-size: 12px;
   font-weight: 600;

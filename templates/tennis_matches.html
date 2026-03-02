@@ -26,15 +26,12 @@
     <p class="games-count" id="gamesCount">{{ matches|length }} MATCHES</p>
     <div class="games-list" id="gamesList">
         {% for match in matches %}
-        <article class="game-card" data-players="{{ match[2] }}|{{ match[4] }}" data-date="{{ (match[1])[0:10] }}">
+        <article class="game-card tennis-match-card" data-players="{{ match[2] }}|{{ match[4] }}" data-date="{{ (match[1])[0:10] }}">
             <div class="game-meta">{{ (match[1])[5:7] }}/{{ (match[1])[8:10] }}/{{ (match[1])[0:4] }}<br>{{ (match[1])[11:19] }}</div>
             <div class="game-teams">
                 <div class="game-team winner">
                     <div class="players">
                         <a href="{{ url_for('tennis_player_stats', year=year, name=match[2]) }}">{{ match[2] }}</a>
-                    </div>
-                    <div class="tennis-score-line">
-                        {{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}
                     </div>
                 </div>
                 <span class="game-vs">VS</span>
@@ -42,10 +39,10 @@
                     <div class="players">
                         <a href="{{ url_for('tennis_player_stats', year=year, name=match[4]) }}">{{ match[4] }}</a>
                     </div>
-                    <div class="tennis-score-line">
-                        {{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}
-                    </div>
                 </div>
+            </div>
+            <div class="tennis-score-card">
+                {{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}
             </div>
         </article>
         {% endfor %}
