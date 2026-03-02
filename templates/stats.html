@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -8,14 +9,18 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM9 9h6v6H9z"/></svg>
             Games
         </a>
-        <div class="dropdown">
-            <button class="dropbtn">{{ year }} <i class="fa fa-caret-down"></i></button>
+        <div class="dropdown dropdown-year">
+            <button class="dropbtn" type="button">{{ year }} <svg class="dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="dropdown-content">
                 {% for y in all_years %}
                     <a href="{{ url_for('stats', year=y) }}">{{ y }}</a>
                 {% endfor %}
             </div>
         </div>
+        <label for="menu__toggle" class="nav-pill menu-trigger" aria-label="Open menu">
+            <svg class="menu-trigger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            Menu
+        </label>
     </div>
 </div>
 <div class="search-bar-wrap">

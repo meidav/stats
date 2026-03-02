@@ -452,15 +452,30 @@ body {
   color: var(--text-muted);
 }
 
+/* Mobile: cleaner top area - title row then controls row */
 @media (max-width: 640px) {
   .page-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .page-header .page-title-hero {
+    font-size: 1.35rem;
+    line-height: 1.2;
   }
 
   .page-header .header-controls {
     width: 100%;
     justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .page-header .header-controls .nav-pill,
+  .page-header .header-controls .dropdown .dropbtn {
+    padding: 12px 16px;
+    font-size: 1rem;
   }
 
   .game-card {
@@ -695,8 +710,7 @@ form {
 .dropdown {
   position: relative;
   display: inline-block;
-  width: 200px;
-  margin: 8px;
+  margin: 0;
 }
 
 .dropdown .dropbtn {
@@ -707,7 +721,7 @@ form {
   border: 1px solid var(--button-border-1);
   background-color: var(--button-bg-1);
   color: var(--button-text-1);
-  min-width: 80px;
+  min-width: 72px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -715,7 +729,34 @@ form {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  max-width: 260px;
+  max-width: 120px;
+}
+
+.dropdown-caret {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+/* Year dropdown - compact list */
+.dropdown-year .dropdown-content {
+  min-width: 100%;
+  width: max-content;
+  padding: 6px 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.dropdown-year .dropdown-content a {
+  padding: 10px 16px;
+  margin: 2px 8px;
+  font-size: 15px;
+  border-radius: 8px;
+}
+
+.dropdown-year .dropdown-content a:hover {
+  background: var(--button-hover);
 }
 
 .dropdown .dropbtn:hover {
@@ -753,17 +794,18 @@ form {
 }
 
 .dropdown-content a {
-  padding: 8px 16px;
+  padding: 10px 16px;
   text-decoration: none;
   display: block;
-  text-align: center;
-  margin: 8px;
-  border-radius: var(--rounded-corners);
+  text-align: left;
+  margin: 2px 8px;
+  border-radius: 8px;
   color: var(--button-text-1);
-  background-color: var(--button-bg-1);
-  border: 1px solid var(--button-border-1);
+  background: transparent;
+  border: none;
   box-sizing: border-box;
-  font-size: 18px;
+  font-size: 15px;
+  transition: background 0.2s;
 }
 
 .dropdown-content a:hover {
@@ -1485,9 +1527,32 @@ input[type=number] {
   appearance: textfield;
 }
 
-#menu__toggle {
+/* Hide checkbox; keep for :checked state */
+#menu__toggle,
+.menu-toggle-sr {
+  position: absolute;
   opacity: 0;
-  display: none;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* On pages with header row (stats, games, etc.), hide the floating hamburger */
+body.has-page-header .hamburger-menu-container .menu__btn {
+  display: none !important;
+}
+
+/* Menu trigger pill in header (replaces hamburger on has-page-header pages) */
+.menu-trigger {
+  cursor: pointer;
+  margin: 0;
+  user-select: none;
+}
+
+.menu-trigger .menu-trigger-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* Full screen overlay - smooth fade in/out */
@@ -1497,31 +1562,30 @@ input[type=number] {
   pointer-events: auto !important;
 }
 
-/* Hamburger button - positioned relative to centered content */
+/* Hamburger button - only shown when body does NOT have .has-page-header (e.g. admin pages) */
 .menu__btn {
   position: fixed;
   top: 12px;
-  right: calc(50vw - 450px/2 + 12px);
-  width: 36px;
-  height: 36px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
   background-color: var(--button-bg-1);
-  border: 2px solid var(--button-border-1);
-  opacity: .7;
+  border: 1px solid var(--button-border-1);
   border-radius: var(--rounded-corners);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  z-index: 1001; /* Above the overlay */
-  transition: all 0.3s ease;
+  gap: 5px;
+  z-index: 1001;
+  transition: all 0.2s ease;
 }
 
-/* On smaller screens, just use standard right positioning */
-@media (max-width: 450px) {
+@media (min-width: 769px) {
   .menu__btn {
-    right: 12px;
+    right: 24px;
+    top: 16px;
   }
 }
 
@@ -1564,28 +1628,60 @@ input[type=number] {
   height: 100vh !important;
   max-width: none !important;
   margin: 0 !important;
-  padding: 70px 20px 20px 20px !important;
+  padding: 80px 24px 24px 24px !important;
   list-style: none;
   background: var(--bg) !important;
   backdrop-filter: blur(10px);
   z-index: 1000;
   
-  /* Hidden by default */
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  
-  /* Smooth animation */
   transition: opacity 0.4s ease, visibility 0.4s ease;
   
-  /* Grid layout for nav items - ALWAYS 2 columns */
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
-  gap: 12px;
+  gap: 16px;
   align-content: center;
   justify-content: center;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* Close button - top right of overlay */
+.menu-close-row {
+  grid-column: 1 / -1 !important;
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  left: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.menu-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: var(--button-bg-1);
+  border: 1px solid var(--button-border-1);
+  border-radius: var(--rounded-corners);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.menu-close-btn:hover {
+  background: var(--button-hover);
+  transform: scale(1.05);
+}
+
+.menu-close-btn svg {
+  width: 22px;
+  height: 22px;
 }
 
 /* List items should not have default list styling */
@@ -1620,50 +1716,48 @@ input[type=number] {
   letter-spacing: 1px;
   opacity: 0.7;
 }
-/* Menu items - optimized for 2-column grid */
+/* Menu items - bigger text, clearer icons */
 .menu__item {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
-  padding: 14px 18px;
+  gap: 14px;
+  padding: 18px 22px;
   margin: 0;
-  color: var(--button-text-1);
-  font-family: 'Roboto', sans-serif;
-  font-size: 17px;
+  color: var(--title-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 20px;
   font-weight: 600;
   text-decoration: none;
   border-radius: var(--rounded-corners);
   background: var(--button-bg-1);
   border: 1px solid var(--button-border-1);
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   white-space: normal;
   word-wrap: break-word;
   box-sizing: border-box;
   min-width: 0;
-  
-  /* Staggered entrance animation */
   animation: menuItemFadeIn 0.5s ease forwards;
   opacity: 0;
   transform: translateY(20px);
 }
 
-/* Staggered animation delays */
-.menu__item:nth-child(1) { animation-delay: 0.1s; }
-.menu__item:nth-child(2) { animation-delay: 0.15s; }
-.menu__item:nth-child(3) { animation-delay: 0.2s; }
-.menu__item:nth-child(4) { animation-delay: 0.25s; }
-.menu__item:nth-child(5) { animation-delay: 0.3s; }
-.menu__item:nth-child(6) { animation-delay: 0.35s; }
-.menu__item:nth-child(7) { animation-delay: 0.4s; }
-.menu__item:nth-child(8) { animation-delay: 0.45s; }
-.menu__item:nth-child(9) { animation-delay: 0.5s; }
-.menu__item:nth-child(10) { animation-delay: 0.55s; }
-.menu__item:nth-child(11) { animation-delay: 0.6s; }
-.menu__item:nth-child(12) { animation-delay: 0.65s; }
-.menu__item:nth-child(13) { animation-delay: 0.7s; }
-.menu__item:nth-child(14) { animation-delay: 0.75s; }
-.menu__item:nth-child(15) { animation-delay: 0.8s; }
+/* Staggered animation (first li is close button, so items start at 2) */
+.menu__box > li:nth-child(2) .menu__item { animation-delay: 0.05s; }
+.menu__box > li:nth-child(3) .menu__item { animation-delay: 0.1s; }
+.menu__box > li:nth-child(4) .menu__item { animation-delay: 0.15s; }
+.menu__box > li:nth-child(5) .menu__item { animation-delay: 0.2s; }
+.menu__box > li:nth-child(6) .menu__item { animation-delay: 0.25s; }
+.menu__box > li:nth-child(7) .menu__item { animation-delay: 0.3s; }
+.menu__box > li:nth-child(8) .menu__item { animation-delay: 0.35s; }
+.menu__box > li:nth-child(9) .menu__item { animation-delay: 0.4s; }
+.menu__box > li:nth-child(10) .menu__item { animation-delay: 0.45s; }
+.menu__box > li:nth-child(11) .menu__item { animation-delay: 0.5s; }
+.menu__box > li:nth-child(12) .menu__item { animation-delay: 0.55s; }
+.menu__box > li:nth-child(13) .menu__item { animation-delay: 0.6s; }
+.menu__box > li:nth-child(14) .menu__item { animation-delay: 0.65s; }
+.menu__box > li:nth-child(15) .menu__item { animation-delay: 0.7s; }
+.menu__box > li:nth-child(16) .menu__item { animation-delay: 0.75s; }
 
 @keyframes menuItemFadeIn {
   to {
@@ -1679,11 +1773,12 @@ input[type=number] {
   box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
-/* Menu icons */
+/* Menu icons - larger and clearer */
 .menu-icon {
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
+  color: var(--title-color);
 }
 
 /* Admin items - no special styling needed, they inherit from .menu__item */
