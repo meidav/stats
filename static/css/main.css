@@ -1668,7 +1668,8 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   height: 100vh !important;
   margin: 0 !important;
   padding: 0 !important;
-  padding-top: 56px !important;
+  /* Top spacing handled by the sticky close row */
+  padding-top: 12px !important;
   padding-bottom: 24px !important;
   padding-left: 20px !important;
   padding-right: 24px !important;
@@ -1696,20 +1697,24 @@ body.has-page-header .hamburger-menu-container .menu__btn {
 }
 
 /* When menu is open, hide the floating hamburger so only one close (drawer X) shows */
+#menu__toggle:checked + .menu__btn {
+  display: none !important;
+}
+
 #menu__toggle:checked ~ .menu__btn {
   display: none !important;
 }
 
-/* Close button - upper RIGHT of drawer only, with safe inset so never cut off */
+/* Close button row - sticky header, right-aligned inside drawer */
 .menu-close-row {
-  position: absolute !important;
-  top: 14px !important;
-  right: 14px !important;
-  left: auto !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1;
+  display: flex !important;
+  justify-content: flex-end !important;
   margin: 0 !important;
-  padding: 0 !important;
-  flex-shrink: 0;
-  direction: ltr;
+  padding: 2px 0 10px 0 !important;
+  background: var(--bg-content);
 }
 
 /* Ensure only one close button shows (no duplicates) */
@@ -1841,7 +1846,7 @@ body.has-page-header .hamburger-menu-container .menu__btn {
     max-width: 88vw !important;
     padding-left: 20px !important;
     padding-right: 24px !important;
-    padding-top: 64px !important;
+    padding-top: 12px !important;
   }
 
   .menu__item {
@@ -3739,68 +3744,6 @@ input[type="time"].form-input:focus {
   .score-inputs {
     width: 100%;
     justify-content: center;
-  }
-  
-  /* Mobile navigation improvements */
-  .menu__box {
-    padding: 70px 10px 20px 10px !important;
-    gap: 8px !important;
-    /* Keep 2 columns - do NOT override grid-template-columns */
-  }
-  
-  .menu__item {
-    font-size: 12px !important;
-    padding: 10px 8px !important;
-    gap: 6px !important;
-  }
-  
-  .menu-icon {
-    width: 14px !important;
-    height: 14px !important;
-  }
-  
-  .menu-separator {
-    padding: 16px 0 10px 0 !important;
-    gap: 8px !important;
-  }
-  
-  .separator-text {
-    font-size: 11px !important;
-  }
-  
-  .menu-section-header {
-    padding: 8px 16px 6px 16px;
-    font-size: 12px;
-  }
-  
-  .menu-collapsible-btn {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-  
-  .menu-collapsible-content .menu__item {
-    padding-left: 44px;
-    font-size: 13px;
-  }
-}
-
-/* Extra small screens - keep 2 columns, just make items even smaller */
-@media (max-width: 400px) {
-  .menu__box {
-    padding: 70px 8px 20px 8px !important;
-    gap: 6px !important;
-    /* Still 2 columns - never override to 1 column */
-  }
-  
-  .menu__item {
-    font-size: 11px !important;
-    padding: 8px 6px !important;
-    gap: 4px !important;
-  }
-  
-  .menu-icon {
-    width: 12px !important;
-    height: 12px !important;
   }
 }
 
