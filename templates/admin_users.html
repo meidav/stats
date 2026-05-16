@@ -1,111 +1,181 @@
 {% extends "base.html" %}
 
+{% block title %}Manage admins{% endblock %}
+
 {% block content %}
 <div class="admin-users">
     <div class="admin-header">
-        <h1>Manage users</h1>
-        <a href="{{ url_for('admin_dashboard') }}" class="universal-btn">
-            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Back to dashboard
-        </a>
+        <h1>Manage admins</h1>
+        <p class="admin-users-lead">Create accounts and control who can open the admin dashboard.</p>
+        <div class="admin-users-toolbar">
+            <a href="{{ url_for('admin_dashboard') }}" class="universal-btn">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to dashboard
+            </a>
+            <button type="button" class="universal-btn universal-btn-emphasis" onclick="openCreateAdminModal()">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                    <path d="M20 8v6M23 11h-6"/>
+                </svg>
+                Create admin
+            </button>
+        </div>
     </div>
 
-    <div class="users-table-container">
-        <table class="users-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Admin</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td data-label="ID">{{ user[0] }}</td>
-                    <td data-label="Username">{{ user[1] }}</td>
-                    <td data-label="Email">{{ user[2] }}</td>
-                    <td data-label="Admin">
+    <div class="admin-user-cards">
+        {% if not users %}
+        <p class="admin-users-empty">No accounts yet.</p>
+        {% endif %}
+        {% for user in users %}
+        <article class="admin-user-card">
+            <dl class="admin-user-meta">
+                <div class="admin-user-meta__row">
+                    <dt>ID</dt>
+                    <dd>{{ user[0] }}</dd>
+                </div>
+                <div class="admin-user-meta__row">
+                    <dt>Username</dt>
+                    <dd class="admin-user-meta__value">{{ user[1] }}</dd>
+                </div>
+                <div class="admin-user-meta__row">
+                    <dt>Email</dt>
+                    <dd class="admin-user-meta__value">{{ user[2] }}</dd>
+                </div>
+                <div class="admin-user-meta__row">
+                    <dt>Admin</dt>
+                    <dd>
                         <span class="admin-badge {{ 'admin-yes' if user[3] else 'admin-no' }}">
-                            {{ 'YES' if user[3] else 'NO' }}
+                            {{ 'Yes' if user[3] else 'No' }}
                         </span>
-                    </td>
-                    <td class="created-date" data-label="Created">
-                        <div class="date-text">{{ user[4].split(' ')[0] if user[4] else 'N/A' }}</div>
-                        <div class="time-text">{{ user[4].split(' ')[1] if user[4] and ' ' in user[4] else '' }}</div>
-                    </td>
-                    <td data-label="Actions">
-                        <div class="action-buttons">
-                            <button type="button" class="universal-btn" onclick="openEditUserModal({{ user[0] }}, '{{ user[1] }}', '{{ user[2] }}', {{ 'true' if user[3] else 'false' }})">
-                                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                </svg>
-                                Edit user
-                            </button>
-                            
-                            <button type="button" class="universal-btn btn-danger" onclick="confirmDeleteUser({{ user[0] }}, '{{ user[1] }}')">
-                                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3,6 5,6 21,6"/>
-                                    <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
-                                </svg>
-                                Delete user
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    </dd>
+                </div>
+                <div class="admin-user-meta__row">
+                    <dt>Created</dt>
+                    <dd class="admin-user-meta__value">
+                        {% if user[4] %}
+                            {{ user[4].split(' ')[0] }}
+                            {% if ' ' in user[4] %}<span class="admin-user-meta__time">· {{ user[4].split(' ', 1)[1][:8] }}</span>{% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+            <div class="admin-user-card__actions">
+                <button type="button"
+                        class="universal-btn admin-user-edit-btn"
+                        data-user-id="{{ user[0] }}"
+                        data-username="{{ user[1]|e }}"
+                        data-email="{{ user[2]|e }}"
+                        data-is-admin="{{ '1' if user[3] else '0' }}">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit
+                </button>
+                <button type="button"
+                        class="universal-btn btn-danger admin-user-delete-btn"
+                        data-user-id="{{ user[0] }}"
+                        data-username="{{ user[1]|e }}">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polyline points="3,6 5,6 21,6"/>
+                        <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                    </svg>
+                    Delete
+                </button>
+            </div>
+        </article>
+        {% endfor %}
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="modal">
+<!-- Delete confirmation -->
+<div id="deleteModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
     <div class="modal-content">
-        <h3>Confirm user deletion</h3>
-        <p>Are you sure you want to delete user <strong id="userToDelete"></strong>? This action cannot be undone.</p>
+        <h3 id="deleteModalTitle">Delete account</h3>
+        <p>Are you sure you want to delete <strong id="userToDelete"></strong>? This cannot be undone.</p>
         <div class="modal-actions">
             <button type="button" class="universal-btn" onclick="closeDeleteModal()">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M6 18L18 6M6 6l12 12"/>
                 </svg>
                 Cancel
             </button>
-            <form id="deleteForm" method="POST" style="display: inline;">
+            <form id="deleteForm" method="POST" class="modal-actions__form">
                 <button type="submit" class="universal-btn btn-danger">
-                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <polyline points="3,6 5,6 21,6"/>
                         <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
                     </svg>
-                    Delete user
+                    Delete
                 </button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Edit User Modal -->
-<div id="editUserModal" class="modal">
+<!-- Create admin -->
+<div id="createAdminModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="createAdminModalTitle">
     <div class="modal-content">
-        <h3>Edit user</h3>
+        <h3 id="createAdminModalTitle">Create admin</h3>
+        <p class="modal-lead">New accounts are created with admin dashboard access.</p>
+        <form method="POST" action="{{ url_for('create_admin_user') }}">
+            <div class="form-group">
+                <label for="createUsername">Username</label>
+                <input type="text" id="createUsername" name="username" required autocomplete="username" maxlength="80">
+            </div>
+            <div class="form-group">
+                <label for="createEmail">Email</label>
+                <input type="email" id="createEmail" name="email" required autocomplete="email" maxlength="120">
+            </div>
+            <div class="form-group">
+                <label for="createPassword">Password</label>
+                <input type="password" id="createPassword" name="password" required autocomplete="new-password" minlength="8">
+            </div>
+            <div class="form-group">
+                <label for="createPasswordConfirm">Confirm password</label>
+                <input type="password" id="createPasswordConfirm" name="confirm_password" required autocomplete="new-password" minlength="8">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="universal-btn" onclick="closeCreateAdminModal()">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Cancel
+                </button>
+                <button type="submit" class="universal-btn universal-btn-emphasis">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <path d="M20 8v6M23 11h-6"/>
+                    </svg>
+                    Create account
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit account -->
+<div id="editUserModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="editUserModalTitle">
+    <div class="modal-content">
+        <h3 id="editUserModalTitle">Edit account</h3>
         <form id="editUserForm" method="POST">
             <div class="form-group">
                 <label for="editUsername">Username</label>
-                <input type="text" id="editUsername" name="username" required>
+                <input type="text" id="editUsername" name="username" required maxlength="80">
             </div>
             <div class="form-group">
                 <label for="editEmail">Email</label>
-                <input type="email" id="editEmail" name="email" required>
+                <input type="email" id="editEmail" name="email" required maxlength="120">
             </div>
             <div class="form-group">
-                <label for="editPassword">New Password (leave blank to keep current)</label>
-                <input type="password" id="editPassword" name="password">
+                <label for="editPassword">New password (optional)</label>
+                <input type="password" id="editPassword" name="password" autocomplete="new-password" minlength="8">
             </div>
             <div class="form-group">
                 <label class="checkbox-label">
@@ -116,13 +186,13 @@
             </div>
             <div class="modal-actions">
                 <button type="button" class="universal-btn" onclick="closeEditUserModal()">
-                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                     Cancel
                 </button>
-                <button type="submit" class="universal-btn">
-                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="submit" class="universal-btn universal-btn-emphasis">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
@@ -133,7 +203,6 @@
     </div>
 </div>
 
-
 <script>
 function confirmDeleteUser(userId, username) {
     document.getElementById('userToDelete').textContent = username;
@@ -143,6 +212,18 @@ function confirmDeleteUser(userId, username) {
 
 function closeDeleteModal() {
     document.getElementById('deleteModal').style.display = 'none';
+}
+
+function openCreateAdminModal() {
+    document.getElementById('createUsername').value = '';
+    document.getElementById('createEmail').value = '';
+    document.getElementById('createPassword').value = '';
+    document.getElementById('createPasswordConfirm').value = '';
+    document.getElementById('createAdminModal').style.display = 'block';
+}
+
+function closeCreateAdminModal() {
+    document.getElementById('createAdminModal').style.display = 'none';
 }
 
 function openEditUserModal(userId, username, email, isAdmin) {
@@ -158,16 +239,39 @@ function closeEditUserModal() {
     document.getElementById('editUserModal').style.display = 'none';
 }
 
-// Close modal when clicking outside of it
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.admin-user-edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            openEditUserModal(
+                parseInt(btn.getAttribute('data-user-id'), 10),
+                btn.getAttribute('data-username'),
+                btn.getAttribute('data-email'),
+                btn.getAttribute('data-is-admin') === '1'
+            );
+        });
+    });
+    document.querySelectorAll('.admin-user-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            confirmDeleteUser(
+                parseInt(btn.getAttribute('data-user-id'), 10),
+                btn.getAttribute('data-username')
+            );
+        });
+    });
+});
+
 window.onclick = function(event) {
-    const deleteModal = document.getElementById('deleteModal');
-    const editModal = document.getElementById('editUserModal');
-    
+    var deleteModal = document.getElementById('deleteModal');
+    var editModal = document.getElementById('editUserModal');
+    var createModal = document.getElementById('createAdminModal');
+
     if (event.target === deleteModal) {
         closeDeleteModal();
     } else if (event.target === editModal) {
         closeEditUserModal();
+    } else if (event.target === createModal) {
+        closeCreateAdminModal();
     }
-}
+};
 </script>
 {% endblock %}

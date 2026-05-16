@@ -6,7 +6,7 @@ from vollis_functions import *
 from tennis_functions import *
 from one_v_one_functions import *
 from other_functions import *
-from auth import init_auth, create_users_table, get_user_by_username, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user, get_user_by_id
+from auth import init_auth, create_users_table, get_user_by_username, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user, get_user_by_id, create_user
 from player_management import get_all_players, get_player_games_count, update_player_name, search_players, get_player_stats
 import pytz
 import logging
@@ -253,9 +253,35 @@ def admin_dashboard():
 @app.route('/admin/users')
 @admin_required
 def admin_users():
-    """Manage users"""
+    """Manage admin accounts"""
     users = get_all_users()
     return render_template('admin_users.html', users=users)
+
+
+@app.route('/admin/users/create', methods=['POST'])
+@admin_required
+def create_admin_user():
+    """Create a new account with admin privileges"""
+    username = (request.form.get('username') or '').strip()
+    email = (request.form.get('email') or '').strip()
+    password = request.form.get('password') or ''
+    confirm = request.form.get('confirm_password') or ''
+
+    if not username or not email or not password:
+        flash('Username, email, and password are required.', 'danger')
+        return redirect(url_for('admin_users'))
+    if password != confirm:
+        flash('Passwords do not match.', 'danger')
+        return redirect(url_for('admin_users'))
+    if len(password) < 8:
+        flash('Password must be at least 8 characters.', 'danger')
+        return redirect(url_for('admin_users'))
+
+    if create_user(username, email, password, is_admin=True):
+        flash('Admin account created successfully.', 'success')
+    else:
+        flash('Could not create that account. The username or email may already be in use.', 'danger')
+    return redirect(url_for('admin_users'))
 
 @app.route('/admin/users/<int:user_id>/toggle_admin', methods=['POST'])
 @admin_required
