@@ -1762,7 +1762,7 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   display: flex !important;
   justify-content: flex-end !important;
   margin: 0 !important;
-  padding: 2px 0 10px 0 !important;
+  padding: 2px 0 4px 0 !important;
   background: var(--bg-content);
 }
 
@@ -1828,8 +1828,8 @@ body.has-page-header .hamburger-menu-container .menu__btn {
 }
 
 .menu-separator--line {
-  padding: 16px 0 12px 0;
-  margin: 4px 0 0 0;
+  padding: 8px 0 4px 0;
+  margin: 2px 0 0 0;
 }
 
 .separator-line {
@@ -1853,8 +1853,8 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   align-items: center;
   justify-content: flex-start;
   gap: 14px;
-  padding: 14px 16px;
-  margin: 0 0 4px 0;
+  padding: 8px 16px;
+  margin: 0;
   width: 100%;
   box-sizing: border-box;
   color: var(--title-color);
@@ -1913,7 +1913,7 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   }
 
   .menu__item {
-    padding: 10px 16px;
+    padding: 5px 16px;
     font-size: 20px;
   }
 }
