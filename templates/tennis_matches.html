@@ -23,7 +23,7 @@
     <div class="search-bar-wrap">
         <input type="text" id="playerFilter" class="search-bar" placeholder="Search players or dates..." autocomplete="off">
     </div>
-    <p class="games-count" id="gamesCount">{{ matches|length }} MATCHES</p>
+    <p class="games-count games-count-hero" id="gamesCount">{{ matches|length }} MATCHES</p>
     <div class="games-list" id="gamesList">
         {% for match in matches %}
         <article class="game-card tennis-match-card" data-players="{{ match[2] }}|{{ match[4] }}" data-date="{{ (match[1])[0:10] }}">
@@ -63,7 +63,7 @@
                 if (show) visible++;
             });
             noResults.style.display = visible === 0 ? 'block' : 'none';
-            if (countEl) countEl.textContent = visible + ' MATCHES';
+            if (countEl) countEl.textContent = visible + ' M';
         }
         if (filterInput) { filterInput.addEventListener('input', filterMatches); }
     });

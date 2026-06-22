@@ -347,18 +347,65 @@ body {
   background-color: var(--input-focus-bg);
 }
 
-/* Section title above tables (e.g. "FEWER THAN 7 GAMES") */
+/* Section headings above stats tables - match table header typography */
+h2.section-title,
+h3.section-title,
 .section-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  margin: 24px 0 8px 0;
-  text-transform: uppercase;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  color: var(--text-secondary) !important;
+  text-transform: uppercase !important;
+  text-align: left !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: none;
 }
 
-.section-title:first-of-type {
+/* Stats list / player detail sections */
+.stats-sections {
+  text-align: left;
+  padding: 0;
+}
+
+.stats-sections .section-title {
+  margin-top: 16px !important;
+  margin-bottom: 4px !important;
+}
+
+.stats-sections .section-title:first-child {
+  margin-top: 12px !important;
+}
+
+.stats-sections .stats-table + .section-title {
+  margin-top: 18px !important;
+}
+
+.stats-table-summary {
+  margin-bottom: 0;
+  padding: 8px 4px;
+}
+
+.stats-sections .stats-table {
   margin-top: 0;
+  margin-bottom: 0;
+  padding: 8px 4px;
+}
+
+@media (max-width: 768px) {
+  .stats-table-summary,
+  .stats-sections .stats-table {
+    padding: 6px 2px;
+  }
+
+  .stats-sections .section-title {
+    margin-top: 14px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .stats-sections .section-title:first-child {
+    margin-top: 10px !important;
+  }
 }
 
 /* Games page - card list (desktop row, mobile card) */
@@ -497,16 +544,27 @@ body {
 }
 
 .games-count {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
-  margin-bottom: 12px;
+  margin: 2px 0 4px 0;
+  text-align: left;
+}
+
+.games-count-hero {
+  font-size: 12px;
+  text-align: center;
+  margin: 0 0 12px 0;
 }
 
 @media (min-width: 769px) {
-  .games-count {
-    text-align: center;
+  .games-count-hero {
     margin-bottom: 16px;
   }
+}
+
+.stats-sections .games-count {
+  margin-top: 0;
+  margin-bottom: 4px;
 }
 
 .no-results-message {
