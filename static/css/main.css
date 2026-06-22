@@ -1071,12 +1071,13 @@ td.player_name, td.player_name a {
 
 /* Stats columns - narrow, centered, no wrapping */
 .table-col-stat {
-  width: 50px !important;
-  max-width: 50px !important;
-  min-width: 50px !important;
+  width: 36px !important;
+  max-width: 40px !important;
+  min-width: 32px !important;
   text-align: center !important;
   padding: 4px 2px !important;
   white-space: nowrap !important;
+  font-size: 11px !important;
 }
 
 /* Date column - narrow, centered, no wrapping */
@@ -1133,18 +1134,18 @@ td.player_name, td.player_name a {
   }
   
   .table-col-player {
-    min-width: 85px !important;
-    max-width: 130px !important;
+    min-width: 95px !important;
+    max-width: 160px !important;
     padding: 4px 4px !important;
-    font-size: 11px !important;
+    font-size: 12px !important;
   }
   
   .table-col-stat {
-    width: 45px !important;
-    max-width: 45px !important;
-    min-width: 45px !important;
-    padding: 4px 2px !important;
-    font-size: 11px !important;
+    width: 32px !important;
+    max-width: 36px !important;
+    min-width: 28px !important;
+    padding: 4px 1px !important;
+    font-size: 10px !important;
   }
   
   .table-col-date {
@@ -2067,6 +2068,14 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   margin: 0 auto;
   padding: 20px 16px 32px;
   box-sizing: border-box;
+  text-align: left;
+}
+
+.admin-user-card,
+.admin-users-toolbar,
+.admin-player-cards,
+.admin-player-card {
+  text-align: left;
 }
 
 .admin-users .admin-header {
@@ -2137,11 +2146,12 @@ body.has-page-header .hamburger-menu-container .menu__btn {
 
 .admin-user-meta__row {
   display: grid;
-  grid-template-columns: minmax(0, 108px) minmax(0, 1fr);
+  grid-template-columns: 6.5rem minmax(0, 1fr);
   gap: 6px 16px;
   padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   align-items: baseline;
+  text-align: left;
 }
 
 .admin-user-meta__row:last-child {
@@ -2156,6 +2166,7 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--link-color);
+  text-align: left;
 }
 
 .admin-user-meta dd {
@@ -2164,8 +2175,9 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   font-size: 0.95rem;
   line-height: 1.45;
   word-break: normal;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   min-width: 0;
+  text-align: left;
 }
 
 .admin-user-meta__value {
@@ -2193,6 +2205,112 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   white-space: normal;
 }
 
+/* Admin players — card layout */
+.admin-players-lead {
+  margin: 0 auto 20px;
+  max-width: 34rem;
+  line-height: 1.55;
+  color: var(--text);
+  opacity: 0.92;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.admin-player-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.admin-players-empty {
+  text-align: center;
+  color: var(--text);
+  opacity: 0.75;
+  padding: 24px;
+  margin: 0;
+}
+
+.admin-player-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px 18px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.admin-player-card__main {
+  flex: 1 1 180px;
+  min-width: 0;
+  text-align: left;
+}
+
+.admin-player-card__name {
+  margin: 0 0 4px 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--button-text-1);
+  line-height: 1.3;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.admin-player-card__games {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--link-color);
+  font-weight: 600;
+}
+
+.admin-player-card .edit-name-btn {
+  flex-shrink: 0;
+}
+
+.admin-players-sort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 18px;
+  max-width: 760px;
+}
+
+.admin-players-sort__label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.admin-players-sort .nav-pill.is-active {
+  border-color: var(--link-color);
+  color: var(--link-color);
+}
+
+@media (max-width: 640px) {
+  .admin-player-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-player-card .edit-name-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .edit-name-btn .edit-text {
+    display: inline;
+  }
+}
+
 .admin-badge {
   display: inline-block;
   padding: 4px 8px;
@@ -2214,14 +2332,36 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   border: 1px solid rgba(108, 117, 125, 0.3);
 }
 
-@media (max-width: 420px) {
+@media (max-width: 640px) {
+  .admin-users {
+    padding: 16px 14px 28px;
+  }
+
+  .admin-user-card {
+    padding: 16px 14px 14px;
+  }
+
   .admin-user-meta__row {
     grid-template-columns: 1fr;
     gap: 4px;
+    padding: 12px 0;
   }
 
   .admin-user-meta dt {
-    font-size: 0.68rem;
+    font-size: 0.7rem;
+  }
+
+  .admin-user-meta dd {
+    font-size: 1rem;
+  }
+
+  .admin-user-card__actions {
+    flex-direction: column;
+  }
+
+  .admin-user-card__actions .universal-btn {
+    width: 100%;
+    min-width: 0;
   }
 }
 
@@ -3484,21 +3624,24 @@ input[type="time"].form-input:focus {
 
 @media (max-width: 768px) {
   .admin-players {
-    padding: 15px;
+    padding: 15px 14px 28px;
   }
   
   .admin-players .admin-header h1 {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
   }
   
   .search-section {
-    max-width: 350px;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 18px 14px;
   }
   
   .search-group {
     flex-direction: column;
     align-items: stretch;
-    max-width: 330px;
+    max-width: none;
   }
   
   .search-input {

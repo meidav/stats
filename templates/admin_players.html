@@ -6,6 +6,7 @@
 <div class="admin-players">
     <div class="admin-header">
         <h1>Manage players</h1>
+        <p class="admin-players-lead">Rename players across all sports and game types.</p>
         <a href="{{ url_for('admin_dashboard') }}" class="universal-btn">
             <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -38,86 +39,31 @@
         </form>
     </div>
     
-    <div class="players-table">
-        <table>
-            <thead>
-                <tr>
-                    <th class="sortable" data-sort="name">
-                        Player name
-                        <span class="sort-indicator">
-                            {% if sort_by == 'name' %}
-                                {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-                            {% else %}↕{% endif %}
-                        </span>
-                    </th>
-                    <th class="sortable" data-sort="games">
-                        Total games
-                        <span class="sort-indicator">
-                            {% if sort_by == 'games' %}
-                                {% if sort_order == 'asc' %}↑{% else %}↓{% endif %}
-                            {% else %}↕{% endif %}
-                        </span>
-                    </th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in players %}
-                <tr>
-                    <td>
-                        <strong>{{ player.name }}</strong>
-                    </td>
-                    <td>
-                        <span class="game-count">{{ player.game_count }}</span>
-                    </td>
-                    <td>
-                        <a href="{{ url_for('edit_player', player=player.name) }}" class="universal-btn edit-name-btn">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                            <span class="edit-text">Edit name</span>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
+    <div class="admin-players-sort">
+        <span class="admin-players-sort__label">Sort by</span>
+        <a href="{{ url_for('admin_players', search=search_query, sort='name', order='asc' if sort_by != 'name' or sort_order == 'desc' else 'desc') }}" class="nav-pill{% if sort_by == 'name' %} is-active{% endif %}">Name</a>
+        <a href="{{ url_for('admin_players', search=search_query, sort='games', order='desc' if sort_by != 'games' or sort_order == 'asc' else 'asc') }}" class="nav-pill{% if sort_by == 'games' %} is-active{% endif %}">Games</a>
+    </div>
+    
+    <div class="admin-player-cards">
         {% if not players %}
-        <div class="no-results">
-            {% if search_query %}
-                <p>No players found matching "{{ search_query }}"</p>
-            {% else %}
-                <p>No players found</p>
-            {% endif %}
-        </div>
+        <p class="admin-players-empty">No players found{% if search_query %} matching "{{ search_query }}"{% endif %}.</p>
         {% endif %}
+        {% for player in players %}
+        <article class="admin-player-card">
+            <div class="admin-player-card__main">
+                <h2 class="admin-player-card__name">{{ player.name }}</h2>
+                <p class="admin-player-card__games">{{ player.game_count }} games</p>
+            </div>
+            <a href="{{ url_for('edit_player', player=player.name) }}" class="universal-btn edit-name-btn">
+                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                <span class="edit-text">Edit name</span>
+            </a>
+        </article>
+        {% endfor %}
     </div>
 </div>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const sortableHeaders = document.querySelectorAll('.sortable');
-    
-    sortableHeaders.forEach(header => {
-        header.addEventListener('click', function() {
-            const sortBy = this.dataset.sort;
-            const currentUrl = new URL(window.location);
-            const currentSort = currentUrl.searchParams.get('sort');
-            const currentOrder = currentUrl.searchParams.get('order');
-            
-            let newOrder = 'asc';
-            if (currentSort === sortBy && currentOrder === 'asc') {
-                newOrder = 'desc';
-            }
-            
-            currentUrl.searchParams.set('sort', sortBy);
-            currentUrl.searchParams.set('order', newOrder);
-            window.location.href = currentUrl.toString();
-        });
-    });
-});
-</script>
 {% endblock %}
