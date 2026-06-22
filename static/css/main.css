@@ -351,7 +351,7 @@ body {
 h2.section-title,
 h3.section-title,
 .section-title {
-  font-size: 12px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
   letter-spacing: 0.02em !important;
   color: var(--text-secondary) !important;
@@ -575,14 +575,14 @@ h3.section-title.section-title--fewer {
 }
 
 .games-count {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-secondary);
   margin: 2px 0 4px 0;
   text-align: center;
 }
 
 .games-count-hero {
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
   margin: 0 0 12px 0;
 }
@@ -1023,7 +1023,7 @@ td a {
   padding: 2px;
   margin: 0 auto;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--button-bg-1);
   text-decoration: none;
 }
@@ -1034,7 +1034,7 @@ table {
   margin: 0 auto;
   background-color: var(--table-bg);
   border-radius: var(--rounded-corners);
-  font-size: 14px;
+  font-size: 16px;
   padding: 15px 8px;
   border-spacing: 0;
   border: none;
@@ -1045,7 +1045,7 @@ table {
 
 @media (max-width: 768px) {
   table {
-    font-size: 12px;
+    font-size: 14px;
     padding: 12px 6px;
   }
 }
@@ -1063,7 +1063,7 @@ th, td {
 @media (max-width: 768px) {
   th, td {
     padding: 4px 2px;
-    font-size: 11px;
+    font-size: 13px;
   }
 }
 
@@ -1072,7 +1072,7 @@ thead {
 }
 
 thead th {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -1090,14 +1090,14 @@ tbody tr:last-child {
 }
 
 th {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: bold;
   color: var(--text);
   border: none;
 }
 
 td {
-  font-size: 13px;
+  font-size: 15px;
   border: none;
   padding: 10px 8px;
 }
@@ -1124,7 +1124,7 @@ td {
 
 /* Player name cells - keep slightly larger */
 td.player_name, td.player_name a {
-  font-size: 15px;
+  font-size: 17px;
 }
 
 /* Common table column classes for consistent styling */
@@ -1149,14 +1149,14 @@ td.player_name, td.player_name a {
   word-break: normal !important;
   overflow-wrap: break-word !important;
   hyphens: none !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 
 .table-col-player a {
   white-space: normal !important;
   word-break: normal !important;
   overflow-wrap: break-word !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 
 /* Stats columns - narrow, centered, no wrapping */
@@ -1167,7 +1167,7 @@ td.player_name, td.player_name a {
   text-align: center !important;
   padding: 4px 2px !important;
   white-space: nowrap !important;
-  font-size: 11px !important;
+  font-size: 13px !important;
 }
 
 /* Date column - narrow, centered, no wrapping */
@@ -1178,7 +1178,7 @@ td.player_name, td.player_name a {
   text-align: center !important;
   padding: 4px 2px !important;
   white-space: nowrap !important;
-  font-size: 13px !important;
+  font-size: 15px !important;
 }
 
 /* Tennis score column - for set scores like "6-3, 6-4" */
@@ -1189,7 +1189,7 @@ td.player_name, td.player_name a {
   text-align: center !important;
   padding: 4px 4px !important;
   white-space: nowrap !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 
 /* Players column - for game tables with multiple players */
@@ -1203,14 +1203,14 @@ td.player_name, td.player_name a {
   overflow-wrap: break-word !important;
   hyphens: none !important;
   line-height: 1.4 !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 
 .table-col-players a {
   white-space: normal !important;
   word-break: normal !important;
   overflow-wrap: break-word !important;
-  font-size: 12px !important;
+  font-size: 14px !important;
 }
 
 /* Mobile adjustments for table columns */
@@ -1220,14 +1220,14 @@ td.player_name, td.player_name a {
     max-width: 30px !important;
     min-width: 30px !important;
     padding: 4px 2px !important;
-    font-size: 11px !important;
+    font-size: 13px !important;
   }
   
   .table-col-player {
     min-width: 95px !important;
     max-width: 160px !important;
     padding: 4px 4px !important;
-    font-size: 12px !important;
+    font-size: 14px !important;
   }
   
   .table-col-stat {
@@ -1235,7 +1235,7 @@ td.player_name, td.player_name a {
     max-width: 36px !important;
     min-width: 28px !important;
     padding: 4px 1px !important;
-    font-size: 10px !important;
+    font-size: 12px !important;
   }
   
   .table-col-date {
@@ -1243,20 +1243,20 @@ td.player_name, td.player_name a {
     max-width: 60px !important;
     min-width: 60px !important;
     padding: 4px 2px !important;
-    font-size: 11px !important;
+    font-size: 13px !important;
   }
   
   .table-col-players {
     min-width: 75px !important;
     padding: 4px 3px !important;
-    font-size: 10px !important;
+    font-size: 12px !important;
   }
   
   .table-col-tennis-score {
     min-width: 70px !important;
     max-width: 100px !important;
     padding: 4px 3px !important;
-    font-size: 11px !important;
+    font-size: 13px !important;
   }
 }
 
