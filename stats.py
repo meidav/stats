@@ -533,7 +533,7 @@ def add_game():
     rare_stats = rare_stats_per_year(current_year, minimum_games)
     w_scores = winners_scores()
     l_scores = losers_scores()
-    players = all_players(all_games)
+    players = all_players(today_games + all_games)
     t_stats = todays_stats()
 
     if request.method == 'POST':
@@ -744,10 +744,10 @@ def vollis():
 @app.route('/add_vollis_game/', methods=('GET', 'POST'))
 @admin_required
 def add_vollis_game():
-    games = vollis_year_games('All years')
-    players = all_vollis_players(games)
-    t_stats = todays_vollis_stats()
     t_games = todays_vollis_games()
+    games = vollis_year_games('All years')
+    players = all_vollis_players(t_games + games)
+    t_stats = todays_vollis_stats()
     year = str(date.today().year)
     winning_scores = vollis_winning_scores()
     losing_scores = vollis_losing_scores()
@@ -935,10 +935,10 @@ def tennis():
 @app.route('/add_tennis_match/', methods=('GET', 'POST'))
 @admin_required
 def add_tennis_match():
-    matches = tennis_year_matches('All years')
-    players = all_tennis_players(matches)
-    t_stats = todays_tennis_stats()
     t_matches = todays_tennis_matches()
+    matches = tennis_year_matches('All years')
+    players = all_tennis_players(t_matches + matches)
+    t_stats = todays_tennis_stats()
     year = str(date.today().year)
     winning_scores = tennis_winning_scores()
     losing_scores = tennis_losing_scores()

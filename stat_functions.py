@@ -243,16 +243,13 @@ def losers_scores():
 	return scores
 
 def all_players(games):
+	"""Unique players in order of most recent game appearance (newest games first)."""
 	players = []
 	for game in games:
-		if game[2] not in players:
-			players.append(game[2])
-		if game[3] not in players:
-			players.append(game[3])
-		if game[5] not in players:
-			players.append(game[5])
-		if game[6] not in players:
-			players.append(game[6])
+		for idx in (2, 3, 5, 6):
+			name = game[idx]
+			if name and name not in players:
+				players.append(name)
 	return players
 
 def year_games(year):

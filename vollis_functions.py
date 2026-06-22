@@ -21,10 +21,10 @@ def vollis_stats_per_year(year, minimum_games):
 def all_vollis_players(games):
     players = []
     for game in games:
-        if game[2] not in players:
-            players.append(game[2])
-        if game[4] not in players:
-            players.append(game[4])
+        for idx in (2, 4):
+            name = game[idx]
+            if name and name not in players:
+                players.append(name)
     return players
 
 
@@ -180,10 +180,10 @@ def todays_vollis_stats():
 def all_vollis_players(games):
     players = []
     for game in games:
-        if game[2] not in players:
-            players.append(game[2])
-        if game[4] not in players:
-            players.append(game[4])
+        for idx in (2, 4):
+            name = game[idx]
+            if name and name not in players:
+                players.append(name)
     return players
 
 def todays_vollis_games():

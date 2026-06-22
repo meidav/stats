@@ -21,10 +21,10 @@ def tennis_stats_per_year(year, minimum_matches):
 def all_tennis_players(matches):
     players = []
     for match in matches:
-        if match[2] not in players:
-            players.append(match[2])
-        if match[4] not in players:
-            players.append(match[4])
+        for idx in (2, 4):
+            name = match[idx]
+            if name and name not in players:
+                players.append(name)
     return players
 
 
@@ -183,10 +183,10 @@ def todays_tennis_stats():
 def all_tennis_players(matches):
     players = []
     for match in matches:
-        if match[2] not in players:
-            players.append(match[2])
-        if match[4] not in players:
-            players.append(match[4])
+        for idx in (2, 4):
+            name = match[idx]
+            if name and name not in players:
+                players.append(name)
     return players
 
 def todays_tennis_matches():
