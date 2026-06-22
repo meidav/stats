@@ -362,15 +362,18 @@ h3.section-title,
   max-width: none;
 }
 
-.section-title--with {
+h2.section-title.section-title--with,
+h3.section-title.section-title--with {
   color: var(--stat-wins) !important;
 }
 
-.section-title--against {
+h2.section-title.section-title--against,
+h3.section-title.section-title--against {
   color: var(--stat-losses) !important;
 }
 
-.section-title--fewer {
+h2.section-title.section-title--fewer,
+h3.section-title.section-title--fewer {
   color: var(--stat-rating) !important;
 }
 
