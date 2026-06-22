@@ -44,7 +44,7 @@
 
     <div class="stats-sections">
         {% if partner_stats %}
-        <h2 class="section-title">Stats with...</h2>
+        <h2 class="section-title section-title--with">Stats with...</h2>
         <table class="stats-table">
             <thead>
                 <tr>
@@ -72,7 +72,7 @@
         {% endif %}
 
         {% if opponent_stats %}
-        <h2 class="section-title">Stats against...</h2>
+        <h2 class="section-title section-title--against">Stats against...</h2>
         <table class="stats-table">
             <thead>
                 <tr>
@@ -100,11 +100,11 @@
         {% endif %}
 
         {% if rare_partner_stats or rare_opponent_stats %}
-        <h2 class="section-title">Fewer than {{ minimum_games }} games</h2>
+        <h2 class="section-title section-title--fewer">Fewer than {{ minimum_games }} games</h2>
         {% endif %}
 
         {% if rare_partner_stats %}
-        <h2 class="section-title">Stats with...</h2>
+        <h2 class="section-title section-title--with">Stats with...</h2>
         <table class="stats-table">
             <thead>
                 <tr>
@@ -132,7 +132,7 @@
         {% endif %}
 
         {% if rare_opponent_stats %}
-        <h2 class="section-title">Stats against...</h2>
+        <h2 class="section-title section-title--against">Stats against...</h2>
         <table class="stats-table">
             <thead>
                 <tr>

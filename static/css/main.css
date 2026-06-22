@@ -356,10 +356,38 @@ h3.section-title,
   letter-spacing: 0.02em !important;
   color: var(--text-secondary) !important;
   text-transform: uppercase !important;
-  text-align: left !important;
+  text-align: center !important;
   margin: 0 !important;
   padding: 0 !important;
   max-width: none;
+}
+
+.section-title--with {
+  color: var(--stat-wins) !important;
+}
+
+.section-title--against {
+  color: var(--stat-losses) !important;
+}
+
+.section-title--fewer {
+  color: var(--stat-rating) !important;
+}
+
+/* Win % color bands: >60 green, 40-60 blue, <40 red */
+.win-pct-high {
+  color: var(--stat-wins) !important;
+  font-weight: 600;
+}
+
+.win-pct-mid {
+  color: var(--stat-rating) !important;
+  font-weight: 600;
+}
+
+.win-pct-low {
+  color: var(--stat-losses) !important;
+  font-weight: 600;
 }
 
 /* Stats list / player detail sections */
