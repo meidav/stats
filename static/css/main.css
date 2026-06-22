@@ -578,7 +578,7 @@ h3.section-title.section-title--fewer {
   font-size: 11px;
   color: var(--text-secondary);
   margin: 2px 0 4px 0;
-  text-align: left;
+  text-align: center;
 }
 
 .games-count-hero {
@@ -596,6 +596,7 @@ h3.section-title.section-title--fewer {
 .stats-sections .games-count {
   margin-top: 0;
   margin-bottom: 4px;
+  text-align: center;
 }
 
 .no-results-message {
