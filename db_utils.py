@@ -15,13 +15,21 @@ class DatabaseManager:
     
     def _get_database_path(self):
         """Get the appropriate database path"""
-        # Try production path first, fall back to local
         prod_path = self.config.DATABASE_PATH
         local_path = self.config.DATABASE_PATH_LOCAL
-        
-        if os.path.exists(prod_path) or '/home/' in prod_path:
+
+        if os.environ.get('DATABASE_PATH'):
+            self._ensure_db_dir(prod_path)
+            return prod_path
+        if os.path.exists(prod_path) or '/home/' in prod_path or prod_path.startswith('/data'):
+            self._ensure_db_dir(prod_path)
             return prod_path
         return local_path
+
+    def _ensure_db_dir(self, path):
+        directory = os.path.dirname(path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
     
     def create_connection(self):
         """Create a database connection"""

@@ -21,3 +21,11 @@ PyMySQL==1.0.2
 
 # Development dependencies (optional)
 Flask-Login==0.3.2
+
+# Mobile API
+Flask-JWT-Extended==4.6.0
+Flask-CORS==4.0.0
+
+# Production server
+gunicorn==21.2.0
+pytz

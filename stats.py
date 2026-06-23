@@ -8,27 +8,30 @@ from one_v_one_functions import *
 from other_functions import *
 from auth import init_auth, create_users_table, get_user_by_username, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user, get_user_by_id, create_user
 from player_management import get_all_players, get_player_games_count, update_player_name, search_players, get_player_stats
+from api import init_api
 import pytz
 import logging
 import subprocess
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'b83880e869f054bfc465a6f46125ac715e7286ed25e88537'
-app.debug = True
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'b83880e869f054bfc465a6f46125ac715e7286ed25e88537')
+app.debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
 
 # Session configuration for persistent login (30 days)
+_is_production = os.environ.get('FLASK_ENV') == 'production'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
-app.config['SESSION_COOKIE_SECURE'] = False  # Set to True if using HTTPS
+app.config['SESSION_COOKIE_SECURE'] = _is_production
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=30)
-app.config['REMEMBER_COOKIE_SECURE'] = False  # Set to True if using HTTPS
+app.config['REMEMBER_COOKIE_SECURE'] = _is_production
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 
 # Initialize authentication
 login_manager = init_auth(app)
 create_users_table()
+init_api(app)
 
 # Set up Flask logging to console
 def setup_logging():

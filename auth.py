@@ -68,7 +68,7 @@ def get_user_by_username(username):
 def create_user(username, email, password, is_admin=False):
     """Create a new user"""
     cur = set_cur()
-    password_hash = generate_password_hash(password)
+    password_hash = generate_password_hash(password, method='pbkdf2:sha256')
     
     try:
         cur.execute('''

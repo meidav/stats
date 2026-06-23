@@ -28,7 +28,6 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    DATABASE_PATH = 'stats.db'
 
 class TestingConfig(Config):
     """Testing configuration"""

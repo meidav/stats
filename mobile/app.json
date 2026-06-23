@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "PlayTracker",
+    "slug": "playtracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "playtracker",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "org.playtracker.app"
+    },
+    "android": {
+      "package": "org.playtracker.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F766E",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
