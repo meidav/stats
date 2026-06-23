@@ -12,13 +12,17 @@ Deploy the Flask API and web app to Railway with a persistent SQLite volume.
 
 SQLite needs disk that survives redeploys.
 
-1. In your Railway service, open **Volumes**.
-2. Create a volume and mount it at `/data`.
-3. Set this environment variable on the service:
+1. In your Railway project canvas, click the **stats** service card.
+2. Open the **Settings** tab (top of the right panel).
+3. Scroll down to the **Volumes** section (below Networking / Scale).
+4. Click **Add Volume** and set mount path: `/data`
+5. Set this environment variable on the service (**Variables** tab):
 
 ```
 DATABASE_PATH=/data/stats.db
 ```
+
+**If you do not see Volumes:** it may require a paid Hobby plan on Railway. For a first test deploy you can skip the volume (data resets on redeploy). Leave `DATABASE_PATH` unset and the app will use a local `stats.db`.
 
 ## 3. Required environment variables
 
@@ -79,6 +83,24 @@ railway volume upload /data/stats.db ./stats.db
 ```
 
 Or use Railway dashboard file upload if available.
+
+## Troubleshooting
+
+### "No start command detected" (Railpack build failure)
+
+Railway uses Railpack and cannot auto-detect Flask when the entry file is `stats.py`. This repo includes:
+
+- `Dockerfile` (preferred - Railway builds from this)
+- `railpack.json` with explicit `startCommand`
+- `railway.toml` with `startCommand`
+
+If it still fails, set **Start Command** manually in Railway:
+
+```
+bash scripts/railway_start.sh
+```
+
+Settings -> Deploy -> Custom Start Command.
 
 ## 7. Mobile app
 
