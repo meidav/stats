@@ -10,19 +10,22 @@ Deploy the Flask API and web app to Railway with a persistent SQLite volume.
 
 ## 2. Add a persistent volume
 
-SQLite needs disk that survives redeploys.
+SQLite needs disk that survives redeploys. Volumes are **not** in Settings - create them from the project canvas:
 
-1. In your Railway project canvas, click the **stats** service card.
-2. Open the **Settings** tab (top of the right panel).
-3. Scroll down to the **Volumes** section (below Networking / Scale).
-4. Click **Add Volume** and set mount path: `/data`
-5. Set this environment variable on the service (**Variables** tab):
+1. Go to your Railway **project canvas** (the diagram view with the stats service box).
+2. **Right-click** empty space on the canvas, OR press **Cmd+K** (Mac) / **Ctrl+K** (Windows).
+3. Choose **Create Volume** (or type "volume" in the command palette).
+4. Select the **stats** service to attach it to.
+5. Set mount path: `/data`
+6. Add this variable on the **Variables** tab:
 
 ```
 DATABASE_PATH=/data/stats.db
 ```
 
-**If you do not see Volumes:** it may require a paid Hobby plan on Railway. For a first test deploy you can skip the volume (data resets on redeploy). Leave `DATABASE_PATH` unset and the app will use a local `stats.db`.
+Railway also sets `RAILWAY_VOLUME_MOUNT_PATH` automatically at runtime.
+
+**If you skip the volume for now:** leave `DATABASE_PATH` unset. The app will work but data resets on each redeploy.
 
 ## 3. Required environment variables
 
@@ -85,6 +88,16 @@ railway volume upload /data/stats.db ./stats.db
 Or use Railway dashboard file upload if available.
 
 ## Troubleshooting
+
+### Healthcheck failure
+
+Set **Healthcheck Path** in Settings -> Deploy:
+
+```
+/api/v1/health
+```
+
+Also add required **Variables**: `FLASK_ENV=production`, `SECRET_KEY`, `TIME_OFFSET=-8`.
 
 ### "No start command detected" (Railpack build failure)
 
