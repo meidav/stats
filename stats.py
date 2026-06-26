@@ -6,6 +6,13 @@ from vollis_functions import *
 from tennis_functions import *
 from one_v_one_functions import *
 from other_functions import *
+import hmac
+import werkzeug.security as _werkzeug_security
+
+# Werkzeug 2.2 removed safe_str_cmp; older Flask-Login on PA still imports it.
+if not hasattr(_werkzeug_security, 'safe_str_cmp'):
+    _werkzeug_security.safe_str_cmp = lambda a, b: hmac.compare_digest(str(a), str(b))
+
 from auth import init_auth, create_users_table, get_user_by_username, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user, get_user_by_id, create_user
 from player_management import get_all_players, get_player_games_count, update_player_name, search_players, get_player_stats
 import pytz
@@ -32,12 +39,12 @@ app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 login_manager = init_auth(app)
 create_users_table()
 
-# Mobile API (optional; needs Flask-JWT-Extended and Flask-CORS)
+# Mobile API (optional; needs Flask-JWT-Extended and Flask-CORS on the server)
 try:
     from api import init_api
     init_api(app)
 except Exception as exc:
-    logging.getLogger(__name__).warning("Mobile API not initialized: %s", exc)
+    logging.getLogger(__name__).debug("Mobile API skipped: %s", exc)
 
 # Set up Flask logging to console
 def setup_logging():
