@@ -3,27 +3,47 @@ name: Deploy to PythonAnywhere
 on:
   push:
     branches:
-      - main  # Change to 'master' if that's your default branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Deploy to PythonAnywhere
+    - name: Repair and deploy on PythonAnywhere
+      env:
+        PA_API_TOKEN: ${{ secrets.PA_API_TOKEN }}
+        PA_USERNAME: ${{ secrets.PA_USERNAME }}
       run: |
-        # Deploy using webhook endpoint (more reliable than API console)
-        curl -X POST "https://${{ secrets.PA_DOMAIN }}/deploy" \
-        -H "Content-Type: application/json" \
-        --fail --show-error
-        
+        set -euo pipefail
+
+        if [ -z "${PA_API_TOKEN:-}" ] || [ -z "${PA_USERNAME:-}" ]; then
+          echo "PA_API_TOKEN or PA_USERNAME secret missing; trying deploy webhook..."
+          curl -fsS -X POST "https://arbel.pythonanywhere.com/deploy" || {
+            echo "Deploy webhook failed. Run bash pa_repair.sh on PythonAnywhere console."
+            exit 1
+          }
+          exit 0
+        fi
+
+        CONSOLE_ID=$(curl -fsS -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/" \
+          -H "Authorization: Token ${PA_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d '{"executable":"bash"}' \
+          | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
+
+        sleep 3
+
+        curl -fsS -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USERNAME}/consoles/${CONSOLE_ID}/send_input/" \
+          -H "Authorization: Token ${PA_API_TOKEN}" \
+          --data-urlencode "input=cd ~/stats && git fetch origin && git reset --hard origin/main && pip3 install -r requirements.txt && touch /var/www/${PA_USERNAME}_pythonanywhere_com_wsgi.py && echo DEPLOY_DONE"
+
+        echo "Deploy command sent to PythonAnywhere console ${CONSOLE_ID}"
+
     - name: Notify deployment success
       if: success()
-      run: echo "✅ Successfully deployed to PythonAnywhere!"
-      
+      run: echo "Successfully deployed to PythonAnywhere"
+
     - name: Notify deployment failure
       if: failure()
-      run: echo "❌ Deployment failed. Check the logs above."
+      run: echo "Deployment failed. Run bash pa_repair.sh on the PythonAnywhere Bash console."
