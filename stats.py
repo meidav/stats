@@ -35,9 +35,12 @@ app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=30)
 app.config['REMEMBER_COOKIE_SECURE'] = _is_production
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 
-# Initialize authentication
+# Initialize authentication (keep startup resilient so a DB hiccup cannot blank the site)
 login_manager = init_auth(app)
-create_users_table()
+try:
+    create_users_table()
+except Exception as exc:
+    logging.getLogger(__name__).error("Could not ensure users table: %s", exc)
 
 # Mobile API (optional; needs Flask-JWT-Extended and Flask-CORS on the server)
 try:
@@ -1529,7 +1532,26 @@ def deploy():
     except Exception as e:
         return f'Deployment failed: {str(e)}', 500
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template(
+        'error.html',
+        code=404,
+        title='Ball went long',
+        message='That page is out. Dig back to the main stats board and try another route.',
+    ), 404
+
 @app.errorhandler(500)
 def internal_error(error):
     import traceback
-    return f"<pre>{traceback.fo
+    app.logger.error(traceback.format_exc())
+    detail = None
+    if app.debug:
+        detail = traceback.format_exc()
+    return render_template(
+        'error.html',
+        code=500,
+        title='Whiffed that one',
+        message='Something spiked the server. The ball is still in play though. Try again or head back to stats.',
+        detail=detail,
+    ), 500
