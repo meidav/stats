@@ -415,19 +415,40 @@ def fix_admin():
 
 @app.route('/api/latest-commit')
 def latest_commit():
-    """Return short hash + subject of HEAD for deploy verification in the browser console."""
+    """Return current and previous commit details for the browser console."""
     try:
+        repo_dir = os.path.dirname(os.path.abspath(__file__))
         result = subprocess.run(
-            ['git', 'log', '-1', '--pretty=format:%h %s'],
+            [
+                'git', 'log', '-2',
+                '--pretty=format:%h%x09%cd%x09%s',
+                '--date=format:%Y-%m-%d %H:%M %Z',
+            ],
             capture_output=True,
             text=True,
-            cwd=os.path.dirname(os.path.abspath(__file__)),
+            cwd=repo_dir,
         )
-        if result.returncode == 0 and result.stdout.strip():
-            return result.stdout.strip()
-        return "Unable to get commit info"
+        if result.returncode != 0 or not result.stdout.strip():
+            return {'error': 'Unable to get commit info'}, 500
+
+        commits = []
+        for line in result.stdout.strip().splitlines():
+            parts = line.split('\t', 2)
+            if len(parts) != 3:
+                continue
+            commits.append({
+                'hash': parts[0],
+                'date': parts[1],
+                'subject': parts[2],
+            })
+
+        payload = {
+            'current': commits[0] if commits else None,
+            'previous': commits[1] if len(commits) > 1 else None,
+        }
+        return payload
     except Exception as e:
-        return f"Error: {str(e)}"
+        return {'error': str(e)}, 500
 
 @app.route('/admin/edit-user/<int:user_id>', methods=['POST'])
 @admin_required

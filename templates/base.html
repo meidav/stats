@@ -3,37 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title>Arbel's Stats | {% block title %} {% endblock %}</title>
-    <!-- Auto-deployment test - LIVE TEST $(date) -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <!-- Material Symbols for navigation and action icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: 'var(--text-primary)',
-                        secondary: 'var(--text-secondary)',
-                        accent: 'var(--accent-color)',
-                        'accent-hover': 'var(--accent-hover)',
-                        'card-bg': 'var(--card-bg)',
-                        'input-bg': 'var(--input-bg)',
-                        'border-color': 'var(--border-color)',
-                    }
-                }
-            }
-        }
-    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 
     <script>
         fetch('/api/latest-commit')
-            .then(function (response) { return response.text(); })
-            .then(function (commit) {
-                console.log('[stats] deployed:', commit);
+            .then(function (response) { return response.json(); })
+            .then(function (info) {
+                if (info.current) {
+                    console.log(
+                        '[stats] deployed:',
+                        info.current.hash,
+                        info.current.date,
+                        '-',
+                        info.current.subject
+                    );
+                }
+                if (info.previous) {
+                    console.log(
+                        '[stats] previous:',
+                        info.previous.hash,
+                        info.previous.date,
+                        '-',
+                        info.previous.subject
+                    );
+                }
             })
             .catch(function () {
                 console.log('[stats] deployed: (could not read commit)');
