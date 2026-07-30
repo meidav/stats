@@ -415,14 +415,17 @@ def fix_admin():
 
 @app.route('/api/latest-commit')
 def latest_commit():
-    """Get the latest git commit message"""
+    """Return short hash + subject of HEAD for deploy verification in the browser console."""
     try:
-        result = subprocess.run(['git', 'log', '-1', '--pretty=format:%s'], 
-                              capture_output=True, text=True, cwd=os.path.dirname(os.path.abspath(__file__)))
-        if result.returncode == 0:
+        result = subprocess.run(
+            ['git', 'log', '-1', '--pretty=format:%h %s'],
+            capture_output=True,
+            text=True,
+            cwd=os.path.dirname(os.path.abspath(__file__)),
+        )
+        if result.returncode == 0 and result.stdout.strip():
             return result.stdout.strip()
-        else:
-            return "Unable to get commit info"
+        return "Unable to get commit info"
     except Exception as e:
         return f"Error: {str(e)}"
 

@@ -55,11 +55,6 @@
     </table>
     {% endif %}
 
-    <script>
-        const last30Stats = {{ last_30_stats | tojson | safe }};
-        console.log("last_30_stats:", last30Stats);
-    </script>
-    
     {% if last_30_stats %}
     <h2 class="section-title">Last 30 days</h2>
     <table id="last-30-days-stats" class="stats-table">

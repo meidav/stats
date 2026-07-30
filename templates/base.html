@@ -30,27 +30,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 
     <script>
-        // Deployment tracking console logs
-        console.log('🚀 DEPLOYMENT INFO: Site loaded at', new Date());
-        
-        // Fetch latest commit dynamically
         fetch('/api/latest-commit')
-            .then(response => response.text())
-            .then(commitMessage => {
-                console.log('📦 Latest deployment commit:', commitMessage);
-                console.log('✅ Automated deployment is working!');
+            .then(function (response) { return response.text(); })
+            .then(function (commit) {
+                console.log('[stats] deployed:', commit);
             })
-            .catch(error => {
-                console.log('⚠️ Could not fetch latest commit:', error);
+            .catch(function () {
+                console.log('[stats] deployed: (could not read commit)');
             });
-        
-        // DEBUG: Check current user status
-        console.log('🔍 DEBUG: Current user:', '{{ current_user.username if current_user.is_authenticated else "Not logged in" }}');
-        console.log('🔍 DEBUG: Is authenticated:', '{{ current_user.is_authenticated }}');
-        console.log('🔍 DEBUG: Is admin:', '{{ current_user.is_admin if current_user.is_authenticated else "N/A" }}');
-        console.log('🔍 DEBUG: User ID:', '{{ current_user.id if current_user.is_authenticated else "N/A" }}');
-        console.log('🔍 DEBUG: Full user object:', '{{ current_user }}');
-        
+
         document.addEventListener('click', function(event) {
             var nav = document.getElementById('main-nav');
             var targetElement = event.target; // Clicked element
