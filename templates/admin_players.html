@@ -1,69 +1,71 @@
 {% extends "base.html" %}
-
+{% block body_class %}has-page-header{% endblock %}
 {% block title %}Manage players{% endblock %}
 
 {% block content %}
-<div class="admin-players">
-    <div class="admin-header">
-        <h1>Manage players</h1>
-        <p class="admin-players-lead">Rename players across all sports and game types.</p>
-        <a href="{{ url_for('admin_dashboard') }}" class="universal-btn">
-            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Back to dashboard
-        </a>
+<div class="page-header">
+    <h1 class="page-title-hero">Manage players</h1>
+    <div class="header-controls">
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-pill">← Admin</a>
+        <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
     </div>
-    
-    <div class="search-section">
-        <form method="GET" action="{{ url_for('admin_players') }}">
-            <div class="search-group">
-                <input type="text" name="search" placeholder="Search players..." value="{{ search_query }}" class="players-search-input">
-                <button type="submit" class="universal-btn">
-                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="M21 21l-4.35-4.35"/>
-                    </svg>
-                    Search
-                </button>
-                {% if search_query %}
-                <a href="{{ url_for('admin_players') }}" class="universal-btn">
-                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                    Clear
-                </a>
-                {% endif %}
-            </div>
-        </form>
-    </div>
-    
+</div>
+
+<div class="search-bar-wrap">
+    <form method="GET" action="{{ url_for('admin_players') }}" class="admin-players-search-form">
+        <input type="text" name="search" id="playerFilter" class="search-bar" placeholder="Search players..." value="{{ search_query }}" autocomplete="off">
+        <input type="hidden" name="sort" value="{{ sort_by }}">
+        <input type="hidden" name="order" value="{{ sort_order }}">
+    </form>
+</div>
+
+<div class="admin-players-toolbar">
+    <p class="games-count games-count-hero" id="playersCount">{{ players|length }} PLAYERS</p>
     <div class="admin-players-sort">
-        <span class="admin-players-sort__label">Sort by</span>
         <a href="{{ url_for('admin_players', search=search_query, sort='name', order='asc' if sort_by != 'name' or sort_order == 'desc' else 'desc') }}" class="nav-pill{% if sort_by == 'name' %} is-active{% endif %}">Name</a>
         <a href="{{ url_for('admin_players', search=search_query, sort='games', order='desc' if sort_by != 'games' or sort_order == 'asc' else 'asc') }}" class="nav-pill{% if sort_by == 'games' %} is-active{% endif %}">Games</a>
     </div>
-    
-    <div class="admin-player-cards">
-        {% if not players %}
-        <p class="admin-players-empty">No players found{% if search_query %} matching "{{ search_query }}"{% endif %}.</p>
-        {% endif %}
-        {% for player in players %}
-        <article class="admin-player-card">
-            <div class="admin-player-card__main">
-                <h2 class="admin-player-card__name">{{ player.name }}</h2>
-                <p class="admin-player-card__games">{{ player.game_count }} games</p>
-            </div>
-            <a href="{{ url_for('edit_player', player=player.name) }}" class="universal-btn edit-name-btn">
-                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-                <span class="edit-text">Edit name</span>
-            </a>
-        </article>
-        {% endfor %}
-    </div>
 </div>
+
+<div class="admin-player-list" id="playersList">
+    {% if not players %}
+    <p class="no-results-message">No players found{% if search_query %} matching "{{ search_query }}"{% endif %}.</p>
+    {% endif %}
+    {% for player in players %}
+    <a class="admin-player-row" href="{{ url_for('edit_player', player=player.name) }}" data-name="{{ player.name|lower }}">
+        <div class="admin-player-avatar" aria-hidden="true">
+            {% if player.photo_url %}
+            <img src="{{ player.photo_url }}" alt="">
+            {% else %}
+            <span>{{ player.initials }}</span>
+            {% endif %}
+        </div>
+        <div class="admin-player-row__main">
+            <strong>{{ player.name }}</strong>
+            <span>{{ player.game_count }} games</span>
+        </div>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </a>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var input = document.getElementById('playerFilter');
+  var rows = document.querySelectorAll('#playersList .admin-player-row');
+  var countEl = document.getElementById('playersCount');
+  if (!input) return;
+  function filterRows() {
+    var q = (input.value || '').toLowerCase().trim();
+    var visible = 0;
+    rows.forEach(function (row) {
+      var show = !q || (row.getAttribute('data-name') || '').indexOf(q) !== -1;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (countEl) countEl.textContent = visible + ' PLAYERS';
+  }
+  input.addEventListener('input', filterRows);
+});
+</script>
 {% endblock %}

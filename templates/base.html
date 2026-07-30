@@ -77,6 +77,11 @@
                         <span class="material-symbols-rounded menu-icon" aria-hidden="true">close</span>
                     </button>
                 </li>
+
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Stats</span>
+                    <div class="separator-line"></div>
+                </li>
                 <li><a class="menu__item" href="{{ url_for('index') }}">
                     <span class="material-symbols-rounded menu-icon" aria-hidden="true">sports_volleyball</span>
                     Doubles stats
@@ -95,11 +100,10 @@
                 </a></li>
                 
                 {% if current_user.is_authenticated and current_user.is_admin %}
-                <!-- Admin section: visual divider only -->
-                <li class="menu-separator menu-separator--line">
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Admin</span>
                     <div class="separator-line"></div>
                 </li>
-                
                 <li><a class="menu__item admin-item" href="{{ url_for('add_game') }}">
                     <span class="material-symbols-rounded menu-icon" aria-hidden="true">add_circle</span>
                     Add game
@@ -124,18 +128,33 @@
                     <span class="material-symbols-rounded menu-icon" aria-hidden="true">edit_square</span>
                     Edit tennis matches
                 </a></li>
+
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Account</span>
+                    <div class="separator-line"></div>
+                </li>
                 <li><a class="menu__item admin-item" href="{{ url_for('admin_dashboard') }}">
                     <span class="material-symbols-rounded menu-icon" aria-hidden="true">dashboard_2</span>
-                    Admin Dashboard
+                    Admin dashboard
                 </a></li>
                 {% endif %}
                 
                 {% if current_user.is_authenticated %}
+                {% if not (current_user.is_authenticated and current_user.is_admin) %}
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Account</span>
+                    <div class="separator-line"></div>
+                </li>
+                {% endif %}
                 <li><a class="menu__item" href="{{ url_for('logout') }}">
                     <span class="material-symbols-rounded menu-icon" aria-hidden="true">logout</span>
                     Logout ({{ current_user.username }})
                 </a></li>
                 {% else %}
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Account</span>
+                    <div class="separator-line"></div>
+                </li>
                 <li><a class="menu__item" href="{{ url_for('login') }}">
                     <span class="material-symbols-rounded menu-icon" aria-hidden="true">login</span>
                     Login

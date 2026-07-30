@@ -1,64 +1,78 @@
 {% extends "base.html" %}
-
+{% block body_class %}has-page-header{% endblock %}
 {% block title %}Admin dashboard{% endblock %}
 
 {% block content %}
-<div class="admin-dashboard">
-    <div class="admin-header">
-        <h1>Admin dashboard</h1>
-    </div>
-    
-    <div class="admin-stats">
-        <div class="stat-card">
-            <h3>Users</h3>
-            <div class="stat-number">{{ users|length }}</div>
-            <a href="{{ url_for('admin_users') }}" class="btn nav-style-btn">
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="8.5" cy="7" r="4"/>
-                    <path d="M20 8v6M23 11h-6"/>
-                </svg>
-                Manage admins
-            </a>
-        </div>
-        
-        <div class="stat-card">
-            <h3>Players</h3>
-            <div class="stat-number">{{ players|length }}</div>
-            <a href="{{ url_for('admin_players') }}" class="btn nav-style-btn">
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                </svg>
-                Manage players
-            </a>
-        </div>
-    </div>
-    
-    <div class="quick-actions">
-        <h3>Quick actions</h3>
-        <div class="action-grid">
-            <a href="{{ url_for('add_game') }}" class="action-card">
-                <h4>Add game</h4>
-                <p>Add a new doubles game</p>
-            </a>
-            
-            <a href="{{ url_for('add_vollis_game') }}" class="action-card">
-                <h4>Add vollis game</h4>
-                <p>Add a new vollis game</p>
-            </a>
-            
-            <a href="{{ url_for('edit_games') }}" class="action-card">
-                <h4>Edit games</h4>
-                <p>Edit existing doubles games</p>
-            </a>
-            
-            <a href="{{ url_for('edit_vollis_games') }}" class="action-card">
-                <h4>Edit vollis games</h4>
-                <p>Edit existing vollis games</p>
-            </a>
-        </div>
+<div class="page-header">
+    <h1 class="page-title-hero">Admin dashboard</h1>
+    <div class="header-controls">
+        <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
     </div>
 </div>
 
+<div class="player-kpi-grid admin-dash-kpis">
+    <div class="player-kpi">
+        <div class="player-kpi-value player-kpi-value--rating">{{ users|length }}</div>
+        <div class="player-kpi-label">Admins</div>
+    </div>
+    <div class="player-kpi">
+        <div class="player-kpi-value player-kpi-value--rating">{{ players_count }}</div>
+        <div class="player-kpi-label">Players</div>
+    </div>
+    <div class="player-kpi">
+        <div class="player-kpi-value">Ready</div>
+        <div class="player-kpi-label">System</div>
+    </div>
+</div>
+
+<div class="admin-link-list">
+    <a class="admin-link-row" href="{{ url_for('admin_users') }}">
+        <span class="material-symbols-rounded" aria-hidden="true">group</span>
+        <span class="admin-link-copy">
+            <strong>Manage admins</strong>
+            <small>Create and edit admin accounts</small>
+        </span>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </a>
+    <a class="admin-link-row" href="{{ url_for('admin_players') }}">
+        <span class="material-symbols-rounded" aria-hidden="true">sports_volleyball</span>
+        <span class="admin-link-copy">
+            <strong>Manage players</strong>
+            <small>Edit names and profile photos</small>
+        </span>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </a>
+    <a class="admin-link-row" href="{{ url_for('add_game') }}">
+        <span class="material-symbols-rounded" aria-hidden="true">add_circle</span>
+        <span class="admin-link-copy">
+            <strong>Add doubles game</strong>
+            <small>Enter a new match</small>
+        </span>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </a>
+    <a class="admin-link-row" href="{{ url_for('edit_games') }}">
+        <span class="material-symbols-rounded" aria-hidden="true">edit_square</span>
+        <span class="admin-link-copy">
+            <strong>Edit doubles games</strong>
+            <small>Search, edit, or delete games</small>
+        </span>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </a>
+    <a class="admin-link-row" href="{{ url_for('add_vollis_game') }}">
+        <span class="material-symbols-rounded" aria-hidden="true">add_box</span>
+        <span class="admin-link-copy">
+            <strong>Add vollis game</strong>
+            <small>Enter a new vollis match</small>
+        </span>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </a>
+    <a class="admin-link-row" href="{{ url_for('edit_vollis_games') }}">
+        <span class="material-symbols-rounded" aria-hidden="true">edit_square</span>
+        <span class="admin-link-copy">
+            <strong>Edit vollis games</strong>
+            <small>Update or remove vollis games</small>
+        </span>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </a>
+</div>
 {% endblock %}

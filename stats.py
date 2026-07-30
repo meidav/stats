@@ -14,7 +14,18 @@ if not hasattr(_werkzeug_security, 'safe_str_cmp'):
     _werkzeug_security.safe_str_cmp = lambda a, b: hmac.compare_digest(str(a), str(b))
 
 from auth import init_auth, create_users_table, get_user_by_username, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user, get_user_by_id, create_user
-from player_management import get_all_players, get_player_games_count, update_player_name, search_players, get_player_stats
+from player_management import (
+    get_all_players,
+    get_player_games_count,
+    update_player_name,
+    search_players,
+    get_player_stats,
+    get_players_with_counts,
+    count_all_players,
+    get_player_photo_url,
+    save_player_photo,
+    remove_player_photo,
+)
 import pytz
 import logging
 import subprocess
@@ -24,6 +35,7 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'b83880e869f054bfc465a6f46125ac715e7286ed25e88537')
 app.debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB profile photo uploads
 
 # Session configuration for persistent login (30 days)
 _is_production = os.environ.get('FLASK_ENV') == 'production'
@@ -207,6 +219,7 @@ def player_stats(year, name):
     last_results = player_last_results(games, name, 10)
     initials = player_initials(name)
     games_display = convert_ampm(games)
+    photo_url = get_player_photo_url(name)
 
     return render_template(
         'player.html',
@@ -230,6 +243,7 @@ def player_stats(year, name):
         streak=streak,
         last_results=last_results,
         initials=initials,
+        photo_url=photo_url,
     )
 
 @app.route('/games/')
@@ -305,8 +319,8 @@ def logout():
 def admin_dashboard():
     """Admin dashboard"""
     users = get_all_users()
-    players = get_all_players()
-    return render_template('admin_dashboard.html', users=users, players=players)
+    players_count = count_all_players()
+    return render_template('admin_dashboard.html', users=users, players_count=players_count)
 
 @app.route('/admin/users')
 @admin_required
@@ -369,28 +383,14 @@ def admin_players():
     search_query = request.args.get('search', '')
     sort_by = request.args.get('sort', 'name')
     sort_order = request.args.get('order', 'asc')
-    
-    if search_query:
-        players = search_players(search_query)
-    else:
-        players = get_all_players()
-    
-    # Get game counts for each player
-    player_data = []
-    for player in players:
-        game_count = get_player_games_count(player)
-        player_data.append({
-            'name': player,
-            'game_count': game_count
-        })
-    
-    # Sort players
-    if sort_by == 'games':
-        player_data.sort(key=lambda x: x['game_count'], reverse=(sort_order == 'desc'))
-    else:  # sort by name
-        player_data.sort(key=lambda x: x['name'].lower(), reverse=(sort_order == 'desc'))
-    
-    return render_template('admin_players.html', players=player_data, search_query=search_query, sort_by=sort_by, sort_order=sort_order)
+    player_data = get_players_with_counts(search_query=search_query, sort_by=sort_by, sort_order=sort_order)
+    return render_template(
+        'admin_players.html',
+        players=player_data,
+        search_query=search_query,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 @app.route('/refresh-user')
 def refresh_user():
@@ -568,36 +568,66 @@ def change_password():
 @app.route('/admin/players/edit', methods=['GET', 'POST'])
 @admin_required
 def edit_player():
-    """Edit player name"""
+    """Edit player profile (name + photo) and view summary stats."""
+    from stat_functions import player_initials
+
     if request.method == 'POST':
-        old_name = request.form['old_name']
-        new_name = request.form['new_name'].strip()
-        
-        if not new_name:
-            flash('New player name cannot be empty', 'danger')
+        old_name = (request.form.get('old_name') or '').strip()
+        new_name = (request.form.get('new_name') or '').strip()
+        action = (request.form.get('action') or 'save').strip()
+
+        if not old_name:
+            flash('No player specified', 'danger')
             return redirect(url_for('admin_players'))
-        
-        if old_name == new_name:
-            flash('New name is the same as the old name', 'info')
-            return redirect(url_for('admin_players'))
-        
-        success, result = update_player_name(old_name, new_name)
-        if success:
-            updated_tables = ', '.join(result)
-            flash(f'Player name updated successfully! Updated tables: {updated_tables}', 'success')
-        else:
+
+        if action == 'remove_photo':
+            remove_player_photo(old_name)
+            flash('Profile photo removed', 'success')
+            return redirect(url_for('edit_player', player=old_name))
+
+        photo = request.files.get('photo')
+        if photo and photo.filename:
+            ok, result = save_player_photo(old_name, photo)
+            if not ok:
+                flash(result, 'danger')
+                return redirect(url_for('edit_player', player=old_name))
+            flash('Profile photo updated', 'success')
+
+        if new_name and new_name != old_name:
+            success, result = update_player_name(old_name, new_name)
+            if success:
+                updated_tables = ', '.join(result) if result else 'profile'
+                flash(f'Player name updated. Updated: {updated_tables}', 'success')
+                return redirect(url_for('edit_player', player=new_name))
             flash(f'Failed to update player name: {result}', 'danger')
-        
-        return redirect(url_for('admin_players'))
-    
+            return redirect(url_for('edit_player', player=old_name))
+
+        if not (photo and photo.filename):
+            flash('No changes to save', 'info')
+        return redirect(url_for('edit_player', player=old_name))
+
     player_name = request.args.get('player')
     if not player_name:
         flash('No player specified', 'danger')
         return redirect(url_for('admin_players'))
-    
-    # Get player stats
+
     stats = get_player_stats(player_name)
-    return render_template('edit_player.html', player_name=player_name, stats=stats)
+    doubles = stats['games']
+    doubles_played = doubles['wins'] + doubles['losses']
+    doubles_pct = (doubles['wins'] / doubles_played) if doubles_played else 0
+    photo_url = get_player_photo_url(player_name)
+    return render_template(
+        'edit_player.html',
+        player_name=player_name,
+        stats=stats,
+        doubles_wins=doubles['wins'],
+        doubles_losses=doubles['losses'],
+        doubles_played=doubles_played,
+        doubles_pct=doubles_pct,
+        photo_url=photo_url,
+        initials=player_initials(player_name),
+        year=str(date.today().year),
+    )
 
 @app.route('/add_game/', methods=('GET', 'POST'))
 @admin_required

@@ -8,3 +8,6 @@ mobile/node_modules/
 .expo/
 dist/
 build/
+
+static/uploads/
+!static/uploads/players/.gitkeep

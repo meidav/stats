@@ -19,7 +19,13 @@
     </div>
 
     <div class="player-hero">
-        <div class="player-avatar" aria-hidden="true">{{ initials }}</div>
+        <div class="player-avatar" aria-hidden="true">
+            {% if photo_url %}
+            <img src="{{ photo_url }}" alt="">
+            {% else %}
+            {{ initials }}
+            {% endif %}
+        </div>
         <div class="player-hero-text">
             <h1 class="player-name">{{ player }}</h1>
             <p class="player-subtitle">{{ year }} Doubles Stats</p>
