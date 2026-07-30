@@ -408,6 +408,9 @@ body {
   border: 1px solid var(--button-border-1);
   font-size: 0.9rem;
   font-weight: 500;
+  font-family: inherit;
+  line-height: 1.2;
+  cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 }
 
