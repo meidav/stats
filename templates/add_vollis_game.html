@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
+{% block body_class %}has-page-header{% endblock %}
 
 {% block title %} Add a vollis game {% endblock %}
 
 {% block content %}
-
-    <h1>Add a vollis game</h1>
+    <div class="page-header">
+        <h1 class="page-title-hero">Add a vollis game</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('vollis') }}" class="nav-pill">← Stats</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
     
     <div class="form-container">
         <form method="post">
@@ -59,8 +65,8 @@
 
     <div>
     {% if todays_stats %}
-    <table>
-        <h1>Today's vollis stats</h1>
+    <h2 class="section-title">Today's vollis stats</h2>
+<table class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank" scope="col">#</th>
@@ -84,8 +90,8 @@
             {% endfor %}
         </tbody>
     </table>
-    <table>
-        <h1>Today's vollis games</h1>
+    <h2 class="section-title">Today's vollis games</h2>
+<table class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank" scope="col">#</th>
@@ -124,8 +130,8 @@
     </div>
     {% if stats %}
     <div>
-        <table>
-            <h1>{{ year }} vollis stats</h1>
+        <h2 class="section-title">{{ year }} vollis stats</h2>
+<table class="stats-table">
             <thead>
                 <tr>
                     <th class="table-col-rank" scope="col">#</th>

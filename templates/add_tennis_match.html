@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
+{% block body_class %}has-page-header{% endblock %}
 
 {% block title %} Add a tennis match {% endblock %}
 
 {% block content %}
-
-    <h1 style="margin-bottom: 16px;">Add a tennis match</h1>
+    <div class="page-header">
+        <h1 class="page-title-hero">Add a tennis match</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('tennis') }}" class="nav-pill">← Stats</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
     
     <div class="form-container">
         <form method="post">
@@ -75,8 +81,8 @@
 
     <div>
     {% if todays_stats %}
-    <table>
-        <h1>Today's tennis stats</h1>
+    <h2 class="section-title">Today's tennis stats</h2>
+<table class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank">#</th>
@@ -104,8 +110,8 @@
             {% endfor %}
         </tbody>
     </table>
-    <table>
-        <h1>Today's tennis matches</h1>
+    <h2 class="section-title">Today's tennis matches</h2>
+<table class="stats-table">
         <thead>
             <tr>
                 <th class="table-col-rank">#</th>
@@ -146,8 +152,8 @@
     </div>
     {% if stats %}
     <div>
-        <table>
-            <h1>{{ year }} Tennis stats</h1>
+        <h2 class="section-title">{{ year }} Tennis stats</h2>
+<table class="stats-table">
             <thead>
                 <tr>
                     <th class="table-col-rank">#</th>

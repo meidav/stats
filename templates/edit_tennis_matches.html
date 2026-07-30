@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
+{% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
+    <div class="page-header">
+        <h1 class="page-title-hero">{{ year }} tennis matches</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('tennis', year=year) }}" class="nav-pill">← Stats</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
+
     <nav>
         <div class="dropdown">
             <button class="dropbtn">Select a year
@@ -13,9 +22,9 @@
             </div>
         </div>      
     </nav>
-    <h1>{% block title %} {{ year }} Tennis matches {% endblock %}</h1>
+    
         <div>
-        	<table>
+        	<table class="stats-table">
         		<thead>
                     <tr>
                         <th class="table-col-rank">#</th>

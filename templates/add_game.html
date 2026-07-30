@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
+{% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
-    <h1>{% block title %} Add a game {% endblock %}</h1>
+    <div class="page-header">
+        <h1 class="page-title-hero">{% block title %}Add a game{% endblock %}</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('stats', year=year) }}" class="nav-pill">← Stats</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
     
     <div class="form-container">
         <form method="post" action="{{ url_for('add_game') }}" id="add-game-form">
@@ -63,7 +70,7 @@
         <div class="add-game-block">
             <h1 class="section-title">Today's stats</h1>
             <div class="table-scroll">
-                <table>
+                <table class="stats-table">
                     <thead>
                         <tr>
                             <th class="table-col-rank">#</th>
@@ -92,7 +99,7 @@
         <div class="add-game-block">
             <h1 class="section-title">Today's games</h1>
             <div class="table-scroll">
-                <table>
+                <table class="stats-table">
                     <thead>
                         <tr>
                             <th class="table-col-rank">#</th>
@@ -146,7 +153,7 @@
         <div class="add-game-block">
             <h1 class="section-title">{{ year }} stats</h1>
             <div class="table-scroll">
-                <table>
+                <table class="stats-table">
                     <thead>
                         <tr>
                             <th class="table-col-rank">#</th>
@@ -178,7 +185,7 @@
             <h1 class="section-title">Infrequent players</h1>
             <p class="games-count">Total games: {{tot_games}} | Min games: {{minimum_games}}</p>
             <div class="table-scroll">
-                <table>
+                <table class="stats-table">
                     <thead>
                         <tr>
                             <th class="table-col-rank clickable" data-sort="number">#</th>

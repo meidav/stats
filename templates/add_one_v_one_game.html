@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
+{% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
-    <h1>{% block title %} Add a Game {% endblock %}</h1>
+    <div class="page-header">
+        <h1 class="page-title-hero">{% block title %}Add a game{% endblock %}</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('one_v_one') }}" class="nav-pill">← Stats</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
     <div>
     <form method="post">
         <datalist id="game_types">
@@ -58,8 +65,8 @@
     </div>
     <div>
     {% if todays_stats %}
-    <table>
-        <h1>Today's 1v1 stats</h1>
+    <h2 class="section-title">Today's 1v1 stats</h2>
+<table class="stats-table">
         <thead>
             <tr>
                 <th class="rank" scope="col" colspan="1">#</th>
@@ -87,8 +94,8 @@
             {% endfor %}
         </tbody>
     </table>
-    <table>
-        <h1>Today's 1v1 games</h1>
+    <h2 class="section-title">Today's 1v1 games</h2>
+<table class="stats-table">
         <thead>
             <tr>
                 <th scope="col" colspan="1">Date/Updated</th>

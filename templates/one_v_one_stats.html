@@ -15,8 +15,8 @@
     </nav>
     <div>
     {% if todays_stats %}
-    <table>
-        <h1>Today's 1v1 stats</h1>
+    <h2 class="section-title">Today's 1v1 stats</h2>
+<table class="stats-table">
         <thead>
             <tr>
                 <th class="rank" scope="col" colspan="1">#</th>
@@ -48,7 +48,7 @@
     </div>
     <h1>{% block title %} {{ year }} 1v1 Stats {% endblock %}</h1>
         <div>
-        	<table>
+        	<table class="stats-table">
         		<thead>
     				<tr>
                         <th class="rank" scope="col" colspan="1">#</th>

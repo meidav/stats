@@ -158,7 +158,9 @@ div, section, article {
   border: 1px solid var(--border-color, #444c56);
   border-radius: 6px;
   color: var(--text-primary, #c9d1d9);
+  font-family: inherit;
   font-size: 16px;
+  font-weight: 400;
   line-height: 1.2;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
@@ -173,6 +175,41 @@ div, section, article {
 
 .form-field-compact::placeholder {
   color: var(--text-secondary, #8b949e);
+}
+
+/* Date/time fields: match text inputs (avoid chunky system UI font on desktop) */
+input[type="date"],
+input[type="time"],
+.form-field-compact[type="date"],
+.form-field-compact[type="time"] {
+  font-family: inherit !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  color: var(--text-primary, #c9d1d9);
+  line-height: 1.2;
+  -webkit-appearance: none;
+  appearance: none;
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="time"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field,
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field,
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  color: inherit !important;
 }
 
 /* Form row for side-by-side fields */
@@ -1172,19 +1209,24 @@ td {
   padding: 10px 8px;
 }
 
-/* Stats tables: Wins column green, Losses column red (columns 3 and 4) */
-.stats-table tbody td:nth-child(3) {
+/* Stats tables: colored headers + W/L columns (player standings tables) */
+.stats-table thead th {
+  color: var(--link-color);
+  font-weight: 600;
+}
+
+.stats-table:has(thead th[title="Wins"]) tbody td:nth-child(3) {
   color: var(--stat-wins);
   font-weight: 600;
 }
 
-.stats-table tbody td:nth-child(4) {
+.stats-table:has(thead th[title="Losses"]) tbody td:nth-child(4) {
   color: var(--stat-losses);
   font-weight: 600;
 }
 
-.stats-table thead th:nth-child(3) { color: var(--stat-wins); }
-.stats-table thead th:nth-child(4) { color: var(--stat-losses); }
+.stats-table thead th[title="Wins"] { color: var(--stat-wins); }
+.stats-table thead th[title="Losses"] { color: var(--stat-losses); }
 
 /* Player summary table: 5 cols = Player, W, L, Win%, Games */
 .stats-table-summary tbody td:nth-child(2),
@@ -1469,6 +1511,8 @@ input[type=date], input[type=time] {
 
 /* Comprehensive mobile date/time input fixes */
 input[type=date]::-webkit-datetime-edit {
+  font-family: inherit !important;
+  font-weight: 400 !important;
   text-align: center;
   width: 100%;
   padding: 0;
@@ -1480,6 +1524,8 @@ input[type=date]::-webkit-datetime-edit {
 }
 
 input[type=time]::-webkit-datetime-edit {
+  font-family: inherit !important;
+  font-weight: 400 !important;
   text-align: center;
   width: 100%;
   padding: 0;
@@ -1771,42 +1817,44 @@ input[type=number] {
   pointer-events: none;
 }
 
-/* On pages with header row (stats, games, etc.), hide the floating hamburger */
-body.has-page-header .hamburger-menu-container .menu__btn {
+/* On pages with header row (stats, games, etc.), hide the floating menu pill */
+body.has-page-header .menu-trigger-floating {
   display: none !important;
 }
 
-/* Menu trigger pill in header (replaces hamburger on has-page-header pages) */
+/* Menu trigger pill in header (replaces floating control on has-page-header pages) */
 .menu-trigger {
   cursor: pointer;
   margin: 0;
   user-select: none;
 }
 
-.menu-trigger .menu-trigger-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-/* Hamburger button - only shown when body does NOT have .has-page-header (e.g. admin pages) */
-.menu__btn {
+.menu-trigger-floating {
   position: fixed;
   top: 12px;
   right: 12px;
-  width: 44px;
-  height: 44px;
-  background-color: var(--button-bg-1);
-  border: 1px solid var(--button-border-1);
-  border-radius: var(--rounded-corners);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
+  z-index: 1001;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  z-index: 1001;
-  transition: all 0.2s ease;
+  padding: 10px 14px;
+  background: var(--button-bg-1);
+  color: var(--button-text-1);
+  border: 1px solid var(--button-border-1);
+  border-radius: var(--rounded-corners);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.menu-trigger-floating:hover {
+  background: var(--button-hover);
+  color: var(--button-text-1);
+}
+
+/* Legacy hamburger button - keep hidden; Menu pill is the standard control */
+.menu__btn {
+  display: none !important;
 }
 
 @media (min-width: 769px) {
@@ -1905,12 +1953,7 @@ body.has-page-header .hamburger-menu-container .menu__btn {
   visibility: visible;
 }
 
-/* When menu is open, hide the floating hamburger so only one close (drawer X) shows */
-#menu__toggle:checked + .menu__btn {
-  display: none !important;
-}
-
-#menu__toggle:checked ~ .menu__btn {
+#menu__toggle:checked ~ .menu-trigger-floating {
   display: none !important;
 }
 
