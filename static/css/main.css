@@ -151,21 +151,24 @@ div, section, article {
 /* Compact form fields for side-by-side layout */
 .form-field-compact {
   flex: 1;
-  padding: 10px 12px;
+  min-width: 0;
+  padding: 8px 10px;
   margin: 0;
   background-color: var(--input-bg, #2d333b);
-  border: 2px solid var(--border-color, #444c56);
+  border: 1px solid var(--border-color, #444c56);
   border-radius: 6px;
   color: var(--text-primary, #c9d1d9);
   font-size: 16px;
-  transition: all 0.2s ease;
+  line-height: 1.2;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
 }
 
 .form-field-compact:focus {
   outline: none;
   border-color: var(--accent-color, #58a6ff);
   background-color: var(--input-focus-bg, #22272e);
-  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.25);
 }
 
 .form-field-compact::placeholder {
@@ -175,7 +178,7 @@ div, section, article {
 /* Form row for side-by-side fields */
 .form-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 4px;
 }
 
@@ -189,23 +192,44 @@ div, section, article {
 }
 
 .form-section {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.form-section h3 {
-  margin-bottom: 2px;
+.form-section h3,
+.form-container .form-section h3 {
+  margin: 0 0 4px 0 !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary) !important;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .form-container {
   max-width: 100%;
   width: 100%;
   margin: 0 auto;
-  padding: 12px;
+  padding: 4px 8px 8px;
   box-sizing: border-box;
 }
 
+.form-container + * ,
+.form-container ~ .space-y-8,
+.form-container ~ div {
+  margin-top: 16px;
+}
+
+.form-submit-wrap {
+  text-align: center;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 .submit-button {
-  padding: 12px 32px;
+  padding: 10px 28px;
   background-color: var(--accent-color);
   color: #fff;
   border: none;
@@ -214,6 +238,8 @@ div, section, article {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 100%;
+  max-width: 280px;
 }
 
 .submit-button:hover {
@@ -231,9 +257,36 @@ div, section, article {
     padding: 10px 14px;
     font-size: 16px; /* Prevent zoom on iOS */
   }
-  
+
   .form-container {
-    padding: 12px;
+    padding: 0 6px 6px;
+  }
+
+  .form-field-compact {
+    padding: 7px 8px;
+  }
+
+  .form-section {
+    margin-bottom: 4px;
+  }
+
+  .form-row {
+    gap: 5px;
+    margin-bottom: 3px;
+  }
+
+  .form-submit-wrap {
+    margin-top: 6px;
+  }
+
+  .submit-button {
+    padding: 9px 20px;
+  }
+
+  /* Keep add/edit game page titles compact so Submit stays above the keyboard */
+  .content > h1:first-child {
+    margin: 4px 0 6px 0 !important;
+    font-size: 1.15rem !important;
   }
 }
 
@@ -3785,14 +3838,17 @@ input[type="time"].form-input:focus {
 }
 
 .form-section {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .form-section h3 {
-  color: var(--text-primary);
-  margin-bottom: 2px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .radio-group {
