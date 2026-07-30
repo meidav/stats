@@ -28,6 +28,37 @@ def all_vollis_players(games):
     return players
 
 
+def convert_vollis_dates(games):
+    """Format vollis game_date / updated_at for display."""
+    converted = []
+    for game in games:
+        raw_date = game[1] or ''
+        try:
+            if len(raw_date) > 19:
+                game_datetime = datetime.strptime(raw_date, "%Y-%m-%d %H:%M:%S.%f")
+            else:
+                game_datetime = datetime.strptime(str(raw_date)[:19], "%Y-%m-%d %H:%M:%S")
+            game_date = game_datetime.strftime("%m/%d/%Y %I:%M %p")
+        except (ValueError, TypeError):
+            game_date = raw_date
+
+        raw_updated = game[6] if len(game) > 6 else ''
+        try:
+            if raw_updated and len(str(raw_updated)) > 19:
+                updated_datetime = datetime.strptime(str(raw_updated), "%Y-%m-%d %H:%M:%S.%f")
+                updated_date = updated_datetime.strftime("%m/%d/%Y %I:%M %p")
+            elif raw_updated:
+                updated_datetime = datetime.strptime(str(raw_updated)[:19], "%Y-%m-%d %H:%M:%S")
+                updated_date = updated_datetime.strftime("%m/%d/%Y %I:%M %p")
+            else:
+                updated_date = ''
+        except (ValueError, TypeError):
+            updated_date = raw_updated or ''
+
+        converted.append([game[0], game_date, game[2], game[3], game[4], game[5], updated_date])
+    return converted
+
+
 def vollis_year_games(year):
     cur = set_cur()
     if year == 'All years':
@@ -36,7 +67,7 @@ def vollis_year_games(year):
         cur.execute("SELECT * FROM vollis_games WHERE strftime('%Y',game_date)=?", (year,))
     row = cur.fetchall()
     row.sort(reverse=True)
-    return row
+    return convert_vollis_dates(row)
 
 def set_cur():
     database = r'stats.db'
@@ -191,8 +222,7 @@ def todays_vollis_games():
     cur.execute("SELECT * FROM vollis_games WHERE game_date > date('now','-15 hours')")
     games = cur.fetchall()
     games.sort(reverse=True)
-    #row = convert_ampm(games)
-    return games
+    return convert_vollis_dates(games)
 
 def vollis_winning_scores():
     scores = [21,15,11]

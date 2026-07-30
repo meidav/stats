@@ -1018,13 +1018,13 @@ def update_vollis_game(id):
 @admin_required
 def delete_vollis_game(id):
     game_id = id
-    game = find_vollis_game(id)
     if request.method == 'POST':
         remove_vollis_game(game_id)
         flash(f'Game deleted!', 'danger')
         return redirect(url_for('edit_vollis_games'))
- 
-    return render_template('delete_vollis_game.html', game=game)
+
+    # Confirmation is handled by the in-page delete modal.
+    return redirect(url_for('edit_vollis_games'))
 
 @app.route('/vollis_player/<year>/<name>')
 def vollis_player_stats(year, name):

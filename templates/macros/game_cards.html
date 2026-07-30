@@ -54,3 +54,53 @@
     </div>
 </article>
 {% endmacro %}
+
+
+{# Vollis 1v1 game card: winner/loser bars with edit/delete #}
+{% macro vollis_game_card(game, year, editable=false) %}
+{% set winner = (game[2] or '')|trim %}
+{% set loser = (game[4] or '')|trim %}
+<article class="game-card"
+         data-players="{{ winner }}|{{ loser }}"
+         data-date="{{ game[1] }}">
+    <div class="game-card-top">
+        <div class="game-card-actions">
+            {% if editable %}
+            <a href="{{ url_for('update_vollis_game', id=game[0]) }}" class="game-action-btn" title="Edit" aria-label="Edit game">
+                <span class="material-symbols-rounded game-action-icon" aria-hidden="true">edit</span>
+            </a>
+            <button type="button"
+                    class="game-action-btn game-action-btn--danger js-open-delete-modal"
+                    title="Delete"
+                    aria-label="Delete game"
+                    data-delete-url="{{ url_for('delete_vollis_game', id=game[0]) }}"
+                    data-date="{{ game[1] }}"
+                    data-w1="{{ winner }}"
+                    data-w2=""
+                    data-ws="{{ game[3] }}"
+                    data-l1="{{ loser }}"
+                    data-l2=""
+                    data-ls="{{ game[5] }}">
+                <span class="material-symbols-rounded game-action-icon" aria-hidden="true">delete</span>
+            </button>
+            {% endif %}
+        </div>
+        <div class="game-meta">{{ game[1] }}</div>
+        <div class="game-card-actions game-card-actions--end"></div>
+    </div>
+    <div class="game-teams game-teams--stacked">
+        <div class="game-team winner">
+            <div class="players">
+                <a href="{{ url_for('vollis_player_stats', year=year, name=winner) }}">{{ winner }}</a>
+            </div>
+            <span class="score">{{ game[3] }}</span>
+        </div>
+        <div class="game-team loser">
+            <div class="players">
+                <a href="{{ url_for('vollis_player_stats', year=year, name=loser) }}">{{ loser }}</a>
+            </div>
+            <span class="score">{{ game[5] }}</span>
+        </div>
+    </div>
+</article>
+{% endmacro %}
