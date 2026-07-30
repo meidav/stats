@@ -20,11 +20,30 @@
 </div>
 
 <div class="admin-players-toolbar">
-    <p class="games-count games-count-hero" id="playersCount">{{ players|length }} PLAYERS</p>
-    <div class="admin-players-sort">
-        <a href="{{ url_for('admin_players', search=search_query, sort='name', order='asc' if sort_by != 'name' or sort_order == 'desc' else 'desc') }}" class="nav-pill{% if sort_by == 'name' %} is-active{% endif %}">Name</a>
-        <a href="{{ url_for('admin_players', search=search_query, sort='games', order='desc' if sort_by != 'games' or sort_order == 'asc' else 'asc') }}" class="nav-pill{% if sort_by == 'games' %} is-active{% endif %}">Games</a>
+    <div class="admin-players-sort" role="group" aria-label="Sort players">
+        <span class="admin-players-sort__label">Sort by</span>
+        <div class="admin-players-sort__options">
+            {% set name_order = 'asc' if sort_by != 'name' or sort_order == 'desc' else 'desc' %}
+            {% set games_order = 'desc' if sort_by != 'games' or sort_order == 'asc' else 'asc' %}
+            <a href="{{ url_for('admin_players', search=search_query, sort='name', order=name_order) }}"
+               class="admin-sort-btn{% if sort_by == 'name' %} is-active{% endif %}"
+               {% if sort_by == 'name' %}aria-current="true"{% endif %}>
+                Name
+                {% if sort_by == 'name' %}
+                <span class="material-symbols-rounded" aria-hidden="true">{% if sort_order == 'asc' %}arrow_upward{% else %}arrow_downward{% endif %}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('admin_players', search=search_query, sort='games', order=games_order) }}"
+               class="admin-sort-btn{% if sort_by == 'games' %} is-active{% endif %}"
+               {% if sort_by == 'games' %}aria-current="true"{% endif %}>
+                Games
+                {% if sort_by == 'games' %}
+                <span class="material-symbols-rounded" aria-hidden="true">{% if sort_order == 'asc' %}arrow_upward{% else %}arrow_downward{% endif %}</span>
+                {% endif %}
+            </a>
+        </div>
     </div>
+    <p class="admin-players-count" id="playersCount">{{ players|length }} players</p>
 </div>
 
 <div class="admin-player-list" id="playersList">
@@ -63,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
       row.style.display = show ? '' : 'none';
       if (show) visible++;
     });
-    if (countEl) countEl.textContent = visible + ' PLAYERS';
+    if (countEl) countEl.textContent = visible + ' players';
   }
   input.addEventListener('input', filterRows);
 });

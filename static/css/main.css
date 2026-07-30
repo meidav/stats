@@ -2929,27 +2929,6 @@ body.has-page-header .menu-trigger-floating {
   flex-shrink: 0;
 }
 
-.admin-players-sort {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 0 auto 18px;
-  max-width: 760px;
-}
-
-.admin-players-sort__label {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-right: 4px;
-}
-
-.admin-players-sort .nav-pill.is-active {
-  border-color: var(--link-color);
-  color: var(--link-color);
-}
-
 @media (max-width: 640px) {
   .admin-player-card {
     flex-direction: column;
@@ -4704,25 +4683,72 @@ tr.table-double-row {
 
 .admin-players-toolbar {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
-  margin: 0 0 12px;
-}
-
-.admin-players-toolbar .games-count-hero {
-  margin: 0;
+  margin: 0 0 14px;
 }
 
 .admin-players-sort {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 10px;
 }
 
-.admin-players-sort .nav-pill.is-active {
-  border-color: var(--link-color);
+.admin-players-sort__label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-players-sort__options {
+  display: inline-flex;
+  align-items: stretch;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--bg-card);
+  border: 1px solid var(--table-border);
+}
+
+.admin-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.admin-sort-btn .material-symbols-rounded {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.admin-sort-btn:hover {
+  color: var(--text);
+}
+
+.admin-sort-btn.is-active {
+  background: rgba(102, 207, 255, 0.16);
   color: var(--link-color);
+}
+
+.admin-players-count {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .admin-players-search-form {
