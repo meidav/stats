@@ -717,11 +717,26 @@ def update(id):
     game_id = id
     x = find_game(game_id)
 
-    game = [x[0][0], x[0][1], x[0][2], x[0][3], x[0][4], x[0][5], x[0][6], x[0][7], x[0][8]]
+    raw = x[0]
+    game = [raw[0], raw[1], raw[2], raw[3], raw[4], raw[5], raw[6], raw[7], raw[8]]
+    display_game = convert_ampm([raw])[0]
+    year = str(raw[1])[:4] if raw[1] else str(date.today().year)
+    date_value = str(raw[1])[:10] if raw[1] else ''
+    time_value = str(raw[1])[11:16] if raw[1] and len(str(raw[1])) >= 16 else ''
     w_scores = winners_scores()
     l_scores = losers_scores()
     games = year_games(str(date.today().year))
     players = all_players(games)
+    template_kwargs = dict(
+        game=game,
+        display_game=display_game,
+        players=players,
+        w_scores=w_scores,
+        l_scores=l_scores,
+        year=year,
+        date_value=date_value,
+        time_value=time_value,
+    )
     
     if request.method == 'POST':
         winner1 = request.form['winner1'].strip()
@@ -745,17 +760,17 @@ def update(id):
                 loser_score = int(loser_score)
             except ValueError:
                 flash('Invalid score values!', 'danger')
-                return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+                return render_template('edit_game.html', **template_kwargs)
                 
             # Validate score logic
             if winner_score <= loser_score:
                 flash('Winner score must be greater than loser score!', 'danger')
-                return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+                return render_template('edit_game.html', **template_kwargs)
                 
             # Validate uniqueness of players
             if len(set([winner1, winner2, loser1, loser2])) < 4:
                 flash('Players must be unique!', 'danger')
-                return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+                return render_template('edit_game.html', **template_kwargs)
             
             # Handle date/time played
             if date_played and time_played:
@@ -781,20 +796,20 @@ def update(id):
             flash(f'Game updated!', 'success')
             return redirect(url_for('edit_games'))
     
-    return render_template('edit_game.html', game=game, players=players, w_scores=w_scores, l_scores=l_scores)
+    return render_template('edit_game.html', **template_kwargs)
     
 
 @app.route('/delete/<int:id>/',methods = ['GET','POST'])
 @admin_required
 def delete_game(id):
     game_id = id
-    game = find_game(id)
     if request.method == 'POST':
         remove_game(game_id)
         flash(f'Game deleted!', 'danger')
         return redirect(url_for('edit_games'))
- 
-    return render_template('delete_game.html', game=game)
+
+    # Confirmation is handled by the in-page delete modal; keep route for form POST.
+    return redirect(url_for('edit_games'))
 
 @app.route('/advanced_stats/')
 def advanced_stats():
@@ -1577,7 +1592,7 @@ def not_found_error(error):
         'error.html',
         code=404,
         title='Ball went long',
-        message='That page is out. Dig back to the main stats board and try another route.',
+        message='This page is out of boundaries.',
     ), 404
 
 @app.errorhandler(500)

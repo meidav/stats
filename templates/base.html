@@ -161,7 +161,63 @@
         {% endfor %}
         {% block content %} {% endblock %}
     </div>
+
+    <div id="delete-game-modal" class="confirm-modal" hidden>
+        <div class="confirm-modal-backdrop" data-close-delete-modal></div>
+        <div class="confirm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-game-title">
+            <h2 id="delete-game-title" class="confirm-modal-title">Delete this game?</h2>
+            <p id="delete-game-meta" class="confirm-modal-meta"></p>
+            <form id="delete-game-form" method="post" action="">
+                <div class="confirm-modal-actions">
+                    <button type="submit" class="confirm-modal-btn confirm-modal-btn--danger">Delete</button>
+                    <button type="button" class="confirm-modal-btn confirm-modal-btn--secondary" data-close-delete-modal>Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/player-datalist.js') }}"></script>
     <script src="{{ url_for('static', filename='js/win-pct.js') }}"></script>
+    <script>
+    (function () {
+        var modal = document.getElementById('delete-game-modal');
+        var form = document.getElementById('delete-game-form');
+        var meta = document.getElementById('delete-game-meta');
+        if (!modal || !form) return;
+
+        function openModal(url, detail) {
+            form.setAttribute('action', url);
+            if (meta) meta.textContent = detail || '';
+            modal.hidden = false;
+            document.body.classList.add('modal-open');
+            var confirmBtn = form.querySelector('button[type="submit"]');
+            if (confirmBtn) confirmBtn.focus();
+        }
+
+        function closeModal() {
+            modal.hidden = true;
+            document.body.classList.remove('modal-open');
+            form.setAttribute('action', '');
+            if (meta) meta.textContent = '';
+        }
+
+        document.addEventListener('click', function (event) {
+            var trigger = event.target.closest('.js-open-delete-modal');
+            if (trigger) {
+                event.preventDefault();
+                openModal(trigger.getAttribute('data-delete-url'), trigger.getAttribute('data-delete-meta'));
+                return;
+            }
+            if (event.target.closest('[data-close-delete-modal]')) {
+                event.preventDefault();
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !modal.hidden) closeModal();
+        });
+    })();
+    </script>
 </body>
 </html>
