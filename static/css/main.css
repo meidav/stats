@@ -2717,147 +2717,161 @@ body.has-page-header .menu-trigger-floating {
   background: rgba(74, 158, 255, 0.1) !important;
 }
 
-/* Admin users (manage admins) — card layout, mobile-safe */
-.admin-users {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 20px 16px 32px;
-  box-sizing: border-box;
-  text-align: left;
-}
-
-.admin-user-card,
-.admin-users-toolbar,
-.admin-player-cards,
-.admin-player-card {
-  text-align: left;
-}
-
-.admin-users .admin-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.admin-users .admin-header h1 {
-  color: var(--button-text-1);
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
-  font-weight: 700;
-  margin: 0 0 12px 0;
-  background: linear-gradient(135deg, var(--button-text-1), var(--link-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.admin-users-lead {
-  margin: 0 auto 20px;
-  max-width: 34rem;
-  line-height: 1.55;
-  color: var(--text);
-  opacity: 0.92;
-  font-size: 0.95rem;
-}
-
-.admin-users-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-}
-
-.admin-users-toolbar .universal-btn {
-  white-space: normal;
-  text-align: center;
-  justify-content: center;
-}
-
-.admin-user-cards {
+/* Admin users (manage admins) */
+.admin-user-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
-.admin-users-empty {
-  text-align: center;
-  color: var(--text);
-  opacity: 0.75;
-  padding: 24px;
-  margin: 0;
-}
-
-.admin-user-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 18px 18px 16px;
-  box-sizing: border-box;
-}
-
-.admin-user-meta {
-  margin: 0;
-  padding: 0;
-}
-
-.admin-user-meta__row {
-  display: grid;
-  grid-template-columns: 6.5rem minmax(0, 1fr);
-  gap: 6px 16px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  align-items: baseline;
-  text-align: left;
-}
-
-.admin-user-meta__row:last-child {
-  border-bottom: none;
-  padding-bottom: 4px;
-}
-
-.admin-user-meta dt {
-  margin: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--link-color);
-  text-align: left;
-}
-
-.admin-user-meta dd {
-  margin: 0;
-  color: var(--text);
-  font-size: 0.95rem;
-  line-height: 1.45;
-  word-break: normal;
-  overflow-wrap: anywhere;
-  min-width: 0;
-  text-align: left;
-}
-
-.admin-user-meta__value {
-  font-weight: 500;
-}
-
-.admin-user-meta__time {
-  font-weight: 400;
-  opacity: 0.75;
-  font-size: 0.88rem;
-}
-
-.admin-user-card__actions {
+.admin-user-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 4px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--table-border);
 }
 
-.admin-user-card__actions .universal-btn {
-  flex: 1 1 auto;
-  min-width: min(140px, 100%);
+.admin-user-row__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-user-row__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-user-row__title strong {
+  font-size: 0.98rem;
+  color: var(--link-color);
+}
+
+.admin-user-row__email,
+.admin-user-row__meta {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.admin-user-icon-btn {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  white-space: normal;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--button-border-1);
+  background: var(--button-bg-1);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.admin-user-icon-btn .material-symbols-rounded {
+  font-size: 20px;
+}
+
+.admin-user-icon-btn:hover {
+  color: var(--link-color);
+  border-color: var(--link-color);
+}
+
+.admin-user-icon-btn--danger:hover {
+  color: #ff8a80;
+  border-color: rgba(255, 59, 48, 0.55);
+  background: rgba(255, 59, 48, 0.12);
+}
+
+.admin-modal-copy {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  line-height: 1.45;
+}
+
+.admin-modal-copy strong {
+  color: var(--text);
+}
+
+.admin-form-dialog {
+  max-width: 380px;
+}
+
+.admin-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-modal-form .form-field-compact {
+  width: 100%;
+  margin: 0 0 8px;
+}
+
+.admin-modal-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-modal-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 14px;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-modal-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--link-color);
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.admin-badge.admin-yes {
+  background: rgba(52, 199, 89, 0.18);
+  color: #7dff9a;
+}
+
+.admin-badge.admin-no {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
 }
 
 /* Admin players — card layout */
@@ -2942,60 +2956,6 @@ body.has-page-header .menu-trigger-floating {
 
   .edit-name-btn .edit-text {
     display: inline;
-  }
-}
-
-.admin-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.admin-badge.admin-yes {
-  background: rgba(40, 167, 69, 0.2);
-  color: #28a745;
-  border: 1px solid rgba(40, 167, 69, 0.3);
-}
-
-.admin-badge.admin-no {
-  background: rgba(108, 117, 125, 0.2);
-  color: #6c757d;
-  border: 1px solid rgba(108, 117, 125, 0.3);
-}
-
-@media (max-width: 640px) {
-  .admin-users {
-    padding: 16px 14px 28px;
-  }
-
-  .admin-user-card {
-    padding: 16px 14px 14px;
-  }
-
-  .admin-user-meta__row {
-    grid-template-columns: 1fr;
-    gap: 4px;
-    padding: 12px 0;
-  }
-
-  .admin-user-meta dt {
-    font-size: 0.7rem;
-  }
-
-  .admin-user-meta dd {
-    font-size: 1rem;
-  }
-
-  .admin-user-card__actions {
-    flex-direction: column;
-  }
-
-  .admin-user-card__actions .universal-btn {
-    width: 100%;
-    min-width: 0;
   }
 }
 
@@ -4744,11 +4704,12 @@ tr.table-double-row {
 }
 
 .admin-players-count {
-  margin: 0;
+  margin: 0 0 12px;
   color: var(--text-muted);
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  text-align: center;
 }
 
 .admin-players-search-form {
