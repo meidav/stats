@@ -422,7 +422,7 @@ def latest_commit():
             [
                 'git', 'log', '-2',
                 '--pretty=format:%h%x09%cd%x09%s',
-                '--date=format:%Y-%m-%d %H:%M %Z',
+                '--date=format:%Y-%m-%d %H:%M',
             ],
             capture_output=True,
             text=True,
