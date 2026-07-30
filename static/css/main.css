@@ -4800,16 +4800,101 @@ tr.table-double-row {
 .admin-photo-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 
 .admin-player-edit-form .form-help {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   color: var(--text-muted);
   font-size: 0.8rem;
 }
 
-.player-avatar--editable {
-  position: relative;
+.admin-player-edit-form {
+  margin-top: 8px;
+}
+
+.admin-player-edit-form .form-section {
+  margin: 0 0 22px;
+  padding-bottom: 4px;
+}
+
+.admin-player-edit-form .form-submit-wrap {
+  margin-top: 8px;
+}
+
+.admin-name-input {
+  width: 100%;
+  max-width: none;
+}
+
+.file-input-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--button-bg-1);
+  border: 1px solid var(--button-border-1);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.file-upload-btn .material-symbols-rounded {
+  font-size: 20px;
+  color: var(--link-color);
+}
+
+.file-upload-btn:hover {
+  background: var(--button-hover);
+  color: var(--text);
+}
+
+.file-input-hidden:focus + .file-upload-btn {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+.file-upload-name {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-kpi-grid + .admin-player-edit-form,
+.player-hero + .player-kpi-grid {
+  margin-top: 8px;
+}
+
+.admin-player-edit-form + .form-submit-wrap,
+.page-header + .player-hero {
+  margin-top: 4px;
+}
+
+.player-hero {
+  margin-bottom: 20px;
+}
+
+.player-kpi-grid {
+  margin-bottom: 24px;
 }

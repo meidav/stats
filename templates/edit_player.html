@@ -58,7 +58,12 @@
     <div class="form-section">
         <h3>Profile photo</h3>
         <div class="admin-photo-controls">
-            <input type="file" name="photo" id="photo" accept="image/jpeg,image/png,image/webp,image/gif" class="form-field-compact">
+            <input type="file" name="photo" id="photo" accept="image/jpeg,image/png,image/webp,image/gif" class="file-input-hidden">
+            <label for="photo" class="file-upload-btn">
+                <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+                Choose photo
+            </label>
+            <span class="file-upload-name" id="photo-filename">No file chosen</span>
             {% if photo_url %}
             <button type="submit" name="action" value="remove_photo" class="nav-pill">Remove photo</button>
             {% endif %}
@@ -68,7 +73,7 @@
 
     <div class="form-section">
         <h3>Player name</h3>
-        <input type="text" id="new_name" name="new_name" value="{{ player_name }}" required class="form-field-compact" style="width:100%; max-width:none;">
+        <input type="text" id="new_name" name="new_name" value="{{ player_name }}" required class="form-field-compact admin-name-input">
         <p class="form-help">Changing the name updates every game where this player appears.</p>
     </div>
 
@@ -76,4 +81,15 @@
         <button type="submit" name="action" value="save" class="submit-button">Save changes</button>
     </div>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var input = document.getElementById('photo');
+  var label = document.getElementById('photo-filename');
+  if (!input || !label) return;
+  input.addEventListener('change', function () {
+    var file = input.files && input.files[0];
+    label.textContent = file ? file.name : 'No file chosen';
+  });
+});
+</script>
 {% endblock %}
