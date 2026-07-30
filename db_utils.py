@@ -12,19 +12,73 @@ class DatabaseManager:
     def __init__(self, config_name='default'):
         self.config = config[config_name]
         self.database_path = self._get_database_path()
+        logger.info("Using database: %s", self.database_path)
     
-    def _get_database_path(self):
-        """Get the appropriate database path"""
+    def _candidate_paths(self):
+        """Ordered list of possible SQLite locations."""
+        paths = []
+        env_path = os.environ.get('DATABASE_PATH')
+        if env_path:
+            paths.append(env_path)
+
         prod_path = self.config.DATABASE_PATH
         local_path = self.config.DATABASE_PATH_LOCAL
+        for path in (prod_path, local_path, 'stats.db'):
+            if path and path not in paths:
+                paths.append(path)
 
-        if os.environ.get('DATABASE_PATH'):
-            self._ensure_db_dir(prod_path)
-            return prod_path
-        if os.path.exists(prod_path) or '/home/' in prod_path or prod_path.startswith('/data'):
-            self._ensure_db_dir(prod_path)
-            return prod_path
-        return local_path
+        # PythonAnywhere historically kept the real DB in the home directory
+        home_db = os.path.expanduser('~/stats.db')
+        if home_db not in paths:
+            paths.append(home_db)
+
+        abs_cwd = os.path.abspath('stats.db')
+        if abs_cwd not in paths:
+            paths.append(abs_cwd)
+
+        return paths
+
+    def _db_looks_valid(self, path):
+        """Reject missing/empty stubs; require a real stats schema."""
+        try:
+            if not path or not os.path.exists(path) or not os.path.isfile(path):
+                return False
+            if os.path.getsize(path) < 1024:
+                return False
+            conn = sqlite3.connect(path)
+            try:
+                row = conn.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name IN ('games', 'users') LIMIT 1"
+                ).fetchone()
+                return row is not None
+            finally:
+                conn.close()
+        except Exception as exc:
+            logger.warning("Skipping database candidate %s: %s", path, exc)
+            return False
+
+    def _get_database_path(self):
+        """Pick the first valid database path from known locations."""
+        candidates = self._candidate_paths()
+
+        # If DATABASE_PATH is explicitly set and valid, always use it
+        env_path = os.environ.get('DATABASE_PATH')
+        if env_path and self._db_looks_valid(env_path):
+            self._ensure_db_dir(env_path)
+            return env_path
+
+        valid = [path for path in candidates if self._db_looks_valid(path)]
+        if valid:
+            # Prefer the largest valid DB (most likely the real production file)
+            best = max(valid, key=lambda path: os.path.getsize(path))
+            self._ensure_db_dir(best)
+            return best
+
+        # Fall back to configured path even if empty (bootstrap / first run)
+        fallback = env_path or self.config.DATABASE_PATH or self.config.DATABASE_PATH_LOCAL or 'stats.db'
+        self._ensure_db_dir(fallback)
+        logger.warning("No valid stats database found; falling back to %s", fallback)
+        return fallback
 
     def _ensure_db_dir(self, path):
         directory = os.path.dirname(path)
