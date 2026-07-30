@@ -166,7 +166,25 @@
         <div class="confirm-modal-backdrop" data-close-delete-modal></div>
         <div class="confirm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-game-title">
             <h2 id="delete-game-title" class="confirm-modal-title">Delete this game?</h2>
-            <p id="delete-game-meta" class="confirm-modal-meta"></p>
+            <div class="confirm-modal-preview" id="delete-game-preview" aria-hidden="true">
+                <div class="game-meta" id="delete-preview-date"></div>
+                <div class="game-teams game-teams--stacked">
+                    <div class="game-team winner">
+                        <div class="players">
+                            <span id="delete-preview-w1"></span>
+                            <span id="delete-preview-w2"></span>
+                        </div>
+                        <span class="score" id="delete-preview-ws"></span>
+                    </div>
+                    <div class="game-team loser">
+                        <div class="players">
+                            <span id="delete-preview-l1"></span>
+                            <span id="delete-preview-l2"></span>
+                        </div>
+                        <span class="score" id="delete-preview-ls"></span>
+                    </div>
+                </div>
+            </div>
             <form id="delete-game-form" method="post" action="">
                 <div class="confirm-modal-actions">
                     <button type="submit" class="confirm-modal-btn confirm-modal-btn--danger">Delete</button>
@@ -182,12 +200,22 @@
     (function () {
         var modal = document.getElementById('delete-game-modal');
         var form = document.getElementById('delete-game-form');
-        var meta = document.getElementById('delete-game-meta');
         if (!modal || !form) return;
 
-        function openModal(url, detail) {
-            form.setAttribute('action', url);
-            if (meta) meta.textContent = detail || '';
+        function setText(id, value) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = value || '';
+        }
+
+        function openModal(trigger) {
+            form.setAttribute('action', trigger.getAttribute('data-delete-url') || '');
+            setText('delete-preview-date', trigger.getAttribute('data-date'));
+            setText('delete-preview-w1', trigger.getAttribute('data-w1'));
+            setText('delete-preview-w2', trigger.getAttribute('data-w2'));
+            setText('delete-preview-ws', trigger.getAttribute('data-ws'));
+            setText('delete-preview-l1', trigger.getAttribute('data-l1'));
+            setText('delete-preview-l2', trigger.getAttribute('data-l2'));
+            setText('delete-preview-ls', trigger.getAttribute('data-ls'));
             modal.hidden = false;
             document.body.classList.add('modal-open');
             var confirmBtn = form.querySelector('button[type="submit"]');
@@ -198,14 +226,13 @@
             modal.hidden = true;
             document.body.classList.remove('modal-open');
             form.setAttribute('action', '');
-            if (meta) meta.textContent = '';
         }
 
         document.addEventListener('click', function (event) {
             var trigger = event.target.closest('.js-open-delete-modal');
             if (trigger) {
                 event.preventDefault();
-                openModal(trigger.getAttribute('data-delete-url'), trigger.getAttribute('data-delete-meta'));
+                openModal(trigger);
                 return;
             }
             if (event.target.closest('[data-close-delete-modal]')) {

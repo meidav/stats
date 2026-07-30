@@ -1,25 +1,31 @@
 {# Doubles game card: stacked winner/loser bars (shared across games, edit, player, add) #}
 {% macro doubles_game_card(game, year, editable=false, selectable=false, highlight_player=none) %}
+{% set w1 = (game[2] or '')|trim %}
+{% set w2 = (game[3] or '')|trim %}
+{% set l1 = (game[5] or '')|trim %}
+{% set l2 = (game[6] or '')|trim %}
 <article class="game-card"
-         data-players="{{ game[2] }}|{{ game[3] }}|{{ game[5] }}|{{ game[6] }}"
+         data-players="{{ w1 }}|{{ w2 }}|{{ l1 }}|{{ l2 }}"
          data-date="{{ game[1] }}">
     <div class="game-card-top">
         <div class="game-card-actions">
             {% if editable %}
             <a href="{{ url_for('update', id=game[0]) }}" class="game-action-btn" title="Edit" aria-label="Edit game">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-                    <path d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75l1.83-1.83z"></path>
-                </svg>
+                <span class="material-symbols-rounded game-action-icon" aria-hidden="true">edit</span>
             </a>
             <button type="button"
                     class="game-action-btn game-action-btn--danger js-open-delete-modal"
                     title="Delete"
                     aria-label="Delete game"
                     data-delete-url="{{ url_for('delete_game', id=game[0]) }}"
-                    data-delete-meta="{{ game[1] }} · {{ game[2] }}/{{ game[3] }} {{ game[4] }}-{{ game[7] }} {{ game[5] }}/{{ game[6] }}">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v10zM18 4h-2.5l-.71-.71c-.18-.18-.44-.29-.7-.29H9.91c-.26 0-.52.11-.7.29L8.5 4H6c-.55 0-1 .45-1 1s.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1z"></path>
-                </svg>
+                    data-date="{{ game[1] }}"
+                    data-w1="{{ w1 }}"
+                    data-w2="{{ w2 }}"
+                    data-ws="{{ game[4] }}"
+                    data-l1="{{ l1 }}"
+                    data-l2="{{ l2 }}"
+                    data-ls="{{ game[7] }}">
+                <span class="material-symbols-rounded game-action-icon" aria-hidden="true">delete</span>
             </button>
             {% endif %}
         </div>
@@ -33,15 +39,15 @@
     <div class="game-teams game-teams--stacked">
         <div class="game-team winner">
             <div class="players">
-                <a href="{{ url_for('player_stats', year=year, name=game[2]) }}"{% if highlight_player == game[2] %} class="is-self"{% endif %}>{{ game[2] }}</a>
-                <a href="{{ url_for('player_stats', year=year, name=game[3]) }}"{% if highlight_player == game[3] %} class="is-self"{% endif %}>{{ game[3] }}</a>
+                <a href="{{ url_for('player_stats', year=year, name=w1) }}"{% if highlight_player == w1 %} class="is-self"{% endif %}>{{ w1 }}</a>
+                <a href="{{ url_for('player_stats', year=year, name=w2) }}"{% if highlight_player == w2 %} class="is-self"{% endif %}>{{ w2 }}</a>
             </div>
             <span class="score">{{ game[4] }}</span>
         </div>
         <div class="game-team loser">
             <div class="players">
-                <a href="{{ url_for('player_stats', year=year, name=game[5]) }}"{% if highlight_player == game[5] %} class="is-self"{% endif %}>{{ game[5] }}</a>
-                <a href="{{ url_for('player_stats', year=year, name=game[6]) }}"{% if highlight_player == game[6] %} class="is-self"{% endif %}>{{ game[6] }}</a>
+                <a href="{{ url_for('player_stats', year=year, name=l1) }}"{% if highlight_player == l1 %} class="is-self"{% endif %}>{{ l1 }}</a>
+                <a href="{{ url_for('player_stats', year=year, name=l2) }}"{% if highlight_player == l2 %} class="is-self"{% endif %}>{{ l2 }}</a>
             </div>
             <span class="score">{{ game[7] }}</span>
         </div>

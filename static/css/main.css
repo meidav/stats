@@ -598,17 +598,29 @@ h3.section-title.section-title--fewer {
   border-radius: 8px;
   background: var(--button-bg-1);
   border: 1px solid var(--button-border-1);
-  color: var(--text-secondary);
+  color: var(--link-color);
   text-decoration: none;
+  padding: 0;
+  line-height: 1;
 }
 
 .game-action-btn:hover {
-  color: var(--text);
+  color: var(--link-hover-color);
   background: var(--button-hover);
 }
 
-.game-action-btn--danger:hover {
+.game-action-btn--danger {
   color: var(--stat-losses);
+}
+
+.game-action-btn--danger:hover {
+  color: #ff6b63;
+}
+
+.game-action-icon {
+  font-size: 18px !important;
+  line-height: 1 !important;
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
 }
 
 button.game-action-btn {
@@ -646,8 +658,8 @@ body.modal-open {
 .confirm-modal-dialog {
   position: relative;
   width: 100%;
-  max-width: 360px;
-  padding: 22px 20px 18px;
+  max-width: 340px;
+  padding: 18px 14px 14px;
   border-radius: 14px;
   background: var(--bg-card);
   border: 1px solid var(--table-border);
@@ -655,20 +667,50 @@ body.modal-open {
 }
 
 .confirm-modal-title {
-  margin: 0 0 8px;
-  font-size: 1.15rem;
+  margin: 0 0 12px;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text);
   text-align: center;
 }
 
-.confirm-modal-meta {
-  margin: 0 0 18px;
-  font-size: 0.85rem;
-  line-height: 1.35;
-  color: var(--text-muted);
-  text-align: center;
-  word-break: break-word;
+.confirm-modal-preview {
+  margin: 0 0 14px;
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--table-border);
+}
+
+.confirm-modal-preview .game-meta {
+  margin-bottom: 6px;
+  font-size: 11px;
+  white-space: normal;
+}
+
+.confirm-modal-preview .game-teams--stacked {
+  gap: 4px;
+}
+
+.confirm-modal-preview .game-team {
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.confirm-modal-preview .game-team .players {
+  font-size: 13px;
+  gap: 1px;
+}
+
+.confirm-modal-preview .game-team .players span {
+  display: block;
+  text-align: left;
+  font-weight: 600;
+  color: #fff;
+}
+
+.confirm-modal-preview .game-team .score {
+  font-size: 1.2rem;
 }
 
 .confirm-modal-actions {
@@ -767,11 +809,24 @@ body.modal-open {
   line-height: 1.35;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
   min-width: 0;
+  flex: 1;
+  text-align: left;
 }
 
-.game-team .players a {
+.game-team .players a,
+.game-team .players span {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  text-indent: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: inherit !important;
   text-decoration: none;
   font-weight: 600;
@@ -835,6 +890,12 @@ body.modal-open {
     flex-direction: column;
     align-items: center;
     text-align: center;
+  }
+
+  .game-teams--stacked .game-team {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
   }
 
   .game-teams:not(.game-teams--stacked) .game-vs {
