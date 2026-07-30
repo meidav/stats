@@ -437,9 +437,9 @@ def latest_commit():
             if len(parts) != 3:
                 continue
             commits.append({
-                'hash': parts[0],
-                'date': parts[1],
-                'subject': parts[2],
+                'hash': parts[0].strip(),
+                'date': parts[1].strip(),
+                'subject': parts[2].strip(),
             })
 
         payload = {
@@ -1532,4 +1532,4 @@ def deploy():
 @app.errorhandler(500)
 def internal_error(error):
     import traceback
-    return f"<pre>{traceback.format_exc()}</pre>", 500
+    return f"<pre>{traceback.fo
