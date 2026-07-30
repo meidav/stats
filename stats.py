@@ -1482,14 +1482,24 @@ def deploy():
         subprocess.run(['git', 'fetch', 'origin'], check=True)
         subprocess.run(['git', 'reset', '--hard', 'origin/main'], check=True)
 
-        # Install/update Python dependencies (required after API package additions)
-        subprocess.run(
-            [sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'],
-            check=True,
-        )
+        # Install/update Python deps. Under uWSGI, sys.executable is uwsgi itself,
+        # so prefer pip3/pip rather than `python -m pip`.
+        pip_error = None
+        for pip_cmd in (
+            ['pip3', 'install', '--user', '-r', 'requirements.txt'],
+            ['pip', 'install', '--user', '-r', 'requirements.txt'],
+        ):
+            result = subprocess.run(pip_cmd, capture_output=True, text=True)
+            if result.returncode == 0:
+                pip_error = None
+                break
+            pip_error = (result.stderr or result.stdout or 'pip install failed').strip()
         
-        # Reload the web app
+        # Reload the web app even if pip had issues (code/static still need a reload)
         subprocess.run(['touch', '/var/www/arbel_pythonanywhere_com_wsgi.py'], check=True)
+
+        if pip_error:
+            return f'Deployed code and reloaded, but pip install failed: {pip_error}', 200
         
         return 'Deployment successful', 200
     except Exception as e:
