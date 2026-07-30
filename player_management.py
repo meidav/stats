@@ -8,13 +8,16 @@ from datetime import datetime
 import os
 import uuid
 import re
+import base64
 
-UPLOAD_DIR = os.path.join('static', 'uploads', 'players')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploads', 'players')
 ALLOWED_PHOTO_EXT = {'.jpg', '.jpeg', '.png', '.webp', '.gif'}
 
 
 def ensure_player_profiles_table():
     """Create player_profiles table if missing."""
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
     with db_manager.get_connection() as conn:
         conn.execute('''
             CREATE TABLE IF NOT EXISTS player_profiles (
@@ -28,6 +31,14 @@ def ensure_player_profiles_table():
 def _slugify_name(name):
     slug = re.sub(r'[^a-zA-Z0-9]+', '-', (name or '').strip().lower()).strip('-')
     return slug[:40] or 'player'
+
+
+def _photo_filesystem_path(filename):
+    return os.path.join(UPLOAD_DIR, filename)
+
+
+def _photo_public_url(filename):
+    return f'/static/uploads/players/{filename}'
 
 
 def get_player_photo_filename(player_name):
@@ -46,28 +57,26 @@ def get_player_photo_url(player_name):
     filename = get_player_photo_filename(player_name)
     if not filename:
         return None
-    path = os.path.join(UPLOAD_DIR, filename)
+    path = _photo_filesystem_path(filename)
     if not os.path.isfile(path):
         return None
-    return f'/static/uploads/players/{filename}'
+    # Cache-bust so updated crops show immediately
+    try:
+        version = int(os.path.getmtime(path))
+    except OSError:
+        version = 0
+    return f'{_photo_public_url(filename)}?v={version}'
 
 
-def save_player_photo(player_name, file_storage):
-    """Save uploaded photo for a player. Returns (ok, message_or_filename)."""
-    if not file_storage or not getattr(file_storage, 'filename', None):
-        return False, 'No file uploaded'
-
-    _, ext = os.path.splitext(file_storage.filename.lower())
-    if ext not in ALLOWED_PHOTO_EXT:
-        return False, 'Use a JPG, PNG, WEBP, or GIF image'
-
+def _store_player_photo_bytes(player_name, data, ext='.jpg'):
     ensure_player_profiles_table()
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
     old = get_player_photo_filename(player_name)
     filename = f'{_slugify_name(player_name)}-{uuid.uuid4().hex[:10]}{ext}'
-    dest = os.path.join(UPLOAD_DIR, filename)
-    file_storage.save(dest)
+    dest = _photo_filesystem_path(filename)
+    with open(dest, 'wb') as handle:
+        handle.write(data)
 
     now = datetime.now().isoformat(timespec='seconds')
     with db_manager.get_connection() as conn:
@@ -80,7 +89,7 @@ def save_player_photo(player_name, file_storage):
         ''', (player_name, filename, now))
 
     if old and old != filename:
-        old_path = os.path.join(UPLOAD_DIR, old)
+        old_path = _photo_filesystem_path(old)
         if os.path.isfile(old_path):
             try:
                 os.remove(old_path)
@@ -88,6 +97,45 @@ def save_player_photo(player_name, file_storage):
                 pass
 
     return True, filename
+
+
+def save_player_photo(player_name, file_storage):
+    """Save uploaded photo for a player. Returns (ok, message_or_filename)."""
+    if not file_storage or not getattr(file_storage, 'filename', None):
+        return False, 'No file uploaded'
+
+    _, ext = os.path.splitext(file_storage.filename.lower())
+    if ext not in ALLOWED_PHOTO_EXT:
+        return False, 'Use a JPG, PNG, WEBP, or GIF image'
+
+    data = file_storage.read()
+    if not data:
+        return False, 'Empty image file'
+    return _store_player_photo_bytes(player_name, data, ext=ext)
+
+
+def save_player_photo_data_url(player_name, data_url):
+    """Save a cropped image from a canvas data URL (image/jpeg or image/png)."""
+    if not data_url or not isinstance(data_url, str) or ',' not in data_url:
+        return False, 'No cropped image provided'
+
+    header, encoded = data_url.split(',', 1)
+    header = header.lower()
+    if 'image/png' in header:
+        ext = '.png'
+    elif 'image/webp' in header:
+        ext = '.webp'
+    else:
+        ext = '.jpg'
+
+    try:
+        data = base64.b64decode(encoded)
+    except Exception:
+        return False, 'Could not read cropped image'
+
+    if not data:
+        return False, 'Empty cropped image'
+    return _store_player_photo_bytes(player_name, data, ext=ext)
 
 
 def remove_player_photo(player_name):
@@ -99,7 +147,7 @@ def remove_player_photo(player_name):
             (datetime.now().isoformat(timespec='seconds'), player_name)
         )
     if old:
-        old_path = os.path.join(UPLOAD_DIR, old)
+        old_path = _photo_filesystem_path(old)
         if os.path.isfile(old_path):
             try:
                 os.remove(old_path)
@@ -182,8 +230,14 @@ def get_players_with_counts(search_query='', sort_by='name', sort_order='asc'):
             continue
         filename = photos.get(name)
         photo_url = None
-        if filename and os.path.isfile(os.path.join(UPLOAD_DIR, filename)):
-            photo_url = f'/static/uploads/players/{filename}'
+        if filename:
+            path = os.path.join(UPLOAD_DIR, filename)
+            if os.path.isfile(path):
+                try:
+                    version = int(os.path.getmtime(path))
+                except OSError:
+                    version = 0
+                photo_url = f'/static/uploads/players/{filename}?v={version}'
         players.append({
             'name': name,
             'game_count': int(count or 0),

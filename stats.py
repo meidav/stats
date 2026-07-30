@@ -24,6 +24,7 @@ from player_management import (
     count_all_players,
     get_player_photo_url,
     save_player_photo,
+    save_player_photo_data_url,
     remove_player_photo,
 )
 import pytz
@@ -585,13 +586,21 @@ def edit_player():
             flash('Profile photo removed', 'success')
             return redirect(url_for('edit_player', player=old_name))
 
-        photo = request.files.get('photo')
-        if photo and photo.filename:
-            ok, result = save_player_photo(old_name, photo)
+        photo_data = (request.form.get('photo_data') or '').strip()
+        if photo_data.startswith('data:image/'):
+            ok, result = save_player_photo_data_url(old_name, photo_data)
             if not ok:
                 flash(result, 'danger')
                 return redirect(url_for('edit_player', player=old_name))
             flash('Profile photo updated', 'success')
+        else:
+            photo = request.files.get('photo')
+            if photo and photo.filename:
+                ok, result = save_player_photo(old_name, photo)
+                if not ok:
+                    flash(result, 'danger')
+                    return redirect(url_for('edit_player', player=old_name))
+                flash('Profile photo updated', 'success')
 
         if new_name and new_name != old_name:
             success, result = update_player_name(old_name, new_name)
@@ -602,7 +611,7 @@ def edit_player():
             flash(f'Failed to update player name: {result}', 'danger')
             return redirect(url_for('edit_player', player=old_name))
 
-        if not (photo and photo.filename):
+        if not photo_data.startswith('data:image/') and not (request.files.get('photo') and request.files.get('photo').filename):
             flash('No changes to save', 'info')
         return redirect(url_for('edit_player', player=old_name))
 

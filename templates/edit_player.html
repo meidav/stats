@@ -3,6 +3,8 @@
 {% block title %}Edit player: {{ player_name }}{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+
 <div class="page-header">
     <div class="header-controls header-controls--spread">
         <a href="{{ url_for('admin_players') }}" class="nav-pill">← Players</a>
@@ -12,11 +14,11 @@
 </div>
 
 <div class="player-hero">
-    <div class="player-avatar player-avatar--editable" aria-hidden="true">
+    <div class="player-avatar player-avatar--editable" id="avatar-preview" aria-hidden="true">
         {% if photo_url %}
         <img src="{{ photo_url }}" alt="">
         {% else %}
-        {{ initials }}
+        <span class="avatar-initials">{{ initials }}</span>
         {% endif %}
     </div>
     <div class="player-hero-text">
@@ -52,8 +54,9 @@
     </div>
 </div>
 
-<form method="POST" enctype="multipart/form-data" class="form-container admin-player-edit-form">
+<form method="POST" enctype="multipart/form-data" class="form-container admin-player-edit-form" id="edit-player-form">
     <input type="hidden" name="old_name" value="{{ player_name }}">
+    <input type="hidden" name="photo_data" id="photo_data" value="">
 
     <div class="form-section">
         <h3>Profile photo</h3>
@@ -61,14 +64,14 @@
             <input type="file" name="photo" id="photo" accept="image/jpeg,image/png,image/webp,image/gif" class="file-input-hidden">
             <label for="photo" class="file-upload-btn">
                 <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
-                Choose photo
+                {% if photo_url %}Change photo{% else %}Choose photo{% endif %}
             </label>
-            <span class="file-upload-name" id="photo-filename">No file chosen</span>
+            <span class="file-upload-name" id="photo-filename">{% if photo_url %}Photo on file{% else %}No file chosen{% endif %}</span>
             {% if photo_url %}
-            <button type="submit" name="action" value="remove_photo" class="nav-pill">Remove photo</button>
+            <button type="submit" name="action" value="remove_photo" class="photo-remove-btn">Remove photo</button>
             {% endif %}
         </div>
-        <p class="form-help">JPG, PNG, WEBP, or GIF. Shown on the public player page too.</p>
+        <p class="form-help">JPG, PNG, WEBP, or GIF. After choosing, crop and zoom before saving.</p>
     </div>
 
     <div class="form-section">
@@ -81,14 +84,134 @@
         <button type="submit" name="action" value="save" class="submit-button">Save changes</button>
     </div>
 </form>
+
+<div id="photo-crop-modal" class="confirm-modal photo-crop-modal" hidden>
+    <div class="confirm-modal-backdrop" data-close-crop-modal></div>
+    <div class="confirm-modal-dialog photo-crop-dialog" role="dialog" aria-modal="true" aria-labelledby="photo-crop-title">
+        <h2 id="photo-crop-title" class="confirm-modal-title">Crop photo</h2>
+        <div class="photo-crop-stage">
+            <img id="photo-crop-image" alt="Crop preview">
+        </div>
+        <div class="photo-crop-zoom">
+            <label for="photo-zoom">Zoom</label>
+            <input type="range" id="photo-zoom" min="0.2" max="3" step="0.01" value="1">
+        </div>
+        <div class="confirm-modal-actions">
+            <button type="button" class="confirm-modal-btn confirm-modal-btn--primary" id="photo-crop-apply">Use photo</button>
+            <button type="button" class="confirm-modal-btn confirm-modal-btn--secondary" data-close-crop-modal>Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var input = document.getElementById('photo');
-  var label = document.getElementById('photo-filename');
-  if (!input || !label) return;
-  input.addEventListener('change', function () {
-    var file = input.files && input.files[0];
-    label.textContent = file ? file.name : 'No file chosen';
+  var filenameLabel = document.getElementById('photo-filename');
+  var photoData = document.getElementById('photo_data');
+  var modal = document.getElementById('photo-crop-modal');
+  var cropImage = document.getElementById('photo-crop-image');
+  var zoom = document.getElementById('photo-zoom');
+  var applyBtn = document.getElementById('photo-crop-apply');
+  var avatar = document.getElementById('avatar-preview');
+  var cropper = null;
+  var objectUrl = null;
+  var defaultFilename = {% if photo_url %}'Photo on file'{% else %}'No file chosen'{% endif %};
+
+  function openModal() {
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+  }
+
+  function closeModal(resetFile) {
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+    }
+    cropImage.removeAttribute('src');
+    if (resetFile) input.value = '';
+  }
+
+  function setAvatarPreview(dataUrl) {
+    if (!avatar) return;
+    avatar.innerHTML = '';
+    var img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = '';
+    avatar.appendChild(img);
+  }
+
+  if (input) {
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = URL.createObjectURL(file);
+      openModal();
+      cropImage.onload = function () {
+        if (cropper) cropper.destroy();
+        // Init after the modal is visible so Cropper gets real dimensions.
+        requestAnimationFrame(function () {
+          cropper = new Cropper(cropImage, {
+            aspectRatio: 1,
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 1,
+            background: false,
+            responsive: true,
+            guides: false,
+            center: true,
+            highlight: false,
+            ready: function () {
+              var imageData = cropper.getImageData();
+              if (zoom) zoom.value = String(imageData.ratio || 1);
+            }
+          });
+        });
+      };
+      cropImage.src = objectUrl;
+    });
+  }
+
+  if (zoom) {
+    zoom.addEventListener('input', function () {
+      if (!cropper) return;
+      cropper.zoomTo(parseFloat(zoom.value || '1'));
+    });
+  }
+
+  if (applyBtn) {
+    applyBtn.addEventListener('click', function () {
+      if (!cropper) return;
+      var canvas = cropper.getCroppedCanvas({
+        width: 512,
+        height: 512,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+      });
+      if (!canvas) return;
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      if (photoData) photoData.value = dataUrl;
+      if (filenameLabel) filenameLabel.textContent = 'Cropped photo ready';
+      setAvatarPreview(dataUrl);
+      closeModal(true);
+    });
+  }
+
+  document.querySelectorAll('[data-close-crop-modal]').forEach(function (el) {
+    el.addEventListener('click', function (event) {
+      event.preventDefault();
+      closeModal(true);
+      if (photoData && !photoData.value) {
+        if (filenameLabel) filenameLabel.textContent = defaultFilename;
+      }
+    });
   });
 });
 </script>
