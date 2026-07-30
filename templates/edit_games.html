@@ -1,86 +1,67 @@
 {% extends 'base.html' %}
+{% from 'macros/game_cards.html' import doubles_game_card %}
 {% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
     <div class="page-header">
-        <h1 class="page-title-hero">{{ year }} games</h1>
+        <h1 class="page-title-hero">Edit {{ year }} Doubles</h1>
         <div class="header-controls">
             <a href="{{ url_for('stats', year=year) }}" class="nav-pill">← Stats</a>
+            <div class="dropdown dropdown-year">
+                <button class="dropbtn" type="button">{{ year }} <svg class="dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+                <div class="dropdown-content">
+                    {% for y in all_years %}
+                        <a href="{{ url_for('edit_games_by_year', year=y) }}">{{ y }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <a href="{{ url_for('add_game') }}" class="nav-pill">+ Add</a>
             <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
         </div>
     </div>
 
-    <nav>
-        <div class="dropdown">
-            <button class="dropbtn">Select a year
-                <i class="fa fa-caret-down"></i>
-            </button>
-            <div class="dropdown-content">
-                {% for year in all_years %}
-                    <a href="{{ url_for('edit_games_by_year', year=year) }}">{{ year }}</a>
-                {% endfor %}
-            </div>
-        </div>      
-    </nav>
-    
-        <div>
-        	<table class="stats-table">
-        		<thead>
-    				<tr>
-                        <th class="table-col-rank" scope="col">#</th>
-                        <th class="table-col-date" scope="col">Date</th>
-                        <th class="table-col-players" scope="col" style="text-align: center !important;">Winners</th>
-                        <th class="table-col-players" scope="col" style="text-align: center !important;">Losers</th>
-                        <th class="table-col-stat" scope="col"></th>
-    				</tr>
-  				</thead>
-        		<tbody>
-                {% for game in games %}
-        			<tr class="table-double-row">
-                    	<td class="table-col-rank">{{ loop.index }}</td>
-                        <td class="table-col-date">
-                            {{ (game[1])[0:10] }}
-                            {% if game[1]|length > 11 %}
-                                {% set time_str = (game[1])[11:16] %}
-                                {% set hour = time_str[:2]|int %}
-                                {% set minute = time_str[3:5] %}
-                                {% if hour == 0 %}
-                                    <div style="font-size: 0.85em; opacity: 0.7; margin-top: 2px;">12:{{ minute }}am</div>
-                                {% elif hour < 12 %}
-                                    <div style="font-size: 0.85em; opacity: 0.7; margin-top: 2px;">{{ hour }}:{{ minute }}am</div>
-                                {% elif hour == 12 %}
-                                    <div style="font-size: 0.85em; opacity: 0.7; margin-top: 2px;">12:{{ minute }}pm</div>
-                                {% else %}
-                                    {% set display_hour = hour - 12 %}
-                                    <div style="font-size: 0.85em; opacity: 0.7; margin-top: 2px;">{{ display_hour }}:{{ minute }}pm</div>
-                                {% endif %}
-                            {% endif %}
-                        </td>
-    			        <td class="table-col-players" style="text-align: center !important;"><a href="{{ url_for('player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[3] ) }}">{{ game[3] }}</a></td>
-                		<td class="table-col-players" style="text-align: center !important;"><a href="{{ url_for('player_stats', year=year, name=game[5] ) }}">{{ game[5] }}</a><br><a href="{{ url_for('player_stats', year=year, name=game[6] ) }}">{{ game[6] }}</a></td>
-                        <td class="table-col-stat">
-                            <a href="{{ url_for('update', id=game[0]) }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" class="icon-edit">
-                                    <path d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75l1.83-1.83z"></path>
-                                </svg>
-                            </a>
-                        </td>
-            		</tr>
-            		<tr class="table-double-row">
-                		<td class="table-col-rank"></td>
-    			        <td class="table-col-date"></td>
-                        <td class="table-col-players score-cell" style="text-align: center !important;">{{ game[4] }}</td>
-                		<td class="table-col-players score-cell" style="text-align: center !important;">{{ game[7] }}</td>
-                		<td class="table-col-stat">
-                            <a href="{{ url_for('delete_game', id=game[0]) }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" class="icon-delete">
-                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v10zM18 4h-2.5l-.71-.71c-.18-.18-.44-.29-.7-.29H9.91c-.26 0-.52.11-.7.29L8.5 4H6c-.55 0-1 .45-1 1s.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1z"></path>
-                                </svg>
-                            </a>
-                        </td>
-            		</tr>
-                {% endfor %}
-            	</tbody>
-            </table>
-        </div>
+    <div class="search-bar-wrap">
+        <input type="text" id="playerFilter" class="search-bar" placeholder="Search all games (players or date)..." autocomplete="off">
+    </div>
+    <p class="games-count games-count-hero" id="gamesCount">{{ games|length }} GAMES</p>
+
+    <div class="games-list" id="gamesList">
+        {% for game in games %}
+            {{ doubles_game_card(game, year, editable=true) }}
+        {% endfor %}
+    </div>
+
+    <div id="noResults" class="no-results-message" style="display: none;">
+        No games found for this filter.
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterInput = document.getElementById('playerFilter');
+    const gameCards = document.querySelectorAll('#gamesList .game-card');
+    const noResults = document.getElementById('noResults');
+    const countEl = document.getElementById('gamesCount');
+
+    function filterGames() {
+        const value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
+        let visible = 0;
+        gameCards.forEach(function(card) {
+            const players = (card.getAttribute('data-players') || '').toLowerCase();
+            const date = (card.getAttribute('data-date') || '').toLowerCase();
+            const show = !value || players.includes(value) || date.includes(value);
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+        if (countEl) countEl.textContent = visible + ' GAMES';
+    }
+
+    if (filterInput) {
+        filterInput.addEventListener('input', filterGames);
+        filterInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { filterInput.value = ''; filterGames(); }
+        });
+    }
+});
+</script>
 {% endblock %}

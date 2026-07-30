@@ -183,15 +183,54 @@ def player_stats(year, name):
     else:
         minimum_games = 1
     all_years = all_years_player(name)
-    games = games_from_player_by_year(year, name)
+    games = sort_games_newest_first(games_from_player_by_year(year, name))
     stats = total_stats(games, name)
     partner_stats = partner_stats_by_year(name, games, minimum_games)
     opponent_stats = opponent_stats_by_year(name, games, minimum_games)
     rare_partner_stats = rare_partner_stats_by_year(name, games, minimum_games)
     rare_opponent_stats = rare_opponent_stats_by_year(name, games, minimum_games)
-    return render_template('player.html', opponent_stats=opponent_stats, rare_opponent_stats=rare_opponent_stats,
-        partner_stats=partner_stats, rare_partner_stats=rare_partner_stats, 
-        year=year, player=name, minimum_games=minimum_games, all_years=all_years, stats=stats)
+
+    # Year standings threshold (for ranking among all players, not partner min)
+    year_game_rows = year_games(year) if year != 'All years' else all_games()
+    tot_games = len(year_game_rows)
+    if year_game_rows:
+        year_min = 1 if tot_games < get_min_delta() else tot_games // get_min_delta()
+    else:
+        year_min = 1
+    rank, field_size = player_rank_in_year(year, name, year_min)
+
+    wins = stats[0][1] if stats else 0
+    losses = stats[0][2] if stats else 0
+    win_pct = stats[0][3] if stats else 0
+    rating = player_point_rating(games, name)
+    streak = player_streak(games, name)
+    last_results = player_last_results(games, name, 10)
+    initials = player_initials(name)
+    games_display = convert_ampm(games)
+
+    return render_template(
+        'player.html',
+        opponent_stats=opponent_stats,
+        rare_opponent_stats=rare_opponent_stats,
+        partner_stats=partner_stats,
+        rare_partner_stats=rare_partner_stats,
+        year=year,
+        player=name,
+        minimum_games=minimum_games,
+        all_years=all_years,
+        stats=stats,
+        games=games_display,
+        wins=wins,
+        losses=losses,
+        win_pct=win_pct,
+        games_played=wins + losses,
+        rating=rating,
+        rank=rank,
+        field_size=field_size,
+        streak=streak,
+        last_results=last_results,
+        initials=initials,
+    )
 
 @app.route('/games/')
 def games():

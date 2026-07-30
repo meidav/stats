@@ -5,31 +5,50 @@
     return 'win-pct-low';
   }
 
-  function findPctColumnIndex(table) {
+  function findColumnIndexes(table) {
     var headers = table.querySelectorAll('thead th');
+    var indexes = { pct: -1, wins: -1, losses: -1 };
     for (var i = 0; i < headers.length; i++) {
       var th = headers[i];
-      if (th.getAttribute('title') === 'Win %' || th.textContent.trim() === '%') {
-        return i;
-      }
+      var title = (th.getAttribute('title') || '').trim();
+      var text = th.textContent.trim();
+      if (title === 'Win %' || text === '%') indexes.pct = i;
+      if (title === 'Wins' || text === 'W') indexes.wins = i;
+      if (title === 'Losses' || text === 'L') indexes.losses = i;
     }
-    return -1;
+    return indexes;
   }
 
   function colorizeTable(table) {
-    var pctIndex = findPctColumnIndex(table);
-    if (pctIndex < 0) return;
+    var indexes = findColumnIndexes(table);
+    if (indexes.pct < 0 && indexes.wins < 0 && indexes.losses < 0) return;
 
     table.querySelectorAll('tbody tr').forEach(function (tr) {
-      var cell = tr.cells[pctIndex];
-      if (!cell) return;
-
-      var value = parseFloat(cell.textContent.replace(/[^0-9.-]/g, ''));
-      if (isNaN(value)) return;
-
-      cell.classList.remove('win-pct-high', 'win-pct-mid', 'win-pct-low');
-      cell.classList.add(winPctClass(value));
+      if (indexes.pct >= 0) {
+        var pctCell = tr.cells[indexes.pct];
+        if (pctCell) {
+          var value = parseFloat(pctCell.textContent.replace(/[^0-9.-]/g, ''));
+          if (!isNaN(value)) {
+            pctCell.classList.remove('win-pct-high', 'win-pct-mid', 'win-pct-low');
+            pctCell.classList.add(winPctClass(value));
+          }
+        }
+      }
+      if (indexes.wins >= 0 && tr.cells[indexes.wins]) {
+        tr.cells[indexes.wins].classList.add('stat-cell-wins');
+      }
+      if (indexes.losses >= 0 && tr.cells[indexes.losses]) {
+        tr.cells[indexes.losses].classList.add('stat-cell-losses');
+      }
     });
+
+    var headers = table.querySelectorAll('thead th');
+    if (indexes.wins >= 0 && headers[indexes.wins]) {
+      headers[indexes.wins].classList.add('stat-header-wins');
+    }
+    if (indexes.losses >= 0 && headers[indexes.losses]) {
+      headers[indexes.losses].classList.add('stat-header-losses');
+    }
   }
 
   function colorizeWinPctTables() {

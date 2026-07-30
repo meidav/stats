@@ -546,7 +546,7 @@ h3.section-title.section-title--fewer {
   }
 }
 
-/* Games page - card list (desktop row, mobile card) */
+/* Games page - stacked score cards (winner bar / loser bar) */
 .games-list {
   display: flex;
   flex-direction: column;
@@ -557,30 +557,65 @@ h3.section-title.section-title--fewer {
 
 .game-card {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
   background: var(--bg-card);
-  border-radius: var(--rounded-corners);
+  border-radius: 12px;
   border: 1px solid var(--table-border);
 }
 
 @media (min-width: 769px) {
   .game-card {
-    padding: 18px 24px;
-    gap: 20px;
+    padding: 14px 16px;
   }
+}
+
+.game-card-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+
+.game-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.game-card-actions--end {
+  justify-content: flex-end;
+}
+
+.game-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--button-bg-1);
+  border: 1px solid var(--button-border-1);
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.game-action-btn:hover {
+  color: var(--text);
+  background: var(--button-hover);
+}
+
+.game-action-btn--danger:hover {
+  color: var(--stat-losses);
 }
 
 .game-meta {
   font-size: 12px;
   color: var(--text-muted);
-  flex-shrink: 0;
-  min-width: 120px;
-  width: 100%;
   text-align: center;
-  order: -1; /* always on top when flex wraps */
+  white-space: nowrap;
 }
 
 .game-teams {
@@ -591,43 +626,78 @@ h3.section-title.section-title--fewer {
   flex-wrap: wrap;
 }
 
+.game-teams--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
 .game-team {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
   padding: 10px 14px;
-  border-radius: var(--rounded-corners);
+  border-radius: 10px;
   min-width: 0;
+  border-left: 3px solid transparent;
 }
 
 .game-team.winner {
-  background: var(--game-winner-bg);
+  background: rgba(30, 141, 53, 0.28);
+  border-left-color: var(--stat-wins);
   color: #fff;
 }
 
 .game-team.loser {
-  background: var(--game-loser-bg);
+  background: rgba(179, 43, 53, 0.28);
+  border-left-color: var(--stat-losses);
   color: #fff;
 }
 
 .game-team .score {
-  font-size: 1.25rem;
+  font-size: 1.45rem;
   font-weight: 700;
   flex-shrink: 0;
+  line-height: 1;
+}
+
+.game-team.winner .score {
+  color: var(--stat-wins);
+}
+
+.game-team.loser .score {
+  color: #ff6b63;
 }
 
 .game-team .players {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.35;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .game-team .players a {
   color: inherit !important;
   text-decoration: none;
+  font-weight: 600;
 }
 
 .game-team .players a:hover {
   text-decoration: underline;
+}
+
+.game-team .players a.is-self {
+  color: #fff !important;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.game-vs {
+  display: none;
 }
 
 .tennis-score-line {
@@ -665,19 +735,20 @@ h3.section-title.section-title--fewer {
 }
 
 @media (min-width: 769px) {
-  .game-teams {
+  .game-teams:not(.game-teams--stacked) {
     justify-content: space-between;
   }
 
-  .game-team {
+  .game-teams:not(.game-teams--stacked) .game-team {
     flex: 1;
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
 
-  .game-vs {
+  .game-teams:not(.game-teams--stacked) .game-vs {
     margin: 0 12px;
+    display: inline;
   }
 }
 
@@ -710,6 +781,188 @@ h3.section-title.section-title--fewer {
   text-align: center;
   padding: 20px;
   color: var(--text-muted);
+}
+
+/* Player profile page */
+.header-controls--spread {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.player-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 8px 0 18px;
+}
+
+.player-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: linear-gradient(145deg, #3a7ca5, #1f4e6b);
+  border: 2px solid rgba(102, 207, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.player-hero-text {
+  min-width: 0;
+}
+
+.player-name {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.15;
+}
+
+.player-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.player-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 18px;
+}
+
+.player-kpi {
+  background: var(--bg-card);
+  border: 1px solid var(--table-border);
+  border-radius: 12px;
+  padding: 12px 8px 10px;
+  text-align: center;
+}
+
+.player-kpi-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.player-kpi-value--wins {
+  color: var(--stat-wins);
+}
+
+.player-kpi-value--losses {
+  color: var(--stat-losses);
+}
+
+.player-kpi-value--rating {
+  color: var(--stat-rating);
+}
+
+.player-kpi-label {
+  margin-top: 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.player-kpi-note {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-secondary);
+}
+
+.player-streak-block {
+  margin: 0 0 20px;
+}
+
+.player-streak-title {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.streak-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.streak-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.streak-dot--w {
+  background: var(--stat-wins);
+}
+
+.streak-dot--l {
+  background: var(--stat-losses);
+}
+
+.player-games-section {
+  margin-top: 24px;
+}
+
+.show-all-btn {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 10px auto 18px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--button-border-1);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.show-all-btn:hover {
+  color: var(--text);
+  background: var(--button-hover);
+}
+
+@media (max-width: 640px) {
+  .player-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 1.2rem;
+  }
+
+  .player-name {
+    font-size: 1.35rem;
+  }
+
+  .player-kpi-value {
+    font-size: 1.25rem;
+  }
 }
 
 /* Mobile: cleaner top area - title row then controls row */
@@ -748,16 +1001,20 @@ h3.section-title.section-title--fewer {
     min-width: 0;
   }
 
-  .game-teams {
+  .game-teams:not(.game-teams--stacked) {
     flex-direction: row;
     justify-content: space-between;
   }
 
-  .game-team {
+  .game-teams:not(.game-teams--stacked) .game-team {
     flex: 1;
     flex-direction: column;
     align-items: center;
     text-align: center;
+  }
+
+  .game-teams--stacked {
+    flex-direction: column;
   }
 
   .game-vs {
@@ -1209,24 +1466,31 @@ td {
   padding: 10px 8px;
 }
 
-/* Stats tables: colored headers + W/L columns (player standings tables) */
+/* Stats tables: colored headers; W/L body colors via win-pct.js classes */
 .stats-table thead th {
   color: var(--link-color);
   font-weight: 600;
 }
 
-.stats-table:has(thead th[title="Wins"]) tbody td:nth-child(3) {
+.stats-table thead th[title="Wins"],
+.stats-table thead th.stat-header-wins {
+  color: var(--stat-wins);
+}
+
+.stats-table thead th[title="Losses"],
+.stats-table thead th.stat-header-losses {
+  color: var(--stat-losses);
+}
+
+.stats-table tbody td.stat-cell-wins {
   color: var(--stat-wins);
   font-weight: 600;
 }
 
-.stats-table:has(thead th[title="Losses"]) tbody td:nth-child(4) {
+.stats-table tbody td.stat-cell-losses {
   color: var(--stat-losses);
   font-weight: 600;
 }
-
-.stats-table thead th[title="Wins"] { color: var(--stat-wins); }
-.stats-table thead th[title="Losses"] { color: var(--stat-losses); }
 
 /* Player summary table: 5 cols = Player, W, L, Win%, Games */
 .stats-table-summary tbody td:nth-child(2),

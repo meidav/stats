@@ -191,20 +191,121 @@ def todays_games():
 def convert_ampm(games):
 	converted_games = []
 	for game in games:
-		if len(game[1]) > 19:
-			game_datetime = datetime.strptime(game[1], "%Y-%m-%d %H:%M:%S.%f")
+		raw_date = game[1] or ''
+		try:
+			if len(raw_date) > 19:
+				game_datetime = datetime.strptime(raw_date, "%Y-%m-%d %H:%M:%S.%f")
+			else:
+				game_datetime = datetime.strptime(raw_date[:19], "%Y-%m-%d %H:%M:%S")
 			game_date = game_datetime.strftime("%m/%d/%Y %I:%M %p")
-		else:
-			game_datetime = datetime.strptime(game[1], "%Y-%m-%d %H:%M:%S")
-			game_date = game_datetime.strftime("%m/%d/%Y")
-		if len(game[8]) > 19:
-			updated_datetime = datetime.strptime(game[8], "%Y-%m-%d %H:%M:%S.%f")
-			updated_date = updated_datetime.strftime("%m/%d/%Y %I:%M %p")
-		else:
-			updated_datetime = datetime.strptime(game[8], "%Y-%m-%d %H:%M:%S")
-			updated_date = updated_datetime.strftime("%m/%d/%Y")
+		except (ValueError, TypeError):
+			game_date = raw_date
+
+		raw_updated = game[8] if len(game) > 8 else ''
+		try:
+			if raw_updated and len(raw_updated) > 19:
+				updated_datetime = datetime.strptime(raw_updated, "%Y-%m-%d %H:%M:%S.%f")
+				updated_date = updated_datetime.strftime("%m/%d/%Y %I:%M %p")
+			elif raw_updated:
+				updated_datetime = datetime.strptime(raw_updated[:19], "%Y-%m-%d %H:%M:%S")
+				updated_date = updated_datetime.strftime("%m/%d/%Y %I:%M %p")
+			else:
+				updated_date = ''
+		except (ValueError, TypeError):
+			updated_date = raw_updated or ''
+
 		converted_games.append([game[0], game_date, game[2], game[3], game[4], game[5], game[6], game[7], updated_date])
 	return converted_games
+
+
+def sort_games_newest_first(games):
+	"""Sort game rows by game_date descending (supports raw ISO or converted display strings)."""
+	def sort_key(game):
+		raw = game[1] or ''
+		for fmt in ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%m/%d/%Y %I:%M %p", "%m/%d/%Y"):
+			try:
+				return datetime.strptime(raw[:26] if '.' in raw else raw, fmt)
+			except (ValueError, TypeError):
+				continue
+		return datetime.min
+	return sorted(games, key=sort_key, reverse=True)
+
+
+def player_point_rating(games, player):
+	"""Average point differential for a player (positive = outscoring opponents)."""
+	total = 0
+	count = 0
+	for game in games:
+		try:
+			winner_score = int(game[4])
+			loser_score = int(game[7])
+		except (TypeError, ValueError):
+			continue
+		if player == game[2] or player == game[3]:
+			total += winner_score - loser_score
+			count += 1
+		elif player == game[5] or player == game[6]:
+			total += loser_score - winner_score
+			count += 1
+	if count == 0:
+		return 0.0
+	return round(total / count, 2)
+
+
+def player_streak(games, player):
+	"""Current win/loss streak string like '3W' or '2L' (games newest-first)."""
+	streak = 0
+	last = None
+	for game in games:
+		if player == game[2] or player == game[3]:
+			result = 'W'
+		elif player == game[5] or player == game[6]:
+			result = 'L'
+		else:
+			continue
+		if last is None:
+			last = result
+			streak = 1
+		elif result == last:
+			streak += 1
+		else:
+			break
+	if not last:
+		return '-'
+	return f'{streak}{last}'
+
+
+def player_last_results(games, player, limit=10):
+	"""Newest-first list of 'W'/'L' results for streak dots."""
+	results = []
+	for game in games:
+		if player == game[2] or player == game[3]:
+			results.append('W')
+		elif player == game[5] or player == game[6]:
+			results.append('L')
+		if len(results) >= limit:
+			break
+	return results
+
+
+def player_rank_in_year(year, player_name, minimum_games):
+	"""1-based rank and field size among year standings (by win %)."""
+	standings = stats_per_year(year, minimum_games)
+	total = len(standings)
+	for index, row in enumerate(standings, start=1):
+		if row[0] == player_name:
+			return index, total
+	# Player below minimum games threshold: still report total field size
+	return None, total
+
+
+def player_initials(name):
+	parts = [p for p in (name or '').split() if p]
+	if not parts:
+		return '?'
+	if len(parts) == 1:
+		return parts[0][:2].upper()
+	return (parts[0][0] + parts[-1][0]).upper()
 	
 def rare_stats_per_year(year, minimum_games):
 	if year == 'All years':

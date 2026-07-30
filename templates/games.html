@@ -1,14 +1,12 @@
 {% extends 'base.html' %}
+{% from 'macros/game_cards.html' import doubles_game_card %}
 {% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
     <div class="page-header">
         <h1 class="page-title-hero">{{ year }} Doubles Games</h1>
         <div class="header-controls">
-            <a href="{{ url_for('stats', year=year) }}" class="nav-pill">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                Stats
-            </a>
+            <a href="{{ url_for('stats', year=year) }}" class="nav-pill">← Stats</a>
             <div class="dropdown dropdown-year">
                 <button class="dropbtn" type="button">{{ year }} <svg class="dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
                 <div class="dropdown-content">
@@ -17,9 +15,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <label for="menu__toggle" class="nav-pill menu-trigger" aria-label="Open menu">
-            Menu
-            </label>
+            <label for="menu__toggle" class="nav-pill menu-trigger" aria-label="Open menu">Menu</label>
         </div>
     </div>
 
@@ -30,28 +26,7 @@
 
     <div class="games-list" id="gamesList">
         {% for game in games %}
-        <article class="game-card" data-players="{{ game[2] }}|{{ game[3] }}|{{ game[5] }}|{{ game[6] }}" data-date="{{ (game[1])[0:10] }}">
-            <div class="game-meta">
-                {{ (game[1])[0:10] }}<br>{{ (game[1])[11:19] }}
-            </div>
-            <div class="game-teams">
-                <div class="game-team winner">
-                    <span class="score">{{ game[4] }}</span>
-                    <div class="players">
-                        <a href="{{ url_for('player_stats', year=year, name=game[2]) }}">{{ game[2] }}</a><br>
-                        <a href="{{ url_for('player_stats', year=year, name=game[3]) }}">{{ game[3] }}</a>
-                    </div>
-                </div>
-                <span class="game-vs">VS</span>
-                <div class="game-team loser">
-                    <span class="score">{{ game[7] }}</span>
-                    <div class="players">
-                        <a href="{{ url_for('player_stats', year=year, name=game[5]) }}">{{ game[5] }}</a><br>
-                        <a href="{{ url_for('player_stats', year=year, name=game[6]) }}">{{ game[6] }}</a>
-                    </div>
-                </div>
-            </div>
-        </article>
+            {{ doubles_game_card(game, year) }}
         {% endfor %}
     </div>
 
@@ -64,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterInput = document.getElementById('playerFilter');
     const gameCards = document.querySelectorAll('#gamesList .game-card');
     const noResults = document.getElementById('noResults');
-
     const countEl = document.getElementById('gamesCount');
 
     function filterGames() {
