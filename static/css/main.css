@@ -271,7 +271,7 @@ input[type="time"]::-webkit-datetime-edit-ampm-field {
 
 .add-game-block .section-title {
   margin-top: 12px !important;
-  margin-bottom: 6px !important;
+  margin-bottom: 10px !important;
   text-align: center !important;
 }
 
@@ -467,7 +467,7 @@ h3.section-title,
   color: var(--text-secondary) !important;
   text-transform: uppercase !important;
   text-align: center !important;
-  margin: 0 !important;
+  margin: 16px 0 10px !important;
   padding: 0 !important;
   max-width: none;
 }
@@ -511,15 +511,17 @@ h3.section-title.section-title--fewer {
 
 .stats-sections .section-title {
   margin-top: 16px !important;
-  margin-bottom: 4px !important;
+  margin-bottom: 10px !important;
 }
 
 .stats-sections .section-title:first-child {
   margin-top: 12px !important;
 }
 
-.stats-sections .stats-table + .section-title {
-  margin-top: 18px !important;
+.stats-sections .stats-table + .section-title,
+.stats-sections .games-list + .section-title,
+.stats-sections .add-game-block + .add-game-block .section-title {
+  margin-top: 20px !important;
 }
 
 .stats-table-summary {
@@ -540,8 +542,8 @@ h3.section-title.section-title--fewer {
   }
 
   .stats-sections .section-title {
-    margin-top: 14px !important;
-    margin-bottom: 3px !important;
+    margin-top: 16px !important;
+    margin-bottom: 10px !important;
   }
 
   .stats-sections .section-title:first-child {
@@ -1680,8 +1682,8 @@ td.player_name, td.player_name a {
 /* Player column - wider with smart wrapping */
 .table-col-player {
   width: auto !important;
-  min-width: 95px !important;
-  max-width: 140px !important;
+  min-width: 80px !important;
+  max-width: none !important;
   text-align: left !important;
   padding: 4px 6px !important;
   white-space: normal !important;
@@ -1709,15 +1711,21 @@ td.player_name, td.player_name a {
   font-size: 13px !important;
 }
 
-/* Date column - narrow, centered, no wrapping */
+/* Date column - compact but wide enough for MM/DD/YYYY */
 .table-col-date {
-  width: 75px !important;
-  max-width: 75px !important;
-  min-width: 75px !important;
+  width: auto !important;
+  min-width: 72px !important;
+  max-width: 96px !important;
   text-align: center !important;
-  padding: 4px 2px !important;
+  padding: 4px 4px !important;
   white-space: nowrap !important;
-  font-size: 15px !important;
+  font-size: 13px !important;
+}
+
+th.table-col-date {
+  white-space: normal !important;
+  line-height: 1.2 !important;
+  overflow-wrap: break-word !important;
 }
 
 /* Tennis score column - for set scores like "6-3, 6-4" */
@@ -1763,8 +1771,8 @@ td.player_name, td.player_name a {
   }
   
   .table-col-player {
-    min-width: 95px !important;
-    max-width: 160px !important;
+    min-width: 72px !important;
+    max-width: none !important;
     padding: 4px 4px !important;
     font-size: 14px !important;
   }
@@ -1778,11 +1786,10 @@ td.player_name, td.player_name a {
   }
   
   .table-col-date {
-    width: 60px !important;
-    max-width: 60px !important;
-    min-width: 60px !important;
+    min-width: 68px !important;
+    max-width: 88px !important;
     padding: 4px 2px !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
   }
   
   .table-col-players {
@@ -4567,21 +4574,23 @@ input[type="time"].form-input:focus {
 
 /* Balanced spacing for double-row tables */
 .table-double-row:nth-child(odd) td {
-  /* First row of each game pair - add some top padding */
-  padding: 4px 4px 2px 4px !important;
-  line-height: 1.2 !important;
-  vertical-align: top !important;
+  padding: 10px 6px 2px 6px !important;
+  line-height: 1.35 !important;
+  vertical-align: bottom !important;
 }
 
 .table-double-row:nth-child(even) td {
-  /* Second row of each game pair - minimal padding */
-  padding: 0px 4px 6px 4px !important;
-  line-height: 1.2 !important;
+  padding: 2px 6px 10px 6px !important;
+  line-height: 1.35 !important;
   vertical-align: top !important;
 }
 
 tr.table-double-row {
   height: auto !important;
+}
+
+tr.table-double-row td {
+  overflow: hidden;
 }
 
 /* Scores in second row */

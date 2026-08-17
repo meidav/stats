@@ -32,6 +32,7 @@
     
 
 {% extends 'base.html' %}
+{% from 'macros/game_cards.html' import vollis_game_card %}
 {% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
@@ -87,32 +88,11 @@
         </tbody>
     </table>
     <h2 class="section-title">Today's vollis games</h2>
-    <table id="gamesTable" class="stats-table">
-        <thead>
-            <tr>
-                <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'gamesTable')">#</th>
-                <th class="table-col-date clickable" scope="col" onclick="sortTable(1, 'gamesTable')">Date/Updated</th>
-                <th class="table-col-player clickable" scope="col" onclick="sortTable(2, 'gamesTable')">Winner</th>
-                <th class="table-col-player clickable" scope="col" onclick="sortTable(3, 'gamesTable')">Loser</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for game in games %}
-                <tr class="table-double-row">
-                    <td class="table-col-rank" style="vertical-align: bottom;">{{ loop.index }}</td>
-                    <td class="table-col-date">{{ (game[1])[0:10] }}<br>{{ (game[1])[11:19] }}</td>
-                    <td class="table-col-player"><a href="{{ url_for('vollis_player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
-                    <td class="table-col-player"><a href="{{ url_for('vollis_player_stats', year=year, name=game[4] ) }}">{{ game[4] }}</a></td>
-                </tr>
-                <tr class="table-double-row">
-                    <td class="table-col-rank"> </td>
-                    <td class="table-col-date">{{ (game[6])[0:10] }}<br>{{ (game[6])[11:19] }}</td>
-                    <td class="table-col-player">{{ game[3] }}</td>
-                    <td class="table-col-player">{{ game[5] }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="games-list">
+        {% for game in games %}
+            {{ vollis_game_card(game, year, editable=false) }}
+        {% endfor %}
+    </div>
     {% endif %}
     <h2 class="section-title">{{ year }} vollis stats</h2>
     <table id="yearlyStatsTable" class="stats-table">
@@ -148,6 +128,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.stats-table tbody tr').forEach(function(tr) {
             var name = (tr.cells[1] && tr.cells[1].textContent) ? tr.cells[1].textContent.toLowerCase() : '';
             tr.style.display = (!q || name.indexOf(q) !== -1) ? '' : 'none';
+        });
+        document.querySelectorAll('.games-list .game-card').forEach(function(card) {
+            var players = (card.getAttribute('data-players') || '').toLowerCase();
+            card.style.display = (!q || players.indexOf(q) !== -1) ? '' : 'none';
         });
     });
 });

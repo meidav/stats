@@ -1,32 +1,19 @@
 {% extends 'base.html' %}
+{% from 'macros/game_cards.html' import vollis_game_card %}
+{% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
-    <h1>{% block title %} Edit vollis game {% endblock %}</h1>
-	<!-- Current Game Info -->
-	<div class="overflow-x-auto" style="margin-bottom: 20px;">
-		<h3 style="text-align: center; margin-bottom: 8px;">Current game details</h3>
-		<table class="stats-table">
-			<thead>
-				<tr>
-					<th class="table-col-date" scope="col">Date/Updated</th>
-					<th class="table-col-player" scope="col" style="text-align: center !important;">Winner</th>
-					<th class="table-col-player" scope="col" style="text-align: center !important;">Loser</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr class="table-double-row">
-					<td class="table-col-date">{{ (game[1])[0:10] }}<br><span style="font-size: 0.85em; opacity: 0.7;">{{ (game[1])[11:19] }}</span></td>
-					<td class="table-col-player" style="text-align: center !important;"><a href="{{ url_for('vollis_player_stats', year=year, name=game[2] ) }}">{{ game[2] }}</a></td>
-					<td class="table-col-player" style="text-align: center !important;"><a href="{{ url_for('vollis_player_stats', year=year, name=game[4] ) }}">{{ game[4] }}</a></td>
-				</tr>
-				<tr class="table-double-row">
-					<td class="table-col-date"><span style="font-size: 0.85em; opacity: 0.7;">{{ (game[6])[0:10] }}<br>{{ (game[6])[11:19] }}</span></td>
-					<td class="table-col-player score-cell" style="text-align: center !important;">{{ game[3] }}</td>
-					<td class="table-col-player score-cell" style="text-align: center !important;">{{ game[5] }}</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+    <div class="page-header">
+        <h1 class="page-title-hero">{% block title %}Edit vollis game{% endblock %}</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('edit_vollis_games_by_year', year=year) }}" class="nav-pill">← Games</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
+
+    <div class="games-list edit-current-game" style="margin-bottom: 20px;">
+        {{ vollis_game_card(game, year, editable=true) }}
+    </div>
     <!-- Edit Form -->
 	<div class="form-container">
 		<form method="post" action="{{ url_for('update_vollis_game', id=game[0]) }}" id="edit-vollis-game-form">
