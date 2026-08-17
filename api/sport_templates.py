@@ -1,56 +1,192 @@
-"""Sport template definitions for league creation."""
+"""Game templates for league creation. Keep this list product-facing and simple."""
 
 SPORT_TEMPLATES = [
     {
         "id": "beach_volleyball_2s",
         "name": "Beach Volleyball 2's",
+        "category": "sports",
         "players_per_side": 2,
         "score_direction": "higher_wins",
+        "score_mode": "points",
         "default_name": "Beach Volleyball 2's",
         "legacy_table": "games",
     },
     {
         "id": "beach_volleyball_4s",
         "name": "Beach Volleyball 4's",
+        "category": "sports",
         "players_per_side": 4,
         "score_direction": "higher_wins",
+        "score_mode": "points",
         "default_name": "Beach Volleyball 4's",
     },
     {
         "id": "vollis",
         "name": "Vollis",
+        "category": "sports",
         "players_per_side": 1,
         "score_direction": "higher_wins",
+        "score_mode": "points",
         "default_name": "Vollis",
         "legacy_table": "vollis_games",
     },
     {
         "id": "tennis_singles",
         "name": "Tennis Singles",
+        "category": "sports",
         "players_per_side": 1,
         "score_direction": "higher_wins",
+        "score_mode": "points",
         "default_name": "Tennis Singles",
         "legacy_table": "tennis_matches",
     },
     {
         "id": "tennis_doubles",
         "name": "Tennis Doubles",
+        "category": "sports",
         "players_per_side": 2,
         "score_direction": "higher_wins",
+        "score_mode": "points",
         "default_name": "Tennis Doubles",
+    },
+    {
+        "id": "basketball_3v3",
+        "name": "Basketball 3v3",
+        "category": "sports",
+        "players_per_side": 3,
+        "score_direction": "higher_wins",
+        "score_mode": "points",
+        "default_name": "Basketball 3v3",
+    },
+    {
+        "id": "gin",
+        "name": "Gin",
+        "category": "cards",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "points",
+        "default_name": "Gin",
+    },
+    {
+        "id": "pusoy_dos",
+        "name": "Pusoy Dos",
+        "category": "cards",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "win_loss",
+        "default_name": "Pusoy Dos",
+    },
+    {
+        "id": "cribbage",
+        "name": "Cribbage",
+        "category": "cards",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "points",
+        "default_name": "Cribbage",
+    },
+    {
+        "id": "spades",
+        "name": "Spades",
+        "category": "cards",
+        "players_per_side": 2,
+        "score_direction": "higher_wins",
+        "score_mode": "points",
+        "default_name": "Spades",
+    },
+    {
+        "id": "hearts",
+        "name": "Hearts",
+        "category": "cards",
+        "players_per_side": 1,
+        "score_direction": "lower_wins",
+        "score_mode": "points",
+        "default_name": "Hearts",
+    },
+    {
+        "id": "chess",
+        "name": "Chess",
+        "category": "board",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "win_loss",
+        "default_name": "Chess",
+    },
+    {
+        "id": "checkers",
+        "name": "Checkers",
+        "category": "board",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "win_loss",
+        "default_name": "Checkers",
+    },
+    {
+        "id": "backgammon",
+        "name": "Backgammon",
+        "category": "board",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "win_loss",
+        "default_name": "Backgammon",
+    },
+    {
+        "id": "yahtzee",
+        "name": "Yahtzee",
+        "category": "board",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "points",
+        "default_name": "Yahtzee",
+    },
+    {
+        "id": "scrabble",
+        "name": "Scrabble",
+        "category": "board",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "points",
+        "default_name": "Scrabble",
+    },
+    {
+        "id": "uno",
+        "name": "Uno",
+        "category": "board",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "win_loss",
+        "default_name": "Uno",
+    },
+    {
+        "id": "catan",
+        "name": "Catan",
+        "category": "board",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "points",
+        "default_name": "Catan",
     },
     {
         "id": "custom",
         "name": "Custom",
+        "category": "custom",
         "players_per_side": 1,
         "score_direction": "higher_wins",
-        "default_name": "Custom Sport",
+        "score_mode": "points",
+        "default_name": "Custom Game",
         "configurable": True,
     },
 ]
 
 VISIBILITY_OPTIONS = ("public", "private", "unlisted")
 SCORE_DIRECTIONS = ("higher_wins", "lower_wins")
+FOCUS_OPTIONS = ("sports", "table", "mixed")
+TEMPLATE_CATEGORIES = (
+    {"id": "sports", "name": "Sports"},
+    {"id": "cards", "name": "Cards"},
+    {"id": "board", "name": "Board games"},
+    {"id": "custom", "name": "Custom"},
+)
 
 _TEMPLATE_BY_ID = {t["id"]: t for t in SPORT_TEMPLATES}
 
@@ -61,3 +197,27 @@ def get_template(template_id):
 
 def list_templates():
     return SPORT_TEMPLATES
+
+
+def focus_for_template(template_id):
+    template = get_template(template_id)
+    if not template:
+        return "mixed"
+    if template["category"] == "sports":
+        return "sports"
+    if template["category"] in ("cards", "board"):
+        return "table"
+    return "mixed"
+
+
+def public_template(template):
+    return {
+        "id": template["id"],
+        "name": template["name"],
+        "category": template["category"],
+        "players_per_side": template["players_per_side"],
+        "score_direction": template["score_direction"],
+        "score_mode": template.get("score_mode", "points"),
+        "default_name": template["default_name"],
+        "configurable": template.get("configurable", False),
+    }

@@ -8,6 +8,11 @@ from flask_jwt_extended import (
 
 from auth import get_user_by_username, verify_password
 from api.brand import APP_DOMAIN, APP_NAME, APP_TAGLINE, APP_URL
+from api.google_auth import (
+    find_or_create_google_user,
+    google_auth_configured,
+    verify_google_id_token,
+)
 from api.game_db import (
     add_game,
     delete_game,
@@ -30,7 +35,13 @@ from api.league_db import (
     sport_to_dict,
     user_can_access_league,
 )
-from api.sport_templates import get_template, list_templates
+from api.sport_templates import (
+    TEMPLATE_CATEGORIES,
+    focus_for_template,
+    get_template,
+    list_templates,
+    public_template,
+)
 from api.stats_service import compute_player_stats, compute_sport_stats
 
 
@@ -48,19 +59,10 @@ def register_routes(api):
 
     @api.route("/sports/templates", methods=["GET"])
     def sport_templates():
-        templates = []
-        for template in list_templates():
-            templates.append(
-                {
-                    "id": template["id"],
-                    "name": template["name"],
-                    "players_per_side": template["players_per_side"],
-                    "score_direction": template["score_direction"],
-                    "default_name": template["default_name"],
-                    "configurable": template.get("configurable", False),
-                }
-            )
-        return jsonify({"templates": templates})
+        return jsonify({
+            "templates": [public_template(t) for t in list_templates()],
+            "categories": list(TEMPLATE_CATEGORIES),
+        })
 
     @api.route("/auth/login", methods=["POST"])
     def api_login():
@@ -88,6 +90,27 @@ def register_routes(api):
             }
         )
 
+    @api.route("/auth/google", methods=["POST"])
+    def api_google_login():
+        data = request.get_json(silent=True) or {}
+        id_token_str = data.get("id_token") or data.get("idToken") or ""
+        if not id_token_str:
+            return jsonify({"error": "id_token is required"}), 400
+        if not google_auth_configured():
+            return jsonify({"error": "Google sign-in is not configured on the server"}), 503
+        try:
+            info = verify_google_id_token(id_token_str)
+            user = find_or_create_google_user(
+                google_sub=info["sub"],
+                email=info["email"],
+                name=info.get("name"),
+            )
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 401
+
+        token = create_access_token(identity=str(user["id"]))
+        return jsonify({"access_token": token, "user": user})
+
     @api.route("/leagues", methods=["POST"])
     @jwt_required()
     def create_league_route():
@@ -102,6 +125,10 @@ def register_routes(api):
         description = data.get("description")
         slug = data.get("slug")
         sport_template_id = data.get("sport_template_id")
+        focus = data.get("focus")
+        if not focus and sport_template_id:
+            focus = focus_for_template(sport_template_id)
+        focus = focus or "mixed"
 
         try:
             league = create_league(
@@ -110,6 +137,7 @@ def register_routes(api):
                 visibility=visibility,
                 description=description,
                 slug=slug,
+                focus=focus,
             )
         except ValueError as exc:
             return jsonify({"error": str(exc)}), 400

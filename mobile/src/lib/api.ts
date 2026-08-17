@@ -50,6 +50,12 @@ export const api = {
       body: { username, password },
     }),
 
+  loginWithGoogle: (idToken: string) =>
+    request<{ access_token: string; user: import('../types').User }>('/auth/google', {
+      method: 'POST',
+      body: { id_token: idToken },
+    }),
+
   getTemplates: () =>
     request<{ templates: import('../types').SportTemplate[] }>('/sports/templates'),
 
@@ -66,6 +72,7 @@ export const api = {
       visibility: string;
       sport_template_id?: string;
       description?: string;
+      focus?: 'sports' | 'table' | 'mixed';
     },
   ) =>
     request<import('../types').League>('/leagues', {
@@ -89,8 +96,8 @@ export const api = {
     payload: {
       winners: string[];
       losers: string[];
-      winner_score: number;
-      loser_score: number;
+      winner_score?: number;
+      loser_score?: number;
     },
   ) =>
     request<import('../types').Game>(`/sports/${sportId}/games`, {

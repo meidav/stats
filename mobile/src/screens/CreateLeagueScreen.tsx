@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   ScrollView,
@@ -11,9 +11,11 @@ import {
 } from 'react-native';
 
 import { colors, spacing } from '../constants/theme';
+import { copyForFocus, defaultTemplateId, FOCUS_OPTIONS, templatesForFocus } from '../lib/focus';
 import { ApiError } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { api } from '../lib/api';
+import type { LeagueFocus } from '../lib/focus';
 import type { SportTemplate } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -29,6 +31,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
   const { token } = useAuth();
   const [name, setName] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'private' | 'unlisted'>('public');
+  const [focus, setFocus] = useState<LeagueFocus>('sports');
   const [templates, setTemplates] = useState<SportTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState('beach_volleyball_2s');
   const [loading, setLoading] = useState(false);
@@ -38,9 +41,20 @@ export function CreateLeagueScreen({ navigation }: Props) {
     api.getTemplates().then((result) => setTemplates(result.templates));
   }, []);
 
+  const visibleTemplates = useMemo(
+    () => templatesForFocus(templates, focus),
+    [templates, focus],
+  );
+  const copy = copyForFocus(focus);
+
+  function handleFocusChange(next: LeagueFocus) {
+    setFocus(next);
+    setSelectedTemplate(defaultTemplateId(templates, next));
+  }
+
   async function handleCreate() {
     if (!token || !name.trim()) {
-      setError('League name is required');
+      setError('Name is required');
       return;
     }
 
@@ -50,6 +64,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
       const league = await api.createLeague(token, {
         name: name.trim(),
         visibility,
+        focus,
         sport_template_id: selectedTemplate,
       });
       navigation.replace('League', { slug: league.slug, name: league.name });
@@ -62,11 +77,28 @@ export function CreateLeagueScreen({ navigation }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Create League</Text>
-      <Text style={styles.label}>League name</Text>
+      <Text style={styles.title}>{copy.createTitle}</Text>
+
+      <Text style={styles.label}>What do you play?</Text>
+      <View style={styles.row}>
+        {FOCUS_OPTIONS.map((option) => (
+          <TouchableOpacity
+            key={option.id}
+            style={[styles.chip, focus === option.id && styles.chipActive]}
+            onPress={() => handleFocusChange(option.id)}
+          >
+            <Text style={[styles.chipText, focus === option.id && styles.chipTextActive]}>
+              {option.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Text style={styles.hint}>{FOCUS_OPTIONS.find((option) => option.id === focus)?.hint}</Text>
+
+      <Text style={styles.label}>Name</Text>
       <TextInput
         style={styles.input}
-        placeholder="Tuesday Night Crew"
+        placeholder={focus === 'table' ? 'Sunday game night' : 'Tuesday Night Crew'}
         value={name}
         onChangeText={setName}
       />
@@ -86,8 +118,8 @@ export function CreateLeagueScreen({ navigation }: Props) {
         ))}
       </View>
 
-      <Text style={styles.label}>First sport</Text>
-      {templates.map((template) => (
+      <Text style={styles.label}>{copy.firstGameLabel}</Text>
+      {visibleTemplates.map((template) => (
         <TouchableOpacity
           key={template.id}
           style={[styles.template, selectedTemplate === template.id && styles.templateActive]}
@@ -95,7 +127,9 @@ export function CreateLeagueScreen({ navigation }: Props) {
         >
           <Text style={styles.templateName}>{template.name}</Text>
           <Text style={styles.templateMeta}>
-            {template.players_per_side} per side · {template.score_direction.replace('_', ' ')}
+            {template.category === 'custom' ? 'Your rules' : template.category}
+            {' · '}
+            {template.score_mode === 'win_loss' ? 'win / loss' : template.score_direction.replace('_', ' ')}
           </Text>
         </TouchableOpacity>
       ))}
@@ -106,7 +140,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Create League</Text>
+          <Text style={styles.buttonText}>Create</Text>
         )}
       </TouchableOpacity>
     </ScrollView>
@@ -133,6 +167,11 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.sm,
     marginTop: spacing.md,
+  },
+  hint: {
+    color: colors.textMuted,
+    fontSize: 13,
+    marginTop: spacing.xs,
   },
   input: {
     borderWidth: 1,

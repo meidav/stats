@@ -3,6 +3,7 @@ from datetime import datetime
 
 from db_utils import db_manager
 from api.league_db import get_league_by_id, get_sport_by_id
+from api.sport_templates import get_template
 
 
 def _parse_json_list(value):
@@ -69,6 +70,9 @@ def add_game(sport_id, winners, losers, winner_score, loser_score, game_date=Non
 
     winners = _validate_players(winners, sport["players_per_side"], "winners")
     losers = _validate_players(losers, sport["players_per_side"], "losers")
+    template = get_template(sport["template_id"]) or {}
+    if template.get("score_mode") == "win_loss" and winner_score in (None, "") and loser_score in (None, ""):
+        winner_score, loser_score = 1, 0
     winner_score, loser_score = _validate_scores(
         winner_score, loser_score, sport["score_direction"]
     )

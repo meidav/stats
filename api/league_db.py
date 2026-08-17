@@ -2,7 +2,12 @@ import re
 import secrets
 
 from db_utils import db_manager
-from api.sport_templates import get_template, VISIBILITY_OPTIONS
+from api.sport_templates import (
+    FOCUS_OPTIONS,
+    VISIBILITY_OPTIONS,
+    focus_for_template,
+    get_template,
+)
 
 
 def _slugify(name):
@@ -106,11 +111,21 @@ def create_leagues_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_sports_league_id ON sports(league_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_league_games_sport_id ON league_games(sport_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_league_games_league_id ON league_games(league_id)")
+        _ensure_column(cursor, "leagues", "focus", "TEXT NOT NULL DEFAULT 'mixed'")
 
 
-def create_league(owner_id, name, visibility="public", description=None, slug=None):
+def _ensure_column(cursor, table, column, definition):
+    cursor.execute(f"PRAGMA table_info({table})")
+    existing = [row[1] for row in cursor.fetchall()]
+    if column not in existing:
+        cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+
+
+def create_league(owner_id, name, visibility="public", description=None, slug=None, focus="mixed"):
     if visibility not in VISIBILITY_OPTIONS:
         raise ValueError(f"visibility must be one of {VISIBILITY_OPTIONS}")
+    if focus not in FOCUS_OPTIONS:
+        raise ValueError(f"focus must be one of {FOCUS_OPTIONS}")
 
     base_slug = _slugify(slug or name)
     final_slug = _unique_slug(base_slug)
@@ -120,10 +135,10 @@ def create_league(owner_id, name, visibility="public", description=None, slug=No
         cursor = conn.cursor()
         cursor.execute(
             """
-            INSERT INTO leagues (owner_id, name, slug, description, visibility, invite_code)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO leagues (owner_id, name, slug, description, visibility, invite_code, focus)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (owner_id, name.strip(), final_slug, description, visibility, invite_code),
+            (owner_id, name.strip(), final_slug, description, visibility, invite_code, focus),
         )
         league_id = cursor.lastrowid
         cursor.execute(
@@ -161,7 +176,24 @@ def add_sport_to_league(league_id, template_id, name=None, players_per_side=None
         )
         sport_id = cursor.lastrowid
 
+    widen_league_focus(league_id, template_id)
     return get_sport_by_id(sport_id)
+
+
+def widen_league_focus(league_id, template_id):
+    league = get_league_by_id(league_id)
+    if not league:
+        return
+    current = league.get("focus") or "mixed"
+    incoming = focus_for_template(template_id)
+    if current == "mixed" or incoming == "mixed" or current == incoming:
+        return
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE leagues SET focus = 'mixed', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (league_id,),
+        )
 
 
 def get_league_by_id(league_id):
@@ -255,6 +287,7 @@ def league_to_dict(league, include_invite_code=False):
         "slug": league["slug"],
         "description": league["description"],
         "visibility": league["visibility"],
+        "focus": league["focus"] if league.get("focus") else "mixed",
         "created_at": league["created_at"],
         "updated_at": league["updated_at"],
     }
@@ -268,13 +301,16 @@ def league_to_dict(league, include_invite_code=False):
 def sport_to_dict(sport):
     if sport is None:
         return None
+    template = get_template(sport["template_id"]) or {}
     return {
         "id": sport["id"],
         "league_id": sport["league_id"],
         "name": sport["name"],
         "template_id": sport["template_id"],
+        "category": template.get("category", "custom"),
         "players_per_side": sport["players_per_side"],
         "score_direction": sport["score_direction"],
+        "score_mode": template.get("score_mode", "points"),
         "min_games_for_rank": sport["min_games_for_rank"],
         "created_at": sport["created_at"],
     }

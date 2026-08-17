@@ -23,6 +23,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "apiUrl": "",
+      "googleWebClientId": "",
+      "googleIosClientId": "",
+      "googleAndroidClientId": ""
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 
 import { colors, spacing } from '../constants/theme';
+import { copyForFocus } from '../lib/focus';
 import { ApiError } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { api } from '../lib/api';
@@ -19,8 +20,9 @@ import type { RootStackParamList } from '../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'AddGame'>;
 
 export function AddGameScreen({ route, navigation }: Props) {
-  const { sportId, sportName, playersPerSide } = route.params;
+  const { sportId, sportName, playersPerSide, scoreMode = 'points', focus = 'mixed' } = route.params;
   const { token } = useAuth();
+  const winLoss = scoreMode === 'win_loss';
   const [winnerNames, setWinnerNames] = useState<string[]>(
     Array.from({ length: playersPerSide }, () => ''),
   );
@@ -59,12 +61,20 @@ export function AddGameScreen({ route, navigation }: Props) {
     setLoading(true);
     setError('');
     try {
-      await api.addGame(token, sportId, {
+      const payload: {
+        winners: string[];
+        losers: string[];
+        winner_score?: number;
+        loser_score?: number;
+      } = {
         winners: winnerNames.map((n) => n.trim()),
         losers: loserNames.map((n) => n.trim()),
-        winner_score: Number(winnerScore),
-        loser_score: Number(loserScore),
-      });
+      };
+      if (!winLoss) {
+        payload.winner_score = Number(winnerScore);
+        payload.loser_score = Number(loserScore);
+      }
+      await api.addGame(token, sportId, payload);
       navigation.goBack();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not save game');
@@ -75,7 +85,7 @@ export function AddGameScreen({ route, navigation }: Props) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Add Game</Text>
+      <Text style={styles.title}>{copyForFocus(focus).addGameTitle}</Text>
       <Text style={styles.subtitle}>{sportName}</Text>
 
       <Text style={styles.section}>Winners</Text>
@@ -100,26 +110,30 @@ export function AddGameScreen({ route, navigation }: Props) {
         />
       ))}
 
-      <View style={styles.scoreRow}>
-        <View style={styles.scoreField}>
-          <Text style={styles.label}>Winner score</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="number-pad"
-            value={winnerScore}
-            onChangeText={setWinnerScore}
-          />
+      {winLoss ? (
+        <Text style={styles.hint}>Just who won. Scores are optional for this game.</Text>
+      ) : (
+        <View style={styles.scoreRow}>
+          <View style={styles.scoreField}>
+            <Text style={styles.label}>Winner score</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="number-pad"
+              value={winnerScore}
+              onChangeText={setWinnerScore}
+            />
+          </View>
+          <View style={styles.scoreField}>
+            <Text style={styles.label}>Loser score</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="number-pad"
+              value={loserScore}
+              onChangeText={setLoserScore}
+            />
+          </View>
         </View>
-        <View style={styles.scoreField}>
-          <Text style={styles.label}>Loser score</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="number-pad"
-            value={loserScore}
-            onChangeText={setLoserScore}
-          />
-        </View>
-      </View>
+      )}
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -170,6 +184,11 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     backgroundColor: colors.surface,
     fontSize: 16,
+    marginBottom: spacing.sm,
+  },
+  hint: {
+    color: colors.textMuted,
+    marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
   scoreRow: {

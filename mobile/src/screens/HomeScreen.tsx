@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { APP_TAGLINE } from '../constants/brand';
 import { colors, spacing } from '../constants/theme';
+import { copyForFocus, focusFromLeagues } from '../lib/focus';
 import { useAuth } from '../lib/auth';
 import { api } from '../lib/api';
 import type { League } from '../types';
@@ -45,10 +46,12 @@ export function HomeScreen({ navigation }: Props) {
     }, [loadLeagues]),
   );
 
+  const copy = copyForFocus(focusFromLeagues(leagues));
+
   return (
     <View style={styles.container}>
       <ScreenHeader
-        title="My Leagues"
+        title={copy.homeTitle}
         onPress={() => navigation.navigate('CreateLeague')}
       />
       <Text style={styles.subtitle}>{APP_TAGLINE}</Text>
@@ -68,7 +71,7 @@ export function HomeScreen({ navigation }: Props) {
           }
           contentContainerStyle={leagues.length === 0 ? styles.emptyList : undefined}
           ListEmptyComponent={
-            <Text style={styles.empty}>No leagues yet. Create your first one.</Text>
+            <Text style={styles.empty}>{copy.homeEmpty}</Text>
           }
           renderItem={({ item }) => (
             <TouchableOpacity
@@ -77,7 +80,9 @@ export function HomeScreen({ navigation }: Props) {
             >
               <Text style={styles.cardTitle}>{item.name}</Text>
               <Text style={styles.cardMeta}>
-                {item.sports.length} sport{item.sports.length === 1 ? '' : 's'} · {item.visibility}
+                {item.sports.length} {item.sports.length === 1 ? copy.itemWord : copy.itemWordPlural}
+                {' · '}
+                {item.visibility}
               </Text>
             </TouchableOpacity>
           )}

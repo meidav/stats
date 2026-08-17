@@ -100,6 +100,8 @@ export function LeagueScreen({ route, navigation }: Props) {
                 sportId: selectedSport.id,
                 sportName: selectedSport.name,
                 playersPerSide: selectedSport.players_per_side,
+                scoreMode: selectedSport.score_mode,
+                focus: league?.focus,
               })
             }
           >

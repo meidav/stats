@@ -8,8 +8,10 @@ export type User = {
 export type SportTemplate = {
   id: string;
   name: string;
+  category: 'sports' | 'cards' | 'board' | 'custom';
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
+  score_mode: 'points' | 'win_loss';
   default_name: string;
   configurable: boolean;
 };
@@ -19,8 +21,10 @@ export type Sport = {
   league_id: number;
   name: string;
   template_id: string;
+  category?: SportTemplate['category'];
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
+  score_mode?: 'points' | 'win_loss';
   min_games_for_rank: number;
   created_at: string;
 };
@@ -31,6 +35,7 @@ export type League = {
   slug: string;
   description?: string | null;
   visibility: 'public' | 'private' | 'unlisted';
+  focus?: 'sports' | 'table' | 'mixed';
   invite_code?: string;
   role?: string;
   sports: Sport[];

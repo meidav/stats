@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
 from api.league_db import create_leagues_tables
+from api.google_auth import ensure_google_auth_schema
 from api.routes import register_routes
 
 api_bp = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -13,5 +14,6 @@ def init_api(app):
     JWTManager(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     create_leagues_tables()
+    ensure_google_auth_schema()
     register_routes(api_bp)
     app.register_blueprint(api_bp)

@@ -12,6 +12,7 @@ type AuthContextValue = {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -40,13 +41,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     restore();
   }, []);
 
+  const persistSession = useCallback(async (accessToken: string, nextUser: User) => {
+    setToken(accessToken);
+    setUser(nextUser);
+    await AsyncStorage.setItem(TOKEN_KEY, accessToken);
+    await AsyncStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+  }, []);
+
   const login = useCallback(async (username: string, password: string) => {
     const result = await api.login(username, password);
-    setToken(result.access_token);
-    setUser(result.user);
-    await AsyncStorage.setItem(TOKEN_KEY, result.access_token);
-    await AsyncStorage.setItem(USER_KEY, JSON.stringify(result.user));
-  }, []);
+    await persistSession(result.access_token, result.user);
+  }, [persistSession]);
+
+  const loginWithGoogle = useCallback(async (idToken: string) => {
+    const result = await api.loginWithGoogle(idToken);
+    await persistSession(result.access_token, result.user);
+  }, [persistSession]);
 
   const logout = useCallback(async () => {
     setToken(null);
@@ -56,8 +66,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ token, user, loading, login, logout }),
-    [token, user, loading, login, logout],
+    () => ({ token, user, loading, login, loginWithGoogle, logout }),
+    [token, user, loading, login, loginWithGoogle, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
