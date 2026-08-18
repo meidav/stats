@@ -1,5 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -17,6 +18,7 @@ import { GlassCard } from '../components/GlassCard';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
+import { LeagueIcon } from '../components/LeagueIcon';
 import { APP_NAME, APP_TAGLINE } from '../constants/brand';
 import { colors, gradients, spacing } from '../constants/theme';
 import { copyForFocus, focusFromLeagues } from '../lib/focus';
@@ -163,31 +165,55 @@ export function HomeScreen({ navigation }: Props) {
           }
           renderItem={({ item }) => {
             const sport = item.sports?.[0];
+            const canEdit = item.role === 'owner' || item.role === 'admin';
             return (
-              <GlassCard
-                style={styles.leagueCard}
-                onPress={() => navigation.navigate('League', { slug: item.slug, name: item.name })}
-              >
+              <GlassCard style={styles.leagueCard}>
                 <View style={styles.leagueRow}>
-                  {sport ? (
-                    <TemplateGlyph
-                      template={{
-                        id: sport.template_id,
-                        category: sport.category || 'custom',
-                      }}
-                      size={26}
-                    />
+                  <TouchableOpacity
+                    style={styles.leagueMain}
+                    activeOpacity={0.85}
+                    onPress={() => navigation.navigate('League', { slug: item.slug, name: item.name })}
+                  >
+                    {item.icon ? (
+                      <LeagueIcon id={item.icon} size={26} />
+                    ) : sport ? (
+                      <TemplateGlyph
+                        template={{
+                          id: sport.template_id,
+                          category: sport.category || 'custom',
+                        }}
+                        size={26}
+                      />
+                    ) : (
+                      <LeagueIcon id="trophy" size={26} />
+                    )}
+                    <View style={styles.leagueCopy}>
+                      <Text style={styles.cardTitle} numberOfLines={1}>
+                        {item.name}
+                      </Text>
+                      <Text style={styles.cardMeta}>
+                        {sport?.name || 'No games yet'}
+                        {' · '}
+                        {item.visibility}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  {canEdit ? (
+                    <TouchableOpacity
+                      style={styles.editButton}
+                      onPress={() =>
+                        navigation.navigate('EditLeague', {
+                          slug: item.slug,
+                          name: item.name,
+                          icon: item.icon ?? null,
+                        })
+                      }
+                      accessibilityLabel={`Edit ${item.name}`}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Ionicons name="create-outline" size={20} color={colors.primary} />
+                    </TouchableOpacity>
                   ) : null}
-                  <View style={styles.leagueCopy}>
-                    <Text style={styles.cardTitle} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Text style={styles.cardMeta}>
-                      {sport?.name || 'No games yet'}
-                      {' · '}
-                      {item.visibility}
-                    </Text>
-                  </View>
                 </View>
               </GlassCard>
             );
@@ -276,11 +302,25 @@ const styles = StyleSheet.create({
   },
   leagueRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  leagueMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.md,
   },
   leagueCopy: {
     flex: 1,
+  },
+  editButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
   },
   cardTitle: {
     fontSize: 18,

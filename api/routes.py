@@ -43,6 +43,7 @@ from api.league_db import (
     league_to_dict,
     search_public_leagues,
     sport_to_dict,
+    update_league,
     user_can_access_league,
 )
 from api.sport_templates import (
@@ -256,6 +257,34 @@ def register_routes(api):
         payload = league_to_dict(league, include_invite_code=include_invite)
         payload["sports"] = [
             sport_to_dict(s) for s in get_sports_for_league(league["id"])
+        ]
+        return jsonify(payload)
+
+    @api.route("/leagues/<slug>", methods=["PATCH", "PUT"])
+    @jwt_required()
+    def patch_league(slug):
+        user_id = int(get_jwt_identity())
+        league = get_league_by_slug(slug)
+        if not league:
+            return jsonify({"error": "league not found"}), 404
+        if not user_can_edit_league(user_id, league["id"]):
+            return jsonify({"error": "permission denied"}), 403
+
+        data = request.get_json(silent=True) or {}
+        fields = {}
+        if "name" in data:
+            fields["name"] = data.get("name")
+        if "icon" in data:
+            fields["icon"] = data.get("icon")
+        try:
+            updated = update_league(league["id"], **fields)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+        payload = league_to_dict(updated, include_invite_code=True)
+        payload["role"] = "owner" if updated.get("owner_id") == user_id else "admin"
+        payload["sports"] = [
+            sport_to_dict(s) for s in get_sports_for_league(updated["id"]) or []
         ]
         return jsonify(payload)
 

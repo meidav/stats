@@ -10,6 +10,8 @@ from api.sport_templates import (
     typical_win_score_for,
 )
 
+_UNSET = object()
+
 
 def _slugify(name):
     slug = name.lower().strip()
@@ -113,6 +115,7 @@ def create_leagues_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_league_games_sport_id ON league_games(sport_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_league_games_league_id ON league_games(league_id)")
         _ensure_column(cursor, "leagues", "focus", "TEXT NOT NULL DEFAULT 'mixed'")
+        _ensure_column(cursor, "leagues", "icon", "TEXT")
 
 
 def _ensure_column(cursor, table, column, definition):
@@ -150,6 +153,34 @@ def create_league(owner_id, name, visibility="public", description=None, slug=No
             (league_id, owner_id),
         )
 
+    return get_league_by_id(league_id)
+
+
+def update_league(league_id, name=None, icon=_UNSET):
+    league = get_league_by_id(league_id)
+    if not league:
+        raise ValueError("league not found")
+
+    next_name = league["name"] if name is None else str(name).strip()
+    if not next_name:
+        raise ValueError("name is required")
+    if icon is _UNSET:
+        next_icon = league.get("icon")
+    elif not icon:
+        next_icon = None
+    else:
+        next_icon = str(icon).strip() or None
+
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE leagues
+            SET name = ?, icon = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (next_name, next_icon, league_id),
+        )
     return get_league_by_id(league_id)
 
 
@@ -299,6 +330,7 @@ def league_to_dict(league, include_invite_code=False):
         "description": league["description"],
         "visibility": league["visibility"],
         "focus": league["focus"] if league.get("focus") else "mixed",
+        "icon": league.get("icon") or None,
         "created_at": league["created_at"],
         "updated_at": league["updated_at"],
     }
@@ -323,6 +355,7 @@ def sport_to_dict(sport):
         "players_per_side": sport.get("players_per_side") or 1,
         "score_direction": sport.get("score_direction") or "higher_wins",
         "score_mode": template.get("score_mode", "points"),
+        "side_kind": template.get("side_kind", "player"),
         "typical_win_score": typical_win_score_for(template_id),
         "min_games_for_rank": sport.get("min_games_for_rank") or 1,
         "created_at": sport.get("created_at"),

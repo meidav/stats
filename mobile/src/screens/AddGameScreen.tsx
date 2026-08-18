@@ -29,13 +29,16 @@ export function AddGameScreen({ route, navigation }: Props) {
   const {
     sportId,
     sportName,
+    templateId,
     playersPerSide,
     scoreMode = 'points',
+    sideKind = 'player',
     focus = 'mixed',
   } = route.params;
   const { token } = useAuth();
   const winLoss = scoreMode === 'win_loss';
-  const oneOnOne = playersPerSide === 1;
+  const teamSides = sideKind === 'team' || templateId === 'indoor_volleyball';
+  const oneOnOne = playersPerSide === 1 && !teamSides;
   const [winnerNames, setWinnerNames] = useState<string[]>(
     Array.from({ length: playersPerSide }, () => ''),
   );
@@ -99,17 +102,19 @@ export function AddGameScreen({ route, navigation }: Props) {
 
   const winnerLabels = useMemo(
     () =>
-      Array.from({ length: playersPerSide }, (_, i) =>
-        oneOnOne ? 'Winner' : `Winner ${i + 1}`,
-      ),
-    [playersPerSide, oneOnOne],
+      Array.from({ length: playersPerSide }, (_, i) => {
+        if (teamSides) return playersPerSide === 1 ? 'Winning team' : `Winning team ${i + 1}`;
+        return oneOnOne ? 'Winner' : `Winner ${i + 1}`;
+      }),
+    [playersPerSide, oneOnOne, teamSides],
   );
   const loserLabels = useMemo(
     () =>
-      Array.from({ length: playersPerSide }, (_, i) =>
-        oneOnOne ? 'Loser' : `Loser ${i + 1}`,
-      ),
-    [playersPerSide, oneOnOne],
+      Array.from({ length: playersPerSide }, (_, i) => {
+        if (teamSides) return playersPerSide === 1 ? 'Losing team' : `Losing team ${i + 1}`;
+        return oneOnOne ? 'Loser' : `Loser ${i + 1}`;
+      }),
+    [playersPerSide, oneOnOne, teamSides],
   );
 
   function suggestionsFor(value: string) {
@@ -224,10 +229,14 @@ export function AddGameScreen({ route, navigation }: Props) {
       >
         <Text style={styles.subtitle}>{sportName}</Text>
 
-        <Text style={styles.section}>{oneOnOne ? 'Winner' : 'Winners'}</Text>
+        <Text style={styles.section}>
+          {teamSides ? 'Winning team' : oneOnOne ? 'Winner' : 'Winners'}
+        </Text>
         {winnerLabels.map((label, index) => renderNameField('winner', label, index, winnerNames[index]))}
 
-        <Text style={styles.section}>{oneOnOne ? 'Loser' : 'Losers'}</Text>
+        <Text style={styles.section}>
+          {teamSides ? 'Losing team' : oneOnOne ? 'Loser' : 'Losers'}
+        </Text>
         {loserLabels.map((label, index) => renderNameField('loser', label, index, loserNames[index]))}
 
         {winLoss ? (
@@ -235,7 +244,7 @@ export function AddGameScreen({ route, navigation }: Props) {
         ) : (
           <View style={styles.scoreRow}>
             <View style={styles.scoreField}>
-              <Text style={styles.label}>Winner score</Text>
+              <Text style={styles.label}>{teamSides ? 'Winning score' : 'Winner score'}</Text>
               <TextInput
                 style={styles.input}
                 keyboardType="number-pad"
@@ -252,7 +261,7 @@ export function AddGameScreen({ route, navigation }: Props) {
               ) : null}
             </View>
             <View style={styles.scoreField}>
-              <Text style={styles.label}>Loser score</Text>
+              <Text style={styles.label}>{teamSides ? 'Losing score' : 'Loser score'}</Text>
               <TextInput
                 style={styles.input}
                 keyboardType="number-pad"
@@ -323,9 +332,9 @@ const styles = StyleSheet.create({
   suggestList: {
     marginTop: 4,
     borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    backgroundColor: 'rgba(191, 219, 254, 0.88)',
     borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.22)',
+    borderColor: 'rgba(99, 102, 241, 0.28)',
     overflow: 'hidden',
     zIndex: 2,
   },
@@ -333,7 +342,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(15, 23, 42, 0.08)',
+    borderBottomColor: 'rgba(37, 99, 235, 0.14)',
   },
   suggestText: {
     color: colors.text,

@@ -79,6 +79,7 @@ export function copyForFocus(focus: LeagueFocus) {
 const TEMPLATE_ALIASES: Record<string, string[]> = {
   beach_volleyball_2s: ['beach volleyball 2', "volleyball 2's", 'vb 2', 'doubles volleyball'],
   beach_volleyball_4s: ['beach volleyball 4', "volleyball 4's", 'vb 4', 'fours volleyball'],
+  indoor_volleyball: ['indoor volleyball', 'indoor vb', 'gym volleyball'],
   vollis: ['vollis'],
   tennis_singles: ['tennis singles', 'singles tennis'],
   tennis_doubles: ['tennis doubles', 'doubles tennis'],
@@ -111,6 +112,7 @@ export function detectTemplateFromName(name: string, templates: SportTemplate[])
     if (templates.some((t) => t.id === 'tennis_singles')) return 'tennis_singles';
   }
   if (hay.includes('volleyball') || /\bvb\b/.test(hay)) {
+    if (hay.includes('indoor') || hay.includes('gym')) return 'indoor_volleyball';
     if (hay.includes('4')) return 'beach_volleyball_4s';
     if (templates.some((t) => t.id === 'beach_volleyball_2s')) return 'beach_volleyball_2s';
   }

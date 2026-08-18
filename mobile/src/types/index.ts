@@ -12,6 +12,7 @@ export type SportTemplate = {
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
   score_mode: 'points' | 'win_loss';
+  side_kind?: 'player' | 'team';
   typical_win_score?: number | null;
   default_name: string;
   configurable: boolean;
@@ -26,6 +27,7 @@ export type Sport = {
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
   score_mode?: 'points' | 'win_loss';
+  side_kind?: 'player' | 'team';
   typical_win_score?: number | null;
   min_games_for_rank: number;
   created_at: string;
@@ -38,6 +40,7 @@ export type League = {
   description?: string | null;
   visibility: 'public' | 'private' | 'unlisted';
   focus?: 'sports' | 'table' | 'mixed';
+  icon?: string | null;
   invite_code?: string;
   role?: string;
   sports: Sport[];

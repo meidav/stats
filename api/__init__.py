@@ -16,7 +16,12 @@ def init_api(app):
     app.config.setdefault("JWT_SECRET_KEY", app.config["SECRET_KEY"])
     app.config.setdefault("JWT_ACCESS_TOKEN_EXPIRES", timedelta(days=30))
     JWTManager(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": "*"}},
+        methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
+    )
     create_leagues_tables()
     ensure_google_auth_schema()
     ensure_settings_schema()

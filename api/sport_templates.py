@@ -21,6 +21,16 @@ SPORT_TEMPLATES = [
         "default_name": "Beach Volleyball 4's",
     },
     {
+        "id": "indoor_volleyball",
+        "name": "Indoor Volleyball",
+        "category": "sports",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "points",
+        "side_kind": "team",
+        "default_name": "Indoor Volleyball",
+    },
+    {
         "id": "vollis",
         "name": "Vollis",
         "category": "sports",
@@ -213,6 +223,7 @@ def focus_for_template(template_id):
 TYPICAL_WIN_SCORES = {
     "beach_volleyball_2s": 21,
     "beach_volleyball_4s": 21,
+    "indoor_volleyball": 25,
     "vollis": 21,
     "tennis_singles": 6,
     "tennis_doubles": 6,
@@ -239,6 +250,7 @@ def public_template(template):
         "players_per_side": template["players_per_side"],
         "score_direction": template["score_direction"],
         "score_mode": template.get("score_mode", "points"),
+        "side_kind": template.get("side_kind", "player"),
         "typical_win_score": typical_win_score_for(template["id"]),
         "default_name": template["default_name"],
         "configurable": template.get("configurable", False),

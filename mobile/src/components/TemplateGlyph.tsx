@@ -1,10 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { iconForTemplate } from '../lib/templateIcons';
 import type { SportTemplate } from '../types';
 
 type GlyphTemplate = Pick<SportTemplate, 'id' | 'category'>;
+
+const beachBall = require('../../assets/beach-volleyball.png');
 
 const FAN = [
   { rank: 'A', suit: 'S', rotate: '-18deg', top: 6, left: 0, z: 1 },
@@ -21,7 +23,7 @@ function suitGlyph(suit: string) {
   return { mark: '♠', color: '#0F172A' };
 }
 
-function FanHand({ size }: { size: number }) {
+export function FanHand({ size }: { size: number }) {
   const scale = size / 28;
   return (
     <View style={[styles.fan, { width: 46 * scale, height: 32 * scale }]}>
@@ -56,6 +58,56 @@ function FanHand({ size }: { size: number }) {
   );
 }
 
+export function CheckerGlyph({ size }: { size: number }) {
+  const inner = size * 0.68;
+  const core = size * 0.22;
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: '#DC2626',
+        borderWidth: Math.max(1, size * 0.06),
+        borderColor: '#9F1239',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <View
+        style={{
+          width: inner,
+          height: inner,
+          borderRadius: inner / 2,
+          borderWidth: Math.max(1.5, size * 0.08),
+          borderColor: 'rgba(255, 228, 230, 0.7)',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <View
+          style={{
+            width: core,
+            height: core,
+            borderRadius: core / 2,
+            backgroundColor: 'rgba(255, 255, 255, 0.28)',
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
+export function BeachVolleyballMark({ size }: { size: number }) {
+  return (
+    <Image
+      source={beachBall}
+      style={{ width: size, height: size }}
+      resizeMode="contain"
+    />
+  );
+}
+
 export function isCardTemplate(template: GlyphTemplate) {
   return template.category === 'cards' || template.id === 'uno';
 }
@@ -69,6 +121,12 @@ export function TemplateGlyph({
 }) {
   if (isCardTemplate(template)) {
     return <FanHand size={size} />;
+  }
+  if (template.id.startsWith('beach_volleyball')) {
+    return <BeachVolleyballMark size={size + 4} />;
+  }
+  if (template.id === 'checkers') {
+    return <CheckerGlyph size={size} />;
   }
   return <Text style={{ fontSize: size, lineHeight: size + 4 }}>{iconForTemplate(template)}</Text>;
 }

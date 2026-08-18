@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block body_class %}has-page-header{% endblock %}
+{% block title %}PlayTracker admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title-hero">PlayTracker admin</h1>
+    <div class="header-controls">
+        <a href="/arbel/admin" class="nav-pill">Legacy stats admin</a>
+        <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+    </div>
+</div>
+
+<div class="player-kpi-grid admin-dash-kpis">
+    <div class="player-kpi">
+        <div class="player-kpi-value player-kpi-value--rating">{{ users|length }}</div>
+        <div class="player-kpi-label">Accounts</div>
+    </div>
+    <div class="player-kpi">
+        <div class="player-kpi-value">{{ jwt_access_token_days }}d</div>
+        <div class="player-kpi-label">App session</div>
+    </div>
+    <div class="player-kpi">
+        <div class="player-kpi-value player-kpi-value--rating">{{ players_count }}</div>
+        <div class="player-kpi-label">Legacy players</div>
+    </div>
+</div>
+
+<form class="admin-settings-card" method="POST" action="{{ url_for('admin_save_settings') }}">
+    <h2 class="admin-settings-title">App settings</h2>
+    <p class="admin-settings-copy">Variables for the PlayTracker mobile app and API. Saved values apply on the next sign-in.</p>
+    <label class="admin-modal-label" for="jwt_access_token_days">App session duration (days)</label>
+    <div class="admin-settings-row">
+        <input
+            class="form-field-compact"
+            type="number"
+            id="jwt_access_token_days"
+            name="jwt_access_token_days"
+            min="1"
+            max="365"
+            step="1"
+            required
+            value="{{ jwt_access_token_days }}"
+        >
+        <button type="submit" class="admin-settings-save">Save</button>
+    </div>
+    <p class="admin-settings-hint">Default is 30. Existing sessions keep their old expiry until the person signs in again.</p>
+</form>
+
+<form class="admin-settings-card" method="POST" action="{{ url_for('admin_import_legacy') }}" enctype="multipart/form-data">
+    <h2 class="admin-settings-title">Import Arbel stats</h2>
+    <p class="admin-settings-copy">
+        Download <code>stats.db</code> from the PythonAnywhere Files tab, then upload it here.
+        This copies doubles, vollis, tennis, and player records onto the Railway database without wiping PlayTracker leagues.
+        Photos are pulled from pythonanywhere.com while that site is still up.
+    </p>
+    <label class="admin-modal-label" for="database">stats.db</label>
+    <input class="form-field-compact" type="file" id="database" name="database" accept=".db,.sqlite,application/octet-stream" required>
+    <label class="admin-settings-hint" style="display:flex;gap:8px;align-items:center;margin:12px 0;">
+        <input type="checkbox" name="fetch_photos" value="1" checked>
+        Fetch player photos from arbel.pythonanywhere.com
+    </label>
+    <button type="submit" class="admin-settings-save">Import database</button>
+</form>
+{% endblock %}

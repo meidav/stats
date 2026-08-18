@@ -11,7 +11,10 @@ import re
 import base64
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploads', 'players')
+UPLOAD_DIR = os.environ.get(
+    'UPLOAD_DIR',
+    os.path.join(BASE_DIR, 'static', 'uploads', 'players'),
+)
 ALLOWED_PHOTO_EXT = {'.jpg', '.jpeg', '.png', '.webp', '.gif'}
 
 

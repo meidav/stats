@@ -3,10 +3,12 @@ import type { SportTemplate } from '../types';
 export function iconForTemplate(template: Pick<SportTemplate, 'id' | 'category'>): string {
   const id = template.id;
 
-  if (id.startsWith('beach_volleyball') || id === 'vollis') return '🏐';
+  if (id.startsWith('beach_volleyball')) return '🏐';
+  if (id === 'indoor_volleyball' || id === 'vollis') return '🏐';
   if (id.startsWith('tennis')) return '🎾';
   if (id.startsWith('basketball')) return '🏀';
-  if (id === 'chess' || id === 'checkers') return '♟️';
+  if (id === 'chess') return '♚';
+  if (id === 'checkers') return '●';
   if (id === 'backgammon' || id === 'yahtzee') return '🎲';
   if (id === 'scrabble') return '🔤';
   if (id === 'catan') return '🏕️';

@@ -110,6 +110,17 @@ export const api = {
       body: payload,
     }),
 
+  updateLeague: (
+    token: string,
+    slug: string,
+    payload: { name?: string; icon?: string | null },
+  ) =>
+    request<import('../types').League>(`/leagues/${slug}`, {
+      method: 'PUT',
+      token,
+      body: payload,
+    }),
+
   getSportStats: (sportId: number, token?: string | null, minGames = 1) =>
     request<import('../types').SportStats>(
       `/sports/${sportId}/stats?min_games=${minGames}`,

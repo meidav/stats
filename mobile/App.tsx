@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './src/lib/auth';
 import type { RootStackParamList } from './src/navigation/types';
 import { AddGameScreen } from './src/screens/AddGameScreen';
 import { CreateLeagueScreen } from './src/screens/CreateLeagueScreen';
+import { EditLeagueScreen } from './src/screens/EditLeagueScreen';
 import { ForgotPasswordScreen } from './src/screens/ForgotPasswordScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LeagueScreen } from './src/screens/LeagueScreen';
@@ -61,6 +62,7 @@ function AppNavigator() {
         <>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="CreateLeague" component={CreateLeagueScreen} />
+          <Stack.Screen name="EditLeague" component={EditLeagueScreen} />
           <Stack.Screen name="League" component={LeagueScreen} />
           <Stack.Screen name="AddGame" component={AddGameScreen} />
           <Stack.Screen name="PlayerProfile" component={PlayerProfileScreen} />

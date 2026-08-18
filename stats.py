@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, flash, redirect, session
+from flask import Flask, render_template, request, url_for, flash, redirect, session, jsonify
 from database_functions import *
 from stat_functions import *
 from datetime import datetime, date, timedelta, timezone
@@ -14,6 +14,7 @@ if not hasattr(_werkzeug_security, 'safe_str_cmp'):
     _werkzeug_security.safe_str_cmp = lambda a, b: hmac.compare_digest(str(a), str(b))
 
 from auth import init_auth, create_users_table, get_user_by_username, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user, get_user_by_id, create_user
+from arbel_prefix import ArbelPrefixMiddleware, is_arbel_request, redirect_legacy_to_arbel
 from player_management import (
     get_all_players,
     get_player_games_count,
@@ -36,7 +37,7 @@ import os
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'b83880e869f054bfc465a6f46125ac715e7286ed25e88537')
 app.debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB profile photo uploads
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # stats import + profile photos
 
 # Session configuration for persistent login (30 days)
 _is_production = os.environ.get('FLASK_ENV') == 'production'
@@ -70,6 +71,10 @@ def setup_logging():
 
 # Set up logging when app starts
 setup_logging()
+
+@app.before_request
+def _redirect_legacy_stats():
+    return redirect_legacy_to_arbel()
 
 # TIME OFFSET
 TIME_OFFSET = -8 #set this to the difference between your timezone and utc
@@ -322,7 +327,7 @@ def logout():
 @app.route('/admin')
 @admin_required
 def admin_dashboard():
-    """Admin dashboard"""
+    """PlayTracker admin at /admin. Legacy volleyball admin at /arbel/admin."""
     users = get_all_users()
     players_count = count_all_players()
     jwt_days = 30
@@ -331,12 +336,54 @@ def admin_dashboard():
         jwt_days = jwt_access_token_days()
     except Exception:
         pass
+    if is_arbel_request():
+        return render_template(
+            'admin_dashboard.html',
+            users=users,
+            players_count=players_count,
+        )
     return render_template(
-        'admin_dashboard.html',
+        'admin_playtracker.html',
         users=users,
         players_count=players_count,
         jwt_access_token_days=jwt_days,
     )
+
+
+@app.route('/admin/import-legacy', methods=['POST'])
+@admin_required
+def admin_import_legacy():
+    uploaded = request.files.get('database')
+    if not uploaded or not uploaded.filename:
+        flash('Choose the stats.db file from PythonAnywhere.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+    import tempfile
+    handle = tempfile.NamedTemporaryFile(suffix='.db', delete=False)
+    source_path = handle.name
+    handle.close()
+    try:
+        uploaded.save(source_path)
+        from api.legacy_import import fetch_player_photos, import_legacy_sqlite
+        from db_utils import db_manager
+        from player_management import UPLOAD_DIR
+
+        report = import_legacy_sqlite(source_path, db_manager.database_path)
+        flash('Legacy stats imported. ' + '; '.join(f'{key}: {value}' for key, value in report.items()), 'success')
+        if request.form.get('fetch_photos'):
+            photos = fetch_player_photos(db_manager.database_path, UPLOAD_DIR)
+            flash(
+                f"Player photos: fetched {photos['fetched']}, already on disk {photos['skipped']}, missing {photos['missing']}.",
+                'info',
+            )
+    except Exception as exc:
+        flash(f'Import failed: {exc}', 'danger')
+    finally:
+        try:
+            os.remove(source_path)
+        except OSError:
+            pass
+    return redirect(url_for('admin_dashboard'))
 
 
 @app.route('/admin/settings', methods=['POST'])
@@ -1665,6 +1712,8 @@ def deploy():
 
 @app.errorhandler(404)
 def not_found_error(error):
+    if request.path.startswith('/api'):
+        return jsonify({"error": "not found"}), 404
     return render_template(
         'error.html',
         code=404,
@@ -1686,3 +1735,6 @@ def internal_error(error):
         message='Something spiked the server. The ball is still in play though. Try again or head back to stats.',
         detail=detail,
     ), 500
+
+
+app.wsgi_app = ArbelPrefixMiddleware(app.wsgi_app)

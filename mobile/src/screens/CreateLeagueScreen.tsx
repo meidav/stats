@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   templateInner: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     gap: 8,
   },
   templateName: {
