@@ -13,7 +13,7 @@ import werkzeug.security as _werkzeug_security
 if not hasattr(_werkzeug_security, 'safe_str_cmp'):
     _werkzeug_security.safe_str_cmp = lambda a, b: hmac.compare_digest(str(a), str(b))
 
-from auth import init_auth, create_users_table, get_user_by_username, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user, get_user_by_id, create_user
+from auth import init_auth, create_users_table, get_user_by_username, get_user_by_email, verify_password, login_user, logout_user, admin_required, get_all_users, update_user_admin_status, delete_user, get_user_by_id, create_user
 from arbel_prefix import ArbelPrefixMiddleware, is_arbel_request, redirect_legacy_to_arbel
 from player_management import (
     get_all_players,
@@ -294,6 +294,8 @@ def login():
         print(f"DEBUG: Login attempt - Username: {username}")
         
         user = get_user_by_username(username)
+        if not user:
+            user = get_user_by_email(username)
         if user:
             print(f"DEBUG: User found - ID: {user.id}, Username: {user.username}, Is Admin: {user.is_admin}")
             password_valid = verify_password(user, password)

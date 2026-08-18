@@ -2,7 +2,12 @@ import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 import { glyphForIcon, kindForIcon } from '../lib/leagueIcons';
-import { BeachVolleyballMark, CheckerGlyph, FanHand } from './TemplateGlyph';
+import {
+  BeachVolleyballMark,
+  CheckerGlyph,
+  ChessKingGlyph,
+  FanHand,
+} from './TemplateGlyph';
 
 export function LeagueIcon({ id, size = 26 }: { id?: string | null; size?: number }) {
   const kind = kindForIcon(id);
@@ -14,6 +19,9 @@ export function LeagueIcon({ id, size = 26 }: { id?: string | null; size?: numbe
   }
   if (kind === 'checker') {
     return <CheckerGlyph size={size} />;
+  }
+  if (kind === 'chess') {
+    return <ChessKingGlyph size={size} />;
   }
   const glyph = glyphForIcon(id);
   if (!glyph) return null;

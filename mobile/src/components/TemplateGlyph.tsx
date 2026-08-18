@@ -9,8 +9,8 @@ type GlyphTemplate = Pick<SportTemplate, 'id' | 'category'>;
 const beachBall = require('../../assets/beach-volleyball.png');
 
 const FAN = [
-  { rank: 'A', suit: 'S', rotate: '-18deg', top: 6, left: 0, z: 1 },
-  { rank: 'K', suit: 'H', rotate: '-9deg', top: 3, left: 7, z: 2 },
+  { rank: 'A', suit: 'S', rotate: '-18deg', top: 6, left: 0, z: 5 },
+  { rank: 'K', suit: 'H', rotate: '-9deg', top: 3, left: 7, z: 4 },
   { rank: 'Q', suit: 'D', rotate: '0deg', top: 0, left: 14, z: 3 },
   { rank: 'J', suit: 'C', rotate: '9deg', top: 3, left: 21, z: 2 },
   { rank: '10', suit: 'S', rotate: '18deg', top: 6, left: 28, z: 1 },
@@ -38,6 +38,7 @@ export function FanHand({ size }: { size: number }) {
                 top: card.top * scale,
                 left: card.left * scale,
                 zIndex: card.z,
+                elevation: card.z,
                 width: 16 * scale,
                 height: 22 * scale,
                 borderRadius: 3 * scale,
@@ -45,10 +46,10 @@ export function FanHand({ size }: { size: number }) {
               },
             ]}
           >
-            <Text style={[styles.rank, { color: suit.color, fontSize: 6 * scale }]}>
+            <Text style={[styles.rank, { color: suit.color, fontSize: 6 * scale, lineHeight: 7 * scale }]}>
               {card.rank}
             </Text>
-            <Text style={[styles.suit, { color: suit.color, fontSize: 7 * scale }]}>
+            <Text style={[styles.suit, { color: suit.color, fontSize: 7 * scale, lineHeight: 8 * scale }]}>
               {suit.mark}
             </Text>
           </View>
@@ -59,41 +60,87 @@ export function FanHand({ size }: { size: number }) {
 }
 
 export function CheckerGlyph({ size }: { size: number }) {
-  const inner = size * 0.68;
-  const core = size * 0.22;
+  const disc = size * 0.72;
+  const groove = disc * 0.58;
   return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: '#DC2626',
-        borderWidth: Math.max(1, size * 0.06),
-        borderColor: '#9F1239',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <View
         style={{
-          width: inner,
-          height: inner,
-          borderRadius: inner / 2,
-          borderWidth: Math.max(1.5, size * 0.08),
-          borderColor: 'rgba(255, 228, 230, 0.7)',
+          width: disc,
+          height: disc,
+          borderRadius: disc / 2,
+          backgroundColor: '#1C1917',
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: '#0C0A09',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <View
           style={{
-            width: core,
-            height: core,
-            borderRadius: core / 2,
-            backgroundColor: 'rgba(255, 255, 255, 0.28)',
+            width: groove,
+            height: groove,
+            borderRadius: groove / 2,
+            borderWidth: Math.max(1.5, disc * 0.09),
+            borderColor: 'rgba(255, 255, 255, 0.2)',
           }}
         />
       </View>
+    </View>
+  );
+}
+
+export function ChessKingGlyph({ size }: { size: number }) {
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <Text
+        style={{
+          fontSize: size * 1.28,
+          lineHeight: size * 1.28,
+          color: '#0F172A',
+          textAlign: 'center',
+          includeFontPadding: false,
+        }}
+      >
+        {'\u265A'}
+      </Text>
+    </View>
+  );
+}
+
+export function CustomGlyph({ size }: { size: number }) {
+  const stroke = Math.max(2, size * 0.14);
+  const arm = size * 0.42;
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size * 0.22,
+        backgroundColor: 'rgba(37, 99, 235, 0.16)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(37, 99, 235, 0.4)',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <View
+        style={{
+          width: arm,
+          height: stroke,
+          borderRadius: 1,
+          backgroundColor: '#2563EB',
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          width: stroke,
+          height: arm,
+          borderRadius: 1,
+          backgroundColor: '#2563EB',
+        }}
+      />
     </View>
   );
 }
@@ -122,13 +169,25 @@ export function TemplateGlyph({
   if (isCardTemplate(template)) {
     return <FanHand size={size} />;
   }
-  if (template.id.startsWith('beach_volleyball')) {
+  if (template.id.startsWith('beach_volleyball') || template.id === 'vollis') {
     return <BeachVolleyballMark size={size + 4} />;
   }
   if (template.id === 'checkers') {
     return <CheckerGlyph size={size} />;
   }
-  return <Text style={{ fontSize: size, lineHeight: size + 4 }}>{iconForTemplate(template)}</Text>;
+  if (template.id === 'chess') {
+    return <ChessKingGlyph size={size} />;
+  }
+  if (template.id === 'custom') {
+    return <CustomGlyph size={size} />;
+  }
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <Text style={{ fontSize: size, lineHeight: size + 2, includeFontPadding: false }}>
+        {iconForTemplate(template)}
+      </Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -146,10 +205,9 @@ const styles = StyleSheet.create({
   },
   rank: {
     fontWeight: '800',
-    lineHeight: 8,
   },
   suit: {
-    lineHeight: 9,
     marginTop: -1,
   },
 });
+

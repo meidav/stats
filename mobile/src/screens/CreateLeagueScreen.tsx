@@ -202,7 +202,9 @@ export function CreateLeagueScreen({ navigation }: Props) {
                 }}
               >
                 <View style={styles.templateInner}>
-                  <TemplateGlyph template={template} size={26} />
+                  <View style={styles.templateIcon}>
+                    <TemplateGlyph template={template} size={28} />
+                  </View>
                   <Text style={styles.templateName} numberOfLines={2}>
                     {template.name}
                   </Text>
@@ -297,7 +299,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: 'rgba(255, 255, 255, 0.28)',
     minHeight: 64,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
   templateActive: {
     borderColor: colors.primary,
@@ -307,6 +309,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  templateIcon: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   templateName: {
     flex: 1,

@@ -96,6 +96,7 @@ const TEMPLATE_ALIASES: Record<string, string[]> = {
   yahtzee: ['yahtzee'],
   scrabble: ['scrabble'],
   catan: ['catan', 'settlers'],
+  monopoly: ['monopoly'],
 };
 
 function templateNeedles(template: SportTemplate) {

@@ -9,10 +9,11 @@ export function iconForTemplate(template: Pick<SportTemplate, 'id' | 'category'>
   if (id.startsWith('basketball')) return '🏀';
   if (id === 'chess') return '♚';
   if (id === 'checkers') return '●';
+  if (id === 'monopoly') return '🎩';
   if (id === 'backgammon' || id === 'yahtzee') return '🎲';
   if (id === 'scrabble') return '🔤';
   if (id === 'catan') return '🏕️';
-  if (id === 'custom') return '✨';
+  if (id === 'custom') return '+';
 
   if (template.category === 'cards' || id === 'uno') return '🃏';
   if (template.category === 'board') return '🧩';

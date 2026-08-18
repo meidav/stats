@@ -12,7 +12,7 @@ export const LEAGUE_ICONS = [
   { id: 'tennis', kind: 'emoji', glyph: '🎾' },
   { id: 'basketball', kind: 'emoji', glyph: '🏀' },
   { id: 'soccer', kind: 'emoji', glyph: '⚽' },
-  { id: 'chess', kind: 'emoji', glyph: '♚' },
+  { id: 'chess', kind: 'chess', glyph: '♚' },
   { id: 'checkers', kind: 'checker', glyph: '●' },
   { id: 'cards', kind: 'cards', glyph: '🃏' },
   { id: 'dice', kind: 'emoji', glyph: '🎲' },

@@ -177,6 +177,15 @@ SPORT_TEMPLATES = [
         "default_name": "Catan",
     },
     {
+        "id": "monopoly",
+        "name": "Monopoly",
+        "category": "board",
+        "players_per_side": 1,
+        "score_direction": "higher_wins",
+        "score_mode": "win_loss",
+        "default_name": "Monopoly",
+    },
+    {
         "id": "custom",
         "name": "Custom",
         "category": "custom",
