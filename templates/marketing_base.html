@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}PlayTracker{% endblock %}</title>
+    <meta name="description" content="PlayTracker: track everything you play. Leagues, standings, and game night in one app.">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/marketing.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <input type="checkbox" id="mkt-nav-toggle" class="mkt-nav-toggle" hidden>
+    <header class="mkt-header">
+        <a class="mkt-brand" href="/">
+            <span class="mkt-logo">PlayTracker</span>
+            <span class="mkt-tag">Track everything you play</span>
+        </a>
+        <label for="mkt-nav-toggle" class="mkt-burger" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </label>
+        <nav class="mkt-nav">
+            <label for="mkt-nav-toggle" class="mkt-nav-close" aria-label="Close menu"></label>
+            <a class="mkt-nav-link {% block nav_app %}{% endblock %}" href="/">Get the app</a>
+            <a class="mkt-nav-link" href="/#about">About</a>
+            <a class="mkt-nav-link" href="/arbel/">Arbel stats</a>
+            <a class="mkt-nav-link mkt-nav-login" href="/login">Login</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mkt-footer">
+        <div class="mkt-footer-grid">
+            <div>
+                <h3>Apps</h3>
+                <a href="/">PlayTracker</a>
+                <a href="/arbel/">Arbel stats</a>
+            </div>
+            <div>
+                <h3>Site</h3>
+                <a href="/">Get the app</a>
+                <a href="/#about">About</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+            </div>
+            <div>
+                <h3>Contact</h3>
+                <a href="mailto:hello@playtracker.org">Feedback</a>
+                <a href="mailto:hello@playtracker.org">Support</a>
+            </div>
+            <div class="mkt-footer-cta">
+                <a class="mkt-btn mkt-btn-primary mkt-btn-disabled" href="/" aria-disabled="true">Get app</a>
+                <div class="mkt-stores">
+                    <span class="mkt-store mkt-store-disabled" title="Coming soon">App Store</span>
+                    <span class="mkt-store mkt-store-disabled" title="Coming soon">Google Play</span>
+                </div>
+                <p>iOS and Android apps are on the way. Store buttons are disabled until we ship.</p>
+            </div>
+        </div>
+        <p class="mkt-copy">Copyright {{ current_year }} PlayTracker. All rights reserved.</p>
+    </footer>
+</body>
+</html>

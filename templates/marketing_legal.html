@@ -1,0 +1,16 @@
+{% extends "marketing_base.html" %}
+{% block title %}{% if page == 'terms' %}Terms{% else %}Privacy{% endif %} | PlayTracker{% endblock %}
+
+{% block content %}
+<section class="mkt-legal">
+    {% if page == 'terms' %}
+    <h1>Terms</h1>
+    <p>PlayTracker is a stats app for leagues you create. Use it for games you actually play. Do not use it to harass people or store data you do not have a right to keep.</p>
+    <p>The mobile app and this site are provided as-is while we keep building. Store listings are not live yet.</p>
+    {% else %}
+    <h1>Privacy</h1>
+    <p>PlayTracker stores the account you sign up with, the leagues you create, and the games you enter. We use that to show standings and keep you signed in.</p>
+    <p>We do not sell that data. If you want an account removed, email hello@playtracker.org.</p>
+    {% endif %}
+</section>
+{% endblock %}

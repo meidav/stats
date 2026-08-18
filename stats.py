@@ -72,6 +72,10 @@ def setup_logging():
 # Set up logging when app starts
 setup_logging()
 
+@app.context_processor
+def _template_globals():
+    return {"current_year": date.today().year}
+
 @app.before_request
 def _redirect_legacy_stats():
     return redirect_legacy_to_arbel()
@@ -108,6 +112,8 @@ def last_30_days_stats():
 
 @app.route('/')
 def index():
+    if not is_arbel_request():
+        return render_template('marketing.html')
     try:
         games = year_games(str(date.today().year))
         tot_games = len(games)
@@ -1711,6 +1717,21 @@ def deploy():
         return 'Deployment successful', 200
     except Exception as e:
         return f'Deployment failed: {str(e)}', 500
+
+
+@app.route('/privacy')
+def marketing_privacy():
+    if is_arbel_request():
+        return redirect('/privacy')
+    return render_template('marketing_legal.html', page='privacy')
+
+
+@app.route('/terms')
+def marketing_terms():
+    if is_arbel_request():
+        return redirect('/terms')
+    return render_template('marketing_legal.html', page='terms')
+
 
 @app.errorhandler(404)
 def not_found_error(error):

@@ -4929,6 +4929,14 @@ tr.table-double-row td {
   white-space: nowrap;
 }
 
+.admin-file-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0 14px;
+}
+
 .photo-crop-modal .confirm-modal-dialog {
   max-width: 420px;
 }

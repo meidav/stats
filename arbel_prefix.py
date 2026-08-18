@@ -14,6 +14,8 @@ KEEP_EXACT = {
     "/deploy",
     "/favicon.ico",
     "/robots.txt",
+    "/privacy",
+    "/terms",
 }
 
 KEEP_STARTSWITH = (
@@ -48,6 +50,8 @@ def redirect_legacy_to_arbel():
 
     path = request.path or "/"
     if any(path.startswith(prefix) for prefix in KEEP_PREFIXES):
+        return None
+    if path == "/":
         return None
     if path in KEEP_EXACT:
         return None

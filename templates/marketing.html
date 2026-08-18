@@ -1,0 +1,117 @@
+{% extends "marketing_base.html" %}
+{% block title %}PlayTracker | Get the app{% endblock %}
+{% block nav_app %}is-active{% endblock %}
+
+{% block content %}
+<section class="mkt-hero">
+    <p class="mkt-kicker">Now headed to the App Store and Google Play</p>
+    <h1>PlayTracker</h1>
+    <p class="mkt-lead">Track everything you play. Leagues, standings, and game night in one place, from beach volleyball to chess.</p>
+    <div class="mkt-hero-actions">
+        <a class="mkt-btn mkt-btn-primary mkt-btn-disabled" href="/" aria-disabled="true">Get the app</a>
+        <a class="mkt-btn mkt-btn-ghost" href="/arbel/">Open Arbel stats</a>
+    </div>
+    <div class="mkt-stores mkt-stores-hero">
+        <span class="mkt-store mkt-store-apple mkt-store-disabled" title="Coming soon">Download on the App Store</span>
+        <span class="mkt-store mkt-store-play mkt-store-disabled" title="Coming soon">Get it on Google Play</span>
+    </div>
+    <p class="mkt-soon">Store listings are not live yet. These buttons stay off until we ship.</p>
+</section>
+
+<section class="mkt-phones" aria-label="App preview">
+    <article class="mkt-phone" style="--tilt: -12deg">
+        <p class="mkt-phone-label">My leagues</p>
+        <div class="mkt-device">
+            <div class="mkt-screen">
+                <div class="mkt-screen-brand">PlayTracker</div>
+                <div class="mkt-row"><span class="mkt-dot mkt-dot-ball"></span><span>Beach VB</span></div>
+                <div class="mkt-row"><span class="mkt-dot mkt-dot-king">♚</span><span>Chess night</span></div>
+                <div class="mkt-row"><span class="mkt-dot mkt-dot-check"></span><span>Checkers</span></div>
+            </div>
+        </div>
+    </article>
+    <article class="mkt-phone" style="--tilt: -6deg">
+        <p class="mkt-phone-label">Standings</p>
+        <div class="mkt-device">
+            <div class="mkt-screen">
+                <div class="mkt-screen-title">Today</div>
+                <div class="mkt-stat"><b>Arbel</b><span>12-4</span></div>
+                <div class="mkt-stat"><b>Craig</b><span>9-7</span></div>
+                <div class="mkt-stat"><b>Rick</b><span>8-8</span></div>
+            </div>
+        </div>
+    </article>
+    <article class="mkt-phone mkt-phone-front" style="--tilt: 0deg">
+        <p class="mkt-phone-label">Add a game</p>
+        <div class="mkt-device">
+            <div class="mkt-screen">
+                <div class="mkt-screen-title">Add game</div>
+                <div class="mkt-pill">Winning team</div>
+                <div class="mkt-pill mkt-pill-muted">Losing team</div>
+                <div class="mkt-cta">Save game</div>
+            </div>
+        </div>
+    </article>
+    <article class="mkt-phone" style="--tilt: 6deg">
+        <p class="mkt-phone-label">Player</p>
+        <div class="mkt-device">
+            <div class="mkt-screen">
+                <div class="mkt-avatar">AM</div>
+                <div class="mkt-screen-title">Arbel</div>
+                <div class="mkt-kpi">.750</div>
+                <p class="mkt-tiny">Win rate this season</p>
+            </div>
+        </div>
+    </article>
+    <article class="mkt-phone" style="--tilt: 12deg">
+        <p class="mkt-phone-label">Game night</p>
+        <div class="mkt-device">
+            <div class="mkt-screen">
+                <div class="mkt-screen-title">Chess</div>
+                <div class="mkt-king">♚</div>
+                <p class="mkt-tiny">No stats yet. Add the first game.</p>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="mkt-features" id="why">
+    <h2>Why PlayTracker?</h2>
+    <ul class="mkt-feature-list">
+        <li>
+            <span class="mkt-icon">★</span>
+            <div>
+                <strong>One league object</strong>
+                <p>Sports, cards, and board games live in the same list. Mix a Tuesday night crew however you want.</p>
+            </div>
+        </li>
+        <li>
+            <span class="mkt-icon">✓</span>
+            <div>
+                <strong>Fastest game entry</strong>
+                <p>Name the winners, drop a score if it matters, and the standings move. Team names work for indoor volleyball.</p>
+            </div>
+        </li>
+        <li>
+            <span class="mkt-icon">◎</span>
+            <div>
+                <strong>Clean on purpose</strong>
+                <p>Glass cards, a cotton candy gradient, and stats that stay out of the way until you need them.</p>
+            </div>
+        </li>
+        <li>
+            <span class="mkt-icon">♛</span>
+            <div>
+                <strong>Built from real games</strong>
+                <p>Started as beach volleyball standings. Now it covers chess, checkers, Monopoly, and whatever you add next.</p>
+            </div>
+        </li>
+    </ul>
+</section>
+
+<section class="mkt-about" id="about">
+    <h2>About PlayTracker</h2>
+    <p>PlayTracker is for people who already keep score on a napkin. Make a league, invite the group, and keep a running record of who won. Public leagues are easy to share. Private ones stay in the crew.</p>
+    <p>The original volleyball stats still live at <a href="/arbel/">playtracker.org/arbel</a>. Same data, same 404 ball, now on Railway instead of PythonAnywhere.</p>
+</section>
+{% endblock %}

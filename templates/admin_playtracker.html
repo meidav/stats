@@ -50,16 +50,32 @@
 <form class="admin-settings-card" method="POST" action="{{ url_for('admin_import_legacy') }}" enctype="multipart/form-data">
     <h2 class="admin-settings-title">Import Arbel stats</h2>
     <p class="admin-settings-copy">
-        Download <code>stats.db</code> from the PythonAnywhere Files tab, then upload it here.
-        This copies doubles, vollis, tennis, and player records onto the Railway database without wiping PlayTracker leagues.
-        Photos are pulled from pythonanywhere.com while that site is still up.
+        Restore a <code>stats.db</code> backup onto Railway. This copies doubles, vollis, tennis, and player records without wiping PlayTracker leagues.
+        Photos are stored on the Railway volume. PythonAnywhere is not required for new games.
     </p>
     <label class="admin-modal-label" for="database">stats.db</label>
-    <input class="form-field-compact" type="file" id="database" name="database" accept=".db,.sqlite,application/octet-stream" required>
+    <div class="admin-file-picker">
+        <input class="file-input-hidden" type="file" id="database" name="database" accept=".db,.sqlite,application/octet-stream" required>
+        <label for="database" class="file-upload-btn">
+            <span class="material-symbols-rounded" aria-hidden="true">database</span>
+            Choose stats.db
+        </label>
+        <span class="file-upload-name" id="database-filename">No file chosen</span>
+    </div>
     <label class="admin-settings-hint" style="display:flex;gap:8px;align-items:center;margin:12px 0;">
-        <input type="checkbox" name="fetch_photos" value="1" checked>
-        Fetch player photos from arbel.pythonanywhere.com
+        <input type="checkbox" name="fetch_photos" value="1">
+        Fetch player photos from arbel.pythonanywhere.com (only if that site is still up)
     </label>
     <button type="submit" class="admin-settings-save">Import database</button>
 </form>
+<script>
+    (function () {
+        var input = document.getElementById('database');
+        var label = document.getElementById('database-filename');
+        if (!input || !label) return;
+        input.addEventListener('change', function () {
+            label.textContent = (input.files && input.files[0]) ? input.files[0].name : 'No file chosen';
+        });
+    })();
+</script>
 {% endblock %}

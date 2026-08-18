@@ -288,10 +288,18 @@ export function HomeScreen({ navigation }: Props) {
         onRequestClose={closeDelete}
       >
         <View style={styles.modalScrim}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>
-              {deleteStep === 1 ? 'Delete this league?' : 'Remove all history?'}
-            </Text>
+          <LinearGradient
+            colors={['#FECACA', '#FDBA74', '#FB7185']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.modalCard}
+          >
+            <View style={styles.modalHeader}>
+              <Ionicons name="warning" size={28} color="#9F1239" />
+              <Text style={styles.modalTitle}>
+                {deleteStep === 1 ? 'Delete this league?' : 'Remove all history?'}
+              </Text>
+            </View>
             <Text style={styles.modalBody}>
               {deleteStep === 1
                 ? `This will delete ${deleteTarget?.name || 'this league'} and all of its stats. This cannot be undone.`
@@ -315,7 +323,7 @@ export function HomeScreen({ navigation }: Props) {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </LinearGradient>
         </View>
       </Modal>
     </ScreenScaffold>
@@ -492,7 +500,7 @@ const styles = StyleSheet.create({
   },
   modalScrim: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    backgroundColor: 'rgba(127, 29, 29, 0.48)',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
@@ -502,19 +510,27 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     borderRadius: 20,
     padding: spacing.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    borderWidth: 1,
+    borderColor: 'rgba(190, 18, 60, 0.35)',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: spacing.sm,
   },
   modalTitle: {
+    flexShrink: 1,
     fontSize: 20,
     fontWeight: '800',
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
+    color: '#7F1D1D',
+    textAlign: 'left',
   },
   modalBody: {
     fontSize: 15,
     lineHeight: 22,
-    color: colors.textMuted,
+    color: '#9F1239',
     textAlign: 'center',
     marginBottom: spacing.lg,
   },
@@ -527,18 +543,18 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 23, 42, 0.06)',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
   },
   modalKeepText: {
     fontWeight: '700',
-    color: colors.text,
+    color: '#7F1D1D',
   },
   modalDelete: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
-    backgroundColor: colors.danger,
+    backgroundColor: '#9F1239',
   },
   modalDeleteText: {
     fontWeight: '700',
