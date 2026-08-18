@@ -24,6 +24,13 @@ export async function upsertCachedLeague(league: League) {
   return next;
 }
 
+export async function removeCachedLeague(id: number) {
+  const existing = await loadCachedLeagues();
+  const next = existing.filter((item) => item.id !== id);
+  await saveCachedLeagues(next);
+  return next;
+}
+
 export async function clearCachedLeagues() {
   await AsyncStorage.removeItem(KEY);
 }

@@ -70,6 +70,8 @@ def import_legacy_sqlite(source_path, dest_path):
                 )
             report[table] = f"imported {len(rows)} row{'s' if len(rows) != 1 else ''}"
 
+        dest.commit()
+
         if "users" in src_tables and "users" in _table_names(dest):
             src_cols = _columns(source, "users")
             dest_cols = _columns(dest, "users")
@@ -81,11 +83,11 @@ def import_legacy_sqlite(source_path, dest_path):
                 for row in source.execute(f"SELECT {quoted} FROM users"):
                     values = tuple(row[col] for col in cols)
                     try:
-                        dest.execute(
+                        cursor = dest.execute(
                             f"INSERT OR IGNORE INTO users ({quoted}) VALUES ({placeholders})",
                             values,
                         )
-                        inserted += dest.rowcount > 0
+                        inserted += (cursor.rowcount or 0) > 0
                     except sqlite3.Error:
                         continue
                 report["users"] = f"merged {inserted} missing account(s)"

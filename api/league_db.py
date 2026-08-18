@@ -184,6 +184,20 @@ def update_league(league_id, name=None, icon=_UNSET):
     return get_league_by_id(league_id)
 
 
+def delete_league(league_id):
+    league = get_league_by_id(league_id)
+    if not league:
+        raise ValueError("league not found")
+
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM league_games WHERE league_id = ?", (league_id,))
+        cursor.execute("DELETE FROM sports WHERE league_id = ?", (league_id,))
+        cursor.execute("DELETE FROM league_members WHERE league_id = ?", (league_id,))
+        cursor.execute("DELETE FROM leagues WHERE id = ?", (league_id,))
+    return True
+
+
 def add_sport_to_league(league_id, template_id, name=None, players_per_side=None, score_direction=None):
     template = get_template(template_id)
     if not template:
@@ -263,7 +277,10 @@ def get_leagues_for_user(user_id):
           ON lm.league_id = l.id AND lm.user_id = ?
         WHERE l.owner_id = ? OR lm.user_id = ?
         GROUP BY l.id
-        ORDER BY l.updated_at DESC
+        ORDER BY COALESCE(
+          (SELECT MAX(created_at) FROM league_games WHERE league_id = l.id),
+          l.created_at
+        ) DESC
         """,
         (user_id, user_id, user_id),
     )

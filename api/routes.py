@@ -44,6 +44,7 @@ from api.league_db import (
     search_public_leagues,
     sport_to_dict,
     update_league,
+    delete_league,
     user_can_access_league,
 )
 from api.sport_templates import (
@@ -287,6 +288,18 @@ def register_routes(api):
             sport_to_dict(s) for s in get_sports_for_league(updated["id"]) or []
         ]
         return jsonify(payload)
+
+    @api.route("/leagues/<slug>", methods=["DELETE"])
+    @jwt_required()
+    def delete_league_route(slug):
+        user_id = int(get_jwt_identity())
+        league = get_league_by_slug(slug)
+        if not league:
+            return jsonify({"error": "league not found"}), 404
+        if not user_can_edit_league(user_id, league["id"]):
+            return jsonify({"error": "permission denied"}), 403
+        delete_league(league["id"])
+        return jsonify({"ok": True, "slug": slug})
 
     @api.route("/leagues/<int:league_id>/sports", methods=["POST"])
     @jwt_required()

@@ -121,6 +121,12 @@ export const api = {
       body: payload,
     }),
 
+  deleteLeague: (token: string, slug: string) =>
+    request<{ ok: boolean; slug: string }>(`/leagues/${slug}`, {
+      method: 'DELETE',
+      token,
+    }),
+
   getSportStats: (sportId: number, token?: string | null, minGames = 1) =>
     request<import('../types').SportStats>(
       `/sports/${sportId}/stats?min_games=${minGames}`,

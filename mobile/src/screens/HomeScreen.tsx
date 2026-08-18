@@ -5,6 +5,7 @@ import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Modal,
   RefreshControl,
   StyleSheet,
   Text,
@@ -15,7 +16,6 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GlassCard } from '../components/GlassCard';
-import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { LeagueIcon } from '../components/LeagueIcon';
@@ -24,7 +24,7 @@ import { colors, gradients, spacing } from '../constants/theme';
 import { copyForFocus, focusFromLeagues } from '../lib/focus';
 import { useAuth } from '../lib/auth';
 import { ApiError, api } from '../lib/api';
-import { loadCachedLeagues, saveCachedLeagues } from '../lib/leagueCache';
+import { loadCachedLeagues, removeCachedLeague, saveCachedLeagues } from '../lib/leagueCache';
 import type { League } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -36,6 +36,9 @@ export function HomeScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<League | null>(null);
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
+  const [deleting, setDeleting] = useState(false);
 
   const loadLeagues = useCallback(async (showSpinner = false) => {
     if (!token) return;
@@ -84,6 +87,40 @@ export function HomeScreen({ navigation }: Props) {
   const copy = copyForFocus(focusFromLeagues(leagues));
   const hasLeagues = leagues.length > 0;
 
+  function openDelete(league: League) {
+    setDeleteTarget(league);
+    setDeleteStep(1);
+  }
+
+  function closeDelete() {
+    if (deleting) return;
+    setDeleteTarget(null);
+    setDeleteStep(1);
+  }
+
+  async function confirmDelete() {
+    if (!token || !deleteTarget) return;
+    if (deleteStep === 1) {
+      setDeleteStep(2);
+      return;
+    }
+    setDeleting(true);
+    setError('');
+    try {
+      await api.deleteLeague(token, deleteTarget.slug);
+      const next = await removeCachedLeague(deleteTarget.id);
+      setLeagues(next);
+      setDeleteTarget(null);
+      setDeleteStep(1);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not delete league');
+      setDeleteTarget(null);
+      setDeleteStep(1);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <ScreenScaffold
       footer={
@@ -110,13 +147,7 @@ export function HomeScreen({ navigation }: Props) {
         <Text style={styles.tagline}>{APP_TAGLINE}</Text>
       </View>
 
-      {hasLeagues ? (
-        <ScreenHeader
-          title={copy.homeTitle}
-          actionLabel={copy.newAction}
-          onAction={() => navigation.navigate('CreateLeague')}
-        />
-      ) : null}
+      {hasLeagues ? <Text style={styles.sectionTitle}>{copy.homeTitle}</Text> : null}
 
       <ErrorBanner message={error} />
 
@@ -137,6 +168,25 @@ export function HomeScreen({ navigation }: Props) {
             />
           }
           contentContainerStyle={hasLeagues ? styles.list : styles.emptyList}
+          ListFooterComponent={
+            hasLeagues ? (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('CreateLeague')}
+                activeOpacity={0.85}
+                style={styles.newLeagueWrap}
+              >
+                <LinearGradient
+                  colors={[...gradients.button]}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={styles.newLeagueButton}
+                >
+                  <Ionicons name="add" size={18} color="#fff" />
+                  <Text style={styles.newLeagueText}>{copy.newAction}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ) : null
+          }
           ListEmptyComponent={
             error ? (
               <Text style={styles.retryHint}>Pull down to try again.</Text>
@@ -199,20 +249,30 @@ export function HomeScreen({ navigation }: Props) {
                     </View>
                   </TouchableOpacity>
                   {canEdit ? (
-                    <TouchableOpacity
-                      style={styles.editButton}
-                      onPress={() =>
-                        navigation.navigate('EditLeague', {
-                          slug: item.slug,
-                          name: item.name,
-                          icon: item.icon ?? null,
-                        })
-                      }
-                      accessibilityLabel={`Edit ${item.name}`}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Ionicons name="create-outline" size={20} color={colors.primary} />
-                    </TouchableOpacity>
+                    <View style={styles.leagueActions}>
+                      <TouchableOpacity
+                        style={styles.editButton}
+                        onPress={() =>
+                          navigation.navigate('EditLeague', {
+                            slug: item.slug,
+                            name: item.name,
+                            icon: item.icon ?? null,
+                          })
+                        }
+                        accessibilityLabel={`Edit ${item.name}`}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Ionicons name="create-outline" size={20} color={colors.primary} />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.deleteButton}
+                        onPress={() => openDelete(item)}
+                        accessibilityLabel={`Delete ${item.name}`}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                      </TouchableOpacity>
+                    </View>
                   ) : null}
                 </View>
               </GlassCard>
@@ -220,6 +280,44 @@ export function HomeScreen({ navigation }: Props) {
           }}
         />
       )}
+
+      <Modal
+        visible={!!deleteTarget}
+        transparent
+        animationType="fade"
+        onRequestClose={closeDelete}
+      >
+        <View style={styles.modalScrim}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>
+              {deleteStep === 1 ? 'Delete this league?' : 'Remove all history?'}
+            </Text>
+            <Text style={styles.modalBody}>
+              {deleteStep === 1
+                ? `This will delete ${deleteTarget?.name || 'this league'} and all of its stats. This cannot be undone.`
+                : 'This removes all history of this league and its stats. There is no way to get it back.'}
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalKeep}
+                onPress={closeDelete}
+                disabled={deleting}
+              >
+                <Text style={styles.modalKeepText}>Keep league</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalDelete}
+                onPress={confirmDelete}
+                disabled={deleting}
+              >
+                <Text style={styles.modalDeleteText}>
+                  {deleting ? 'Deleting...' : deleteStep === 1 ? 'Delete' : 'Delete everything'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScreenScaffold>
   );
 }
@@ -246,12 +344,20 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
   },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: colors.text,
+    textAlign: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+  },
   loader: {
     marginTop: spacing.xl,
   },
   list: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.lg,
   },
   emptyList: {
     flexGrow: 1,
@@ -314,6 +420,11 @@ const styles = StyleSheet.create({
   leagueCopy: {
     flex: 1,
   },
+  leagueActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   editButton: {
     width: 36,
     height: 36,
@@ -321,6 +432,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(37, 99, 235, 0.12)',
+  },
+  deleteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(220, 38, 38, 0.12)',
   },
   cardTitle: {
     fontSize: 18,
@@ -352,5 +471,77 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '700',
     fontSize: 15,
+  },
+  newLeagueWrap: {
+    alignItems: 'center',
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  newLeagueButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  newLeagueText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  modalScrim: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 20,
+    padding: spacing.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  modalBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  modalKeep: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.06)',
+  },
+  modalKeepText: {
+    fontWeight: '700',
+    color: colors.text,
+  },
+  modalDelete: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: colors.danger,
+  },
+  modalDeleteText: {
+    fontWeight: '700',
+    color: '#fff',
   },
 });
