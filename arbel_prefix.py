@@ -13,6 +13,8 @@ KEEP_EXACT = {
     "/logout",
     "/deploy",
     "/favicon.ico",
+    "/apple-touch-icon.png",
+    "/apple-touch-icon-precomposed.png",
     "/robots.txt",
     "/privacy",
     "/terms",

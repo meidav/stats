@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, flash, redirect, session, jsonify
+from flask import Flask, render_template, request, url_for, flash, redirect, session, jsonify, send_from_directory
 from database_functions import *
 from stat_functions import *
 from datetime import datetime, date, timedelta, timezone
@@ -109,6 +109,21 @@ def last_30_days_stats():
     except Exception as e:
         print(f"Error fetching last 30 days stats: {e}")
         return []  # Return empty list on failure to ensure stability
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon',
+    )
+
+
+@app.route('/apple-touch-icon.png')
+@app.route('/apple-touch-icon-precomposed.png')
+def apple_touch_icon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'apple-touch-icon.png')
+
 
 @app.route('/')
 def index():
