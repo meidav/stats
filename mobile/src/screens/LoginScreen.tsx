@@ -1,67 +1,30 @@
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { APP_NAME, APP_TAGLINE } from '../constants/brand';
-import {
-  GOOGLE_ANDROID_CLIENT_ID,
-  GOOGLE_IOS_CLIENT_ID,
-  GOOGLE_WEB_CLIENT_ID,
-  googleSignInEnabled,
-} from '../constants/config';
+import { AuthCard, authInputStyle } from '../components/AuthCard';
+import { GradientButton } from '../components/GradientButton';
+import { PasswordField } from '../components/PasswordField';
+import { AppleLogo, GoogleLogo } from '../components/icons';
 import { colors, spacing } from '../constants/theme';
 import { ApiError } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import type { RootStackParamList } from '../navigation/types';
 
-WebBrowser.maybeCompleteAuthSession();
+type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-export function LoginScreen() {
-  const { login, loginWithGoogle } = useAuth();
-  const [username, setUsername] = useState('');
+export function LoginScreen({ navigation }: Props) {
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    iosClientId: GOOGLE_IOS_CLIENT_ID || undefined,
-    androidClientId: GOOGLE_ANDROID_CLIENT_ID || undefined,
-    webClientId: GOOGLE_WEB_CLIENT_ID || undefined,
-    clientId: GOOGLE_WEB_CLIENT_ID || undefined,
-  });
-
-  useEffect(() => {
-    if (response?.type !== 'success') {
-      return;
-    }
-    const idToken = response.params.id_token;
-    if (!idToken) {
-      setError('Google did not return an ID token');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    loginWithGoogle(idToken)
-      .catch((err) => {
-        setError(err instanceof ApiError ? err.message : 'Google sign-in failed');
-      })
-      .finally(() => setLoading(false));
-  }, [response, loginWithGoogle]);
 
   async function handleLogin() {
     setLoading(true);
     setError('');
     try {
-      await login(username.trim(), password);
+      await login(email.trim(), password);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed');
     } finally {
@@ -69,138 +32,130 @@ export function LoginScreen() {
     }
   }
 
-  async function handleGoogle() {
-    setError('');
-    if (!googleSignInEnabled) {
-      setError('Add a Google Web client ID in app.json extra.googleWebClientId');
-      return;
-    }
-    await promptAsync();
-  }
-
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <View style={styles.card}>
-        <Text style={styles.brand}>{APP_NAME}</Text>
-        <Text style={styles.tagline}>{APP_TAGLINE}</Text>
+    <AuthCard>
+      <TouchableOpacity style={[styles.socialButton, styles.appleButton]} disabled>
+        <AppleLogo />
+        <Text style={styles.appleButtonText}>Sign in with Apple</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.googleButton, (loading || !request) && styles.buttonDisabled]}
-          onPress={handleGoogle}
-          disabled={loading}
-        >
-          <Text style={styles.googleButtonText}>Continue with Google</Text>
+      <TouchableOpacity style={[styles.socialButton, styles.googleButton]} disabled>
+        <GoogleLogo />
+        <Text style={styles.googleButtonText}>Sign in with Google</Text>
+      </TouchableOpacity>
+
+      <View style={styles.dividerRow}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>or sign in with email</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <TextInput
+        style={authInputStyle}
+        placeholder="Email"
+        placeholderTextColor={colors.textMuted}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="email-address"
+        textContentType="emailAddress"
+        autoComplete="email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <PasswordField
+        placeholder="Password"
+        textContentType="password"
+        autoComplete="password"
+        value={password}
+        onChangeText={setPassword}
+      />
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      <GradientButton
+        label="Sign In"
+        onPress={handleLogin}
+        disabled={loading}
+        loading={loading}
+      />
+
+      <View style={styles.footerRow}>
+        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+          <Text style={styles.footerLink}>Forgot password?</Text>
         </TouchableOpacity>
-
-        <Text style={styles.divider}>or</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          autoCapitalize="none"
-          value={username}
-          onChangeText={setUsername}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
-          )}
+        <Text style={styles.footerSep}>|</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <Text style={styles.footerLink}>Create account</Text>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </AuthCard>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    padding: spacing.lg,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  brand: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: colors.primary,
-    textAlign: 'center',
-  },
-  tagline: {
-    fontSize: 16,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-    marginTop: spacing.xs,
-  },
-  googleButton: {
-    borderWidth: 1,
-    borderColor: colors.border,
+  socialButton: {
     borderRadius: 10,
     padding: spacing.md,
     alignItems: 'center',
-    backgroundColor: colors.background,
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: spacing.sm,
+    opacity: 0.72,
+  },
+  appleButton: {
+    backgroundColor: '#111827',
+  },
+  appleButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  googleButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: 'rgba(15, 23, 42, 0.12)',
   },
   googleButtonText: {
     color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },
-  divider: {
-    textAlign: 'center',
-    color: colors.textMuted,
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginVertical: spacing.md,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    fontSize: 16,
-    backgroundColor: colors.background,
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(15, 23, 42, 0.2)',
   },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
+  dividerText: {
+    color: colors.textMuted,
+    fontSize: 12,
     fontWeight: '700',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
   error: {
     color: colors.danger,
     marginBottom: spacing.sm,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+  },
+  footerLink: {
+    color: colors.primary,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  footerSep: {
+    color: colors.textMuted,
   },
 });

@@ -14,7 +14,7 @@
     "android": {
       "package": "org.playtracker.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0F766E",
+        "backgroundColor": "#2563EB",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -26,12 +26,16 @@
     },
     "extra": {
       "apiUrl": "",
-      "googleWebClientId": "",
+      "googleWebClientId": "32346032386-92npa1nj0v043m9qukudbmaa0g0hod1p.apps.googleusercontent.com",
       "googleIosClientId": "",
-      "googleAndroidClientId": ""
+      "googleAndroidClientId": "",
+      "eas": {
+        "projectId": "79dba00b-27b1-4813-8f20-a429e2179699"
+      }
     },
     "plugins": [
       "expo-web-browser"
-    ]
+    ],
+    "owner": "stacktracker"
   }
 }

@@ -65,6 +65,21 @@ def get_user_by_username(username):
         return user
     return None
 
+def get_user_by_email(email):
+    """Get user by email"""
+    cur = set_cur()
+    cur.execute(
+        'SELECT id, username, email, is_admin, password_hash FROM users WHERE email = ?',
+        (email.strip().lower(),),
+    )
+    user_data = cur.fetchone()
+
+    if user_data:
+        user = User(user_data[0], user_data[1], user_data[2], user_data[3])
+        user.password_hash = user_data[4]
+        return user
+    return None
+
 def create_user(username, email, password, is_admin=False):
     """Create a new user"""
     cur = set_cur()

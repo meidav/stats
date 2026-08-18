@@ -6,7 +6,14 @@ from flask_jwt_extended import (
     verify_jwt_in_request,
 )
 
-from auth import get_user_by_username, verify_password
+from auth import get_user_by_email, get_user_by_username, verify_password
+from api.auth_service import (
+    authenticate_with_email,
+    register_with_email,
+    request_password_reset,
+    reset_password_with_token,
+    user_payload,
+)
 from api.brand import APP_DOMAIN, APP_NAME, APP_TAGLINE, APP_URL
 from api.google_auth import (
     find_or_create_google_user,
@@ -67,28 +74,70 @@ def register_routes(api):
     @api.route("/auth/login", methods=["POST"])
     def api_login():
         data = request.get_json(silent=True) or {}
+        email = (data.get("email") or "").strip()
         username = (data.get("username") or "").strip()
         password = data.get("password") or ""
 
-        if not username or not password:
-            return jsonify({"error": "username and password required"}), 400
+        if not password:
+            return jsonify({"error": "password is required"}), 400
 
-        user = get_user_by_username(username)
-        if not user or not verify_password(user, password):
+        user = None
+        if email:
+            user = authenticate_with_email(email, password)
+        elif username:
+            user = get_user_by_username(username)
+            if user and not verify_password(user, password):
+                user = None
+
+        if not user:
             return jsonify({"error": "invalid credentials"}), 401
 
         token = create_access_token(identity=str(user.id))
-        return jsonify(
-            {
-                "access_token": token,
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "is_admin": user.is_admin,
-                },
-            }
-        )
+        return jsonify({"access_token": token, "user": user_payload(user)})
+
+    @api.route("/auth/register", methods=["POST"])
+    def api_register():
+        data = request.get_json(silent=True) or {}
+        email = (data.get("email") or "").strip()
+        password = data.get("password") or ""
+
+        if not email or not password:
+            return jsonify({"error": "email and password are required"}), 400
+
+        try:
+            user = register_with_email(email, password)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+        token = create_access_token(identity=str(user.id))
+        return jsonify({"access_token": token, "user": user_payload(user)}), 201
+
+    @api.route("/auth/forgot-password", methods=["POST"])
+    def api_forgot_password():
+        data = request.get_json(silent=True) or {}
+        email = (data.get("email") or "").strip()
+        if not email:
+            return jsonify({"error": "email is required"}), 400
+        try:
+            request_password_reset(email)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"message": "If that email exists, a reset link has been sent."})
+
+    @api.route("/auth/reset-password", methods=["POST"])
+    def api_reset_password():
+        data = request.get_json(silent=True) or {}
+        token = (data.get("token") or "").strip()
+        password = data.get("password") or ""
+        if not token or not password:
+            return jsonify({"error": "token and password are required"}), 400
+        try:
+            user = reset_password_with_token(token, password)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+        access_token = create_access_token(identity=str(user.id))
+        return jsonify({"access_token": access_token, "user": user_payload(user)})
 
     @api.route("/auth/google", methods=["POST"])
     def api_google_login():

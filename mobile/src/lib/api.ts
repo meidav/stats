@@ -24,11 +24,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     headers.Authorization = `Bearer ${options.token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: options.method ?? 'GET',
-    headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: options.method ?? 'GET',
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch {
+    throw new ApiError('Could not reach PlayTracker. Check your connection.', 0);
+  }
 
   const data = await response.json().catch(() => ({}));
 
@@ -44,10 +49,28 @@ export const api = {
   health: () =>
     request<{ app: string; tagline: string; domain: string }>('/health'),
 
-  login: (username: string, password: string) =>
+  login: (email: string, password: string) =>
     request<{ access_token: string; user: import('../types').User }>('/auth/login', {
       method: 'POST',
-      body: { username, password },
+      body: { email, password },
+    }),
+
+  register: (email: string, password: string) =>
+    request<{ access_token: string; user: import('../types').User }>('/auth/register', {
+      method: 'POST',
+      body: { email, password },
+    }),
+
+  forgotPassword: (email: string) =>
+    request<{ message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: { email },
+    }),
+
+  resetPassword: (token: string, password: string) =>
+    request<{ access_token: string; user: import('../types').User }>('/auth/reset-password', {
+      method: 'POST',
+      body: { token, password },
     }),
 
   loginWithGoogle: (idToken: string) =>

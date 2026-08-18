@@ -11,7 +11,9 @@ type AuthContextValue = {
   token: string | null;
   user: User | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  resetPassword: (token: string, password: string) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -48,8 +50,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(USER_KEY, JSON.stringify(nextUser));
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const result = await api.login(username, password);
+  const login = useCallback(async (email: string, password: string) => {
+    const result = await api.login(email, password);
+    await persistSession(result.access_token, result.user);
+  }, [persistSession]);
+
+  const register = useCallback(async (email: string, password: string) => {
+    const result = await api.register(email, password);
+    await persistSession(result.access_token, result.user);
+  }, [persistSession]);
+
+  const resetPassword = useCallback(async (token: string, password: string) => {
+    const result = await api.resetPassword(token, password);
     await persistSession(result.access_token, result.user);
   }, [persistSession]);
 
@@ -66,8 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ token, user, loading, login, loginWithGoogle, logout }),
-    [token, user, loading, login, loginWithGoogle, logout],
+    () => ({ token, user, loading, login, register, resetPassword, loginWithGoogle, logout }),
+    [token, user, loading, login, register, resetPassword, loginWithGoogle, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
