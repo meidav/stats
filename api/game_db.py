@@ -121,6 +121,27 @@ def get_game_by_id(game_id):
     return _game_row_to_dict(row)
 
 
+def get_player_names_for_user(user_id):
+    rows = db_manager.execute_query(
+        """
+        SELECT winners, losers
+        FROM league_games
+        WHERE league_id IN (
+            SELECT league_id FROM league_members WHERE user_id = ?
+            UNION
+            SELECT id FROM leagues WHERE owner_id = ?
+        )
+        """,
+        (user_id, user_id),
+    ) or []
+    names = set()
+    for row in rows:
+        data = dict(row)
+        names.update(_parse_json_list(data.get("winners")))
+        names.update(_parse_json_list(data.get("losers")))
+    return sorted(names, key=lambda name: name.lower())
+
+
 def get_games_for_sport(sport_id, year=None, limit=100, offset=0):
     params = [sport_id]
     sql = "SELECT * FROM league_games WHERE sport_id = ?"

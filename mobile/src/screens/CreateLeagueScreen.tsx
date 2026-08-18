@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,11 +9,16 @@ import {
   View,
 } from 'react-native';
 
+import { ErrorBanner } from '../components/ErrorBanner';
+import { GradientButton } from '../components/GradientButton';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenScaffold } from '../components/ScreenScaffold';
+import { TemplateGlyph } from '../components/TemplateGlyph';
 import { colors, spacing } from '../constants/theme';
-import { copyForFocus, defaultTemplateId, FOCUS_OPTIONS, templatesForFocus } from '../lib/focus';
-import { ApiError } from '../lib/api';
+import { copyForFocus, defaultTemplateId, detectTemplateFromName, FOCUS_OPTIONS, templatesForFocus } from '../lib/focus';
+import { upsertCachedLeague } from '../lib/leagueCache';
+import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { api } from '../lib/api';
 import type { LeagueFocus } from '../lib/focus';
 import type { SportTemplate } from '../types';
 import type { RootStackParamList } from '../navigation/types';
@@ -29,6 +33,8 @@ const VISIBILITY_OPTIONS = [
 
 export function CreateLeagueScreen({ navigation }: Props) {
   const { token } = useAuth();
+  const scrollRef = useRef<ScrollView>(null);
+  const nameY = useRef(0);
   const [name, setName] = useState('');
   const [visibility, setVisibility] = useState<'public' | 'private' | 'unlisted'>('public');
   const [focus, setFocus] = useState<LeagueFocus>('sports');
@@ -36,30 +42,69 @@ export function CreateLeagueScreen({ navigation }: Props) {
   const [selectedTemplate, setSelectedTemplate] = useState('beach_volleyball_2s');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const pickedTemplate = useRef(false);
 
   useEffect(() => {
     api.getTemplates().then((result) => setTemplates(result.templates));
   }, []);
 
-  const visibleTemplates = useMemo(
-    () => templatesForFocus(templates, focus),
-    [templates, focus],
-  );
+  const visibleTemplates = useMemo(() => {
+    const visible = templatesForFocus(templates, focus);
+    const selected = templates.find((template) => template.id === selectedTemplate);
+    if (selected && !visible.some((template) => template.id === selected.id)) {
+      return [selected, ...visible];
+    }
+    return visible;
+  }, [templates, focus, selectedTemplate]);
   const copy = copyForFocus(focus);
 
   function handleFocusChange(next: LeagueFocus) {
     setFocus(next);
+    const visible = templatesForFocus(templates, next);
+    if (visible.some((template) => template.id === selectedTemplate)) {
+      return;
+    }
+    const detected = detectTemplateFromName(name, templates);
+    if (detected && visible.some((template) => template.id === detected)) {
+      setSelectedTemplate(detected);
+      return;
+    }
     setSelectedTemplate(defaultTemplateId(templates, next));
   }
 
+  function applyName(value: string) {
+    setName(value);
+    if (nameError && value.trim()) {
+      setNameError(false);
+      setError('');
+    }
+    if (pickedTemplate.current) return;
+    const detected = detectTemplateFromName(value, templates);
+    if (detected) {
+      setSelectedTemplate(detected);
+    }
+  }
+
+  function showNameError() {
+    setNameError(true);
+    setError('Add a name to continue.');
+    scrollRef.current?.scrollTo({ y: Math.max(nameY.current - 24, 0), animated: true });
+  }
+
   async function handleCreate() {
-    if (!token || !name.trim()) {
-      setError('Name is required');
+    if (!token) {
+      setError('Your session expired. Sign out and sign in again.');
+      return;
+    }
+    if (!name.trim()) {
+      showNameError();
       return;
     }
 
     setLoading(true);
     setError('');
+    setNameError(false);
     try {
       const league = await api.createLeague(token, {
         name: name.trim(),
@@ -67,6 +112,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
         focus,
         sport_template_id: selectedTemplate,
       });
+      await upsertCachedLeague(league);
       navigation.replace('League', { slug: league.slug, name: league.name });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not create league');
@@ -76,90 +122,110 @@ export function CreateLeagueScreen({ navigation }: Props) {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{copy.createTitle}</Text>
+    <ScreenScaffold
+      keyboard
+      footer={
+        <View style={styles.footer}>
+          <ErrorBanner message={!nameError ? error : ''} />
+          <GradientButton label="Create league" onPress={handleCreate} loading={loading} disabled={loading} />
+        </View>
+      }
+    >
+      <ScreenHeader title={copy.createTitle} onBack={() => navigation.goBack()} />
+      <ScrollView
+        ref={scrollRef}
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets
+      >
+        <Text style={styles.label}>What do you play?</Text>
+        <View style={styles.row}>
+          {FOCUS_OPTIONS.map((option) => (
+            <TouchableOpacity
+              key={option.id}
+              style={[styles.chip, focus === option.id && styles.chipActive]}
+              onPress={() => handleFocusChange(option.id)}
+            >
+              <Text style={[styles.chipText, focus === option.id && styles.chipTextActive]}>
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text style={styles.hint}>{FOCUS_OPTIONS.find((option) => option.id === focus)?.hint}</Text>
 
-      <Text style={styles.label}>What do you play?</Text>
-      <View style={styles.row}>
-        {FOCUS_OPTIONS.map((option) => (
-          <TouchableOpacity
-            key={option.id}
-            style={[styles.chip, focus === option.id && styles.chipActive]}
-            onPress={() => handleFocusChange(option.id)}
-          >
-            <Text style={[styles.chipText, focus === option.id && styles.chipTextActive]}>
-              {option.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <Text style={styles.hint}>{FOCUS_OPTIONS.find((option) => option.id === focus)?.hint}</Text>
-
-      <Text style={styles.label}>Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={focus === 'table' ? 'Sunday game night' : 'Tuesday Night Crew'}
-        value={name}
-        onChangeText={setName}
-      />
-
-      <Text style={styles.label}>Visibility</Text>
-      <View style={styles.row}>
-        {VISIBILITY_OPTIONS.map((option) => (
-          <TouchableOpacity
-            key={option.id}
-            style={[styles.chip, visibility === option.id && styles.chipActive]}
-            onPress={() => setVisibility(option.id)}
-          >
-            <Text style={[styles.chipText, visibility === option.id && styles.chipTextActive]}>
-              {option.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={styles.label}>{copy.firstGameLabel}</Text>
-      {visibleTemplates.map((template) => (
-        <TouchableOpacity
-          key={template.id}
-          style={[styles.template, selectedTemplate === template.id && styles.templateActive]}
-          onPress={() => setSelectedTemplate(template.id)}
+        <View
+          onLayout={(event) => {
+            nameY.current = event.nativeEvent.layout.y;
+          }}
         >
-          <Text style={styles.templateName}>{template.name}</Text>
-          <Text style={styles.templateMeta}>
-            {template.category === 'custom' ? 'Your rules' : template.category}
-            {' · '}
-            {template.score_mode === 'win_loss' ? 'win / loss' : template.score_direction.replace('_', ' ')}
-          </Text>
-        </TouchableOpacity>
-      ))}
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            style={[styles.input, nameError && styles.inputError]}
+            placeholder={focus === 'table' ? 'Sunday game night' : 'Tuesday Night Crew'}
+            placeholderTextColor={nameError ? colors.danger : colors.textMuted}
+            autoCapitalize="words"
+            value={name}
+            onChangeText={applyName}
+          />
+          {nameError ? <Text style={styles.fieldError}>Name is required.</Text> : null}
+        </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+        <Text style={styles.label}>Visibility</Text>
+        <View style={styles.row}>
+          {VISIBILITY_OPTIONS.map((option) => (
+            <TouchableOpacity
+              key={option.id}
+              style={[styles.chip, visibility === option.id && styles.chipActive]}
+              onPress={() => setVisibility(option.id)}
+            >
+              <Text style={[styles.chipText, visibility === option.id && styles.chipTextActive]}>
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleCreate} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Create</Text>
-        )}
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={styles.label}>{copy.firstGameLabel}</Text>
+        <View style={styles.grid}>
+          {visibleTemplates.map((template) => {
+            const selected = selectedTemplate === template.id;
+            return (
+              <TouchableOpacity
+                key={template.id}
+                style={[styles.template, selected && styles.templateActive]}
+                onPress={() => {
+                  pickedTemplate.current = true;
+                  setSelectedTemplate(template.id);
+                }}
+              >
+                <View style={styles.templateInner}>
+                  <TemplateGlyph template={template} size={26} />
+                  <Text style={styles.templateName} numberOfLines={2}>
+                    {template.name}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </ScreenScaffold>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text,
-    marginBottom: spacing.lg,
+  footer: {
+    paddingHorizontal: spacing.lg,
   },
   label: {
     fontSize: 14,
@@ -178,8 +244,19 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 10,
     padding: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
     fontSize: 16,
+    color: colors.text,
+  },
+  inputError: {
+    borderColor: colors.danger,
+    backgroundColor: 'rgba(220, 38, 38, 0.08)',
+  },
+  fieldError: {
+    color: colors.danger,
+    marginTop: spacing.xs,
+    fontSize: 13,
+    fontWeight: '600',
   },
   row: {
     flexDirection: 'row',
@@ -191,7 +268,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
     alignItems: 'center',
   },
   chipActive: {
@@ -206,42 +283,36 @@ const styles = StyleSheet.create({
   chipTextActive: {
     color: '#fff',
   },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
   template: {
-    padding: spacing.md,
-    borderRadius: 10,
+    width: '47%',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
-    marginBottom: spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
+    minHeight: 64,
+    justifyContent: 'flex-end',
   },
   templateActive: {
     borderColor: colors.primary,
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+  },
+  templateInner: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
   },
   templateName: {
+    flex: 1,
     fontWeight: '700',
     color: colors.text,
-  },
-  templateMeta: {
-    color: colors.textMuted,
-    marginTop: 2,
     fontSize: 13,
-    textTransform: 'capitalize',
-  },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginTop: spacing.lg,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  error: {
-    color: colors.danger,
-    marginTop: spacing.md,
+    lineHeight: 16,
   },
 });

@@ -9,6 +9,11 @@ export const colors = {
   border: '#E2E8F0',
   danger: '#DC2626',
   success: '#16A34A',
+  win: '#059669',
+  loss: '#E11D48',
+  neutral: '#2563EB',
+  errorFill: 'rgba(190, 24, 93, 0.94)',
+  errorBorder: 'rgba(255, 220, 230, 0.7)',
 };
 
 export const gradients = {

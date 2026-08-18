@@ -20,10 +20,31 @@
         <div class="player-kpi-label">Players</div>
     </div>
     <div class="player-kpi">
-        <div class="player-kpi-value">Ready</div>
-        <div class="player-kpi-label">System</div>
+        <div class="player-kpi-value">{{ jwt_access_token_days }}d</div>
+        <div class="player-kpi-label">App session</div>
     </div>
 </div>
+
+<form class="admin-settings-card" method="POST" action="{{ url_for('admin_save_settings') }}">
+    <h2 class="admin-settings-title">PlayTracker settings</h2>
+    <p class="admin-settings-copy">Variables for the mobile app and API. Saved values apply on the next sign-in.</p>
+    <label class="admin-modal-label" for="jwt_access_token_days">App session duration (days)</label>
+    <div class="admin-settings-row">
+        <input
+            class="form-field-compact"
+            type="number"
+            id="jwt_access_token_days"
+            name="jwt_access_token_days"
+            min="1"
+            max="365"
+            step="1"
+            required
+            value="{{ jwt_access_token_days }}"
+        >
+        <button type="submit" class="admin-settings-save">Save</button>
+    </div>
+    <p class="admin-settings-hint">Default is 30. Existing sessions keep their old expiry until the person signs in again.</p>
+</form>
 
 <div class="admin-link-list">
     <a class="admin-link-row" href="{{ url_for('admin_users') }}">

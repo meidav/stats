@@ -14,6 +14,7 @@ import { ForgotPasswordScreen } from './src/screens/ForgotPasswordScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { LeagueScreen } from './src/screens/LeagueScreen';
 import { LoginScreen } from './src/screens/LoginScreen';
+import { PlayerProfileScreen } from './src/screens/PlayerProfileScreen';
 import { ResetPasswordScreen } from './src/screens/ResetPasswordScreen';
 import { SignUpScreen } from './src/screens/SignUpScreen';
 import { WelcomeScreen } from './src/screens/WelcomeScreen';
@@ -40,6 +41,7 @@ function AppNavigator() {
   }
 
   const stack = (
+    <GradientBackground>
     <Stack.Navigator
       initialRouteName={token ? 'Home' : 'Welcome'}
       screenOptions={{
@@ -61,14 +63,12 @@ function AppNavigator() {
           <Stack.Screen name="CreateLeague" component={CreateLeagueScreen} />
           <Stack.Screen name="League" component={LeagueScreen} />
           <Stack.Screen name="AddGame" component={AddGameScreen} />
+          <Stack.Screen name="PlayerProfile" component={PlayerProfileScreen} />
         </>
       )}
     </Stack.Navigator>
+    </GradientBackground>
   );
-
-  if (!token) {
-    return <GradientBackground>{stack}</GradientBackground>;
-  }
 
   return stack;
 }

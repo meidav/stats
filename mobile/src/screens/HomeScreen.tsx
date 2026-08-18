@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -11,12 +12,17 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
+import { ErrorBanner } from '../components/ErrorBanner';
+import { GlassCard } from '../components/GlassCard';
 import { ScreenHeader } from '../components/ScreenHeader';
-import { APP_TAGLINE } from '../constants/brand';
-import { colors, spacing } from '../constants/theme';
+import { ScreenScaffold } from '../components/ScreenScaffold';
+import { TemplateGlyph } from '../components/TemplateGlyph';
+import { APP_NAME, APP_TAGLINE } from '../constants/brand';
+import { colors, gradients, spacing } from '../constants/theme';
 import { copyForFocus, focusFromLeagues } from '../lib/focus';
 import { useAuth } from '../lib/auth';
-import { api } from '../lib/api';
+import { ApiError, api } from '../lib/api';
+import { loadCachedLeagues, saveCachedLeagues } from '../lib/leagueCache';
 import type { League } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -27,12 +33,27 @@ export function HomeScreen({ navigation }: Props) {
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
 
-  const loadLeagues = useCallback(async () => {
+  const loadLeagues = useCallback(async (showSpinner = false) => {
     if (!token) return;
+    if (showSpinner) setLoading(true);
     try {
       const result = await api.getMyLeagues(token);
-      setLeagues(result.leagues);
+      const next = result.leagues ?? [];
+      if (next.length === 0) {
+        const cached = await loadCachedLeagues();
+        if (cached.length > 0) {
+          setLeagues(cached);
+          setError('');
+          return;
+        }
+      }
+      setLeagues(next);
+      setError('');
+      await saveCachedLeagues(next);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not load leagues');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -41,102 +62,229 @@ export function HomeScreen({ navigation }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      setLoading(true);
-      loadLeagues();
+      let active = true;
+      async function boot() {
+        const cached = await loadCachedLeagues();
+        if (!active) return;
+        if (cached.length) {
+          setLeagues(cached);
+          setLoading(false);
+        }
+        await loadLeagues(!cached.length);
+      }
+      boot();
+      return () => {
+        active = false;
+      };
     }, [loadLeagues]),
   );
 
   const copy = copyForFocus(focusFromLeagues(leagues));
+  const hasLeagues = leagues.length > 0;
 
   return (
-    <View style={styles.container}>
-      <ScreenHeader
-        title={copy.homeTitle}
-        onPress={() => navigation.navigate('CreateLeague')}
-      />
-      <Text style={styles.subtitle}>{APP_TAGLINE}</Text>
-      <Text style={styles.user}>Signed in as {user?.username}</Text>
+    <ScreenScaffold
+      footer={
+        <View style={styles.footer}>
+          <Text style={styles.user} numberOfLines={1}>
+            {user?.email || user?.username}
+          </Text>
+          <Text style={styles.footerDot}>·</Text>
+          <TouchableOpacity onPress={logout}>
+            <Text style={styles.logoutText}>Sign out</Text>
+          </TouchableOpacity>
+        </View>
+      }
+    >
+      <View style={styles.hero}>
+        <LinearGradient
+          colors={[...gradients.brandText]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.brandBadge}
+        >
+          <Text style={styles.brand}>{APP_NAME}</Text>
+        </LinearGradient>
+        <Text style={styles.tagline}>{APP_TAGLINE}</Text>
+      </View>
 
-      {loading ? (
+      {hasLeagues ? (
+        <ScreenHeader
+          title={copy.homeTitle}
+          actionLabel={copy.newAction}
+          onAction={() => navigation.navigate('CreateLeague')}
+        />
+      ) : null}
+
+      <ErrorBanner message={error} />
+
+      {loading && !hasLeagues ? (
         <ActivityIndicator style={styles.loader} color={colors.primary} />
       ) : (
         <FlatList
           data={leagues}
           keyExtractor={(item) => String(item.id)}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => {
-              setRefreshing(true);
-              loadLeagues();
-            }} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                loadLeagues();
+              }}
+              tintColor={colors.primary}
+            />
           }
-          contentContainerStyle={leagues.length === 0 ? styles.emptyList : undefined}
+          contentContainerStyle={hasLeagues ? styles.list : styles.emptyList}
           ListEmptyComponent={
-            <Text style={styles.empty}>{copy.homeEmpty}</Text>
+            error ? (
+              <Text style={styles.retryHint}>Pull down to try again.</Text>
+            ) : (
+              <GlassCard style={styles.emptyCard}>
+                <Text style={styles.emptyEmoji}>🏆</Text>
+                <Text style={styles.emptyTitle}>{copy.homeEmpty}</Text>
+                <Text style={styles.emptyBody}>
+                  A league can be sports, game night, or both. Standings live here after you add games.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('CreateLeague')}
+                  activeOpacity={0.85}
+                >
+                  <LinearGradient
+                    colors={[...gradients.button]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={styles.emptyButton}
+                  >
+                    <Text style={styles.emptyButtonText}>Create a league</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </GlassCard>
+            )
           }
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.card}
-              onPress={() => navigation.navigate('League', { slug: item.slug, name: item.name })}
-            >
-              <Text style={styles.cardTitle}>{item.name}</Text>
-              <Text style={styles.cardMeta}>
-                {item.sports.length} {item.sports.length === 1 ? copy.itemWord : copy.itemWordPlural}
-                {' · '}
-                {item.visibility}
-              </Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item }) => {
+            const sport = item.sports?.[0];
+            return (
+              <GlassCard
+                style={styles.leagueCard}
+                onPress={() => navigation.navigate('League', { slug: item.slug, name: item.name })}
+              >
+                <View style={styles.leagueRow}>
+                  {sport ? (
+                    <TemplateGlyph
+                      template={{
+                        id: sport.template_id,
+                        category: sport.category || 'custom',
+                      }}
+                      size={26}
+                    />
+                  ) : null}
+                  <View style={styles.leagueCopy}>
+                    <Text style={styles.cardTitle} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                    <Text style={styles.cardMeta}>
+                      {sport?.name || 'No games yet'}
+                      {' · '}
+                      {item.visibility}
+                    </Text>
+                  </View>
+                </View>
+              </GlassCard>
+            );
+          }}
         />
       )}
-
-      <TouchableOpacity style={styles.logout} onPress={logout}>
-        <Text style={styles.logoutText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
+    </ScreenScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  subtitle: {
-    paddingHorizontal: spacing.md,
-    color: colors.textMuted,
-    marginBottom: spacing.xs,
-  },
-  user: {
-    paddingHorizontal: spacing.md,
-    color: colors.textMuted,
-    fontSize: 13,
+  hero: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
+  },
+  brandBadge: {
+    borderRadius: 14,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+  brand: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#fff',
+  },
+  tagline: {
+    marginTop: spacing.md,
+    fontSize: 16,
+    color: colors.textMuted,
+    textAlign: 'center',
   },
   loader: {
     marginTop: spacing.xl,
   },
+  list: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+  },
   emptyList: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
-  empty: {
+  emptyCard: {
+    padding: spacing.xl,
+    alignItems: 'center',
+  },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: spacing.md,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text,
     textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  emptyBody: {
+    fontSize: 15,
+    lineHeight: 22,
     color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  emptyButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.xl,
+  },
+  emptyButtonText: {
+    color: '#fff',
+    fontWeight: '700',
     fontSize: 16,
   },
-  card: {
-    backgroundColor: colors.surface,
-    marginHorizontal: spacing.md,
+  retryHint: {
+    textAlign: 'center',
+    color: colors.textMuted,
+    fontSize: 15,
+  },
+  leagueCard: {
+    padding: spacing.lg,
     marginBottom: spacing.md,
-    padding: spacing.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+  },
+  leagueRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.md,
+  },
+  leagueCopy: {
+    flex: 1,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.text,
   },
   cardMeta: {
@@ -144,12 +292,25 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textTransform: 'capitalize',
   },
-  logout: {
-    padding: spacing.lg,
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  user: {
+    color: colors.textMuted,
+    fontSize: 13,
+    maxWidth: '62%',
+  },
+  footerDot: {
+    color: colors.textMuted,
   },
   logoutText: {
-    color: colors.danger,
-    fontWeight: '600',
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 15,
   },
 });

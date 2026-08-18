@@ -7,6 +7,7 @@ from api.sport_templates import (
     VISIBILITY_OPTIONS,
     focus_for_template,
     get_template,
+    typical_win_score_for,
 )
 
 
@@ -215,17 +216,27 @@ def get_league_by_slug(slug):
 
 
 def get_leagues_for_user(user_id):
-    rows = db_manager.execute_query(
+    db_manager.execute_query(
         """
-        SELECT l.*, lm.role
-        FROM leagues l
-        JOIN league_members lm ON lm.league_id = l.id
-        WHERE lm.user_id = ?
-        ORDER BY l.updated_at DESC
+        INSERT OR IGNORE INTO league_members (league_id, user_id, role)
+        SELECT id, owner_id, 'owner' FROM leagues WHERE owner_id = ?
         """,
         (user_id,),
+        fetch_all=False,
     )
-    return [_row_to_dict(row) for row in rows]
+    rows = db_manager.execute_query(
+        """
+        SELECT l.*, COALESCE(lm.role, 'owner') AS role
+        FROM leagues l
+        LEFT JOIN league_members lm
+          ON lm.league_id = l.id AND lm.user_id = ?
+        WHERE l.owner_id = ? OR lm.user_id = ?
+        GROUP BY l.id
+        ORDER BY l.updated_at DESC
+        """,
+        (user_id, user_id, user_id),
+    )
+    return [_row_to_dict(row) for row in rows or []]
 
 
 def get_sports_for_league(league_id):
@@ -301,16 +312,18 @@ def league_to_dict(league, include_invite_code=False):
 def sport_to_dict(sport):
     if sport is None:
         return None
-    template = get_template(sport["template_id"]) or {}
+    template_id = sport.get("template_id")
+    template = get_template(template_id) or {}
     return {
         "id": sport["id"],
         "league_id": sport["league_id"],
         "name": sport["name"],
-        "template_id": sport["template_id"],
+        "template_id": template_id,
         "category": template.get("category", "custom"),
-        "players_per_side": sport["players_per_side"],
-        "score_direction": sport["score_direction"],
+        "players_per_side": sport.get("players_per_side") or 1,
+        "score_direction": sport.get("score_direction") or "higher_wins",
         "score_mode": template.get("score_mode", "points"),
-        "min_games_for_rank": sport["min_games_for_rank"],
-        "created_at": sport["created_at"],
+        "typical_win_score": typical_win_score_for(template_id),
+        "min_games_for_rank": sport.get("min_games_for_rank") or 1,
+        "created_at": sport.get("created_at"),
     }

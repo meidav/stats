@@ -299,7 +299,11 @@ def login():
                 flash('Successfully logged in!', 'success')
                 print(f"DEBUG: User {username} logged in successfully")
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('index'))
+                if next_page:
+                    return redirect(next_page)
+                if user.is_admin:
+                    return redirect(url_for('admin_dashboard'))
+                return redirect(url_for('index'))
             else:
                 print(f"DEBUG: Invalid password for user {username}")
                 flash('Invalid username or password', 'danger')
@@ -321,7 +325,41 @@ def admin_dashboard():
     """Admin dashboard"""
     users = get_all_users()
     players_count = count_all_players()
-    return render_template('admin_dashboard.html', users=users, players_count=players_count)
+    jwt_days = 30
+    try:
+        from api.app_settings import jwt_access_token_days
+        jwt_days = jwt_access_token_days()
+    except Exception:
+        pass
+    return render_template(
+        'admin_dashboard.html',
+        users=users,
+        players_count=players_count,
+        jwt_access_token_days=jwt_days,
+    )
+
+
+@app.route('/admin/settings', methods=['POST'])
+@admin_required
+def admin_save_settings():
+    raw = (request.form.get('jwt_access_token_days') or '').strip()
+    try:
+        days = int(raw)
+    except ValueError:
+        flash('Session duration must be a number of days.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+    if days < 1 or days > 365:
+        flash('Session duration must be between 1 and 365 days.', 'danger')
+        return redirect(url_for('admin_dashboard'))
+    try:
+        from api.app_settings import apply_runtime_settings, set_setting
+        set_setting('jwt_access_token_days', days)
+        apply_runtime_settings(app)
+    except Exception as exc:
+        flash(f'Could not save settings: {exc}', 'danger')
+        return redirect(url_for('admin_dashboard'))
+    flash(f'App session duration saved: {days} day{"s" if days != 1 else ""}. New sign-ins use this value.', 'success')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/users')
 @admin_required

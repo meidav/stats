@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { AuthCard, authInputStyle } from '../components/AuthCard';
+import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
 import { PasswordField } from '../components/PasswordField';
 import { AppleLogo, GoogleLogo } from '../components/icons';
@@ -70,7 +71,7 @@ export function LoginScreen({ navigation }: Props) {
         onChangeText={setPassword}
       />
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <ErrorBanner message={error} />
 
       <GradientButton
         label="Sign In"
@@ -138,10 +139,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
-  },
-  error: {
-    color: colors.danger,
-    marginBottom: spacing.sm,
   },
   footerRow: {
     flexDirection: 'row',

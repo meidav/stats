@@ -1,3 +1,5 @@
+from urllib.parse import unquote
+
 from flask import jsonify, request
 from flask_jwt_extended import (
     create_access_token,
@@ -26,6 +28,7 @@ from api.game_db import (
     game_to_dict,
     get_game_by_id,
     get_games_for_sport,
+    get_player_names_for_user,
     update_game,
     user_can_edit_league,
 )
@@ -49,7 +52,7 @@ from api.sport_templates import (
     list_templates,
     public_template,
 )
-from api.stats_service import compute_player_stats, compute_sport_stats
+from api.stats_service import compute_player_stats, compute_score_hints, compute_sport_stats
 
 
 def register_routes(api):
@@ -190,6 +193,8 @@ def register_routes(api):
             )
         except ValueError as exc:
             return jsonify({"error": str(exc)}), 400
+        except Exception as exc:
+            return jsonify({"error": f"Could not create league: {exc}"}), 500
 
         sports = []
         if sport_template_id:
@@ -214,15 +219,24 @@ def register_routes(api):
     @jwt_required()
     def my_leagues():
         user_id = int(get_jwt_identity())
-        leagues = get_leagues_for_user(user_id)
-        result = []
-        for league in leagues:
-            item = league_to_dict(league, include_invite_code=True)
-            item["sports"] = [
-                sport_to_dict(s) for s in get_sports_for_league(league["id"])
-            ]
-            result.append(item)
-        return jsonify({"leagues": result})
+        try:
+            leagues = get_leagues_for_user(user_id)
+            result = []
+            for league in leagues:
+                item = league_to_dict(league, include_invite_code=True)
+                item["sports"] = [
+                    sport_to_dict(s) for s in get_sports_for_league(league["id"]) or []
+                ]
+                result.append(item)
+            return jsonify({"leagues": result})
+        except Exception as exc:
+            return jsonify({"error": f"Could not load leagues: {exc}"}), 500
+
+    @api.route("/players", methods=["GET"])
+    @jwt_required()
+    def my_players():
+        user_id = int(get_jwt_identity())
+        return jsonify({"players": get_player_names_for_user(user_id)})
 
     @api.route("/leagues/<slug>", methods=["GET"])
     def get_league(slug):
@@ -365,7 +379,25 @@ def register_routes(api):
             return jsonify({"error": str(exc)}), 400
         return jsonify(stats)
 
-    @api.route("/sports/<int:sport_id>/players/<player_name>", methods=["GET"])
+    @api.route("/sports/<int:sport_id>/score-hints", methods=["GET"])
+    def sport_score_hints(sport_id):
+        sport = get_sport_by_id(sport_id)
+        if not sport:
+            return jsonify({"error": "sport not found"}), 404
+
+        league = get_league_by_id(sport["league_id"])
+        verify_jwt_in_request(optional=True)
+        identity = get_jwt_identity()
+        user_id = int(identity) if identity else None
+        if not user_can_access_league(user_id, league):
+            return jsonify({"error": "access denied"}), 403
+
+        try:
+            return jsonify(compute_score_hints(sport_id))
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @api.route("/sports/<int:sport_id>/players/<path:player_name>", methods=["GET"])
     def player_stats(sport_id, player_name):
         sport = get_sport_by_id(sport_id)
         if not sport:
@@ -379,7 +411,7 @@ def register_routes(api):
             return jsonify({"error": "access denied"}), 403
 
         year = request.args.get("year")
-        stats = compute_player_stats(sport_id, player_name, year=year)
+        stats = compute_player_stats(sport_id, unquote(player_name), year=year)
         return jsonify(stats)
 
     @api.route("/games/<int:game_id>", methods=["PUT"])

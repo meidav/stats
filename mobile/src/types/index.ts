@@ -12,6 +12,7 @@ export type SportTemplate = {
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
   score_mode: 'points' | 'win_loss';
+  typical_win_score?: number | null;
   default_name: string;
   configurable: boolean;
 };
@@ -25,6 +26,7 @@ export type Sport = {
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
   score_mode?: 'points' | 'win_loss';
+  typical_win_score?: number | null;
   min_games_for_rank: number;
   created_at: string;
 };
@@ -61,6 +63,7 @@ export type PlayerStat = {
   losses: number;
   games: number;
   win_pct: number;
+  plus_minus?: number;
 };
 
 export type SportStats = {
@@ -69,4 +72,23 @@ export type SportStats = {
   min_games: number;
   total_games: number;
   stats: PlayerStat[];
+  today_stats?: PlayerStat[];
+};
+
+export type PlayerProfile = {
+  sport_id: number;
+  sport_name?: string;
+  player: string;
+  year: string;
+  wins: number;
+  losses: number;
+  games: number;
+  win_pct: number;
+  plus_minus: number;
+  streak: string;
+  rank: number | null;
+  field_size: number;
+  last_results: string[];
+  partners: PlayerStat[];
+  opponents: PlayerStat[];
 };

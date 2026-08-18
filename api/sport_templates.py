@@ -210,6 +210,27 @@ def focus_for_template(template_id):
     return "mixed"
 
 
+TYPICAL_WIN_SCORES = {
+    "beach_volleyball_2s": 21,
+    "beach_volleyball_4s": 21,
+    "vollis": 21,
+    "tennis_singles": 6,
+    "tennis_doubles": 6,
+    "basketball_3v3": 21,
+    "gin": 100,
+    "cribbage": 121,
+    "spades": 500,
+    "hearts": 0,
+    "yahtzee": 250,
+    "scrabble": 350,
+    "catan": 10,
+}
+
+
+def typical_win_score_for(template_id):
+    return TYPICAL_WIN_SCORES.get(template_id)
+
+
 def public_template(template):
     return {
         "id": template["id"],
@@ -218,6 +239,7 @@ def public_template(template):
         "players_per_side": template["players_per_side"],
         "score_direction": template["score_direction"],
         "score_mode": template.get("score_mode", "points"),
+        "typical_win_score": typical_win_score_for(template["id"]),
         "default_name": template["default_name"],
         "configurable": template.get("configurable", False),
     }

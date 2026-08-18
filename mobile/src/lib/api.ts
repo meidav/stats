@@ -38,7 +38,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const message = (data as { error?: string }).error ?? 'Request failed';
+    const payload = data as { error?: string; msg?: string; message?: string };
+    const raw = payload.error || payload.msg || payload.message || '';
+    const lower = raw.toLowerCase();
+    let message = raw || `Request failed (${response.status})`;
+    if (response.status === 401 || lower.includes('expired') || lower.includes('token')) {
+      message = 'Your session expired. Sign out and sign in again.';
+    }
     throw new ApiError(message, response.status);
   }
 
@@ -107,6 +113,21 @@ export const api = {
   getSportStats: (sportId: number, token?: string | null, minGames = 1) =>
     request<import('../types').SportStats>(
       `/sports/${sportId}/stats?min_games=${minGames}`,
+      { token },
+    ),
+
+  getPlayerStats: (sportId: number, playerName: string, token?: string | null) =>
+    request<import('../types').PlayerProfile>(
+      `/sports/${sportId}/players/${encodeURIComponent(playerName)}`,
+      { token },
+    ),
+
+  getMyPlayers: (token: string) =>
+    request<{ players: string[] }>('/players', { token }),
+
+  getScoreHints: (sportId: number, token?: string | null) =>
+    request<{ winner_score: number | null; loser_scores: number[]; score_mode: string }>(
+      `/sports/${sportId}/score-hints`,
       { token },
     ),
 

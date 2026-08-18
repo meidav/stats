@@ -1,9 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useCallback, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -11,9 +13,17 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { colors, spacing } from '../constants/theme';
+import { ErrorBanner } from '../components/ErrorBanner';
+import { GlassCard } from '../components/GlassCard';
+import { ScreenScaffold } from '../components/ScreenScaffold';
+import { StatsTable } from '../components/StatsTable';
+import { TemplateGlyph } from '../components/TemplateGlyph';
+import { colors, gradients, spacing } from '../constants/theme';
+import { copyForFocus } from '../lib/focus';
 import { useAuth } from '../lib/auth';
-import { api } from '../lib/api';
+import { ApiError, api } from '../lib/api';
+import { upsertCachedLeague } from '../lib/leagueCache';
+import { firstResultCopy } from '../lib/names';
 import type { League, PlayerStat, Sport } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -25,25 +35,17 @@ export function LeagueScreen({ route, navigation }: Props) {
   const [league, setLeague] = useState<League | null>(null);
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [stats, setStats] = useState<PlayerStat[]>([]);
+  const [todayStats, setTodayStats] = useState<PlayerStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
+  const selectedIdRef = useRef<number | null>(null);
 
   const loadStats = useCallback(async (sport: Sport) => {
     const statsData = await api.getSportStats(sport.id, token, 1);
     setStats(statsData.stats);
+    setTodayStats(statsData.today_stats ?? []);
   }, [token]);
-
-  const loadLeague = useCallback(async () => {
-    const leagueData = await api.getLeague(slug, token);
-    setLeague(leagueData);
-    const sport = selectedSport ?? leagueData.sports[0] ?? null;
-    if (sport) {
-      setSelectedSport(sport);
-      await loadStats(sport);
-    } else {
-      setStats([]);
-    }
-  }, [slug, token, selectedSport, loadStats]);
 
   useFocusEffect(
     useCallback(() => {
@@ -54,10 +56,23 @@ export function LeagueScreen({ route, navigation }: Props) {
           const leagueData = await api.getLeague(slug, token);
           if (!active) return;
           setLeague(leagueData);
-          const sport = selectedSport ?? leagueData.sports[0] ?? null;
+          await upsertCachedLeague(leagueData);
+          const sport =
+            leagueData.sports.find((item) => item.id === selectedIdRef.current) ??
+            leagueData.sports[0] ??
+            null;
+          selectedIdRef.current = sport?.id ?? null;
+          setSelectedSport(sport);
           if (sport) {
-            setSelectedSport(sport);
             await loadStats(sport);
+          } else {
+            setStats([]);
+            setTodayStats([]);
+          }
+          setError('');
+        } catch (err) {
+          if (active) {
+            setError(err instanceof ApiError ? err.message : 'Could not load league');
           }
         } finally {
           if (active) {
@@ -74,45 +89,115 @@ export function LeagueScreen({ route, navigation }: Props) {
   );
 
   async function selectSport(sport: Sport) {
+    selectedIdRef.current = sport.id;
     setSelectedSport(sport);
     setLoading(true);
-    await loadStats(sport);
-    setLoading(false);
+    try {
+      await loadStats(sport);
+      setError('');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not load stats');
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleRefresh() {
     setRefreshing(true);
-    await loadLeague();
-    setRefreshing(false);
+    try {
+      const leagueData = await api.getLeague(slug, token);
+      setLeague(leagueData);
+      await upsertCachedLeague(leagueData);
+      const sport =
+        leagueData.sports.find((item) => item.id === selectedIdRef.current) ??
+        leagueData.sports[0] ??
+        null;
+      selectedIdRef.current = sport?.id ?? null;
+      setSelectedSport(sport);
+      if (sport) {
+        await loadStats(sport);
+      }
+      setError('');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not load league');
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  const leagueName = league?.name || name;
+  const copy = copyForFocus(league?.focus || 'mixed');
+  const openAddGame = () => {
+    if (!selectedSport) return;
+    navigation.navigate('AddGame', {
+      sportId: selectedSport.id,
+      sportName: selectedSport.name,
+      templateId: selectedSport.template_id,
+      playersPerSide: selectedSport.players_per_side,
+      scoreMode: selectedSport.score_mode,
+      focus: league?.focus,
+      leagueName,
+    });
+  };
+
+  function openPlayer(playerName: string) {
+    if (!selectedSport) return;
+    navigation.navigate('PlayerProfile', {
+      sportId: selectedSport.id,
+      playerName,
+      sportName: selectedSport.name,
+      leagueName,
+    });
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>Back</Text>
+    <ScreenScaffold>
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back} accessibilityLabel="Back">
+          <Ionicons name="chevron-back" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.title}>{name}</Text>
+        <View style={styles.topBarSpacer} />
         {selectedSport ? (
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('AddGame', {
-                sportId: selectedSport.id,
-                sportName: selectedSport.name,
-                playersPerSide: selectedSport.players_per_side,
-                scoreMode: selectedSport.score_mode,
-                focus: league?.focus,
-              })
-            }
-          >
-            <Text style={styles.add}>+ Game</Text>
+          <TouchableOpacity onPress={openAddGame} activeOpacity={0.85}>
+            <LinearGradient
+              colors={[...gradients.button]}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.addButton}
+            >
+              <Ionicons name="add" size={18} color="#fff" />
+              <Text style={styles.addButtonText}>Game</Text>
+            </LinearGradient>
           </TouchableOpacity>
         ) : (
-          <View style={styles.addPlaceholder} />
+          <View style={styles.topBarSpacer} />
         )}
       </View>
 
-      {league?.sports.length ? (
+      <Text
+        style={styles.leagueName}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.62}
+      >
+        {leagueName}
+      </Text>
+      {selectedSport ? (
+        <View style={styles.sportMeta}>
+          <TemplateGlyph
+            template={{
+              id: selectedSport.template_id,
+              category: selectedSport.category || 'custom',
+            }}
+            size={18}
+          />
+          <Text style={styles.sportMetaText} numberOfLines={1}>
+            {selectedSport.name}
+          </Text>
+        </View>
+      ) : null}
+
+      {league && league.sports.length > 1 ? (
         <View style={styles.sportTabs}>
           {league.sports.map((sport) => (
             <TouchableOpacity
@@ -120,6 +205,10 @@ export function LeagueScreen({ route, navigation }: Props) {
               style={[styles.tab, selectedSport?.id === sport.id && styles.tabActive]}
               onPress={() => selectSport(sport)}
             >
+              <TemplateGlyph
+                template={{ id: sport.template_id, category: sport.category || 'custom' }}
+                size={16}
+              />
               <Text
                 style={[
                   styles.tabText,
@@ -133,84 +222,137 @@ export function LeagueScreen({ route, navigation }: Props) {
         </View>
       ) : null}
 
+      <ErrorBanner message={error} />
+
       {loading ? (
         <ActivityIndicator style={styles.loader} color={colors.primary} />
       ) : (
-        <FlatList
-          data={stats}
-          keyExtractor={(item) => item.player}
+        <ScrollView
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />
           }
           contentContainerStyle={stats.length === 0 ? styles.emptyList : styles.list}
-          ListEmptyComponent={
-            <Text style={styles.empty}>No stats yet. Add your first game.</Text>
-          }
-          renderItem={({ item, index }) => (
-            <View style={styles.row}>
-              <Text style={styles.rank}>{index + 1}</Text>
-              <View style={styles.playerBlock}>
-                <Text style={styles.player}>{item.player}</Text>
-                <Text style={styles.record}>
-                  {item.wins}-{item.losses} · {(item.win_pct * 100).toFixed(0)}%
-                </Text>
-              </View>
-            </View>
+        >
+          {stats.length === 0 ? (
+            <GlassCard style={styles.emptyCard}>
+              {selectedSport ? (
+                <TemplateGlyph
+                  template={{
+                    id: selectedSport.template_id,
+                    category: selectedSport.category || 'custom',
+                  }}
+                  size={36}
+                />
+              ) : null}
+              <Text style={styles.emptyTitle}>No stats yet</Text>
+              <Text style={styles.emptyBody}>
+                {firstResultCopy(selectedSport?.name || 'game', selectedSport?.template_id)}
+              </Text>
+              {selectedSport ? (
+                <TouchableOpacity onPress={openAddGame} activeOpacity={0.85}>
+                  <LinearGradient
+                    colors={[...gradients.button]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={styles.emptyButton}
+                  >
+                    <Text style={styles.emptyButtonText}>{copy.addGameTitle}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ) : null}
+            </GlassCard>
+          ) : (
+            <>
+              <StatsTable
+                title="Today's stats"
+                stats={todayStats}
+                onPlayerPress={openPlayer}
+              />
+              <StatsTable
+                title="Standings"
+                stats={stats}
+                showPlusMinus={false}
+                onPlayerPress={openPlayer}
+              />
+            </>
           )}
-        />
+        </ScrollView>
       )}
-    </View>
+    </ScreenScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  topBarSpacer: {
+    flex: 1,
   },
   back: {
-    color: colors.primary,
-    fontWeight: '600',
-    width: 48,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
+  leagueName: {
+    fontSize: 26,
+    fontWeight: '800',
     color: colors.text,
-    flex: 1,
     textAlign: 'center',
+    paddingHorizontal: spacing.lg,
   },
-  add: {
-    color: colors.primary,
+  sportMeta: {
+    marginTop: 6,
+    marginBottom: spacing.md,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+    paddingHorizontal: spacing.lg,
+    maxWidth: '90%',
+  },
+  sportMetaText: {
+    color: colors.textMuted,
     fontWeight: '700',
-    width: 48,
-    textAlign: 'right',
+    fontSize: 14,
+    flexShrink: 1,
   },
-  addPlaceholder: {
-    width: 48,
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
   },
   sportTabs: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
   },
   tab: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 6,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: 20,
-    backgroundColor: colors.surface,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: 'rgba(255, 255, 255, 0.45)',
   },
   tabActive: {
     backgroundColor: colors.primary,
@@ -228,7 +370,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   list: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
   },
   emptyList: {
@@ -236,36 +378,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.lg,
   },
-  empty: {
-    textAlign: 'center',
-    color: colors.textMuted,
-    fontSize: 16,
-  },
-  row: {
-    flexDirection: 'row',
+  emptyCard: {
+    padding: spacing.xl,
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
-  rank: {
-    width: 28,
-    fontWeight: '700',
-    color: colors.textMuted,
-  },
-  playerBlock: {
-    flex: 1,
-  },
-  player: {
-    fontSize: 17,
-    fontWeight: '700',
+  emptyTitle: {
+    marginTop: spacing.md,
+    fontSize: 20,
+    fontWeight: '800',
     color: colors.text,
   },
-  record: {
+  emptyBody: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
+    fontSize: 15,
+    lineHeight: 22,
     color: colors.textMuted,
-    marginTop: 2,
+    textAlign: 'center',
+  },
+  emptyButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.xl,
+  },
+  emptyButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
   },
 });

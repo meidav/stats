@@ -4605,6 +4605,55 @@ tr.table-double-row td {
   margin-bottom: 18px;
 }
 
+.admin-settings-card {
+  max-width: 720px;
+  margin: 0 auto 22px;
+  padding: 16px 16px 14px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--table-border);
+}
+
+.admin-settings-title {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.admin-settings-copy,
+.admin-settings-hint {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.admin-settings-hint {
+  margin: 10px 0 0;
+}
+
+.admin-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-settings-row .form-field-compact {
+  max-width: 120px;
+  margin: 0;
+}
+
+.admin-settings-save {
+  appearance: none;
+  border: 0;
+  background: var(--link-color);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
 .admin-link-list {
   display: flex;
   flex-direction: column;

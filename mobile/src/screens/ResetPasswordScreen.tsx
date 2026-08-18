@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 
 import { AuthCard, authInputStyle } from '../components/AuthCard';
+import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
 import { PasswordField } from '../components/PasswordField';
 import { colors, spacing } from '../constants/theme';
@@ -71,7 +72,7 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
 
       <Text style={styles.hint}>Use at least 8 characters.</Text>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <ErrorBanner message={error} />
 
       <GradientButton
         label="Update password"
@@ -93,10 +94,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: -spacing.sm,
     marginBottom: spacing.md,
-  },
-  error: {
-    color: colors.danger,
-    marginBottom: spacing.sm,
   },
   backLink: {
     alignItems: 'center',

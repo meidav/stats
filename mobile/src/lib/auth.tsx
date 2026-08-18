@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { api } from './api';
+import { clearCachedLeagues } from './leagueCache';
+import { clearCachedPlayers } from './playerCache';
 import type { User } from '../types';
 
 const TOKEN_KEY = 'playtracker_token';
@@ -75,6 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     await AsyncStorage.removeItem(TOKEN_KEY);
     await AsyncStorage.removeItem(USER_KEY);
+    await clearCachedLeagues();
+    await clearCachedPlayers();
   }, []);
 
   const value = useMemo(

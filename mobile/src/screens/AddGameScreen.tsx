@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,19 +9,33 @@ import {
   View,
 } from 'react-native';
 
+import { ErrorBanner } from '../components/ErrorBanner';
+import { GradientButton } from '../components/GradientButton';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenScaffold } from '../components/ScreenScaffold';
 import { colors, spacing } from '../constants/theme';
 import { copyForFocus } from '../lib/focus';
-import { ApiError } from '../lib/api';
+import { autoCapWords } from '../lib/names';
+import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { api } from '../lib/api';
+import { loadCachedLeagues } from '../lib/leagueCache';
+import { loadCachedPlayers, rememberPlayers } from '../lib/playerCache';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddGame'>;
+type FocusField = { side: 'winner' | 'loser'; index: number } | 'winnerScore' | 'loserScore' | null;
 
 export function AddGameScreen({ route, navigation }: Props) {
-  const { sportId, sportName, playersPerSide, scoreMode = 'points', focus = 'mixed' } = route.params;
+  const {
+    sportId,
+    sportName,
+    playersPerSide,
+    scoreMode = 'points',
+    focus = 'mixed',
+  } = route.params;
   const { token } = useAuth();
   const winLoss = scoreMode === 'win_loss';
+  const oneOnOne = playersPerSide === 1;
   const [winnerNames, setWinnerNames] = useState<string[]>(
     Array.from({ length: playersPerSide }, () => ''),
   );
@@ -31,32 +44,99 @@ export function AddGameScreen({ route, navigation }: Props) {
   );
   const [winnerScore, setWinnerScore] = useState('');
   const [loserScore, setLoserScore] = useState('');
+  const [players, setPlayers] = useState<string[]>([]);
+  const [winnerHint, setWinnerHint] = useState<number | null>(null);
+  const [loserHints, setLoserHints] = useState<number[]>([]);
+  const [focusField, setFocusField] = useState<FocusField>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+    async function loadHints() {
+      if (!token) return;
+      const cached = await loadCachedPlayers();
+      if (active && cached.length) setPlayers(cached);
+
+      const leagues = await loadCachedLeagues();
+      const [remote, sportGames, ...sportStats] = await Promise.all([
+        api.getMyPlayers(token).catch(() => ({ players: [] as string[] })),
+        api.getSportGames(sportId, token).catch(() => ({ games: [] as Array<{ winners: string[]; losers: string[] }> })),
+        ...leagues.flatMap((league) =>
+          (league.sports || []).map((sport) =>
+            api.getSportStats(sport.id, token, 1).catch(() => ({ stats: [] as Array<{ player: string }> })),
+          ),
+        ),
+      ]);
+      if (!active) return;
+      const fromGames = (sportGames.games || []).flatMap((game) => [...game.winners, ...game.losers]);
+      const fromStats = sportStats.flatMap((item) => (item.stats || []).map((row) => row.player));
+      const merged = await rememberPlayers([
+        ...(remote.players || []),
+        ...fromGames,
+        ...fromStats,
+        ...cached,
+      ]);
+      setPlayers(merged);
+
+      if (!winLoss) {
+        try {
+          const hints = await api.getScoreHints(sportId, token);
+          if (!active) return;
+          setWinnerHint(hints.winner_score);
+          setLoserHints(hints.loser_scores ?? []);
+        } catch {
+          // Score chips are optional.
+        }
+      }
+    }
+    loadHints();
+    return () => {
+      active = false;
+    };
+  }, [token, sportId, winLoss]);
+
   const winnerLabels = useMemo(
-    () => Array.from({ length: playersPerSide }, (_, i) => `Winner ${i + 1}`),
-    [playersPerSide],
+    () =>
+      Array.from({ length: playersPerSide }, (_, i) =>
+        oneOnOne ? 'Winner' : `Winner ${i + 1}`,
+      ),
+    [playersPerSide, oneOnOne],
   );
   const loserLabels = useMemo(
-    () => Array.from({ length: playersPerSide }, (_, i) => `Loser ${i + 1}`),
-    [playersPerSide],
+    () =>
+      Array.from({ length: playersPerSide }, (_, i) =>
+        oneOnOne ? 'Loser' : `Loser ${i + 1}`,
+      ),
+    [playersPerSide, oneOnOne],
   );
 
-  function updateName(
-    side: 'winner' | 'loser',
-    index: number,
-    value: string,
-  ) {
+  function suggestionsFor(value: string) {
+    const query = value.trim().toLowerCase();
+    const taken = [...winnerNames, ...loserNames]
+      .map((name) => name.trim().toLowerCase())
+      .filter((name) => name && name !== query);
+    return players
+      .filter((name) => !taken.includes(name.toLowerCase()))
+      .filter((name) => !query || name.toLowerCase().includes(query))
+      .slice(0, 8);
+  }
+
+  function updateName(side: 'winner' | 'loser', index: number, value: string) {
+    const next = autoCapWords(value);
     if (side === 'winner') {
-      setWinnerNames((prev) => prev.map((name, i) => (i === index ? value : name)));
+      setWinnerNames((prev) => prev.map((name, i) => (i === index ? next : name)));
     } else {
-      setLoserNames((prev) => prev.map((name, i) => (i === index ? value : name)));
+      setLoserNames((prev) => prev.map((name, i) => (i === index ? next : name)));
     }
   }
 
   async function handleSubmit() {
-    if (!token) return;
+    if (!token) {
+      setError('Your session expired. Sign out and sign in again.');
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -75,6 +155,7 @@ export function AddGameScreen({ route, navigation }: Props) {
         payload.loser_score = Number(loserScore);
       }
       await api.addGame(token, sportId, payload);
+      await rememberPlayers([...payload.winners, ...payload.losers]);
       navigation.goBack();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not save game');
@@ -83,88 +164,137 @@ export function AddGameScreen({ route, navigation }: Props) {
     }
   }
 
+  function renderNameField(
+    side: 'winner' | 'loser',
+    label: string,
+    index: number,
+    value: string,
+  ) {
+    const focused = focusField && typeof focusField === 'object' && focusField.side === side && focusField.index === index;
+    const matches = focused ? suggestionsFor(value) : [];
+    return (
+      <View key={`${side}-${index}`} style={styles.fieldWrap}>
+        <TextInput
+          style={styles.input}
+          placeholder={label}
+          placeholderTextColor={colors.textMuted}
+          autoCapitalize="words"
+          autoCorrect={false}
+          value={value}
+          onFocus={() => setFocusField({ side, index })}
+          onChangeText={(next) => updateName(side, index, next)}
+        />
+        {matches.length > 0 ? (
+          <View style={styles.suggestList}>
+            {matches.map((name) => (
+              <TouchableOpacity
+                key={name}
+                style={styles.suggestItem}
+                onPressIn={() => {
+                  updateName(side, index, name);
+                  setFocusField(null);
+                }}
+              >
+                <Text style={styles.suggestText}>{name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{copyForFocus(focus).addGameTitle}</Text>
-      <Text style={styles.subtitle}>{sportName}</Text>
-
-      <Text style={styles.section}>Winners</Text>
-      {winnerLabels.map((label, index) => (
-        <TextInput
-          key={`w-${index}`}
-          style={styles.input}
-          placeholder={label}
-          value={winnerNames[index]}
-          onChangeText={(value) => updateName('winner', index, value)}
-        />
-      ))}
-
-      <Text style={styles.section}>Losers</Text>
-      {loserLabels.map((label, index) => (
-        <TextInput
-          key={`l-${index}`}
-          style={styles.input}
-          placeholder={label}
-          value={loserNames[index]}
-          onChangeText={(value) => updateName('loser', index, value)}
-        />
-      ))}
-
-      {winLoss ? (
-        <Text style={styles.hint}>Just who won. Scores are optional for this game.</Text>
-      ) : (
-        <View style={styles.scoreRow}>
-          <View style={styles.scoreField}>
-            <Text style={styles.label}>Winner score</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="number-pad"
-              value={winnerScore}
-              onChangeText={setWinnerScore}
-            />
-          </View>
-          <View style={styles.scoreField}>
-            <Text style={styles.label}>Loser score</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="number-pad"
-              value={loserScore}
-              onChangeText={setLoserScore}
-            />
-          </View>
+    <ScreenScaffold
+      keyboard
+      footer={
+        <View style={styles.footer}>
+          <ErrorBanner message={error} />
+          <GradientButton label="Save game" onPress={handleSubmit} loading={loading} disabled={loading} />
         </View>
-      )}
+      }
+    >
+      <ScreenHeader title={copyForFocus(focus).addGameTitle} onBack={() => navigation.goBack()} />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets
+      >
+        <Text style={styles.subtitle}>{sportName}</Text>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+        <Text style={styles.section}>{oneOnOne ? 'Winner' : 'Winners'}</Text>
+        {winnerLabels.map((label, index) => renderNameField('winner', label, index, winnerNames[index]))}
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color="#fff" />
+        <Text style={styles.section}>{oneOnOne ? 'Loser' : 'Losers'}</Text>
+        {loserLabels.map((label, index) => renderNameField('loser', label, index, loserNames[index]))}
+
+        {winLoss ? (
+          <Text style={styles.hint}>Just who won.</Text>
         ) : (
-          <Text style={styles.buttonText}>Save Game</Text>
+          <View style={styles.scoreRow}>
+            <View style={styles.scoreField}>
+              <Text style={styles.label}>Winner score</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="number-pad"
+                value={winnerScore}
+                onFocus={() => setFocusField('winnerScore')}
+                onChangeText={setWinnerScore}
+              />
+              {winnerHint != null ? (
+                <View style={styles.chipRow}>
+                  <TouchableOpacity style={styles.scoreChip} onPress={() => setWinnerScore(String(winnerHint))}>
+                    <Text style={styles.scoreChipText}>{winnerHint}</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : null}
+            </View>
+            <View style={styles.scoreField}>
+              <Text style={styles.label}>Loser score</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="number-pad"
+                value={loserScore}
+                onFocus={() => setFocusField('loserScore')}
+                onChangeText={setLoserScore}
+              />
+              {loserHints.length ? (
+                <View style={styles.chipRow}>
+                  {loserHints.map((score) => (
+                    <TouchableOpacity
+                      key={score}
+                      style={styles.scoreChip}
+                      onPress={() => setLoserScore(String(score))}
+                    >
+                      <Text style={styles.scoreChipText}>{score}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          </View>
         )}
-      </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </ScreenScaffold>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text,
+  footer: {
+    paddingHorizontal: spacing.lg,
   },
   subtitle: {
     color: colors.textMuted,
     marginBottom: spacing.lg,
-    marginTop: spacing.xs,
   },
   section: {
     fontWeight: '700',
@@ -177,14 +307,37 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.xs,
   },
+  fieldWrap: {
+    marginBottom: spacing.sm,
+  },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 10,
     padding: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
     fontSize: 16,
-    marginBottom: spacing.sm,
+    color: colors.text,
+    marginBottom: 0,
+  },
+  suggestList: {
+    marginTop: 4,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.22)',
+    overflow: 'hidden',
+    zIndex: 2,
+  },
+  suggestItem: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(15, 23, 42, 0.08)',
+  },
+  suggestText: {
+    color: colors.text,
+    fontWeight: '600',
   },
   hint: {
     color: colors.textMuted,
@@ -199,20 +352,21 @@ const styles = StyleSheet.create({
   scoreField: {
     flex: 1,
   },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginTop: spacing.lg,
+  chipRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
   },
-  buttonText: {
-    color: '#fff',
+  scoreChip: {
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.28)',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  scoreChipText: {
+    color: colors.primary,
     fontWeight: '700',
-    fontSize: 16,
-  },
-  error: {
-    color: colors.danger,
-    marginTop: spacing.md,
   },
 });
