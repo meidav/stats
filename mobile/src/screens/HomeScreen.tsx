@@ -19,7 +19,8 @@ import { GlassCard } from '../components/GlassCard';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { LeagueIcon } from '../components/LeagueIcon';
-import { APP_NAME, APP_TAGLINE } from '../constants/brand';
+import { BrandLockup } from '../components/BrandLockup';
+import { APP_TAGLINE } from '../constants/brand';
 import { colors, gradients, spacing } from '../constants/theme';
 import { copyForFocus, focusFromLeagues } from '../lib/focus';
 import { useAuth } from '../lib/auth';
@@ -39,6 +40,7 @@ export function HomeScreen({ navigation }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<League | null>(null);
   const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
   const [deleting, setDeleting] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
 
   const loadLeagues = useCallback(async (showSpinner = false) => {
     if (!token) return;
@@ -129,21 +131,14 @@ export function HomeScreen({ navigation }: Props) {
             {user?.email || user?.username}
           </Text>
           <Text style={styles.footerDot}>·</Text>
-          <TouchableOpacity onPress={logout}>
+          <TouchableOpacity onPress={() => setSignOutOpen(true)}>
             <Text style={styles.logoutText}>Sign out</Text>
           </TouchableOpacity>
         </View>
       }
     >
       <View style={styles.hero}>
-        <LinearGradient
-          colors={[...gradients.brandText]}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={styles.brandBadge}
-        >
-          <Text style={styles.brand}>{APP_NAME}</Text>
-        </LinearGradient>
+        <BrandLockup size={120} />
         <Text style={styles.tagline}>{APP_TAGLINE}</Text>
       </View>
 
@@ -326,6 +321,47 @@ export function HomeScreen({ navigation }: Props) {
           </LinearGradient>
         </View>
       </Modal>
+
+      <Modal
+        visible={signOutOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSignOutOpen(false)}
+      >
+        <View style={styles.signOutScrim}>
+          <LinearGradient
+            colors={['#BFDBFE', '#C4B5FD', '#93C5FD']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.signOutCard}
+          >
+            <View style={styles.signOutHeader}>
+              <Ionicons name="log-out-outline" size={26} color={colors.primaryDark} />
+              <Text style={styles.signOutTitle}>Sign out?</Text>
+            </View>
+            <Text style={styles.signOutBody}>
+              You can sign back in anytime with the same account.
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.signOutStay}
+                onPress={() => setSignOutOpen(false)}
+              >
+                <Text style={styles.signOutStayText}>Stay signed in</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.signOutConfirm}
+                onPress={() => {
+                  setSignOutOpen(false);
+                  logout();
+                }}
+              >
+                <Text style={styles.signOutConfirmText}>Sign out</Text>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </View>
+      </Modal>
     </ScreenScaffold>
   );
 }
@@ -336,18 +372,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
   },
-  brandBadge: {
-    borderRadius: 14,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-  },
-  brand: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#fff',
-  },
   tagline: {
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     fontSize: 16,
     color: colors.textMuted,
     textAlign: 'center',
@@ -557,6 +583,62 @@ const styles = StyleSheet.create({
     backgroundColor: '#9F1239',
   },
   modalDeleteText: {
+    fontWeight: '700',
+    color: '#fff',
+  },
+  signOutScrim: {
+    flex: 1,
+    backgroundColor: 'rgba(30, 58, 138, 0.42)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  signOutCard: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 20,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.28)',
+  },
+  signOutHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: spacing.sm,
+  },
+  signOutTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.text,
+  },
+  signOutBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  signOutStay: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: 'rgba(49, 16, 101, 0.4)',
+  },
+  signOutStayText: {
+    fontWeight: '700',
+    color: colors.text,
+  },
+  signOutConfirm: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+  },
+  signOutConfirmText: {
     fontWeight: '700',
     color: '#fff',
   },

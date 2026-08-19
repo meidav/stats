@@ -54,7 +54,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
       <TextInput
         style={authInputStyle}
         placeholder="Email"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.onGlassMuted}
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="email-address"
@@ -81,7 +81,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   message: {
-    color: colors.text,
+    color: colors.onGlass,
     fontSize: 15,
     lineHeight: 22,
     textAlign: 'center',
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   backLinkText: {
-    color: colors.primary,
+    color: colors.linkOnGlass,
     fontSize: 15,
     fontWeight: '600',
   },

@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import {
   KeyboardAvoidingView,
@@ -10,16 +9,18 @@ import {
   ViewStyle,
 } from 'react-native';
 
-import { APP_NAME, APP_TAGLINE } from '../constants/brand';
-import { colors, glass, gradients, spacing } from '../constants/theme';
+import { BrandLockup } from './BrandLockup';
+import { APP_TAGLINE } from '../constants/brand';
+import { colors, glass, spacing } from '../constants/theme';
 
 type Props = {
   children: React.ReactNode;
   subtitle?: string;
   style?: ViewStyle;
+  footer?: React.ReactNode;
 };
 
-export function AuthCard({ children, subtitle, style }: Props) {
+export function AuthCard({ children, subtitle, style, footer }: Props) {
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -31,18 +32,14 @@ export function AuthCard({ children, subtitle, style }: Props) {
         bounces={false}
       >
         <View style={[styles.card, style]}>
-          <LinearGradient
-            colors={[...gradients.brandText]}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={styles.brandGradient}
-          >
-            <Text style={styles.brand}>{APP_NAME}</Text>
-          </LinearGradient>
+          <View style={styles.brandWrap}>
+            <BrandLockup size={132} />
+          </View>
           <Text style={styles.tagline}>{APP_TAGLINE}</Text>
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
           {children}
         </View>
+        {footer ? <View style={styles.belowCard}>{footer}</View> : null}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -50,13 +47,13 @@ export function AuthCard({ children, subtitle, style }: Props) {
 
 export const authInputStyle = {
   borderWidth: 1,
-  borderColor: 'rgba(255, 255, 255, 0.45)',
+  borderColor: 'rgba(196, 181, 253, 0.45)',
   borderRadius: 10,
   padding: spacing.md,
   marginBottom: spacing.md,
   fontSize: 16,
-  backgroundColor: 'rgba(255, 255, 255, 0.35)',
-  color: colors.text,
+  backgroundColor: 'rgba(76, 29, 149, 0.22)',
+  color: colors.onGlass,
 } as const;
 
 const styles = StyleSheet.create({
@@ -67,6 +64,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: spacing.lg,
+  },
+  belowCard: {
+    marginTop: spacing.lg,
+    alignItems: 'center',
   },
   card: {
     backgroundColor: glass.backgroundColor,
@@ -80,32 +81,24 @@ const styles = StyleSheet.create({
     shadowOffset: glass.shadowOffset,
     elevation: glass.elevation,
   },
-  brandGradient: {
+  brandWrap: {
     alignSelf: 'center',
-    borderRadius: 14,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-  },
-  brand: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#fff',
-    textAlign: 'center',
+    marginBottom: spacing.sm,
   },
   tagline: {
     fontSize: 16,
-    color: colors.textMuted,
+    color: colors.onGlassMuted,
     textAlign: 'center',
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     marginBottom: spacing.lg,
   },
   subtitle: {
     fontSize: 15,
-    color: colors.text,
+    color: colors.onGlass,
     textAlign: 'center',
     marginTop: -spacing.sm,
     marginBottom: spacing.lg,
     lineHeight: 22,
-    opacity: 0.82,
+    opacity: 0.92,
   },
 });

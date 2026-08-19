@@ -19,7 +19,7 @@ export function PasswordField({ style, ...props }: Props) {
       <TextInput
         {...props}
         style={[authInputStyle, styles.input, style]}
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.onGlassMuted}
         secureTextEntry={!visible}
         autoCapitalize="none"
         autoCorrect={false}
@@ -33,7 +33,7 @@ export function PasswordField({ style, ...props }: Props) {
         <Ionicons
           name={visible ? icons.eyeOff : icons.eye}
           size={20}
-          color={colors.textMuted}
+          color={colors.onGlassMuted}
         />
       </TouchableOpacity>
     </View>

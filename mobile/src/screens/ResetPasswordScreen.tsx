@@ -49,7 +49,7 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
       <TextInput
         style={authInputStyle}
         placeholder="Reset code"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.onGlassMuted}
         autoCapitalize="none"
         autoCorrect={false}
         value={token}
@@ -90,7 +90,7 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   hint: {
-    color: colors.textMuted,
+    color: colors.onGlassMuted,
     fontSize: 13,
     marginTop: -spacing.sm,
     marginBottom: spacing.md,
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   backLinkText: {
-    color: colors.primary,
+    color: colors.linkOnGlass,
     fontSize: 15,
     fontWeight: '600',
   },

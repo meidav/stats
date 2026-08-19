@@ -1,21 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// When false, intro is skipped after the user completes it once.
-export const ALWAYS_SHOW_INTRO = true;
+const INTRO_SEEN_KEY = 'playtracker_intro_seen_at';
+const INTRO_TTL_MS = 3 * 60 * 60 * 1000;
 
-const ONBOARDING_KEY = 'playtracker_onboarding_done';
-
-export async function hasCompletedOnboarding(): Promise<boolean> {
-  if (ALWAYS_SHOW_INTRO) {
-    return false;
-  }
-  const value = await AsyncStorage.getItem(ONBOARDING_KEY);
-  return value === '1';
+export async function hasSeenIntroRecently(): Promise<boolean> {
+  const raw = await AsyncStorage.getItem(INTRO_SEEN_KEY);
+  if (!raw) return false;
+  const seenAt = Number(raw);
+  if (!Number.isFinite(seenAt)) return false;
+  return Date.now() - seenAt < INTRO_TTL_MS;
 }
 
-export async function completeOnboarding(): Promise<void> {
-  if (ALWAYS_SHOW_INTRO) {
-    return;
-  }
-  await AsyncStorage.setItem(ONBOARDING_KEY, '1');
+export async function markIntroSeen(): Promise<void> {
+  await AsyncStorage.setItem(INTRO_SEEN_KEY, String(Date.now()));
 }

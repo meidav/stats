@@ -82,8 +82,10 @@ def register_with_email(email, password):
 def authenticate_with_email(email, password):
     from auth import verify_password
 
-    email = normalize_email(email)
-    user = get_user_by_email(email)
+    identifier = (email or "").strip()
+    user = get_user_by_email(normalize_email(identifier)) if identifier else None
+    if not user:
+        user = get_user_by_username(identifier)
     if not user or not verify_password(user, password):
         return None
     return user

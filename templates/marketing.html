@@ -5,7 +5,8 @@
 {% block content %}
 <section class="mkt-hero">
     <p class="mkt-kicker">Now headed to the App Store and Google Play</p>
-    <h1>PlayTracker</h1>
+    <h1 class="mkt-sr-only">PlayTracker</h1>
+    <img class="mkt-hero-logo" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="">
     <p class="mkt-lead">Track everything you play. Leagues, standings, and game night in one place, from beach volleyball to chess.</p>
     <div class="mkt-hero-actions">
         <a class="mkt-btn mkt-btn-primary mkt-btn-disabled" href="/" aria-disabled="true">Get the app</a>
@@ -23,7 +24,9 @@
         <p class="mkt-phone-label">My leagues</p>
         <div class="mkt-device">
             <div class="mkt-screen">
-                <div class="mkt-screen-brand">PlayTracker</div>
+                <div class="mkt-screen-brand">
+                    <img src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="">
+                </div>
                 <div class="mkt-row"><span class="mkt-dot mkt-dot-ball"></span><span>Beach VB</span></div>
                 <div class="mkt-row"><span class="mkt-dot mkt-dot-king">♚</span><span>Chess night</span></div>
                 <div class="mkt-row"><span class="mkt-dot mkt-dot-check"></span><span>Checkers</span></div>

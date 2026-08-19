@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from auth import create_user, create_users_table, get_user_by_username
+from auth import create_user, create_users_table, get_user_by_email, get_user_by_username
 from db_utils import db_manager
 from api.auth_service import ensure_password_reset_schema
 from api.google_auth import ensure_google_auth_schema
@@ -25,11 +25,20 @@ def ensure_demo_user():
     else:
         print(f"Failed to create demo user '{username}'.")
 
-    db_manager.execute_query(
-        "UPDATE users SET is_admin = 1 WHERE username = ?",
-        (username,),
-        fetch_all=False,
-    )
+    email_owner = get_user_by_email(email)
+    if email_owner and email_owner.username != username:
+        print(f"Email {email} already belongs to '{email_owner.username}'; leaving demo email unchanged.")
+        db_manager.execute_query(
+            "UPDATE users SET is_admin = 1 WHERE username = ?",
+            (username,),
+            fetch_all=False,
+        )
+    else:
+        db_manager.execute_query(
+            "UPDATE users SET is_admin = 1, email = ? WHERE username = ?",
+            (email, username),
+            fetch_all=False,
+        )
 
 
 def ensure_admin_user():

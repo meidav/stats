@@ -1,12 +1,13 @@
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet } from 'react-native';
 
 import { GradientBackground } from './src/components/GradientBackground';
 import { colors } from './src/constants/theme';
 import { AuthProvider, useAuth } from './src/lib/auth';
+import { hasSeenIntroRecently } from './src/lib/onboarding';
 import type { RootStackParamList } from './src/navigation/types';
 import { AddGameScreen } from './src/screens/AddGameScreen';
 import { CreateLeagueScreen } from './src/screens/CreateLeagueScreen';
@@ -32,8 +33,30 @@ const navTheme = {
 
 function AppNavigator() {
   const { token, loading: authLoading } = useAuth();
+  const [gateReady, setGateReady] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
 
-  if (authLoading) {
+  useEffect(() => {
+    let active = true;
+    setGateReady(false);
+    async function decideStart() {
+      if (authLoading) return;
+      if (token) {
+        if (active) setGateReady(true);
+        return;
+      }
+      const seen = await hasSeenIntroRecently();
+      if (!active) return;
+      setShowIntro(!seen);
+      setGateReady(true);
+    }
+    decideStart();
+    return () => {
+      active = false;
+    };
+  }, [authLoading, token]);
+
+  if (authLoading || !gateReady) {
     return (
       <GradientBackground style={styles.loader}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -41,10 +64,12 @@ function AppNavigator() {
     );
   }
 
+  const initialRouteName = token ? 'Home' : showIntro ? 'Welcome' : 'Login';
+
   const stack = (
     <GradientBackground>
     <Stack.Navigator
-      initialRouteName={token ? 'Home' : 'Welcome'}
+      initialRouteName={initialRouteName}
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: 'transparent' },

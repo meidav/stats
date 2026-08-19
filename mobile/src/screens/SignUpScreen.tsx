@@ -43,7 +43,7 @@ export function SignUpScreen({ navigation }: Props) {
       <TextInput
         style={authInputStyle}
         placeholder="Email"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={colors.onGlassMuted}
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="email-address"
@@ -89,7 +89,7 @@ export function SignUpScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   hint: {
-    color: colors.textMuted,
+    color: colors.onGlassMuted,
     fontSize: 13,
     marginTop: -spacing.sm,
     marginBottom: spacing.md,
@@ -102,11 +102,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   footerText: {
-    color: colors.textMuted,
+    color: colors.onGlassMuted,
     fontSize: 15,
   },
   footerLink: {
-    color: colors.primary,
+    color: colors.linkOnGlass,
     fontSize: 15,
     fontWeight: '700',
   },

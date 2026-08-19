@@ -37,13 +37,14 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
+    if (!response.ok) {
     const payload = data as { error?: string; msg?: string; message?: string };
     const raw = payload.error || payload.msg || payload.message || '';
-    const lower = raw.toLowerCase();
     let message = raw || `Request failed (${response.status})`;
-    if (response.status === 401 || lower.includes('expired') || lower.includes('token')) {
+    if (response.status === 401 && options.token) {
       message = 'Your session expired. Sign out and sign in again.';
+    } else if (response.status === 401) {
+      message = 'Could not sign in. Check your email and password.';
     }
     throw new ApiError(message, response.status);
   }

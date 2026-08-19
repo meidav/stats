@@ -9,6 +9,7 @@ KEEP_PREFIXES = (
 )
 
 KEEP_EXACT = {
+    "/",
     "/login",
     "/logout",
     "/deploy",

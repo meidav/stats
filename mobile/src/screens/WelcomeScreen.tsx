@@ -1,6 +1,6 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   Dimensions,
   NativeScrollEvent,
@@ -13,16 +13,19 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BrandLockup } from '../components/BrandLockup';
 import { GradientButton } from '../components/GradientButton';
-import { APP_NAME, APP_TAGLINE } from '../constants/brand';
-import { colors, glass, gradients, spacing } from '../constants/theme';
+import { BeachVolleyballMark } from '../components/TemplateGlyph';
+import { APP_TAGLINE } from '../constants/brand';
+import { colors, glass, spacing } from '../constants/theme';
+import { markIntroSeen } from '../lib/onboarding';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
 const SLIDES = [
   {
-    emoji: '🏐',
+    graphic: 'beach' as const,
     title: 'Track every sport',
     body: 'Beach volleyball, tennis, basketball, and more. Log wins, scores, and who played.',
   },
@@ -44,12 +47,29 @@ const SLIDE_WIDTH = SCREEN_WIDTH;
 export function WelcomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
+  const finishing = useRef(false);
   const [index, setIndex] = useState(0);
   const isLast = index === SLIDES.length - 1;
   const isFirst = index === 0;
 
-  function finish() {
-    navigation.replace('Login');
+  useFocusEffect(
+    useCallback(() => {
+      finishing.current = false;
+      setIndex(0);
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({ x: 0, animated: false });
+      });
+    }, []),
+  );
+
+  async function finish() {
+    if (finishing.current) return;
+    finishing.current = true;
+    try {
+      await markIntroSeen();
+    } finally {
+      navigation.replace('Login');
+    }
   }
 
   function goToSlide(nextIndex: number) {
@@ -72,8 +92,20 @@ export function WelcomeScreen({ navigation }: Props) {
     goToSlide(index - 1);
   }
 
+  function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    const x = event.nativeEvent.contentOffset.x;
+    const lastStart = SLIDE_WIDTH * (SLIDES.length - 1);
+    if (x > lastStart + SLIDE_WIDTH * 0.28) {
+      finish();
+    }
+  }
+
   function handleScrollEnd(event: NativeSyntheticEvent<NativeScrollEvent>) {
     const nextIndex = Math.round(event.nativeEvent.contentOffset.x / SLIDE_WIDTH);
+    if (nextIndex >= SLIDES.length) {
+      finish();
+      return;
+    }
     setIndex(nextIndex);
   }
 
@@ -81,14 +113,7 @@ export function WelcomeScreen({ navigation }: Props) {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + spacing.lg }]}>
         <View style={styles.hero}>
-          <LinearGradient
-            colors={[...gradients.brandText]}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={styles.brandGradient}
-          >
-            <Text style={styles.appName}>{APP_NAME}</Text>
-          </LinearGradient>
+          <BrandLockup size={148} />
           <Text style={styles.tagline}>{APP_TAGLINE}</Text>
         </View>
       </View>
@@ -99,6 +124,7 @@ export function WelcomeScreen({ navigation }: Props) {
         pagingEnabled
         bounces={false}
         showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
         onMomentumScrollEnd={handleScrollEnd}
         scrollEventThrottle={16}
         style={styles.carousel}
@@ -107,12 +133,19 @@ export function WelcomeScreen({ navigation }: Props) {
         {SLIDES.map((item) => (
           <View key={item.title} style={styles.slidePage}>
             <View style={styles.slide}>
-              <Text style={styles.emoji}>{item.emoji}</Text>
+              {'graphic' in item ? (
+                <View style={styles.graphicWrap}>
+                  <BeachVolleyballMark size={96} />
+                </View>
+              ) : (
+                <Text style={styles.emoji}>{item.emoji}</Text>
+              )}
               <Text style={styles.slideTitle}>{item.title}</Text>
               <Text style={styles.slideBody}>{item.body}</Text>
             </View>
           </View>
         ))}
+        <View style={styles.slidePage} />
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.lg }]}>
@@ -169,7 +202,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   skipText: {
-    color: colors.textMuted,
+    color: colors.text,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -179,20 +212,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     paddingHorizontal: spacing.sm,
   },
-  brandGradient: {
-    borderRadius: 14,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
-  },
-  appName: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#fff',
-  },
   tagline: {
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     fontSize: 17,
-    color: colors.textMuted,
+    color: colors.text,
     textAlign: 'center',
   },
   carousel: {
@@ -221,6 +244,10 @@ const styles = StyleSheet.create({
     shadowOffset: glass.shadowOffset,
     elevation: glass.elevation,
   },
+  graphicWrap: {
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
   emoji: {
     fontSize: 56,
     textAlign: 'center',
@@ -238,7 +265,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: colors.text,
     textAlign: 'center',
-    opacity: 0.82,
+    opacity: 0.88,
   },
   dots: {
     flexDirection: 'row',
@@ -270,22 +297,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(37, 99, 235, 0.25)',
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    backgroundColor: 'rgba(91, 33, 182, 0.22)',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.md,
   },
   secondaryButtonDisabled: {
     borderColor: 'rgba(148, 163, 184, 0.35)',
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    backgroundColor: 'rgba(49, 16, 101, 0.18)',
   },
   secondaryButtonText: {
-    color: colors.primary,
+    color: colors.onGlass,
     fontSize: 16,
     fontWeight: '700',
   },
   secondaryButtonTextDisabled: {
-    color: colors.textMuted,
+    color: colors.onGlassMuted,
   },
   primaryButtonFlex: {
     flex: 1,
