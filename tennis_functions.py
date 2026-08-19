@@ -1,5 +1,42 @@
+import sqlite3
+
 from create_tennis_database import *
 from datetime import datetime, date
+
+
+def tennis_db_path():
+    try:
+        from db_utils import db_manager
+
+        path = db_manager.database_path
+        conn = sqlite3.connect(path)
+        try:
+            row = conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='tennis_matches'"
+            ).fetchone()
+        finally:
+            conn.close()
+        if row:
+            return path
+    except Exception:
+        pass
+    return r"stats.db"
+
+
+def ensure_tennis_schema(conn=None):
+    close = False
+    if conn is None:
+        conn = create_connection(tennis_db_path())
+        close = True
+    try:
+        cursor = conn.cursor()
+        columns = [row[1] for row in cursor.execute("PRAGMA table_info(tennis_matches)").fetchall()]
+        if columns and "set_scores" not in columns:
+            cursor.execute("ALTER TABLE tennis_matches ADD COLUMN set_scores TEXT")
+            conn.commit()
+    finally:
+        if close and conn is not None:
+            conn.close()
 
 def tennis_stats_per_year(year, minimum_matches):
     matches = tennis_year_matches(year)
@@ -39,10 +76,10 @@ def tennis_year_matches(year):
     return row
 
 def set_cur():
-    database = r'stats.db'
-    conn = create_connection(database)
+    ensure_tennis_schema()
+    conn = create_connection(tennis_db_path())
     cur = conn.cursor()
-    return cur  
+    return cur
 
 def add_tennis_stats(match):
     # match array: [date, winner, loser, winner_score, loser_score, updated_at, set_scores]
@@ -55,10 +92,9 @@ def enter_data_into_database(matches_data):
         new_tennis_match(x[4], x[2], 0, x[3], 0, x[4], None)
 
 def new_tennis_match(match_date, winner, winner_score, loser, loser_score, updated_at, set_scores=None):
-    database = r'stats.db'
-    conn = create_connection(database)
+    conn = create_connection(tennis_db_path())
     with conn:
-        # Always pass 7 parameters (set_scores can be None for old/simple matches)
+        ensure_tennis_schema(conn)
         match = (match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
         create_tennis_match(conn, match)
 
@@ -69,16 +105,15 @@ def find_tennis_match(match_id):
     return row
 
 def edit_tennis_match(match_id, match_date, winner, winner_score, loser, loser_score, updated_at, set_scores, match_id2):
-    database = r'stats.db'
-    conn = create_connection(database)
-    with conn: 
-        match = (match_id, match_date, winner, winner_score, loser, loser_score, updated_at, set_scores, match_id2);
+    conn = create_connection(tennis_db_path())
+    with conn:
+        ensure_tennis_schema(conn)
+        match = (match_id, match_date, winner, winner_score, loser, loser_score, updated_at, set_scores, match_id2)
         database_update_tennis_match(conn, match)
 
 def remove_tennis_match(match_id):
-    database = r'stats.db'
-    conn = create_connection(database)
-    with conn: 
+    conn = create_connection(tennis_db_path())
+    with conn:
         database_delete_tennis_match(conn, match_id)
 
 def all_tennis_years():

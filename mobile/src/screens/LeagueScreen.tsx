@@ -193,6 +193,7 @@ export function LeagueScreen({ route, navigation }: Props) {
       winnerScore: game.winner_score,
       loserScore: game.loser_score,
       gameDate: game.game_date,
+      metadata: game.metadata,
     });
   }
 

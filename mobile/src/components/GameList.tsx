@@ -5,6 +5,7 @@ import { GlassCard } from './GlassCard';
 import { IconActionRow } from './IconActionRow';
 import { colors, spacing } from '../constants/theme';
 import { formatGameStamp } from '../lib/datetime';
+import { formatSetLine } from '../lib/tennisSets';
 import type { Game } from '../types';
 
 type Props = {
@@ -22,7 +23,9 @@ export function GameList({ games, canEdit, winLoss, onEdit, onDelete }: Props) {
 
   return (
     <View>
-      {games.map((game) => (
+      {games.map((game) => {
+        const setLine = formatSetLine(game.metadata);
+        return (
         <GlassCard key={game.id} style={styles.card}>
           <View style={styles.top}>
             <Text style={styles.when}>{formatGameStamp(game.game_date)}</Text>
@@ -45,7 +48,7 @@ export function GameList({ games, canEdit, winLoss, onEdit, onDelete }: Props) {
               ))}
             </View>
             <Text style={[styles.score, styles.winnerScore]}>
-              {winLoss ? 'W' : game.winner_score}
+              {winLoss ? 'W' : setLine ? '' : game.winner_score}
             </Text>
           </View>
 
@@ -58,11 +61,13 @@ export function GameList({ games, canEdit, winLoss, onEdit, onDelete }: Props) {
               ))}
             </View>
             <Text style={[styles.score, styles.loserScore]}>
-              {winLoss ? 'L' : game.loser_score}
+              {winLoss ? 'L' : setLine ? '' : game.loser_score}
             </Text>
           </View>
+          {setLine ? <Text style={styles.sets}>{setLine}</Text> : null}
         </GlassCard>
-      ))}
+        );
+      })}
     </View>
   );
 }
@@ -138,5 +143,12 @@ const styles = StyleSheet.create({
   },
   loserScore: {
     color: colors.loss,
+  },
+  sets: {
+    textAlign: 'center',
+    fontWeight: '800',
+    fontSize: 16,
+    color: colors.text,
+    paddingTop: 2,
   },
 });

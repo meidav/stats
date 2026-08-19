@@ -1288,8 +1288,12 @@ def add_tennis_match():
         print(f"DEBUG: Set scores text = {set_scores_text}")
         print(f"DEBUG: Sets = {sets}")
         
-        # Store both totals (for backwards compatibility) and actual set scores
-        add_tennis_stats([date_time_played, winner, loser, total_winner_games, total_loser_games, my_time, set_scores_text])
+        try:
+            add_tennis_stats([date_time_played, winner, loser, total_winner_games, total_loser_games, my_time, set_scores_text])
+        except Exception as exc:
+            flash(f'Could not save match: {exc}', 'danger')
+            return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats,
+                           matches=t_matches, winning_scores=winning_scores, losing_scores=losing_scores, stats=stats)
         flash(f'Match added: {set_scores_text}', 'success')
         return redirect(url_for('add_tennis_match'))
 

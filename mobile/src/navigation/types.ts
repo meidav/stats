@@ -23,6 +23,7 @@ export type RootStackParamList = {
     winnerScore?: number;
     loserScore?: number;
     gameDate?: string;
+    metadata?: Record<string, unknown>;
   };
   PlayerProfile: {
     sportId: number;

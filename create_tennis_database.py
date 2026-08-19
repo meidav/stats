@@ -67,7 +67,8 @@ def main():
                                     winner_score integer NOT NULL,
                                     loser text NOT NULL,
                                     loser_score integer NOT NULL,
-                                    updated_at DATETIME NOT NULL
+                                    updated_at DATETIME NOT NULL,
+                                    set_scores TEXT
                                 );"""
 
     # create a database connection

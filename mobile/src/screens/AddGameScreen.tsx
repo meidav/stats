@@ -18,6 +18,14 @@ import { colors, spacing } from '../constants/theme';
 import { copyForFocus } from '../lib/focus';
 import { formatLocalDateTime, parseLocalDateTime } from '../lib/datetime';
 import { autoCapWords } from '../lib/names';
+import {
+  TENNIS_FORMATS,
+  isTennisTemplate,
+  setsFromMetadata,
+  tennisScorePayload,
+  type TennisFormat,
+  type TennisSetInput,
+} from '../lib/tennisSets';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { loadCachedLeagues } from '../lib/leagueCache';
@@ -48,10 +56,12 @@ export function AddGameScreen({ route, navigation }: Props) {
     winnerScore: initialWinnerScore,
     loserScore: initialLoserScore,
     gameDate,
+    metadata,
   } = route.params;
   const { token } = useAuth();
   const editing = Boolean(gameId);
   const winLoss = scoreMode === 'win_loss';
+  const tennis = isTennisTemplate(templateId);
   const teamSides = sideKind === 'team' || templateId === 'indoor_volleyball';
   const oneOnOne = playersPerSide === 1 && !teamSides;
   const [winnerNames, setWinnerNames] = useState<string[]>(() => padNames(winners, playersPerSide));
@@ -62,6 +72,9 @@ export function AddGameScreen({ route, navigation }: Props) {
   const [loserScore, setLoserScore] = useState(
     initialLoserScore != null ? String(initialLoserScore) : '',
   );
+  const initialTennis = setsFromMetadata(metadata, initialWinnerScore, initialLoserScore);
+  const [tennisFormat, setTennisFormat] = useState<TennisFormat>(initialTennis.format);
+  const [tennisSets, setTennisSets] = useState<TennisSetInput[]>(initialTennis.sets);
   const [playedAt, setPlayedAt] = useState(() => parseLocalDateTime(gameDate));
   const [players, setPlayers] = useState<string[]>([]);
   const [winnerHint, setWinnerHint] = useState<number | null>(null);
@@ -153,6 +166,21 @@ export function AddGameScreen({ route, navigation }: Props) {
     }
   }
 
+  function chooseTennisFormat(next: TennisFormat) {
+    setTennisFormat(next);
+    setTennisSets((prev) => {
+      const filled = prev.slice(0, next);
+      while (filled.length < next) filled.push({ winner: '', loser: '' });
+      return filled;
+    });
+  }
+
+  function updateTennisSet(index: number, side: 'winner' | 'loser', value: string) {
+    setTennisSets((prev) =>
+      prev.map((set, i) => (i === index ? { ...set, [side]: value.replace(/[^\d]/g, '') } : set)),
+    );
+  }
+
   async function handleSubmit() {
     if (!token) {
       setError('Your session expired. Sign out and sign in again.');
@@ -168,12 +196,18 @@ export function AddGameScreen({ route, navigation }: Props) {
         winner_score?: number;
         loser_score?: number;
         game_date?: string;
+        metadata?: Record<string, unknown>;
       } = {
         winners: winnerNames.map((n) => n.trim()),
         losers: loserNames.map((n) => n.trim()),
         game_date: formatLocalDateTime(playedAt),
       };
-      if (!winLoss) {
+      if (tennis) {
+        const tennisScore = tennisScorePayload(tennisSets, tennisFormat);
+        payload.winner_score = tennisScore.winner_score;
+        payload.loser_score = tennisScore.loser_score;
+        payload.metadata = tennisScore.metadata;
+      } else if (!winLoss) {
         payload.winner_score = Number(winnerScore);
         payload.loser_score = Number(loserScore);
       }
@@ -272,6 +306,45 @@ export function AddGameScreen({ route, navigation }: Props) {
 
         {winLoss ? (
           <Text style={styles.hint}>Just who won.</Text>
+        ) : tennis ? (
+          <View style={styles.tennisBlock}>
+            <Text style={styles.section}>Set scores</Text>
+            <View style={styles.formatRow}>
+              {TENNIS_FORMATS.map((option) => (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[styles.formatChip, tennisFormat === option.id && styles.formatChipOn]}
+                  onPress={() => chooseTennisFormat(option.id)}
+                >
+                  <Text style={[styles.formatText, tennisFormat === option.id && styles.formatTextOn]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {tennisSets.map((set, index) => (
+              <View key={`set-${index}`} style={styles.scoreRow}>
+                <View style={styles.scoreField}>
+                  <Text style={styles.label}>Set {index + 1} winner</Text>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="number-pad"
+                    value={set.winner}
+                    onChangeText={(value) => updateTennisSet(index, 'winner', value)}
+                  />
+                </View>
+                <View style={styles.scoreField}>
+                  <Text style={styles.label}>Set {index + 1} loser</Text>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="number-pad"
+                    value={set.loser}
+                    onChangeText={(value) => updateTennisSet(index, 'loser', value)}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
         ) : (
           <View style={styles.scoreRow}>
             <View style={styles.scoreField}>
@@ -388,6 +461,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.md,
     marginTop: spacing.md,
+  },
+  tennisBlock: {
+    marginTop: spacing.sm,
+  },
+  formatRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  formatChip: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.22)',
+  },
+  formatChipOn: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  formatText: {
+    color: colors.text,
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  formatTextOn: {
+    color: '#fff',
   },
   scoreField: {
     flex: 1,

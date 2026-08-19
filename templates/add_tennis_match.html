@@ -34,33 +34,33 @@
                 <h3>Set scores</h3>
                 
                 <!-- Match Format Buttons -->
-                <div style="text-align: center; margin-bottom: 12px;">
-                    <button type="button" onclick="showSets(1)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">1 Set</button>
-                    <button type="button" onclick="showSets(3)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 3</button>
-                    <button type="button" onclick="showSets(5)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 5</button>
+                <div style="text-align: center; margin-bottom: 12px;" class="tennis-format">
+                    <button type="button" data-sets="1" onclick="showSets(1)" class="submit-button tennis-format-btn is-active" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">1 Set</button>
+                    <button type="button" data-sets="3" onclick="showSets(3)" class="submit-button tennis-format-btn" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 3</button>
+                    <button type="button" data-sets="5" onclick="showSets(5)" class="submit-button tennis-format-btn" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 5</button>
                 </div>
                 
-                <div class="form-row" id="set1">
+                <div class="form-row set-row" id="set1">
                     <input type="number" name="winner_set1" placeholder="Set 1 - W" min="0" max="20" value="{{ request.form.get('winner_set1', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set1" placeholder="Set 1 - L" min="0" max="20" value="{{ request.form.get('loser_set1', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row" id="set2" style="display: none;">
+                <div class="form-row set-row" id="set2">
                     <input type="number" name="winner_set2" placeholder="Set 2 - W" min="0" max="20" value="{{ request.form.get('winner_set2', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set2" placeholder="Set 2 - L" min="0" max="20" value="{{ request.form.get('loser_set2', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row" id="set3" style="display: none;">
+                <div class="form-row set-row" id="set3">
                     <input type="number" name="winner_set3" placeholder="Set 3 - W" min="0" max="20" value="{{ request.form.get('winner_set3', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set3" placeholder="Set 3 - L" min="0" max="20" value="{{ request.form.get('loser_set3', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row" id="set4" style="display: none;">
+                <div class="form-row set-row" id="set4">
                     <input type="number" name="winner_set4" placeholder="Set 4 - W" min="0" max="20" value="{{ request.form.get('winner_set4', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set4" placeholder="Set 4 - L" min="0" max="20" value="{{ request.form.get('loser_set4', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row" id="set5" style="display: none;">
+                <div class="form-row set-row" id="set5">
                     <input type="number" name="winner_set5" placeholder="Set 5 - W" min="0" max="20" value="{{ request.form.get('winner_set5', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set5" placeholder="Set 5 - L" min="0" max="20" value="{{ request.form.get('loser_set5', '') }}" class="form-field-compact">
                 </div>
@@ -182,31 +182,27 @@
 
 <script>
 function showSets(numSets) {
-    // Hide all sets first
-    document.getElementById('set1').style.display = 'flex';
-    document.getElementById('set2').style.display = 'none';
-    document.getElementById('set3').style.display = 'none';
-    document.getElementById('set4').style.display = 'none';
-    document.getElementById('set5').style.display = 'none';
-    
-    // Show appropriate number of sets
-    if (numSets >= 3) {
-        document.getElementById('set2').style.display = 'flex';
-        document.getElementById('set3').style.display = 'flex';
-    }
-    if (numSets >= 5) {
-        document.getElementById('set4').style.display = 'flex';
-        document.getElementById('set5').style.display = 'flex';
+    document.querySelectorAll('.tennis-format-btn').forEach(function (btn) {
+        btn.classList.toggle('is-active', Number(btn.getAttribute('data-sets')) === numSets);
+    });
+    for (var i = 1; i <= 5; i++) {
+        var row = document.getElementById('set' + i);
+        if (!row) continue;
+        var show = i === 1 || (numSets >= 3 && i <= 3) || (numSets === 5 && i <= 5);
+        row.classList.toggle('set-hidden', !show);
+        row.querySelectorAll('input').forEach(function (input) {
+            input.disabled = !show;
+            if (!show) input.value = '';
+        });
     }
 }
 
-// Auto-fill date and time with current values on page load
 document.addEventListener('DOMContentLoaded', function() {
+    showSets(1);
     const dateInput = document.getElementById('date_played');
     const timeInput = document.getElementById('time_played');
     
-    // Only set if fields are empty
-    if (!dateInput.value) {
+    if (dateInput && !dateInput.value) {
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -214,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dateInput.value = `${year}-${month}-${day}`;
     }
     
-    if (!timeInput.value) {
+    if (timeInput && !timeInput.value) {
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');

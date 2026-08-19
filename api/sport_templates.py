@@ -47,6 +47,7 @@ SPORT_TEMPLATES = [
         "players_per_side": 1,
         "score_direction": "higher_wins",
         "score_mode": "points",
+        "score_shape": "sets",
         "default_name": "Tennis Singles",
         "legacy_table": "tennis_matches",
     },
@@ -57,6 +58,7 @@ SPORT_TEMPLATES = [
         "players_per_side": 2,
         "score_direction": "higher_wins",
         "score_mode": "points",
+        "score_shape": "sets",
         "default_name": "Tennis Doubles",
     },
     {
@@ -259,6 +261,7 @@ def public_template(template):
         "players_per_side": template["players_per_side"],
         "score_direction": template["score_direction"],
         "score_mode": template.get("score_mode", "points"),
+        "score_shape": template.get("score_shape", "points"),
         "side_kind": template.get("side_kind", "player"),
         "typical_win_score": typical_win_score_for(template["id"]),
         "default_name": template["default_name"],

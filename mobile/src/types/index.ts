@@ -27,6 +27,7 @@ export type Sport = {
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
   score_mode?: 'points' | 'win_loss';
+  score_shape?: 'points' | 'sets';
   side_kind?: 'player' | 'team';
   typical_win_score?: number | null;
   min_games_for_rank: number;

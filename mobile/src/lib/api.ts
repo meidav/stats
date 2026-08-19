@@ -161,6 +161,7 @@ export const api = {
       winner_score?: number;
       loser_score?: number;
       game_date?: string;
+      metadata?: Record<string, unknown>;
     },
   ) =>
     request<import('../types').Game>(`/sports/${sportId}/games`, {
@@ -178,6 +179,7 @@ export const api = {
       winner_score?: number;
       loser_score?: number;
       game_date?: string;
+      metadata?: Record<string, unknown>;
     },
   ) =>
     request<import('../types').Game>(`/games/${gameId}`, {
