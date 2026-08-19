@@ -7,13 +7,18 @@
     <meta name="description" content="PlayTracker: track everything you play. Leagues, standings, and game night in one app.">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/playtracker-logo.svg') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/playtracker-logo.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/marketing.css') }}">
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <input type="checkbox" id="mkt-nav-toggle" class="mkt-nav-toggle" hidden>
     <header class="mkt-header">
         <a class="mkt-brand" href="/">
-            <img class="mkt-brand-mark" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="PlayTracker">
+            <span class="mkt-logo-plate mkt-logo-plate-nav">
+                <img class="mkt-brand-mark" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="PlayTracker">
+            </span>
             <span class="mkt-tag">Track everything you play</span>
         </a>
         <label for="mkt-nav-toggle" class="mkt-burger" aria-label="Open menu">
@@ -22,9 +27,8 @@
         <nav class="mkt-nav">
             <label for="mkt-nav-toggle" class="mkt-nav-close" aria-label="Close menu"></label>
             <a class="mkt-nav-link {% block nav_app %}{% endblock %}" href="/">Get the app</a>
-            <a class="mkt-nav-link" href="/#about">About</a>
-            <a class="mkt-nav-link" href="/arbel/">Arbel stats</a>
-            <a class="mkt-nav-link mkt-nav-login" href="/login">Login</a>
+            <a class="mkt-nav-link {% block nav_about %}{% endblock %}" href="/about">About</a>
+            <a class="mkt-nav-link mkt-nav-login {% block nav_login %}{% endblock %}" href="/login">Login</a>
         </nav>
     </header>
 
@@ -33,34 +37,13 @@
     </main>
 
     <footer class="mkt-footer">
-        <div class="mkt-footer-grid">
-            <div>
-                <h3>Apps</h3>
-                <a href="/">PlayTracker</a>
-                <a href="/arbel/">Arbel stats</a>
-            </div>
-            <div>
-                <h3>Site</h3>
-                <a href="/">Get the app</a>
-                <a href="/#about">About</a>
-                <a href="/privacy">Privacy</a>
-                <a href="/terms">Terms</a>
-            </div>
-            <div>
-                <h3>Contact</h3>
-                <a href="mailto:hello@playtracker.org">Feedback</a>
-                <a href="mailto:hello@playtracker.org">Support</a>
-            </div>
-            <div class="mkt-footer-cta">
-                <a class="mkt-btn mkt-btn-primary mkt-btn-disabled" href="/" aria-disabled="true">Get app</a>
-                <div class="mkt-stores">
-                    <span class="mkt-store mkt-store-disabled" title="Coming soon">App Store</span>
-                    <span class="mkt-store mkt-store-disabled" title="Coming soon">Google Play</span>
-                </div>
-                <p>iOS and Android apps are on the way. Store buttons are disabled until we ship.</p>
-            </div>
-        </div>
-        <p class="mkt-copy">Copyright {{ current_year }} PlayTracker. All rights reserved.</p>
+        <p class="mkt-copy">
+            Copyright {{ current_year }} Arbel Industries
+            <span class="mkt-copy-dot">·</span>
+            <a href="/privacy">Privacy</a>
+            <span class="mkt-copy-dot">·</span>
+            <a href="/terms">Terms</a>
+        </p>
     </footer>
 </body>
 </html>

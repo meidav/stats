@@ -1,0 +1,49 @@
+{% extends "marketing_base.html" %}
+{% block title %}Login | PlayTracker{% endblock %}
+{% block nav_login %}is-active{% endblock %}
+{% block body_class %}mkt-login-page{% endblock %}
+
+{% block content %}
+<section class="mkt-login-wrap" aria-label="PlayTracker login, coming soon">
+    <div class="mkt-login-card">
+        <div class="mkt-tape" aria-hidden="true">
+            <span>Coming soon · Coming soon · Coming soon · Coming soon</span>
+        </div>
+
+        <div class="mkt-login-brand">
+            <span class="mkt-logo-plate mkt-logo-plate-login">
+                <img src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="PlayTracker">
+            </span>
+            <p class="mkt-login-tag">Track everything you play</p>
+        </div>
+
+        <button type="button" class="mkt-login-social mkt-login-apple" disabled>
+            Sign in with Apple
+        </button>
+        <button type="button" class="mkt-login-social mkt-login-google" disabled>
+            Sign in with Google
+        </button>
+
+        <div class="mkt-login-or">
+            <span>or sign in with email</span>
+        </div>
+
+        <label class="mkt-login-field">
+            <span class="mkt-sr-only">Email</span>
+            <input type="email" placeholder="Email" disabled>
+        </label>
+        <label class="mkt-login-field">
+            <span class="mkt-sr-only">Password</span>
+            <input type="password" placeholder="Password" disabled>
+        </label>
+
+        <button type="button" class="mkt-btn mkt-btn-primary mkt-login-submit" disabled>Sign In</button>
+
+        <p class="mkt-login-footer">
+            <span>Forgot password?</span>
+            <span class="mkt-copy-dot">|</span>
+            <span>Create account</span>
+        </p>
+    </div>
+</section>
+{% endblock %}

@@ -19,6 +19,7 @@ KEEP_EXACT = {
     "/robots.txt",
     "/privacy",
     "/terms",
+    "/about",
 }
 
 KEEP_STARTSWITH = (

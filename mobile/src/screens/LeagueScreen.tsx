@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React, { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -14,37 +15,47 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 
 import { ErrorBanner } from '../components/ErrorBanner';
+import { CollapsibleSection } from '../components/CollapsibleSection';
+import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { StatsTable } from '../components/StatsTable';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { colors, gradients, spacing } from '../constants/theme';
 import { copyForFocus } from '../lib/focus';
+import { localToday } from '../lib/datetime';
 import { useAuth } from '../lib/auth';
 import { ApiError, api } from '../lib/api';
 import { upsertCachedLeague } from '../lib/leagueCache';
 import { firstResultCopy } from '../lib/names';
-import type { League, PlayerStat, Sport } from '../types';
+import type { Game, League, PlayerStat, Sport } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'League'>;
 
 export function LeagueScreen({ route, navigation }: Props) {
-  const { slug, name } = route.params;
+  const { slug, name, role: routeRole } = route.params;
   const { token } = useAuth();
   const [league, setLeague] = useState<League | null>(null);
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [stats, setStats] = useState<PlayerStat[]>([]);
   const [todayStats, setTodayStats] = useState<PlayerStat[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [deleteGame, setDeleteGame] = useState<Game | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const selectedIdRef = useRef<number | null>(null);
 
   const loadStats = useCallback(async (sport: Sport) => {
-    const statsData = await api.getSportStats(sport.id, token, 1);
+    const [statsData, gamesData] = await Promise.all([
+      api.getSportStats(sport.id, token, 1, localToday()),
+      api.getSportGames(sport.id, token),
+    ]);
     setStats(statsData.stats);
     setTodayStats(statsData.today_stats ?? []);
+    setGames(gamesData.games ?? []);
   }, [token]);
 
   useFocusEffect(
@@ -68,6 +79,7 @@ export function LeagueScreen({ route, navigation }: Props) {
           } else {
             setStats([]);
             setTodayStats([]);
+            setGames([]);
           }
           setError('');
         } catch (err) {
@@ -116,6 +128,10 @@ export function LeagueScreen({ route, navigation }: Props) {
       setSelectedSport(sport);
       if (sport) {
         await loadStats(sport);
+      } else {
+        setStats([]);
+        setTodayStats([]);
+        setGames([]);
       }
       setError('');
     } catch (err) {
@@ -127,6 +143,11 @@ export function LeagueScreen({ route, navigation }: Props) {
 
   const leagueName = league?.name || name;
   const copy = copyForFocus(league?.focus || 'mixed');
+  const canEdit =
+    league?.role === 'owner' ||
+    league?.role === 'admin' ||
+    routeRole === 'owner' ||
+    routeRole === 'admin';
   const openAddGame = () => {
     if (!selectedSport) return;
     navigation.navigate('AddGame', {
@@ -140,6 +161,42 @@ export function LeagueScreen({ route, navigation }: Props) {
       leagueName,
     });
   };
+
+  function openEditGame(game: Game) {
+    if (!selectedSport) return;
+    navigation.navigate('AddGame', {
+      sportId: selectedSport.id,
+      sportName: selectedSport.name,
+      templateId: selectedSport.template_id,
+      playersPerSide: selectedSport.players_per_side,
+      scoreMode: selectedSport.score_mode,
+      sideKind: selectedSport.side_kind,
+      focus: league?.focus,
+      leagueName,
+      gameId: game.id,
+      winners: game.winners,
+      losers: game.losers,
+      winnerScore: game.winner_score,
+      loserScore: game.loser_score,
+      gameDate: game.game_date,
+    });
+  }
+
+  async function confirmDeleteGame() {
+    if (!token || !deleteGame || !selectedSport) return;
+    setDeleting(true);
+    setError('');
+    try {
+      await api.deleteGame(token, deleteGame.id);
+      setDeleteGame(null);
+      await loadStats(selectedSport);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not delete game');
+      setDeleteGame(null);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   function openPlayer(playerName: string) {
     if (!selectedSport) return;
@@ -264,21 +321,75 @@ export function LeagueScreen({ route, navigation }: Props) {
             </GlassCard>
           ) : (
             <>
-              <StatsTable
-                title="Today's stats"
-                stats={todayStats}
-                onPlayerPress={openPlayer}
-              />
-              <StatsTable
-                title="Standings"
-                stats={stats}
-                showPlusMinus={false}
-                onPlayerPress={openPlayer}
-              />
+              {todayStats.length > 0 ? (
+                <CollapsibleSection title="Today's stats" count={todayStats.length}>
+                  <StatsTable stats={todayStats} onPlayerPress={openPlayer} />
+                </CollapsibleSection>
+              ) : null}
+              <CollapsibleSection title="Standings" count={stats.length}>
+                <StatsTable
+                  stats={stats}
+                  showPlusMinus={false}
+                  onPlayerPress={openPlayer}
+                />
+              </CollapsibleSection>
+              <CollapsibleSection title="Games" count={games.length}>
+                <GameList
+                  games={games}
+                  canEdit={!!canEdit}
+                  winLoss={selectedSport?.score_mode === 'win_loss'}
+                  onEdit={openEditGame}
+                  onDelete={setDeleteGame}
+                />
+              </CollapsibleSection>
             </>
           )}
         </ScrollView>
       )}
+
+      <Modal
+        visible={!!deleteGame}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!deleting) setDeleteGame(null);
+        }}
+      >
+        <View style={styles.modalScrim}>
+          <LinearGradient
+            colors={['#FECACA', '#FDBA74', '#FB7185']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.modalCard}
+          >
+            <View style={styles.modalHeader}>
+              <Ionicons name="warning" size={26} color="#9F1239" />
+              <Text style={styles.modalTitle}>Delete this game?</Text>
+            </View>
+            <Text style={styles.modalBody}>
+              This result comes out of standings. You can log it again later if you need to.
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalKeep}
+                onPress={() => setDeleteGame(null)}
+                disabled={deleting}
+              >
+                <Text style={styles.modalKeepText}>Keep game</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalDelete}
+                onPress={confirmDeleteGame}
+                disabled={deleting}
+              >
+                <Text style={styles.modalDeleteText}>
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </View>
+      </Modal>
     </ScreenScaffold>
   );
 }
@@ -411,5 +522,66 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 16,
+  },
+  modalScrim: {
+    flex: 1,
+    backgroundColor: 'rgba(127, 29, 29, 0.48)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 20,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(190, 18, 60, 0.35)',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: spacing.sm,
+  },
+  modalTitle: {
+    flexShrink: 1,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#7F1D1D',
+  },
+  modalBody: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#9F1239',
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  modalKeep: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+  },
+  modalKeepText: {
+    fontWeight: '700',
+    color: '#7F1D1D',
+  },
+  modalDelete: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: '#9F1239',
+  },
+  modalDeleteText: {
+    fontWeight: '700',
+    color: '#fff',
   },
 });

@@ -289,6 +289,9 @@ def games_by_year(year):
 # Authentication routes
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if not is_arbel_request():
+        return render_template('marketing_login.html')
+
     # Ensure users table exists and admin user is created
     create_users_table()
     
@@ -1732,6 +1735,11 @@ def deploy():
         return 'Deployment successful', 200
     except Exception as e:
         return f'Deployment failed: {str(e)}', 500
+
+
+@app.route('/about')
+def marketing_about():
+    return render_template('marketing_about.html')
 
 
 @app.route('/privacy')

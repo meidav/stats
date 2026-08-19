@@ -49,8 +49,39 @@ a:hover { text-decoration: underline; }
 
 .mkt-brand-mark {
   display: block;
-  height: 72px;
+  height: 52px;
   width: auto;
+}
+
+.mkt-logo-plate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3b0764, #5b21b6, #6d28d9);
+  border: 1px solid rgba(196, 181, 253, 0.38);
+  box-shadow: 0 10px 24px rgba(46, 16, 101, 0.28);
+}
+
+.mkt-logo-plate-nav {
+  padding: 4px 8px;
+  border-radius: 16px;
+}
+
+.mkt-logo-plate-hero {
+  display: inline-flex;
+  margin: 8px auto 16px;
+  padding: 10px 14px;
+  border-radius: 28px;
+}
+
+.mkt-logo-plate-mini {
+  padding: 4px 6px;
+  border-radius: 12px;
+}
+
+.mkt-logo-plate-login {
+  padding: 8px 12px;
+  border-radius: 22px;
 }
 
 .mkt-logo {
@@ -60,8 +91,9 @@ a:hover { text-decoration: underline; }
 }
 
 .mkt-tag {
-  font-size: 0.82rem;
-  color: var(--mkt-muted);
+  font-size: 0.9rem;
+  color: var(--mkt-ink);
+  font-weight: 600;
   font-style: italic;
 }
 
@@ -119,13 +151,15 @@ a:hover { text-decoration: underline; }
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.45);
   color: var(--mkt-blue);
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .mkt-hero h1,
+.mkt-about h1,
 .mkt-legal h1 {
   margin: 0 0 12px;
   font-size: clamp(2.4rem, 7vw, 4.2rem);
@@ -146,9 +180,8 @@ a:hover { text-decoration: underline; }
 
 .mkt-hero-logo {
   display: block;
-  width: min(280px, 72vw);
+  width: min(240px, 64vw);
   height: auto;
-  margin: 0 auto 8px;
 }
 
 .mkt-lead {
@@ -222,30 +255,30 @@ a:hover { text-decoration: underline; }
 .mkt-phones {
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  gap: 12px;
-  padding: 12px 16px 48px;
-  overflow-x: auto;
+  align-items: stretch;
+  gap: 20px;
+  padding: 8px 24px 56px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .mkt-phone {
-  flex: 0 0 160px;
+  flex: 1 1 0;
+  max-width: 180px;
   text-align: center;
-  transform: rotate(var(--tilt, 0deg));
 }
 
-.mkt-phone-front { z-index: 2; }
-
 .mkt-phone-label {
-  margin: 0 0 8px;
-  font-weight: 800;
+  margin: 0 0 10px;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-weight: 700;
   color: var(--mkt-blue);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .mkt-device {
-  width: 160px;
-  height: 300px;
+  width: 100%;
+  height: 320px;
   margin: 0 auto;
   padding: 10px;
   border-radius: 28px;
@@ -269,7 +302,7 @@ a:hover { text-decoration: underline; }
 
 .mkt-screen-brand img {
   display: block;
-  width: 72px;
+  width: 64px;
   height: auto;
 }
 
@@ -338,7 +371,11 @@ a:hover { text-decoration: underline; }
 .mkt-features h2,
 .mkt-about h2 {
   font-size: 1.8rem;
-  margin: 0 0 18px;
+  margin: 28px 0 18px;
+}
+
+.mkt-about h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
 }
 
 .mkt-feature-list {
@@ -377,48 +414,33 @@ a:hover { text-decoration: underline; }
 .mkt-about,
 .mkt-legal {
   text-align: left;
+  max-width: 720px;
 }
 
 .mkt-footer {
   margin-top: 24px;
-  padding: 32px 24px 18px;
+  padding: 22px 24px 28px;
   background: rgba(15, 23, 42, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-.mkt-footer-grid {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-}
-
-.mkt-footer h3 {
-  margin: 0 0 8px;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.mkt-footer a,
-.mkt-footer p {
-  display: block;
-  color: var(--mkt-ink);
-  margin: 6px 0;
-  font-size: 0.92rem;
-}
-
-.mkt-footer-cta p {
-  color: var(--mkt-muted);
-  font-size: 0.8rem;
-}
-
 .mkt-copy {
   text-align: center;
-  margin: 28px 0 0;
+  margin: 0;
+  color: var(--mkt-ink);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.mkt-copy a {
+  display: inline;
+  color: var(--mkt-ink);
+  font-weight: 700;
+}
+
+.mkt-copy-dot {
+  margin: 0 8px;
   color: var(--mkt-muted);
-  font-size: 0.8rem;
 }
 
 @media (max-width: 860px) {
@@ -461,7 +483,157 @@ a:hover { text-decoration: underline; }
     height: 100vh;
     transform: translateX(-100%);
   }
-  .mkt-footer-grid {
-    grid-template-columns: 1fr 1fr;
+  .mkt-tag {
+    display: none;
   }
+  .mkt-phones {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 20px;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    padding: 8px 20px 48px;
+    scrollbar-width: none;
+  }
+  .mkt-phones::-webkit-scrollbar {
+    display: none;
+  }
+  .mkt-phone {
+    flex: 0 0 72vw;
+    max-width: 280px;
+    scroll-snap-align: center;
+  }
+  .mkt-device {
+    height: 420px;
+  }
+}
+
+.mkt-login-wrap {
+  padding: 28px 20px 64px;
+}
+
+.mkt-login-card {
+  position: relative;
+  overflow: hidden;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 28px 22px 32px;
+  border-radius: 20px;
+  background: rgba(76, 29, 149, 0.32);
+  border: 1px solid rgba(196, 181, 253, 0.38);
+  box-shadow: 0 18px 40px rgba(46, 16, 101, 0.22);
+}
+
+.mkt-login-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.mkt-login-brand img {
+  display: block;
+  height: 112px;
+  width: auto;
+}
+
+.mkt-login-tag {
+  margin: 10px 0 0;
+  color: #fde8d0;
+  font-weight: 600;
+}
+
+.mkt-login-social {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  opacity: 0.72;
+}
+
+.mkt-login-apple {
+  background: #111827;
+  color: #fff;
+}
+
+.mkt-login-google {
+  background: linear-gradient(90deg, #2563eb, #4f46e5);
+  color: #fff;
+}
+
+.mkt-login-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  color: #fde8d0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.mkt-login-or::before,
+.mkt-login-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 247, 237, 0.35);
+}
+
+.mkt-login-field input {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(196, 181, 253, 0.45);
+  background: rgba(76, 29, 149, 0.22);
+  color: #fff7ed;
+}
+
+.mkt-login-submit {
+  width: 100%;
+  opacity: 0.72;
+}
+
+.mkt-login-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 0;
+  color: #fff;
+  font-weight: 700;
+}
+
+.mkt-tape {
+  position: absolute;
+  left: -28%;
+  right: -28%;
+  top: 44%;
+  z-index: 4;
+  transform: rotate(-16deg);
+  padding: 0;
+  background: #facc15;
+  border-top: 7px solid #111827;
+  border-bottom: 7px solid #111827;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.28);
+  pointer-events: none;
+}
+
+.mkt-tape span {
+  display: block;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #111827;
+  padding: 8px 0;
+  text-align: center;
+  white-space: nowrap;
 }

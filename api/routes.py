@@ -256,6 +256,13 @@ def register_routes(api):
         is_member = user_id and user_can_access_league(user_id, league)
         include_invite = is_member and league.get("owner_id") == user_id
         payload = league_to_dict(league, include_invite_code=include_invite)
+        if user_id:
+            if league.get("owner_id") == user_id:
+                payload["role"] = "owner"
+            elif user_can_edit_league(user_id, league["id"]):
+                payload["role"] = "admin"
+            else:
+                payload["role"] = "member"
         payload["sports"] = [
             sport_to_dict(s) for s in get_sports_for_league(league["id"])
         ]
@@ -415,8 +422,9 @@ def register_routes(api):
         year = request.args.get("year")
         min_games_arg = request.args.get("min_games")
         min_games = int(min_games_arg) if min_games_arg is not None else None
+        today = request.args.get("today")
         try:
-            stats = compute_sport_stats(sport_id, year=year, min_games=min_games)
+            stats = compute_sport_stats(sport_id, year=year, min_games=min_games, today=today)
         except ValueError as exc:
             return jsonify({"error": str(exc)}), 400
         return jsonify(stats)

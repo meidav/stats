@@ -63,6 +63,21 @@ def _game_row_to_dict(row):
     return data
 
 
+def _normalize_game_date(value):
+    if not value:
+        return None
+    text = str(value).strip().replace("T", " ")
+    if text.endswith("Z"):
+        text = text[:-1]
+    plus_at = text.find("+", 10)
+    if plus_at != -1:
+        text = text[:plus_at]
+    text = text.strip()
+    if len(text) == 16:
+        text += ":00"
+    return text[:19]
+
+
 def add_game(sport_id, winners, losers, winner_score, loser_score, game_date=None, metadata=None, entered_by=None):
     sport = get_sport_by_id(sport_id)
     if not sport:
@@ -79,6 +94,8 @@ def add_game(sport_id, winners, losers, winner_score, loser_score, game_date=Non
 
     if game_date is None:
         game_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        game_date = _normalize_game_date(game_date) or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     metadata_json = json.dumps(metadata or {})
 
     with db_manager.get_connection() as conn:
@@ -172,7 +189,7 @@ def update_game(game_id, **fields):
         winner_score, loser_score, sport["score_direction"]
     )
 
-    game_date = fields.get("game_date", game["game_date"])
+    game_date = _normalize_game_date(fields.get("game_date", game["game_date"])) or game["game_date"]
     metadata = fields.get("metadata", game["metadata"])
     metadata_json = json.dumps(metadata or {})
 

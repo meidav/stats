@@ -128,9 +128,9 @@ export const api = {
       token,
     }),
 
-  getSportStats: (sportId: number, token?: string | null, minGames = 1) =>
+  getSportStats: (sportId: number, token?: string | null, minGames = 1, today?: string) =>
     request<import('../types').SportStats>(
-      `/sports/${sportId}/stats?min_games=${minGames}`,
+      `/sports/${sportId}/stats?min_games=${minGames}${today ? `&today=${today}` : ''}`,
       { token },
     ),
 
@@ -160,12 +160,36 @@ export const api = {
       losers: string[];
       winner_score?: number;
       loser_score?: number;
+      game_date?: string;
     },
   ) =>
     request<import('../types').Game>(`/sports/${sportId}/games`, {
       method: 'POST',
       token,
       body: payload,
+    }),
+
+  updateGame: (
+    token: string,
+    gameId: number,
+    payload: {
+      winners: string[];
+      losers: string[];
+      winner_score?: number;
+      loser_score?: number;
+      game_date?: string;
+    },
+  ) =>
+    request<import('../types').Game>(`/games/${gameId}`, {
+      method: 'PUT',
+      token,
+      body: payload,
+    }),
+
+  deleteGame: (token: string, gameId: number) =>
+    request<{ success: boolean }>(`/games/${gameId}`, {
+      method: 'DELETE',
+      token,
     }),
 
   discoverLeagues: (query?: string) =>

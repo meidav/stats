@@ -5,7 +5,7 @@ import { glyphForIcon, kindForIcon } from '../lib/leagueIcons';
 import {
   BeachVolleyballMark,
   CheckerGlyph,
-  ChessKingGlyph,
+  ChessKnightGlyph,
   FanHand,
 } from './TemplateGlyph';
 
@@ -21,7 +21,7 @@ export function LeagueIcon({ id, size = 26 }: { id?: string | null; size?: numbe
     return <CheckerGlyph size={size} />;
   }
   if (kind === 'chess') {
-    return <ChessKingGlyph size={size} />;
+    return <ChessKnightGlyph size={size} />;
   }
   const glyph = glyphForIcon(id);
   if (!glyph) return null;

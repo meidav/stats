@@ -19,6 +19,7 @@ import { GlassCard } from '../components/GlassCard';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { LeagueIcon } from '../components/LeagueIcon';
+import { IconActionRow } from '../components/IconActionRow';
 import { BrandLockup } from '../components/BrandLockup';
 import { APP_TAGLINE } from '../constants/brand';
 import { colors, gradients, spacing } from '../constants/theme';
@@ -217,7 +218,13 @@ export function HomeScreen({ navigation }: Props) {
                   <TouchableOpacity
                     style={styles.leagueMain}
                     activeOpacity={0.85}
-                    onPress={() => navigation.navigate('League', { slug: item.slug, name: item.name })}
+                    onPress={() =>
+                      navigation.navigate('League', {
+                        slug: item.slug,
+                        name: item.name,
+                        role: item.role,
+                      })
+                    }
                   >
                     {item.icon ? (
                       <LeagueIcon id={item.icon} size={26} />
@@ -244,30 +251,18 @@ export function HomeScreen({ navigation }: Props) {
                     </View>
                   </TouchableOpacity>
                   {canEdit ? (
-                    <View style={styles.leagueActions}>
-                      <TouchableOpacity
-                        style={styles.editButton}
-                        onPress={() =>
-                          navigation.navigate('EditLeague', {
-                            slug: item.slug,
-                            name: item.name,
-                            icon: item.icon ?? null,
-                          })
-                        }
-                        accessibilityLabel={`Edit ${item.name}`}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      >
-                        <Ionicons name="create-outline" size={20} color={colors.primary} />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.deleteButton}
-                        onPress={() => openDelete(item)}
-                        accessibilityLabel={`Delete ${item.name}`}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      >
-                        <Ionicons name="trash-outline" size={20} color={colors.danger} />
-                      </TouchableOpacity>
-                    </View>
+                    <IconActionRow
+                      onEdit={() =>
+                        navigation.navigate('EditLeague', {
+                          slug: item.slug,
+                          name: item.name,
+                          icon: item.icon ?? null,
+                        })
+                      }
+                      onDelete={() => openDelete(item)}
+                      editLabel={`Edit ${item.name}`}
+                      deleteLabel={`Delete ${item.name}`}
+                    />
                   ) : null}
                 </View>
               </GlassCard>
@@ -375,7 +370,8 @@ const styles = StyleSheet.create({
   tagline: {
     marginTop: spacing.sm,
     fontSize: 16,
-    color: colors.textMuted,
+    color: colors.text,
+    fontWeight: '600',
     textAlign: 'center',
   },
   sectionTitle: {
@@ -454,27 +450,6 @@ const styles = StyleSheet.create({
   leagueCopy: {
     flex: 1,
   },
-  leagueActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  editButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-  },
-  deleteButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(220, 38, 38, 0.12)',
-  },
   cardTitle: {
     fontSize: 18,
     fontWeight: '800',
@@ -483,6 +458,7 @@ const styles = StyleSheet.create({
   cardMeta: {
     marginTop: spacing.xs,
     color: colors.textMuted,
+    fontWeight: '600',
     textTransform: 'capitalize',
   },
   footer: {
@@ -629,7 +605,7 @@ const styles = StyleSheet.create({
   },
   signOutStayText: {
     fontWeight: '700',
-    color: colors.text,
+    color: '#fff',
   },
   signOutConfirm: {
     flex: 1,

@@ -2,7 +2,7 @@ export const colors = {
   background: '#EFF6FF',
   surface: '#FFFFFF',
   text: '#0F172A',
-  textMuted: '#64748B',
+  textMuted: '#334155',
   onGlass: '#FFF7ED',
   onGlassMuted: '#FDE8D0',
   linkOnGlass: '#BFDBFE',
@@ -34,6 +34,16 @@ export const glass = {
   shadowRadius: 20,
   shadowOffset: { width: 0, height: 10 },
   elevation: 4,
+} as const;
+
+export const glassLight = {
+  backgroundColor: 'rgba(255, 252, 248, 0.52)',
+  borderColor: 'rgba(255, 255, 255, 0.72)',
+  shadowColor: '#475569',
+  shadowOpacity: 0.12,
+  shadowRadius: 16,
+  shadowOffset: { width: 0, height: 8 },
+  elevation: 3,
 } as const;
 
 export const spacing = {

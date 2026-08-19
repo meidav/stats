@@ -7,7 +7,7 @@ import { formatPlusMinus, winPctColor } from '../lib/names';
 import type { PlayerStat } from '../types';
 
 type Props = {
-  title: string;
+  title?: string;
   stats: PlayerStat[];
   showPlusMinus?: boolean;
   onPlayerPress: (player: string) => void;
@@ -18,7 +18,7 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>{title}</Text>
+      {title ? <Text style={styles.title}>{title}</Text> : null}
       <GlassCard style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={[styles.th, styles.rank]}>#</Text>
@@ -80,14 +80,14 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
 
 const styles = StyleSheet.create({
   wrap: {
-    marginBottom: spacing.lg,
+    marginBottom: 0,
   },
   title: {
     fontSize: 13,
     fontWeight: '800',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
-    color: colors.textMuted,
+    color: colors.text,
     marginBottom: spacing.sm,
     paddingHorizontal: 4,
   },
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   altRow: {
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    backgroundColor: 'rgba(37, 99, 235, 0.06)',
   },
   th: {
     fontSize: 12,

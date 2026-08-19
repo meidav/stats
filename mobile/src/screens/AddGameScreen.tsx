@@ -9,12 +9,14 @@ import {
   View,
 } from 'react-native';
 
+import { DateTimeField } from '../components/DateTimeField';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { colors, spacing } from '../constants/theme';
 import { copyForFocus } from '../lib/focus';
+import { formatLocalDateTime, parseLocalDateTime } from '../lib/datetime';
 import { autoCapWords } from '../lib/names';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -25,6 +27,12 @@ import type { RootStackParamList } from '../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'AddGame'>;
 type FocusField = { side: 'winner' | 'loser'; index: number } | 'winnerScore' | 'loserScore' | null;
 
+function padNames(names: string[] | undefined, count: number) {
+  const next = [...(names || [])];
+  while (next.length < count) next.push('');
+  return next.slice(0, count);
+}
+
 export function AddGameScreen({ route, navigation }: Props) {
   const {
     sportId,
@@ -34,19 +42,27 @@ export function AddGameScreen({ route, navigation }: Props) {
     scoreMode = 'points',
     sideKind = 'player',
     focus = 'mixed',
+    gameId,
+    winners,
+    losers,
+    winnerScore: initialWinnerScore,
+    loserScore: initialLoserScore,
+    gameDate,
   } = route.params;
   const { token } = useAuth();
+  const editing = Boolean(gameId);
   const winLoss = scoreMode === 'win_loss';
   const teamSides = sideKind === 'team' || templateId === 'indoor_volleyball';
   const oneOnOne = playersPerSide === 1 && !teamSides;
-  const [winnerNames, setWinnerNames] = useState<string[]>(
-    Array.from({ length: playersPerSide }, () => ''),
+  const [winnerNames, setWinnerNames] = useState<string[]>(() => padNames(winners, playersPerSide));
+  const [loserNames, setLoserNames] = useState<string[]>(() => padNames(losers, playersPerSide));
+  const [winnerScore, setWinnerScore] = useState(
+    initialWinnerScore != null ? String(initialWinnerScore) : '',
   );
-  const [loserNames, setLoserNames] = useState<string[]>(
-    Array.from({ length: playersPerSide }, () => ''),
+  const [loserScore, setLoserScore] = useState(
+    initialLoserScore != null ? String(initialLoserScore) : '',
   );
-  const [winnerScore, setWinnerScore] = useState('');
-  const [loserScore, setLoserScore] = useState('');
+  const [playedAt, setPlayedAt] = useState(() => parseLocalDateTime(gameDate));
   const [players, setPlayers] = useState<string[]>([]);
   const [winnerHint, setWinnerHint] = useState<number | null>(null);
   const [loserHints, setLoserHints] = useState<number[]>([]);
@@ -151,15 +167,21 @@ export function AddGameScreen({ route, navigation }: Props) {
         losers: string[];
         winner_score?: number;
         loser_score?: number;
+        game_date?: string;
       } = {
         winners: winnerNames.map((n) => n.trim()),
         losers: loserNames.map((n) => n.trim()),
+        game_date: formatLocalDateTime(playedAt),
       };
       if (!winLoss) {
         payload.winner_score = Number(winnerScore);
         payload.loser_score = Number(loserScore);
       }
-      await api.addGame(token, sportId, payload);
+      if (editing && gameId) {
+        await api.updateGame(token, gameId, payload);
+      } else {
+        await api.addGame(token, sportId, payload);
+      }
       await rememberPlayers([...payload.winners, ...payload.losers]);
       navigation.goBack();
     } catch (err) {
@@ -215,11 +237,19 @@ export function AddGameScreen({ route, navigation }: Props) {
       footer={
         <View style={styles.footer}>
           <ErrorBanner message={error} />
-          <GradientButton label="Save game" onPress={handleSubmit} loading={loading} disabled={loading} />
+          <GradientButton
+            label={editing ? 'Save changes' : 'Save game'}
+            onPress={handleSubmit}
+            loading={loading}
+            disabled={loading}
+          />
         </View>
       }
     >
-      <ScreenHeader title={copyForFocus(focus).addGameTitle} onBack={() => navigation.goBack()} />
+      <ScreenHeader
+        title={editing ? 'Edit game' : copyForFocus(focus).addGameTitle}
+        onBack={() => navigation.goBack()}
+      />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -228,6 +258,7 @@ export function AddGameScreen({ route, navigation }: Props) {
         automaticallyAdjustKeyboardInsets
       >
         <Text style={styles.subtitle}>{sportName}</Text>
+        <DateTimeField value={playedAt} onChange={setPlayedAt} />
 
         <Text style={styles.section}>
           {teamSides ? 'Winning team' : oneOnOne ? 'Winner' : 'Winners'}

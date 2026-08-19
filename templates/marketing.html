@@ -6,11 +6,12 @@
 <section class="mkt-hero">
     <p class="mkt-kicker">Now headed to the App Store and Google Play</p>
     <h1 class="mkt-sr-only">PlayTracker</h1>
-    <img class="mkt-hero-logo" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="">
+    <span class="mkt-logo-plate mkt-logo-plate-hero">
+        <img class="mkt-hero-logo" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="">
+    </span>
     <p class="mkt-lead">Track everything you play. Leagues, standings, and game night in one place, from beach volleyball to chess.</p>
     <div class="mkt-hero-actions">
         <a class="mkt-btn mkt-btn-primary mkt-btn-disabled" href="/" aria-disabled="true">Get the app</a>
-        <a class="mkt-btn mkt-btn-ghost" href="/arbel/">Open Arbel stats</a>
     </div>
     <div class="mkt-stores mkt-stores-hero">
         <span class="mkt-store mkt-store-apple mkt-store-disabled" title="Coming soon">Download on the App Store</span>
@@ -20,31 +21,33 @@
 </section>
 
 <section class="mkt-phones" aria-label="App preview">
-    <article class="mkt-phone" style="--tilt: -12deg">
+    <article class="mkt-phone">
         <p class="mkt-phone-label">My leagues</p>
         <div class="mkt-device">
             <div class="mkt-screen">
                 <div class="mkt-screen-brand">
-                    <img src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="">
+                    <span class="mkt-logo-plate mkt-logo-plate-mini">
+                        <img src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="">
+                    </span>
                 </div>
                 <div class="mkt-row"><span class="mkt-dot mkt-dot-ball"></span><span>Beach VB</span></div>
-                <div class="mkt-row"><span class="mkt-dot mkt-dot-king">♚</span><span>Chess night</span></div>
+                <div class="mkt-row"><span class="mkt-dot mkt-dot-king">♞</span><span>Chess night</span></div>
                 <div class="mkt-row"><span class="mkt-dot mkt-dot-check"></span><span>Checkers</span></div>
             </div>
         </div>
     </article>
-    <article class="mkt-phone" style="--tilt: -6deg">
+    <article class="mkt-phone">
         <p class="mkt-phone-label">Standings</p>
         <div class="mkt-device">
             <div class="mkt-screen">
                 <div class="mkt-screen-title">Today</div>
-                <div class="mkt-stat"><b>Arbel</b><span>12-4</span></div>
+                <div class="mkt-stat"><b>Jordan</b><span>12-4</span></div>
                 <div class="mkt-stat"><b>Craig</b><span>9-7</span></div>
                 <div class="mkt-stat"><b>Rick</b><span>8-8</span></div>
             </div>
         </div>
     </article>
-    <article class="mkt-phone mkt-phone-front" style="--tilt: 0deg">
+    <article class="mkt-phone">
         <p class="mkt-phone-label">Add a game</p>
         <div class="mkt-device">
             <div class="mkt-screen">
@@ -55,23 +58,23 @@
             </div>
         </div>
     </article>
-    <article class="mkt-phone" style="--tilt: 6deg">
+    <article class="mkt-phone">
         <p class="mkt-phone-label">Player</p>
         <div class="mkt-device">
             <div class="mkt-screen">
-                <div class="mkt-avatar">AM</div>
-                <div class="mkt-screen-title">Arbel</div>
+                <div class="mkt-avatar">JM</div>
+                <div class="mkt-screen-title">Jordan</div>
                 <div class="mkt-kpi">.750</div>
                 <p class="mkt-tiny">Win rate this season</p>
             </div>
         </div>
     </article>
-    <article class="mkt-phone" style="--tilt: 12deg">
+    <article class="mkt-phone">
         <p class="mkt-phone-label">Game night</p>
         <div class="mkt-device">
             <div class="mkt-screen">
                 <div class="mkt-screen-title">Chess</div>
-                <div class="mkt-king">♚</div>
+                <div class="mkt-king">♞</div>
                 <p class="mkt-tiny">No stats yet. Add the first game.</p>
             </div>
         </div>
@@ -84,7 +87,7 @@
         <li>
             <span class="mkt-icon">★</span>
             <div>
-                <strong>One league object</strong>
+                <strong>One place for every league</strong>
                 <p>Sports, cards, and board games live in the same list. Mix a Tuesday night crew however you want.</p>
             </div>
         </li>
@@ -106,15 +109,9 @@
             <span class="mkt-icon">♛</span>
             <div>
                 <strong>Built from real games</strong>
-                <p>Started as beach volleyball standings. Now it covers chess, checkers, Monopoly, and whatever you add next.</p>
+                <p>It started with beach volleyball standings. Now it covers chess, checkers, Monopoly, and whatever you add next.</p>
             </div>
         </li>
     </ul>
-</section>
-
-<section class="mkt-about" id="about">
-    <h2>About PlayTracker</h2>
-    <p>PlayTracker is for people who already keep score on a napkin. Make a league, invite the group, and keep a running record of who won. Public leagues are easy to share. Private ones stay in the crew.</p>
-    <p>The original volleyball stats still live at <a href="/arbel/">playtracker.org/arbel</a>. Same data, same 404 ball, now on Railway instead of PythonAnywhere.</p>
 </section>
 {% endblock %}

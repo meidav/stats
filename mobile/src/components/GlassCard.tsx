@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 
-import { glass } from '../constants/theme';
+import { glassLight } from '../constants/theme';
 
 type Props = {
   children: React.ReactNode;
@@ -23,14 +23,14 @@ export function GlassCard({ children, style, onPress }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: glass.backgroundColor,
+    backgroundColor: glassLight.backgroundColor,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: glass.borderColor,
-    shadowColor: glass.shadowColor,
-    shadowOpacity: glass.shadowOpacity,
-    shadowRadius: glass.shadowRadius,
-    shadowOffset: glass.shadowOffset,
-    elevation: glass.elevation,
+    borderColor: glassLight.borderColor,
+    shadowColor: glassLight.shadowColor,
+    shadowOpacity: glassLight.shadowOpacity,
+    shadowRadius: glassLight.shadowRadius,
+    shadowOffset: glassLight.shadowOffset,
+    elevation: glassLight.elevation,
   },
 });

@@ -6,10 +6,10 @@ from api.league_db import get_sport_by_id
 from api.sport_templates import get_template, typical_win_score_for
 
 
-def _is_today(game_date):
+def _is_on_day(game_date, day):
     if not game_date:
         return False
-    return str(game_date)[:10] == date.today().isoformat()
+    return str(game_date)[:10] == day
 
 
 def _rows_from_games(games, min_games=1):
@@ -46,7 +46,7 @@ def _rows_from_games(games, min_games=1):
     return stats
 
 
-def compute_sport_stats(sport_id, year=None, min_games=None):
+def compute_sport_stats(sport_id, year=None, min_games=None, today=None):
     sport = get_sport_by_id(sport_id)
     if not sport:
         raise ValueError("sport not found")
@@ -54,7 +54,8 @@ def compute_sport_stats(sport_id, year=None, min_games=None):
     if min_games is None:
         min_games = sport.get("min_games_for_rank") or 1
     games = get_games_for_sport(sport_id, year=year, limit=10000)
-    today_games = [game for game in games if _is_today(game.get("game_date"))]
+    today_key = today or date.today().isoformat()
+    today_games = [game for game in games if _is_on_day(game.get("game_date"), today_key)]
 
     return {
         "sport_id": sport_id,
