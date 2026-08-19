@@ -65,6 +65,37 @@ def all_tennis_players(matches):
     return players
 
 
+def _format_ampm(raw):
+    raw = raw or ''
+    try:
+        if len(str(raw)) > 19:
+            value = datetime.strptime(str(raw), "%Y-%m-%d %H:%M:%S.%f")
+        else:
+            value = datetime.strptime(str(raw)[:19], "%Y-%m-%d %H:%M:%S")
+        return value.strftime("%m/%d/%Y %I:%M %p")
+    except (ValueError, TypeError):
+        return raw
+
+
+def convert_tennis_dates(matches):
+    converted = []
+    for match in matches:
+        match_date = _format_ampm(match[1] if len(match) > 1 else '')
+        updated_at = _format_ampm(match[6] if len(match) > 6 else '')
+        set_scores = match[7] if len(match) > 7 else None
+        converted.append([
+            match[0],
+            match_date,
+            match[2],
+            match[3],
+            match[4],
+            match[5],
+            updated_at,
+            set_scores,
+        ])
+    return converted
+
+
 def tennis_year_matches(year):
     cur = set_cur()
     if year == 'All years':
@@ -163,7 +194,8 @@ def all_tennis_opponents(player, matches):
             players.append(match[2])
         if match[4] not in players:
             players.append(match[4])
-    players.remove(player)
+    if player in players:
+        players.remove(player)
     return players
 
 
@@ -191,8 +223,8 @@ def total_tennis_stats(name, matches):
             wins += 1
         if match[4] == name:
             losses += 1
-    win_percent = wins / (wins + losses)
     total_matches = wins + losses
+    win_percent = wins / total_matches if total_matches else 0
     stats.append([name, wins, losses, win_percent, total_matches])
     return stats
 
@@ -229,7 +261,6 @@ def todays_tennis_matches():
     cur.execute("SELECT * FROM tennis_matches WHERE match_date > date('now','-15 hours')")
     matches = cur.fetchall()
     matches.sort(reverse=True)
-    #row = convert_ampm(matches)
     return matches
 
 def tennis_winning_scores():

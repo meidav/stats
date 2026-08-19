@@ -32,6 +32,7 @@
     
 
 {% extends 'base.html' %}
+{% from 'macros/game_cards.html' import tennis_match_card %}
 {% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
@@ -86,29 +87,14 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
+    {% if matches %}
     <h2 class="section-title">Today's tennis matches</h2>
-    <table id="matchesTable" class="stats-table">
-        <thead>
-            <tr>
-                <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'matchesTable')">#</th>
-                <th class="table-col-date clickable" scope="col" onclick="sortTable(1, 'matchesTable')">Date</th>
-                <th class="table-col-player clickable" scope="col" onclick="sortTable(2, 'matchesTable')">Winner</th>
-                <th class="table-col-player clickable" scope="col" onclick="sortTable(3, 'matchesTable')">Loser</th>
-                <th class="table-col-tennis-score clickable" scope="col" onclick="sortTable(4, 'matchesTable')">Sets</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for match in matches %}
-                <tr>
-                    <td class="table-col-rank">{{ loop.index }}</td>
-                    <td class="table-col-date" title="Time: {{ (match[1])[11:19] }}">{{ (match[1])[0:10] }}</td>
-                    <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
-                    <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
-                    <td class="table-col-tennis-score">{{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="games-list">
+        {% for match in matches %}
+            {{ tennis_match_card(match, year) }}
+        {% endfor %}
+    </div>
     {% endif %}
     <h2 class="section-title">{{ year }} tennis stats</h2>
     <table id="yearlyStatsTable" class="stats-table">

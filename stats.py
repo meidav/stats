@@ -1157,11 +1157,40 @@ def delete_vollis_game(id):
 @app.route('/vollis_player/<year>/<name>')
 def vollis_player_stats(year, name):
     all_years = all_years_vollis_player(name)
-    games = games_from_vollis_player_by_year(year, name)
+    games = sort_games_newest_first(games_from_vollis_player_by_year(year, name))
     stats = total_vollis_stats(name, games)
-    opponent_stats = vollis_opponent_stats_by_year(name, games)
-    return render_template('vollis_player.html', opponent_stats=opponent_stats, 
-        year=year, player=name, all_years=all_years, stats=stats)
+    opponent_stats = vollis_opponent_stats_by_year(name, games) if games else []
+    standings = vollis_stats_per_year(year, 1)
+    rank, field_size = rank_from_standings(standings, name)
+    wins = stats[0][1] if stats else 0
+    losses = stats[0][2] if stats else 0
+    win_pct = stats[0][3] if stats else 0
+    return render_template(
+        'singles_player.html',
+        sport='vollis',
+        sport_label='Vollis',
+        stats_endpoint='vollis_stats',
+        player_endpoint='vollis_player_stats',
+        games_noun='Games',
+        games_abbr='G',
+        opponent_stats=opponent_stats,
+        year=year,
+        player=name,
+        all_years=all_years,
+        stats=stats,
+        games=convert_vollis_dates(games),
+        wins=wins,
+        losses=losses,
+        win_pct=win_pct,
+        games_played=wins + losses,
+        rating=singles_point_rating(games, name),
+        rank=rank,
+        field_size=field_size,
+        streak=singles_streak(games, name),
+        last_results=singles_last_results(games, name),
+        initials=player_initials(name),
+        photo_url=get_player_photo_url(name),
+    )
 
 ## --------------------------------------------------
 ## TENNIS ROUTES
@@ -1180,7 +1209,7 @@ def tennis():
     all_years = all_tennis_years()
     year = str(date.today().year)
     t_stats = todays_tennis_stats()
-    matches = todays_tennis_matches()
+    matches = convert_tennis_dates(todays_tennis_matches())
     minimum_matches = 0
     stats = tennis_stats_per_year(year, minimum_matches)
     return render_template('tennis_stats.html', stats=stats, todays_stats=t_stats, matches=matches,
@@ -1193,6 +1222,7 @@ def add_tennis_match():
     t_matches = todays_tennis_matches()
     matches = tennis_year_matches('All years')
     players = all_tennis_players(t_matches + matches)
+    t_matches = convert_tennis_dates(t_matches)
     t_stats = todays_tennis_stats()
     year = str(date.today().year)
     winning_scores = tennis_winning_scores()
@@ -1320,13 +1350,13 @@ def edit_tennis_matches_by_year(year):
 @app.route('/tennis_matches/')
 def tennis_matches():
     all_years = all_tennis_years()
-    matches = tennis_year_matches(str(date.today().year))
+    matches = convert_tennis_dates(tennis_year_matches(str(date.today().year)))
     return render_template('tennis_matches.html', matches=matches, all_years=all_years, year=str(date.today().year))
 
 @app.route('/tennis_matches/<year>')
 def tennis_matches_by_year(year):
     all_years = all_tennis_years()
-    matches = tennis_year_matches(year)
+    matches = convert_tennis_dates(tennis_year_matches(year))
     return render_template('tennis_matches.html', all_years=all_years, matches=matches, year=year)
 
 
@@ -1448,11 +1478,40 @@ def delete_tennis_match(id):
 @app.route('/tennis_player/<year>/<name>')
 def tennis_player_stats(year, name):
     all_years = all_years_tennis_player(name)
-    matches = matches_from_tennis_player_by_year(year, name)
+    matches = sort_games_newest_first(matches_from_tennis_player_by_year(year, name))
     stats = total_tennis_stats(name, matches)
-    opponent_stats = tennis_opponent_stats_by_year(name, matches)
-    return render_template('tennis_player.html', opponent_stats=opponent_stats, 
-        year=year, player=name, all_years=all_years, stats=stats)
+    opponent_stats = tennis_opponent_stats_by_year(name, matches) if matches else []
+    standings = tennis_stats_per_year(year, 1)
+    rank, field_size = rank_from_standings(standings, name)
+    wins = stats[0][1] if stats else 0
+    losses = stats[0][2] if stats else 0
+    win_pct = stats[0][3] if stats else 0
+    return render_template(
+        'singles_player.html',
+        sport='tennis',
+        sport_label='Tennis',
+        stats_endpoint='tennis_stats',
+        player_endpoint='tennis_player_stats',
+        games_noun='Matches',
+        games_abbr='M',
+        opponent_stats=opponent_stats,
+        year=year,
+        player=name,
+        all_years=all_years,
+        stats=stats,
+        games=convert_tennis_dates(matches),
+        wins=wins,
+        losses=losses,
+        win_pct=win_pct,
+        games_played=wins + losses,
+        rating=singles_point_rating(matches, name),
+        rank=rank,
+        field_size=field_size,
+        streak=singles_streak(matches, name),
+        last_results=singles_last_results(matches, name),
+        initials=player_initials(name),
+        photo_url=get_player_photo_url(name),
+    )
 
 
 ## --------------------------------------------------

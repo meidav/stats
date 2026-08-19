@@ -156,7 +156,8 @@ def all_vollis_opponents(player, games):
             players.append(game[2])
         if game[4] not in players:
             players.append(game[4])
-    players.remove(player)
+    if player in players:
+        players.remove(player)
     return players
 
 
@@ -184,8 +185,8 @@ def total_vollis_stats(name, games):
             wins += 1
         if game[4] == name:
             losses += 1
-    win_percent = wins / (wins + losses)
     total_games = wins + losses
+    win_percent = wins / total_games if total_games else 0
     stats.append([name, wins, losses, win_percent, total_games])
     return stats
 

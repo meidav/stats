@@ -51,34 +51,33 @@
             <div class="form-section" style="margin-bottom: 0;">
                 <h3>Set scores</h3>
                 
-                <!-- Match Format Buttons -->
-                <div style="text-align: center; margin-bottom: 12px;">
-                    <button type="button" onclick="showSets(1)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">1 Set</button>
-                    <button type="button" onclick="showSets(3)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 3</button>
-                    <button type="button" onclick="showSets(5)" class="submit-button" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 5</button>
+                <div class="tennis-format" role="group" aria-label="Match format">
+                    <button type="button" data-sets="1" onclick="showSets(1)" class="tennis-format-btn is-active" aria-pressed="true">1 Set</button>
+                    <button type="button" data-sets="3" onclick="showSets(3)" class="tennis-format-btn" aria-pressed="false">Best of 3</button>
+                    <button type="button" data-sets="5" onclick="showSets(5)" class="tennis-format-btn" aria-pressed="false">Best of 5</button>
                 </div>
                 
-                <div class="form-row" id="set1">
+                <div class="form-row set-row" id="set1">
                     <input type="number" name="winner_set1" placeholder="Set 1 - W" min="0" max="20" value="{{ request.form.get('winner_set1', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set1" placeholder="Set 1 - L" min="0" max="20" value="{{ request.form.get('loser_set1', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row" id="set2" style="display: none;">
+                <div class="form-row set-row set-hidden" id="set2">
                     <input type="number" name="winner_set2" placeholder="Set 2 - W" min="0" max="20" value="{{ request.form.get('winner_set2', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set2" placeholder="Set 2 - L" min="0" max="20" value="{{ request.form.get('loser_set2', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row" id="set3" style="display: none;">
+                <div class="form-row set-row set-hidden" id="set3">
                     <input type="number" name="winner_set3" placeholder="Set 3 - W" min="0" max="20" value="{{ request.form.get('winner_set3', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set3" placeholder="Set 3 - L" min="0" max="20" value="{{ request.form.get('loser_set3', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row" id="set4" style="display: none;">
+                <div class="form-row set-row set-hidden" id="set4">
                     <input type="number" name="winner_set4" placeholder="Set 4 - W" min="0" max="20" value="{{ request.form.get('winner_set4', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set4" placeholder="Set 4 - L" min="0" max="20" value="{{ request.form.get('loser_set4', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row" id="set5" style="display: none;">
+                <div class="form-row set-row set-hidden" id="set5">
                     <input type="number" name="winner_set5" placeholder="Set 5 - W" min="0" max="20" value="{{ request.form.get('winner_set5', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set5" placeholder="Set 5 - L" min="0" max="20" value="{{ request.form.get('loser_set5', '') }}" class="form-field-compact">
                 </div>
@@ -93,27 +92,28 @@
                 </div>
             </div>
 
-            <input type="submit" value="Update match" style="background-color: #0969da !important; color: white !important; border: none !important;">
+            <div class="form-submit-wrap">
+                <button type="submit" class="submit-button submit-button--action">Update match</button>
+            </div>
         </form>
     </div>
 
 <script>
 function showSets(numSets) {
-    // Hide all sets first
-    document.getElementById('set1').style.display = 'flex';
-    document.getElementById('set2').style.display = 'none';
-    document.getElementById('set3').style.display = 'none';
-    document.getElementById('set4').style.display = 'none';
-    document.getElementById('set5').style.display = 'none';
-    
-    // Show the required sets
-    if (numSets >= 3) {
-        document.getElementById('set2').style.display = 'flex';
-        document.getElementById('set3').style.display = 'flex';
-    }
-    if (numSets >= 5) {
-        document.getElementById('set4').style.display = 'flex';
-        document.getElementById('set5').style.display = 'flex';
+    document.querySelectorAll('.tennis-format-btn').forEach(function (btn) {
+        var active = Number(btn.getAttribute('data-sets')) === numSets;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    for (var i = 1; i <= 5; i++) {
+        var row = document.getElementById('set' + i);
+        if (!row) continue;
+        var show = i === 1 || (numSets >= 3 && i <= 3) || (numSets === 5 && i <= 5);
+        row.classList.toggle('set-hidden', !show);
+        row.querySelectorAll('input').forEach(function (input) {
+            input.disabled = !show;
+            if (!show) input.value = '';
+        });
     }
 }
 

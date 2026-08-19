@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'macros/game_cards.html' import tennis_match_card %}
 {% block body_class %}has-page-header{% endblock %}
 
 {% block title %} Add a tennis match {% endblock %}
@@ -20,7 +21,6 @@
                 {% endfor %}
             </datalist>
             
-            <!-- Players -->
             <div class="form-section" style="margin-bottom: 0;">
                 <h3>Players</h3>
                 <div class="form-row">
@@ -29,15 +29,13 @@
                 </div>
             </div>
 
-            <!-- Set Scores -->
             <div class="form-section" style="margin-bottom: 0;">
                 <h3>Set scores</h3>
                 
-                <!-- Match Format Buttons -->
-                <div style="text-align: center; margin-bottom: 12px;" class="tennis-format">
-                    <button type="button" data-sets="1" onclick="showSets(1)" class="submit-button tennis-format-btn is-active" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">1 Set</button>
-                    <button type="button" data-sets="3" onclick="showSets(3)" class="submit-button tennis-format-btn" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 3</button>
-                    <button type="button" data-sets="5" onclick="showSets(5)" class="submit-button tennis-format-btn" style="width: auto; padding: 8px 16px; margin: 4px; font-size: 14px;">Best of 5</button>
+                <div class="tennis-format" role="group" aria-label="Match format">
+                    <button type="button" data-sets="1" onclick="showSets(1)" class="tennis-format-btn is-active" aria-pressed="true">1 Set</button>
+                    <button type="button" data-sets="3" onclick="showSets(3)" class="tennis-format-btn" aria-pressed="false">Best of 3</button>
+                    <button type="button" data-sets="5" onclick="showSets(5)" class="tennis-format-btn" aria-pressed="false">Best of 5</button>
                 </div>
                 
                 <div class="form-row set-row" id="set1">
@@ -45,28 +43,27 @@
                     <input type="number" name="loser_set1" placeholder="Set 1 - L" min="0" max="20" value="{{ request.form.get('loser_set1', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row set-row" id="set2">
+                <div class="form-row set-row set-hidden" id="set2">
                     <input type="number" name="winner_set2" placeholder="Set 2 - W" min="0" max="20" value="{{ request.form.get('winner_set2', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set2" placeholder="Set 2 - L" min="0" max="20" value="{{ request.form.get('loser_set2', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row set-row" id="set3">
+                <div class="form-row set-row set-hidden" id="set3">
                     <input type="number" name="winner_set3" placeholder="Set 3 - W" min="0" max="20" value="{{ request.form.get('winner_set3', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set3" placeholder="Set 3 - L" min="0" max="20" value="{{ request.form.get('loser_set3', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row set-row" id="set4">
+                <div class="form-row set-row set-hidden" id="set4">
                     <input type="number" name="winner_set4" placeholder="Set 4 - W" min="0" max="20" value="{{ request.form.get('winner_set4', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set4" placeholder="Set 4 - L" min="0" max="20" value="{{ request.form.get('loser_set4', '') }}" class="form-field-compact">
                 </div>
                 
-                <div class="form-row set-row" id="set5">
+                <div class="form-row set-row set-hidden" id="set5">
                     <input type="number" name="winner_set5" placeholder="Set 5 - W" min="0" max="20" value="{{ request.form.get('winner_set5', '') }}" class="form-field-compact">
                     <input type="number" name="loser_set5" placeholder="Set 5 - L" min="0" max="20" value="{{ request.form.get('loser_set5', '') }}" class="form-field-compact">
                 </div>
             </div>
             
-            <!-- Optional Date/Time -->
             <div class="form-section" style="margin-bottom: 0;">
                 <h3>Match details (optional)</h3>
                 <div class="form-row">
@@ -75,115 +72,95 @@
                 </div>
             </div>
 
-            <input type="submit" value="Add match" style="background-color: #0969da !important; color: white !important; border: none !important;">
+            <div class="form-submit-wrap">
+                <button type="submit" class="submit-button submit-button--action">Add match</button>
+            </div>
         </form>
     </div>
 
-    <div>
-    {% if todays_stats %}
-    <h2 class="section-title">Today's tennis stats</h2>
-<table class="stats-table">
-        <thead>
-            <tr>
-                <th class="table-col-rank">#</th>
-                <th class="table-col-player">Player</th>
-                <th class="table-col-stat" title="Wins">W</th>
-                <th class="table-col-stat" title="Losses">L</th>
-                <th class="table-col-stat" title="Win %">%</th>
-                <th class="table-col-stat">+/-</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for stat in todays_stats %}
-            <tr>
-                <td class="table-col-rank">{{ loop.index }}</td>
-                <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=stat[0] ) }}">{{ stat[0] }}</a></td>
-                <td class="table-col-stat">{{ stat[1] }}</td>
-                <td class="table-col-stat">{{ stat[2] }}</td>
-                <td class="table-col-stat">{{ "{:.2f}".format(stat[3]*100) }}</td>
-                {% if stat[4] > 0 %}
-                    <td class="table-col-stat">+{{ stat[4] }}</td>
-                {% else %}
-                    <td class="table-col-stat">{{ stat[4] }}</td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <h2 class="section-title">Today's tennis matches</h2>
-<table class="stats-table">
-        <thead>
-            <tr>
-                <th class="table-col-rank">#</th>
-				<th class="table-col-date">Date</th>
-                <th class="table-col-player">Winner</th>
-                <th class="table-col-player">Loser</th>
-                <th class="table-col-tennis-score">Sets</th>
-                <th class="table-col-stat">Update</th>
-            </tr>
-            </thead>
-        <tbody>
-        {% for match in matches %}
-            <tr>
-                <td class="table-col-rank">{{ loop.index }}</td>
-    			<td class="table-col-date" title="Time: {{ (match[1])[11:19] }}">{{ (match[1])[0:10] }}</td>
-                <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
-                <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
-                <td class="table-col-tennis-score">{{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}</td>
-                <td class="table-col-stat">
-                    <div class="table-actions">
-                        <a href="{{ url_for('update_tennis_match', id=match[0]) }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" class="icon-edit">
-                                <path d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36zM20.71 7.04a.996.996 0 0 0 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75l1.83-1.83z"></path>
-                            </svg>
-                        </a>
-                        <a href="{{ url_for('delete_tennis_match', id=match[0]) }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" class="icon-delete">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v10zM18 4h-2.5l-.71-.71c-.18-.18-.44-.29-.7-.29H9.91c-.26 0-.52.11-.7.29L8.5 4H6c-.55 0-1 .45-1 1s.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1z"></path>
-                            </svg>
-                        </a>
-                    </div>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-    </div>
-    {% if stats %}
-    <div>
-        <h2 class="section-title">{{ year }} Tennis stats</h2>
-<table class="stats-table">
-            <thead>
-                <tr>
-                    <th class="table-col-rank">#</th>
-                    <th class="table-col-player">Player</th>
-                    <th class="table-col-stat" title="Wins">W</th>
-                    <th class="table-col-stat" title="Losses">L</th>
-                    <th class="table-col-stat" title="Win %">%</th>
-                    <th class="table-col-stat" title="Matches">M</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for player in stats %}
-                <tr>
-                    <td class="table-col-rank">{{ loop.index }}</td>
-                    <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
-                    <td class="table-col-stat">{{ player[1] }}</td>
-                    <td class="table-col-stat">{{ player[2] }}</td>
-                    <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
-                    <td class="table-col-stat">{{ player[1] + player[2] }}</td>
-                </tr>
+    <div class="stats-sections">
+        {% if todays_stats %}
+        <div class="add-game-block">
+            <h2 class="section-title">Today's tennis stats</h2>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank">#</th>
+                            <th class="table-col-player">Player</th>
+                            <th class="table-col-stat" title="Wins">W</th>
+                            <th class="table-col-stat" title="Losses">L</th>
+                            <th class="table-col-stat" title="Win %">%</th>
+                            <th class="table-col-stat">+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in todays_stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=stat[0] ) }}">{{ stat[0] }}</a></td>
+                            <td class="table-col-stat">{{ stat[1] }}</td>
+                            <td class="table-col-stat">{{ stat[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(stat[3]*100) }}</td>
+                            <td class="table-col-stat">{% if stat[4] > 0 %}+{{ stat[4] }}{% else %}{{ stat[4] }}{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if matches %}
+        <div class="add-game-block">
+            <h2 class="section-title">Today's tennis matches</h2>
+            <div class="games-list">
+                {% for match in matches %}
+                    {{ tennis_match_card(match, year, editable=true) }}
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stats %}
+        <div class="add-game-block">
+            <h2 class="section-title">{{ year }} Tennis stats</h2>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank">#</th>
+                            <th class="table-col-player">Player</th>
+                            <th class="table-col-stat" title="Wins">W</th>
+                            <th class="table-col-stat" title="Losses">L</th>
+                            <th class="table-col-stat" title="Win %">%</th>
+                            <th class="table-col-stat" title="Matches">M</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                            <td class="table-col-stat">{{ player[1] }}</td>
+                            <td class="table-col-stat">{{ player[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 
 <script>
 function showSets(numSets) {
     document.querySelectorAll('.tennis-format-btn').forEach(function (btn) {
-        btn.classList.toggle('is-active', Number(btn.getAttribute('data-sets')) === numSets);
+        var active = Number(btn.getAttribute('data-sets')) === numSets;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
     for (var i = 1; i <= 5; i++) {
         var row = document.getElementById('set' + i);
@@ -198,7 +175,17 @@ function showSets(numSets) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    showSets(1);
+    var filled = 1;
+    for (var i = 5; i >= 1; i--) {
+        var winnerInput = document.querySelector('input[name="winner_set' + i + '"]');
+        var loserInput = document.querySelector('input[name="loser_set' + i + '"]');
+        if ((winnerInput && winnerInput.value) || (loserInput && loserInput.value)) {
+            filled = i;
+            break;
+        }
+    }
+    showSets(filled >= 4 ? 5 : (filled >= 2 ? 3 : 1));
+
     const dateInput = document.getElementById('date_played');
     const timeInput = document.getElementById('time_played');
     

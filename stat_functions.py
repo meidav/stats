@@ -306,6 +306,73 @@ def player_initials(name):
 	if len(parts) == 1:
 		return parts[0][:2].upper()
 	return (parts[0][0] + parts[-1][0]).upper()
+
+
+def singles_result(game, player, winner_idx=2, loser_idx=4):
+	if player == game[winner_idx]:
+		return 'W'
+	if player == game[loser_idx]:
+		return 'L'
+	return None
+
+
+def singles_streak(games, player, winner_idx=2, loser_idx=4):
+	streak = 0
+	last = None
+	for game in games:
+		result = singles_result(game, player, winner_idx, loser_idx)
+		if not result:
+			continue
+		if last is None:
+			last = result
+			streak = 1
+		elif result == last:
+			streak += 1
+		else:
+			break
+	if not last:
+		return '-'
+	return f'{streak}{last}'
+
+
+def singles_last_results(games, player, limit=10, winner_idx=2, loser_idx=4):
+	results = []
+	for game in games:
+		result = singles_result(game, player, winner_idx, loser_idx)
+		if not result:
+			continue
+		results.append(result)
+		if len(results) >= limit:
+			break
+	return results
+
+
+def singles_point_rating(games, player, winner_idx=2, loser_idx=4, winner_score_idx=3, loser_score_idx=5):
+	total = 0
+	count = 0
+	for game in games:
+		try:
+			winner_score = int(game[winner_score_idx])
+			loser_score = int(game[loser_score_idx])
+		except (TypeError, ValueError, IndexError):
+			continue
+		if player == game[winner_idx]:
+			total += winner_score - loser_score
+			count += 1
+		elif player == game[loser_idx]:
+			total += loser_score - winner_score
+			count += 1
+	if count == 0:
+		return 0.0
+	return round(total / count, 2)
+
+
+def rank_from_standings(standings, player_name):
+	total = len(standings or [])
+	for index, row in enumerate(standings or [], start=1):
+		if row[0] == player_name:
+			return index, total
+	return None, total
 	
 def rare_stats_per_year(year, minimum_games):
 	if year == 'All years':

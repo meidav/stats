@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'macros/game_cards.html' import tennis_match_card %}
 {% block body_class %}has-page-header{% endblock %}
 
 {% block content %}
@@ -25,28 +26,7 @@
     <p class="games-count games-count-hero" id="gamesCount">{{ matches|length }} MATCHES</p>
     <div class="games-list" id="gamesList">
         {% for match in matches %}
-        <article class="game-card tennis-match-card" data-players="{{ match[2] }}|{{ match[4] }}" data-date="{{ match[1] }}">
-            <div class="game-card-top">
-                <div class="game-card-actions"></div>
-                <div class="game-meta">{{ match[1] }}</div>
-                <div class="game-card-actions game-card-actions--end"></div>
-            </div>
-            <div class="game-teams game-teams--stacked">
-                <div class="game-team winner">
-                    <div class="players">
-                        <a href="{{ url_for('tennis_player_stats', year=year, name=match[2]) }}">{{ match[2] }}</a>
-                    </div>
-                </div>
-                <div class="game-team loser">
-                    <div class="players">
-                        <a href="{{ url_for('tennis_player_stats', year=year, name=match[4]) }}">{{ match[4] }}</a>
-                    </div>
-                </div>
-            </div>
-            <div class="tennis-score-card">
-                {{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}
-            </div>
-        </article>
+            {{ tennis_match_card(match, year) }}
         {% endfor %}
     </div>
     <div id="noResults" class="no-results-message" style="display: none;">No matches found.</div>
@@ -65,7 +45,7 @@
                 if (show) visible++;
             });
             noResults.style.display = visible === 0 ? 'block' : 'none';
-            if (countEl) countEl.textContent = visible + ' M';
+            if (countEl) countEl.textContent = visible + ' MATCHES';
         }
         if (filterInput) { filterInput.addEventListener('input', filterMatches); }
     });

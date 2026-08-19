@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import tennis_match_card, vollis_game_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div class="header-controls header-controls--spread">
+            <a href="{{ url_for(stats_endpoint, year=year) }}" class="nav-pill">← Stats</a>
+            <div class="dropdown dropdown-year">
+                <button class="dropbtn" type="button">{{ year }} <svg class="dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+                <div class="dropdown-content">
+                    {% for y in all_years %}
+                        <a href="{{ url_for(player_endpoint, year=y, name=player) }}">{{ y }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <label for="menu__toggle" class="nav-pill menu-trigger" aria-label="Open menu">Menu</label>
+        </div>
+    </div>
+
+    <div class="player-hero">
+        <div class="player-avatar" aria-hidden="true">
+            {% if photo_url %}
+            <img src="{{ photo_url }}" alt="">
+            {% else %}
+            {{ initials }}
+            {% endif %}
+        </div>
+        <div class="player-hero-text">
+            <h1 class="player-name">{{ player }}</h1>
+            <p class="player-subtitle">{{ year }} {{ sport_label }} Stats</p>
+        </div>
+    </div>
+
+    <div class="player-kpi-grid">
+        <div class="player-kpi">
+            <div class="player-kpi-value player-kpi-value--wins">{{ wins }}</div>
+            <div class="player-kpi-label">Wins</div>
+        </div>
+        <div class="player-kpi">
+            <div class="player-kpi-value player-kpi-value--losses">{{ losses }}</div>
+            <div class="player-kpi-label">Losses</div>
+        </div>
+        <div class="player-kpi">
+            <div class="player-kpi-value">{{ "{:.0f}".format(win_pct * 100) }}%</div>
+            <div class="player-kpi-label">Win %</div>
+        </div>
+        <div class="player-kpi">
+            <div class="player-kpi-value">{{ games_played }}</div>
+            <div class="player-kpi-label">{{ games_noun }}</div>
+        </div>
+        <div class="player-kpi">
+            <div class="player-kpi-value player-kpi-value--rating">{{ "{:.2f}".format(rating) }}</div>
+            <div class="player-kpi-label">
+                Rating
+                {% if rank %}
+                <span class="player-kpi-note">#{{ rank }} of {{ field_size }}</span>
+                {% elif field_size %}
+                <span class="player-kpi-note">of {{ field_size }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="player-kpi">
+            <div class="player-kpi-value {% if streak.endswith('W') %}player-kpi-value--wins{% elif streak.endswith('L') %}player-kpi-value--losses{% endif %}">{{ streak }}</div>
+            <div class="player-kpi-label">Streak</div>
+        </div>
+    </div>
+
+    {% if last_results %}
+    <div class="player-streak-block">
+        <h2 class="player-streak-title">Last {{ last_results|length }} {{ games_noun|lower }}</h2>
+        <div class="streak-dots" aria-label="Recent results">
+            {% for result in last_results %}
+            <span class="streak-dot streak-dot--{{ result|lower }}" title="{{ result }}">{{ result }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="stats-sections">
+        {% if opponent_stats %}
+        <h2 class="section-title section-title--against">Stats vs opponents ({{ opponent_stats|length }})</h2>
+        <div class="table-scroll">
+            <table class="stats-table collapsible-table" data-collapse-rows="8">
+                <thead>
+                    <tr>
+                        <th class="table-col-rank" scope="col">#</th>
+                        <th class="table-col-player" scope="col">Opponent</th>
+                        <th class="table-col-stat" scope="col" title="Win %">%</th>
+                        <th class="table-col-stat" scope="col" title="Wins">W</th>
+                        <th class="table-col-stat" scope="col" title="Losses">L</th>
+                        <th class="table-col-stat" scope="col" title="{{ games_noun }}">{{ games_abbr }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in opponent_stats %}
+                    <tr>
+                        <td class="table-col-rank">{{ loop.index }}</td>
+                        <td class="table-col-player"><a href="{{ url_for(player_endpoint, year=year, name=stat['opponent']) }}">{{ stat['opponent'] }}</a></td>
+                        <td class="table-col-stat">{{ "{:.0f}".format(stat['win_percentage']*100) }}</td>
+                        <td class="table-col-stat">{{ stat['wins'] }}</td>
+                        <td class="table-col-stat">{{ stat['losses'] }}</td>
+                        <td class="table-col-stat">{{ stat['total_games'] if stat['total_games'] is defined else stat['total_matches'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if games %}
+    <div class="player-games-section">
+        <h2 class="section-title">{{ games_noun }} played ({{ games|length }})</h2>
+        <div class="games-list">
+            {% for game in games %}
+                {% if sport == 'tennis' %}
+                    {{ tennis_match_card(game, year, highlight_player=player) }}
+                {% else %}
+                    {{ vollis_game_card(game, year, highlight_player=player) }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.collapsible-table').forEach(function (table) {
+    var limit = parseInt(table.getAttribute('data-collapse-rows') || '8', 10);
+    var rows = table.querySelectorAll('tbody tr');
+    if (rows.length <= limit) return;
+
+    for (var i = limit; i < rows.length; i++) {
+      rows[i].classList.add('is-collapsed-row');
+      rows[i].style.display = 'none';
+    }
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'show-all-btn';
+    btn.textContent = 'Show all ' + rows.length + ' opponents';
+    btn.addEventListener('click', function () {
+      var expanded = table.classList.toggle('is-expanded');
+      for (var j = limit; j < rows.length; j++) {
+        rows[j].style.display = expanded ? '' : 'none';
+      }
+      btn.textContent = expanded
+        ? 'Show fewer opponents'
+        : 'Show all ' + rows.length + ' opponents';
+    });
+    table.parentNode.insertBefore(btn, table.nextSibling);
+  });
+});
+</script>
+{% endblock %}
