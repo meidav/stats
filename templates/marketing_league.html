@@ -1,6 +1,8 @@
 {% extends "marketing_base.html" %}
+{% from "marketing_league_macros.html" import fold, standings_table, game_list %}
 {% block title %}{{ league.name }} | PlayTracker{% endblock %}
 {% block nav_leagues %}is-active{% endblock %}
+{% block body_class %}mkt-app-page{% endblock %}
 
 {% block extra_head %}
     <link rel="canonical" href="{{ share_url }}">
@@ -16,8 +18,16 @@
     <h1>{{ league.name }}</h1>
     {% if league.description %}
     <p class="mkt-lead">{{ league.description }}</p>
-    {% else %}
-    <p class="mkt-lead">Read-only standings. Log games in the PlayTracker app.</p>
+    {% endif %}
+
+    {% if sport_tabs|length > 1 %}
+    <nav class="mkt-sport-tabs" aria-label="Sports">
+        {% for sport in sport_tabs %}
+        <a class="mkt-sport-tab{% if block and sport.id == block.sport.id %} is-active{% endif %}" href="/l/{{ league.slug }}?sport={{ sport.id }}">{{ sport.name }}</a>
+        {% endfor %}
+    </nav>
+    {% elif block %}
+    <p class="mkt-sport-pill">{{ block.sport.name }}</p>
     {% endif %}
 
     {% if league.visibility == 'unlisted' %}
@@ -27,38 +37,41 @@
     <div class="mkt-cta-row">
         <a class="mkt-btn mkt-btn-primary" href="{{ app_scheme_url }}">Open in PlayTracker</a>
     </div>
-    <p class="mkt-soon">Have the app? That opens this league. If not, PlayTracker is coming soon to the App Store and Google Play.</p>
-    <div class="mkt-stores" aria-label="App store listings coming soon">
-        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/app-store.svg') }}" alt="Download on the App Store" width="148" height="44">
-        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/google-play.svg') }}" alt="Get it on Google Play" width="155" height="44">
-    </div>
+    <p class="mkt-soon">Have the app? That opens this league. If not, listings are coming soon.</p>
 
-    {% if sport_blocks %}
-        {% for block in sport_blocks %}
-        <section class="mkt-sport-block">
-            <h2>{{ block.sport.name }}</h2>
-            {% if block.today_stats %}
-            <h3>Today</h3>
-            {% with rows=block.today_stats %}
-            {% include "marketing_standings_table.html" %}
-            {% endwith %}
-            {% endif %}
-            <h3>Standings</h3>
+    {% if block %}
+        {% if block.today_stats %}
+        {% call fold("Today's stats", block.today_stats|length) %}
+            {{ standings_table(block.today_stats) }}
+        {% endcall %}
+        {% endif %}
+
+        {% call fold("Standings", block.stats|length) %}
             {% if block.stats %}
-            {% with rows=block.stats %}
-            {% include "marketing_standings_table.html" %}
-            {% endwith %}
+                {{ standings_table(block.stats) }}
             {% else %}
-            <div class="mkt-empty-card">
-                <p>No games yet. Standings show up after someone logs a result in the app.</p>
-            </div>
+                <div class="mkt-empty-card">
+                    <p>No games yet. Standings show up after someone logs a result in the app.</p>
+                </div>
             {% endif %}
-        </section>
-        {% endfor %}
+        {% endcall %}
+
+        {% call fold("Games", block.games|length) %}
+            {{ game_list(block.games) }}
+        {% endcall %}
     {% else %}
     <div class="mkt-empty-card">
         <p>This league does not have a sport yet.</p>
     </div>
     {% endif %}
+
+    <div class="mkt-stores" aria-label="App store listings coming soon">
+        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/app-store.svg') }}" alt="Download on the App Store" width="148" height="44">
+        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/google-play.svg') }}" alt="Get it on Google Play" width="155" height="44">
+    </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/marketing-folds.js') }}"></script>
 {% endblock %}

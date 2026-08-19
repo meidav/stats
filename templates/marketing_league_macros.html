@@ -1,0 +1,117 @@
+{% macro fold(title, count) %}
+<section class="mkt-fold" data-fold>
+    <button class="mkt-fold-head" type="button" data-fold-toggle aria-expanded="true">
+        <span class="mkt-fold-title">{{ title }}</span>
+        {% if count is not none %}
+        <span class="mkt-fold-count">{{ count }}</span>
+        {% endif %}
+        <svg class="mkt-fold-chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </button>
+    <div class="mkt-fold-body">
+        <div class="mkt-fold-clip">
+            <div class="mkt-fold-inner">
+                {{ caller() }}
+            </div>
+        </div>
+    </div>
+</section>
+{% endmacro %}
+
+{% macro standings_table(rows) %}
+<div class="mkt-glass mkt-table-wrap">
+    <table class="mkt-table">
+        <thead>
+            <tr>
+                <th class="mkt-col-rank">#</th>
+                <th class="mkt-col-player">Player</th>
+                <th class="mkt-col-stat mkt-win">W</th>
+                <th class="mkt-col-stat mkt-loss">L</th>
+                <th class="mkt-col-stat mkt-neutral">%</th>
+                <th class="mkt-col-stat mkt-neutral">G</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td class="mkt-col-rank">{{ loop.index }}</td>
+                <td class="mkt-col-player">
+                    <a class="mkt-player-link" href="{{ row.href }}">{{ row.player }}</a>
+                </td>
+                <td class="mkt-col-stat mkt-win">{{ row.wins }}</td>
+                <td class="mkt-col-stat mkt-loss">{{ row.losses }}</td>
+                <td class="mkt-col-stat {{ row.pct_class }}">{{ row.pct_label }}</td>
+                <td class="mkt-col-stat mkt-neutral">{{ row.games }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}
+
+{% macro pair_table(rows) %}
+<div class="mkt-glass mkt-table-wrap">
+    <table class="mkt-table mkt-pair-table">
+        <thead>
+            <tr>
+                <th class="mkt-col-player">Player</th>
+                <th class="mkt-col-stat mkt-neutral">%</th>
+                <th class="mkt-col-stat mkt-win">W</th>
+                <th class="mkt-col-stat mkt-loss">L</th>
+                <th class="mkt-col-stat mkt-neutral">G</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td class="mkt-col-player">
+                    <a class="mkt-player-link" href="{{ row.href }}">{{ row.player }}</a>
+                </td>
+                <td class="mkt-col-stat {{ row.pct_class }}">{{ row.pct_label }}</td>
+                <td class="mkt-col-stat mkt-win">{{ row.wins }}</td>
+                <td class="mkt-col-stat mkt-loss">{{ row.losses }}</td>
+                <td class="mkt-col-stat mkt-neutral">{{ row.games }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endmacro %}
+
+{% macro game_list(games) %}
+{% if games %}
+<div class="mkt-game-list">
+    {% for game in games %}
+    <article class="mkt-glass mkt-game">
+        <p class="mkt-game-when">{{ game.when }}</p>
+        <div class="mkt-team mkt-team-win">
+            <div class="mkt-team-players">
+                {% for name in game.winners %}
+                <span>{{ name }}</span>
+                {% endfor %}
+            </div>
+            {% if game.winner_score not in [None, ''] %}
+            <span class="mkt-team-score">{{ game.winner_score }}</span>
+            {% endif %}
+        </div>
+        <div class="mkt-team mkt-team-loss">
+            <div class="mkt-team-players">
+                {% for name in game.losers %}
+                <span>{{ name }}</span>
+                {% endfor %}
+            </div>
+            {% if game.loser_score not in [None, ''] %}
+            <span class="mkt-team-score">{{ game.loser_score }}</span>
+            {% endif %}
+        </div>
+        {% if game.set_line %}
+        <p class="mkt-game-sets">{{ game.set_line }}</p>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<p class="mkt-empty-copy">No games logged yet.</p>
+{% endif %}
+{% endmacro %}

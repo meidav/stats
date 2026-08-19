@@ -1,0 +1,86 @@
+{% extends "marketing_base.html" %}
+{% from "marketing_league_macros.html" import pair_table %}
+{% block title %}{{ player.player }} | {{ league.name }} | PlayTracker{% endblock %}
+{% block nav_leagues %}is-active{% endblock %}
+{% block body_class %}mkt-app-page{% endblock %}
+
+{% block extra_head %}
+    {% if league.visibility == 'unlisted' %}
+    <meta name="robots" content="noindex, nofollow">
+    {% endif %}
+    <meta name="description" content="{{ player.player }} stats in {{ league.name }} on PlayTracker.">
+{% endblock %}
+
+{% block content %}
+<section class="mkt-standings mkt-player-page">
+    <a class="mkt-back" href="{{ league_url }}" aria-label="Back to league">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </a>
+
+    <div class="mkt-player-hero">
+        <div class="mkt-avatar" aria-hidden="true">{{ player.initials }}</div>
+        <div class="mkt-player-hero-text">
+            <h1>{{ player.player }}</h1>
+            <p class="mkt-player-sub">{{ league.name }} · {{ sport.name }}</p>
+        </div>
+    </div>
+
+    <div class="mkt-kpi-grid">
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value mkt-win">{{ player.wins }}</span>
+            <span class="mkt-kpi-label">Wins</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value mkt-loss">{{ player.losses }}</span>
+            <span class="mkt-kpi-label">Losses</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value {{ player.pct_class }}">{{ player.pct_label }}</span>
+            <span class="mkt-kpi-label">Win %</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value mkt-neutral">{{ player.games }}</span>
+            <span class="mkt-kpi-label">Games</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value {{ player.plus_minus_class }}">{{ player.plus_minus_label }}</span>
+            <span class="mkt-kpi-label">+/-</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value {{ player.streak_class }}">{{ player.streak }}</span>
+            <span class="mkt-kpi-label">{{ player.streak_label }}</span>
+        </div>
+    </div>
+
+    {% if player.last_results %}
+    <div class="mkt-last-games">
+        <h2>Last {{ player.last_results|length }} games</h2>
+        <div class="mkt-result-dots">
+            {% for result in player.last_results %}
+            <span class="mkt-result-dot {% if result == 'W' %}is-win{% else %}is-loss{% endif %}">{{ result }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if player.partners %}
+    <section class="mkt-pair-block">
+        <h2 class="mkt-win">Stats with partners ({{ player.partners|length }})</h2>
+        {{ pair_table(player.partners) }}
+    </section>
+    {% endif %}
+
+    {% if player.opponents %}
+    <section class="mkt-pair-block">
+        <h2 class="mkt-loss">Stats vs opponents ({{ player.opponents|length }})</h2>
+        {{ pair_table(player.opponents) }}
+    </section>
+    {% endif %}
+
+    <div class="mkt-cta-row">
+        <a class="mkt-btn mkt-btn-primary" href="{{ app_scheme_url }}">Open in PlayTracker</a>
+    </div>
+</section>
+{% endblock %}

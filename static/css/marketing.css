@@ -747,30 +747,25 @@ a:hover { text-decoration: underline; }
 .mkt-standings {
   max-width: 720px;
   margin: 0 auto;
-  padding: 36px 20px 48px;
+  padding: 28px 20px 48px;
   text-align: center;
 }
 
 .mkt-standings h1 {
-  margin: 0 0 12px;
-  font-size: clamp(2rem, 6vw, 3.2rem);
+  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
   letter-spacing: -0.04em;
+  color: #0f172a;
 }
 
 .mkt-standings h2 {
-  margin: 28px 0 10px;
-  font-size: 1.35rem;
-  text-align: left;
-}
-
-.mkt-standings h3 {
-  margin: 16px 0 8px;
+  margin: 0 0 8px;
   font-size: 0.82rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--mkt-muted);
   text-align: left;
+  color: #334155;
 }
 
 .mkt-note {
@@ -792,34 +787,181 @@ a:hover { text-decoration: underline; }
   margin: 8px 0 4px;
 }
 
-.mkt-sport-block {
-  margin-top: 12px;
+.mkt-sport-pill {
+  display: inline-flex;
+  align-items: center;
+  margin: 8px auto 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.62);
+  border: 1px solid rgba(147, 197, 253, 0.95);
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.mkt-sport-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0 16px;
+}
+
+.mkt-sport-tab {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: var(--mkt-ink);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.mkt-sport-tab:hover {
+  text-decoration: none;
+}
+
+.mkt-sport-tab.is-active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.mkt-fold {
+  margin: 0 0 24px;
   text-align: left;
 }
 
+.mkt-fold-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: padding 0.22s ease, background 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.mkt-fold.is-closed .mkt-fold-head {
+  padding: 18px 12px;
+  background: rgba(255, 252, 248, 0.72);
+  border-color: rgba(37, 99, 235, 0.28);
+  box-shadow: 0 6px 14px rgba(30, 58, 138, 0.16);
+}
+
+.mkt-fold-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #0f172a;
+}
+
+.mkt-fold.is-closed .mkt-fold-title {
+  font-size: 15px;
+  letter-spacing: 0.4px;
+}
+
+.mkt-fold-count {
+  min-width: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.mkt-fold.is-closed .mkt-fold-count {
+  padding: 4px 10px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 13px;
+}
+
+.mkt-fold-chevron {
+  width: 16px;
+  height: 16px;
+  color: #334155;
+  transform: rotate(180deg);
+  transition: transform 0.22s ease, width 0.22s ease, height 0.22s ease, color 0.22s ease;
+}
+
+.mkt-fold.is-closed .mkt-fold-chevron {
+  width: 20px;
+  height: 20px;
+  color: #1d4ed8;
+  transform: rotate(0deg);
+}
+
+.mkt-fold-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.26s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.mkt-fold.is-closed .mkt-fold-body {
+  grid-template-rows: 0fr;
+  transition-duration: 0.22s;
+  transition-timing-function: cubic-bezier(0.32, 0, 0.67, 0);
+}
+
+.mkt-fold-clip {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.mkt-fold-inner {
+  transform-origin: 50% 0;
+  transition: transform 0.26s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.mkt-fold.is-closed .mkt-fold-inner {
+  transform: translateY(-40%) scaleX(0.28);
+  transition-duration: 0.22s;
+}
+
+.mkt-glass,
 .mkt-empty-card,
-.mkt-table-wrap,
 .mkt-league-card {
-  background: rgba(255, 255, 255, 0.48);
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  box-shadow: 0 12px 28px rgba(30, 58, 138, 0.12);
+  background: rgba(255, 252, 248, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 8px 16px rgba(71, 85, 105, 0.12);
 }
 
 .mkt-empty-card {
-  margin: 18px 0 0;
+  margin: 0;
   padding: 22px 18px;
-  border-radius: 16px;
+  border-radius: 20px;
 }
 
-.mkt-empty-card p {
+.mkt-empty-card p,
+.mkt-empty-copy {
   margin: 0;
   color: var(--mkt-muted);
   line-height: 1.5;
+  text-align: center;
+}
+
+.mkt-empty-copy {
+  padding: 16px 0;
 }
 
 .mkt-table-wrap {
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 20px;
 }
 
 .mkt-table {
@@ -834,16 +976,16 @@ a:hover { text-decoration: underline; }
 }
 
 .mkt-table th {
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
+  font-size: 12px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--mkt-muted);
+  color: #334155;
   border-bottom: 1px solid rgba(15, 23, 42, 0.12);
 }
 
 .mkt-table td {
-  font-size: 0.95rem;
-  color: var(--mkt-ink);
+  font-size: 15px;
+  color: #0f172a;
 }
 
 .mkt-table tbody tr:nth-child(even) {
@@ -851,9 +993,13 @@ a:hover { text-decoration: underline; }
 }
 
 .mkt-col-rank {
-  width: 36px;
-  color: var(--mkt-muted);
+  width: 28px;
+  color: #334155;
   text-align: left;
+}
+
+.mkt-table .mkt-col-rank {
+  color: #334155;
 }
 
 .mkt-col-player {
@@ -865,8 +1011,217 @@ a:hover { text-decoration: underline; }
   text-align: right;
 }
 
+.mkt-player-link {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(37, 99, 235, 0.35);
+}
+
+.mkt-player-link:hover {
+  color: #1d4ed8;
+}
+
 .mkt-win { color: #059669; }
 .mkt-loss { color: #e11d48; }
+.mkt-neutral { color: #2563eb; }
+.mkt-table .mkt-win,
+.mkt-kpi-value.mkt-win { color: #059669; }
+.mkt-table .mkt-loss,
+.mkt-kpi-value.mkt-loss { color: #e11d48; }
+.mkt-table .mkt-neutral,
+.mkt-kpi-value.mkt-neutral { color: #2563eb; }
+
+.mkt-game-list {
+  display: grid;
+  gap: 8px;
+}
+
+.mkt-game {
+  padding: 16px;
+  border-radius: 20px;
+}
+
+.mkt-game-when {
+  margin: 0 0 8px;
+  padding: 0 14px;
+  color: rgba(15, 23, 42, 0.55);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.mkt-team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border-left: 4px solid;
+}
+
+.mkt-team:last-of-type {
+  margin-bottom: 0;
+}
+
+.mkt-team-win {
+  background: rgba(5, 150, 105, 0.18);
+  border-left-color: #059669;
+}
+
+.mkt-team-loss {
+  background: rgba(225, 29, 72, 0.14);
+  border-left-color: #e11d48;
+}
+
+.mkt-team-players {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.mkt-team-win .mkt-team-players { color: #065f46; }
+.mkt-team-loss .mkt-team-players { color: #9f1239; }
+
+.mkt-team-score {
+  min-width: 40px;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 32px;
+  text-align: right;
+}
+
+.mkt-team-win .mkt-team-score { color: #059669; }
+.mkt-team-loss .mkt-team-score { color: #e11d48; }
+
+.mkt-game-sets {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.mkt-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 0 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.35);
+  color: #2563eb;
+}
+
+.mkt-back svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mkt-back:hover {
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.mkt-player-page {
+  text-align: left;
+}
+
+.mkt-player-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 24px;
+}
+
+.mkt-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  display: grid;
+  place-items: center;
+  background: #2563eb;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.mkt-player-hero-text h1 {
+  margin: 0;
+  text-align: left;
+  font-size: 26px;
+}
+
+.mkt-player-sub {
+  margin: 4px 0 0;
+  color: #334155;
+  font-size: 14px;
+}
+
+.mkt-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 24px;
+}
+
+.mkt-kpi {
+  padding: 16px 8px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.mkt-kpi-value {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.mkt-kpi-label {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #334155;
+}
+
+.mkt-last-games {
+  margin: 0 0 24px;
+}
+
+.mkt-pair-block {
+  margin: 0 0 24px;
+}
+
+.mkt-pair-block h2.mkt-win { color: #059669; }
+.mkt-pair-block h2.mkt-loss { color: #e11d48; }
+
+.mkt-result-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mkt-result-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mkt-result-dot.is-win { background: #059669; }
+.mkt-result-dot.is-loss { background: #e11d48; }
 
 .mkt-league-index {
   list-style: none;
@@ -902,6 +1257,21 @@ a:hover { text-decoration: underline; }
 }
 
 .mkt-standings .mkt-stores {
-  margin-top: 10px;
+  margin-top: 18px;
   pointer-events: none;
+}
+
+.mkt-pair-table .mkt-col-stat {
+  width: 32px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mkt-fold-head,
+  .mkt-fold-body,
+  .mkt-fold-inner,
+  .mkt-fold-chevron,
+  .mkt-fold-title,
+  .mkt-fold-count {
+    transition: none;
+  }
 }
