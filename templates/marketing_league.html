@@ -1,5 +1,5 @@
 {% extends "marketing_base.html" %}
-{% from "marketing_league_macros.html" import fold, standings_table, game_list %}
+{% from "marketing_league_macros.html" import fold, standings_table, game_list, sport_mark %}
 {% block title %}{{ league.name }} | PlayTracker{% endblock %}
 {% block nav_leagues %}is-active{% endblock %}
 {% block body_class %}mkt-app-page{% endblock %}
@@ -23,21 +23,22 @@
     {% if sport_tabs|length > 1 %}
     <nav class="mkt-sport-tabs" aria-label="Sports">
         {% for sport in sport_tabs %}
-        <a class="mkt-sport-tab{% if block and sport.id == block.sport.id %} is-active{% endif %}" href="/l/{{ league.slug }}?sport={{ sport.id }}">{{ sport.name }}</a>
+        <a class="mkt-sport-tab{% if block and sport.id == block.sport.id %} is-active{% endif %}" href="/l/{{ league.slug }}?sport={{ sport.id }}">
+            {{ sport_mark(sport) }}
+            <span>{{ sport.name }}</span>
+        </a>
         {% endfor %}
     </nav>
     {% elif block %}
-    <p class="mkt-sport-pill">{{ block.sport.name }}</p>
+    <p class="mkt-sport-pill">
+        {{ sport_mark(block.sport) }}
+        <span>{{ block.sport.name }}</span>
+    </p>
     {% endif %}
 
     {% if league.visibility == 'unlisted' %}
     <p class="mkt-note">Anyone with this link can view standings. This league is not listed in public search.</p>
     {% endif %}
-
-    <div class="mkt-cta-row">
-        <a class="mkt-btn mkt-btn-primary" href="{{ app_scheme_url }}">Open in PlayTracker</a>
-    </div>
-    <p class="mkt-soon">Have the app? That opens this league. If not, listings are coming soon.</p>
 
     {% if block %}
         {% if block.today_stats %}
@@ -56,7 +57,7 @@
             {% endif %}
         {% endcall %}
 
-        {% call fold("Games", block.games|length) %}
+        {% call fold("Games", block.games|length, closed=true) %}
             {{ game_list(block.games) }}
         {% endcall %}
     {% else %}
@@ -65,6 +66,10 @@
     </div>
     {% endif %}
 
+    <div class="mkt-cta-row">
+        <button type="button" class="mkt-btn mkt-btn-primary" disabled>Open in PlayTracker</button>
+    </div>
+    <p class="mkt-soon">Have the app? Open in PlayTracker is coming soon, along with App Store and Google Play listings.</p>
     <div class="mkt-stores" aria-label="App store listings coming soon">
         <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/app-store.svg') }}" alt="Download on the App Store" width="148" height="44">
         <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/google-play.svg') }}" alt="Get it on Google Play" width="155" height="44">

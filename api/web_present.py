@@ -41,6 +41,48 @@ def player_href(slug, player, sport_id):
     return f"/l/{slug}/p/{encoded}?sport={sport_id}"
 
 
+def sport_glyph(sport):
+    template_id = str((sport or {}).get("template_id") or "")
+    category = str((sport or {}).get("category") or "")
+    if template_id.startswith("beach_volleyball") or template_id == "vollis":
+        return {"glyph_src": "img/sports/beach-volleyball.png", "glyph": ""}
+    if template_id == "indoor_volleyball":
+        mark = "🏐"
+    elif template_id.startswith("tennis"):
+        mark = "🎾"
+    elif template_id.startswith("basketball"):
+        mark = "🏀"
+    elif template_id == "chess":
+        mark = "♞"
+    elif template_id == "checkers":
+        mark = "●"
+    elif template_id == "monopoly":
+        mark = "🎩"
+    elif template_id in ("backgammon", "yahtzee"):
+        mark = "🎲"
+    elif template_id == "scrabble":
+        mark = "🔤"
+    elif template_id == "catan":
+        mark = "🏕️"
+    elif template_id == "custom":
+        mark = "+"
+    elif category == "cards" or template_id == "uno":
+        mark = "🃏"
+    elif category == "board":
+        mark = "🧩"
+    elif category == "sports":
+        mark = "🏅"
+    else:
+        mark = "🎮"
+    return {"glyph_src": None, "glyph": mark}
+
+
+def with_sport_glyph(sport):
+    data = dict(sport or {})
+    data.update(sport_glyph(data))
+    return data
+
+
 def annotate_stat_rows(rows, slug, sport_id):
     annotated = []
     for row in rows or []:

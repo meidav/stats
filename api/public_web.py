@@ -14,7 +14,7 @@ from api.league_db import (
     sport_to_dict,
 )
 from api.stats_service import compute_player_stats, compute_sport_stats
-from api.web_present import annotate_stat_rows, present_games, present_player
+from api.web_present import annotate_stat_rows, present_games, present_player, with_sport_glyph
 
 
 def _abort_if_arbel():
@@ -45,7 +45,7 @@ def _pick_sport(sports, sport_id_arg):
 
 
 def _sport_block(league, sport):
-    payload = sport_to_dict(sport)
+    payload = with_sport_glyph(sport_to_dict(sport))
     try:
         stats = compute_sport_stats(sport["id"], min_games=1)
     except ValueError:
@@ -93,7 +93,7 @@ def register_public_web(app):
         sports = get_sports_for_league(league["id"]) or []
         selected = _pick_sport(sports, request.args.get("sport"))
         block = _sport_block(league, selected) if selected else None
-        tabs = [sport_to_dict(sport) for sport in sports]
+        tabs = [with_sport_glyph(sport_to_dict(sport)) for sport in sports]
         payload = league_to_dict(league)
         share_url = league_share_url(league) or f"{APP_URL}/l/{league['slug']}"
         return render_template(
@@ -128,7 +128,7 @@ def register_public_web(app):
             return render_template("marketing_league_unavailable.html"), 404
 
         payload = league_to_dict(league)
-        sport_payload = sport_to_dict(sport)
+        sport_payload = with_sport_glyph(sport_to_dict(sport))
         share_url = league_share_url(league) or f"{APP_URL}/l/{league['slug']}"
         return render_template(
             "marketing_player.html",

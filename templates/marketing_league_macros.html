@@ -1,6 +1,6 @@
-{% macro fold(title, count) %}
-<section class="mkt-fold" data-fold>
-    <button class="mkt-fold-head" type="button" data-fold-toggle aria-expanded="true">
+{% macro fold(title, count, closed=false) %}
+<section class="mkt-fold{% if closed %} is-closed{% endif %}" data-fold>
+    <button class="mkt-fold-head" type="button" data-fold-toggle aria-expanded="{{ 'false' if closed else 'true' }}">
         <span class="mkt-fold-title">{{ title }}</span>
         {% if count is not none %}
         <span class="mkt-fold-count">{{ count }}</span>
@@ -17,6 +17,14 @@
         </div>
     </div>
 </section>
+{% endmacro %}
+
+{% macro sport_mark(sport) %}
+{% if sport.glyph_src %}
+<img class="mkt-sport-mark" src="{{ url_for('static', filename=sport.glyph_src) }}" alt="">
+{% elif sport.glyph %}
+<span class="mkt-sport-mark-text" aria-hidden="true">{{ sport.glyph }}</span>
+{% endif %}
 {% endmacro %}
 
 {% macro standings_table(rows) %}

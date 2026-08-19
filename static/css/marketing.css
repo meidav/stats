@@ -73,11 +73,12 @@ a:hover { text-decoration: underline; }
 
 .mkt-brand-name {
   font-family: Fredoka, "Avenir Next", sans-serif;
-  font-weight: 800;
-  font-size: 1.28rem;
+  font-weight: 600;
+  font-size: 1.72rem;
   line-height: 1.05;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.08em;
   color: #fff;
+  white-space: nowrap;
 }
 
 .mkt-logo-plate {
@@ -116,8 +117,9 @@ a:hover { text-decoration: underline; }
 .mkt-tag {
   font-size: 0.9rem;
   color: #fff;
-  font-weight: 600;
+  font-weight: 500;
   font-style: italic;
+  white-space: nowrap;
 }
 
 .mkt-nav {
@@ -150,25 +152,29 @@ a:hover { text-decoration: underline; }
   border-color: var(--mkt-peach);
 }
 .mkt-nav-about:hover,
-.mkt-nav-about.is-active {
+.mkt-nav-about.is-active,
+.mkt-nav-leagues:hover,
+.mkt-nav-leagues.is-active {
   text-decoration: none;
   background: #fb923c;
   border-color: #fb923c;
   color: #3b0764;
 }
-.mkt-nav-leagues.is-active {
-  background: rgba(255, 255, 255, 0.16);
+.mkt-nav-leagues {
+  background: var(--mkt-peach);
+  color: #3b0764;
+  border-color: var(--mkt-peach);
 }
 .mkt-nav-login {
-  background: #fff;
+  background: var(--mkt-lilac);
   color: #3b0764;
-  border-color: #fff;
+  border-color: var(--mkt-lilac);
 }
 .mkt-nav-login:hover,
 .mkt-nav-login.is-active {
   text-decoration: none;
-  background: #ede9fe;
-  border-color: #ede9fe;
+  background: #a78bfa;
+  border-color: #a78bfa;
   color: #3b0764;
 }
 
@@ -250,6 +256,8 @@ a:hover { text-decoration: underline; }
   min-height: 48px;
   padding: 12px 20px;
   border-radius: 14px;
+  font-family: inherit;
+  font-size: 1rem;
   font-weight: 800;
 }
 .mkt-btn:hover { text-decoration: none; }
@@ -257,6 +265,15 @@ a:hover { text-decoration: underline; }
 .mkt-btn-primary {
   background: linear-gradient(90deg, var(--mkt-blue), var(--mkt-indigo));
   color: #fff;
+  border: 0;
+}
+
+.mkt-btn[disabled],
+.mkt-btn.is-disabled {
+  opacity: 0.42;
+  cursor: default;
+  pointer-events: none;
+  filter: grayscale(0.2);
 }
 
 .mkt-stores {
@@ -545,11 +562,13 @@ a:hover { text-decoration: underline; }
     height: 44px;
   }
   .mkt-brand-name {
-    font-size: 1.05rem;
+    font-size: 1.38rem;
+    letter-spacing: 0.07em;
   }
   .mkt-tag {
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     line-height: 1.15;
+    font-weight: 500;
   }
   .mkt-phones {
     justify-content: flex-start;
@@ -784,12 +803,13 @@ a:hover { text-decoration: underline; }
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
-  margin: 8px 0 4px;
+  margin: 20px 0 4px;
 }
 
 .mkt-sport-pill {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   margin: 8px auto 16px;
   padding: 6px 12px;
   border-radius: 999px;
@@ -800,15 +820,23 @@ a:hover { text-decoration: underline; }
   font-size: 13px;
 }
 
-.mkt-sport-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin: 8px 0 16px;
+.mkt-sport-mark {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.mkt-sport-mark-text {
+  font-size: 16px;
+  line-height: 1;
 }
 
 .mkt-sport-tab {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 6px;
   padding: 8px 16px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.35);
@@ -816,6 +844,14 @@ a:hover { text-decoration: underline; }
   color: var(--mkt-ink);
   font-weight: 600;
   font-size: 13px;
+}
+
+.mkt-sport-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0 16px;
 }
 
 .mkt-sport-tab:hover {
