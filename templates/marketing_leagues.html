@@ -1,0 +1,32 @@
+{% extends "marketing_base.html" %}
+{% block title %}Public leagues | PlayTracker{% endblock %}
+{% block nav_leagues %}is-active{% endblock %}
+
+{% block content %}
+<section class="mkt-standings">
+    <p class="mkt-kicker">Public leagues</p>
+    <h1>Leagues you can find</h1>
+    <p class="mkt-lead">Open standings in the browser, or in the PlayTracker app when you have it. Unlisted and private leagues stay off this list.</p>
+
+    {% if leagues %}
+    <ul class="mkt-league-index">
+        {% for league in leagues %}
+        <li>
+            <a class="mkt-league-card" href="/l/{{ league.slug }}">
+                <strong>{{ league.name }}</strong>
+                {% if league.description %}
+                <span>{{ league.description }}</span>
+                {% else %}
+                <span>{{ league.sport_count }} {{ 'sport' if league.sport_count == 1 else 'sports' }}</span>
+                {% endif %}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="mkt-empty-card">
+        <p>No public leagues yet. Create one in the PlayTracker app and set visibility to Public.</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

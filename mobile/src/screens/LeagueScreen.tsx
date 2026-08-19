@@ -27,6 +27,7 @@ import { localToday } from '../lib/datetime';
 import { useAuth } from '../lib/auth';
 import { ApiError, api } from '../lib/api';
 import { upsertCachedLeague } from '../lib/leagueCache';
+import { shareLeague } from '../lib/leagueLinks';
 import { firstResultCopy } from '../lib/names';
 import type { Game, League, PlayerStat, Sport } from '../types';
 import type { RootStackParamList } from '../navigation/types';
@@ -141,13 +142,26 @@ export function LeagueScreen({ route, navigation }: Props) {
     }
   }
 
-  const leagueName = league?.name || name;
+  const leagueName = league?.name || name || '';
   const copy = copyForFocus(league?.focus || 'mixed');
   const canEdit =
     league?.role === 'owner' ||
     league?.role === 'admin' ||
     routeRole === 'owner' ||
     routeRole === 'admin';
+  const isMember = Boolean(league?.role || routeRole);
+  const canShare = Boolean(
+    league && (league.share_url || league.visibility !== 'private' || league.invite_code),
+  );
+
+  async function handleShare() {
+    if (!league) return;
+    try {
+      await shareLeague(league);
+    } catch {
+      // Share sheet cancelled or unavailable.
+    }
+  }
   const openAddGame = () => {
     if (!selectedSport) return;
     navigation.navigate('AddGame', {
@@ -215,7 +229,16 @@ export function LeagueScreen({ route, navigation }: Props) {
           <Ionicons name="chevron-back" size={24} color={colors.primary} />
         </TouchableOpacity>
         <View style={styles.topBarSpacer} />
-        {selectedSport ? (
+        {canShare ? (
+          <TouchableOpacity
+            onPress={handleShare}
+            style={styles.shareButton}
+            accessibilityLabel="Share league"
+          >
+            <Ionicons name="share-outline" size={22} color={colors.primary} />
+          </TouchableOpacity>
+        ) : null}
+        {selectedSport && isMember ? (
           <TouchableOpacity onPress={openAddGame} activeOpacity={0.85}>
             <LinearGradient
               colors={[...gradients.button]}
@@ -227,9 +250,7 @@ export function LeagueScreen({ route, navigation }: Props) {
               <Text style={styles.addButtonText}>Game</Text>
             </LinearGradient>
           </TouchableOpacity>
-        ) : (
-          <View style={styles.topBarSpacer} />
-        )}
+        ) : null}
       </View>
 
       <Text
@@ -306,7 +327,7 @@ export function LeagueScreen({ route, navigation }: Props) {
               <Text style={styles.emptyBody}>
                 {firstResultCopy(selectedSport?.name || 'game', selectedSport?.template_id)}
               </Text>
-              {selectedSport ? (
+              {selectedSport && isMember ? (
                 <TouchableOpacity onPress={openAddGame} activeOpacity={0.85}>
                   <LinearGradient
                     colors={[...gradients.button]}
@@ -411,6 +432,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.35)',
+  },
+  shareButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+    marginRight: spacing.sm,
   },
   leagueName: {
     fontSize: 26,

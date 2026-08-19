@@ -2,6 +2,7 @@ import re
 import secrets
 
 from db_utils import db_manager
+from api.brand import APP_URL
 from api.sport_templates import (
     FOCUS_OPTIONS,
     VISIBILITY_OPTIONS,
@@ -9,6 +10,8 @@ from api.sport_templates import (
     get_template,
     typical_win_score_for,
 )
+
+LINKABLE_VISIBILITY = ("public", "unlisted")
 
 _UNSET = object()
 
@@ -324,17 +327,33 @@ def search_public_leagues(query=None, limit=20):
     return [_row_to_dict(row) for row in rows]
 
 
-def user_can_access_league(user_id, league):
-    if league["visibility"] == "public" or league["visibility"] == "unlisted":
-        return True
-    if user_id is None:
+def league_is_linkable(league):
+    return bool(league) and league.get("visibility") in LINKABLE_VISIBILITY
+
+
+def league_share_url(league):
+    if not league_is_linkable(league) or not league.get("slug"):
+        return None
+    return f"{APP_URL}/l/{league['slug']}"
+
+
+def user_is_league_member(user_id, league):
+    if not user_id or not league:
         return False
+    if league.get("owner_id") == user_id:
+        return True
     row = db_manager.execute_query(
         "SELECT 1 FROM league_members WHERE league_id = ? AND user_id = ?",
         (league["id"], user_id),
         fetch_one=True,
     )
     return row is not None
+
+
+def user_can_access_league(user_id, league):
+    if league_is_linkable(league):
+        return True
+    return user_is_league_member(user_id, league)
 
 
 def league_to_dict(league, include_invite_code=False):
@@ -348,6 +367,7 @@ def league_to_dict(league, include_invite_code=False):
         "visibility": league["visibility"],
         "focus": league["focus"] if league.get("focus") else "mixed",
         "icon": league.get("icon") or None,
+        "share_url": league_share_url(league),
         "created_at": league["created_at"],
         "updated_at": league["updated_at"],
     }

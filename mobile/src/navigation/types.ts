@@ -6,7 +6,7 @@ export type RootStackParamList = {
   ResetPassword: { email?: string } | undefined;
   Home: undefined;
   CreateLeague: undefined;
-  League: { slug: string; name: string; role?: string };
+  League: { slug: string; name?: string; role?: string };
   EditLeague: { slug: string; name: string; icon?: string | null };
   AddGame: {
     sportId: number;

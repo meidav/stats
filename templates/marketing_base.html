@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/marketing.css') }}">
+    {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <input type="checkbox" id="mkt-nav-toggle" class="mkt-nav-toggle" hidden>
@@ -27,6 +28,7 @@
         <nav class="mkt-nav">
             <label for="mkt-nav-toggle" class="mkt-nav-close" aria-label="Close menu"></label>
             <a class="mkt-nav-link mkt-nav-about {% block nav_about %}{% endblock %}" href="/about">About</a>
+            <a class="mkt-nav-link mkt-nav-leagues {% block nav_leagues %}{% endblock %}" href="/leagues">Leagues</a>
             <a class="mkt-nav-link mkt-nav-login {% block nav_login %}{% endblock %}" href="/login">Login</a>
         </nav>
     </header>

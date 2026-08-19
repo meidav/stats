@@ -137,6 +137,9 @@ a:hover { text-decoration: underline; }
   border-color: #fb923c;
   color: #3b0764;
 }
+.mkt-nav-leagues.is-active {
+  background: rgba(255, 255, 255, 0.16);
+}
 .mkt-nav-login {
   background: #fff;
   color: #3b0764;
@@ -717,4 +720,166 @@ a:hover { text-decoration: underline; }
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--mkt-blue) !important;
+}
+
+.mkt-standings {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 36px 20px 48px;
+  text-align: center;
+}
+
+.mkt-standings h1 {
+  margin: 0 0 12px;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  letter-spacing: -0.04em;
+}
+
+.mkt-standings h2 {
+  margin: 28px 0 10px;
+  font-size: 1.35rem;
+  text-align: left;
+}
+
+.mkt-standings h3 {
+  margin: 16px 0 8px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mkt-muted);
+  text-align: left;
+}
+
+.mkt-note {
+  margin: 0 auto 18px;
+  max-width: 34rem;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.42);
+  color: var(--mkt-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.mkt-cta-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0 4px;
+}
+
+.mkt-sport-block {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.mkt-empty-card,
+.mkt-table-wrap,
+.mkt-league-card {
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  box-shadow: 0 12px 28px rgba(30, 58, 138, 0.12);
+}
+
+.mkt-empty-card {
+  margin: 18px 0 0;
+  padding: 22px 18px;
+  border-radius: 16px;
+}
+
+.mkt-empty-card p {
+  margin: 0;
+  color: var(--mkt-muted);
+  line-height: 1.5;
+}
+
+.mkt-table-wrap {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.mkt-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mkt-table th,
+.mkt-table td {
+  padding: 10px 12px;
+  font-weight: 700;
+}
+
+.mkt-table th {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mkt-muted);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.mkt-table td {
+  font-size: 0.95rem;
+  color: var(--mkt-ink);
+}
+
+.mkt-table tbody tr:nth-child(even) {
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.mkt-col-rank {
+  width: 36px;
+  color: var(--mkt-muted);
+  text-align: left;
+}
+
+.mkt-col-player {
+  text-align: left;
+}
+
+.mkt-col-stat {
+  width: 40px;
+  text-align: right;
+}
+
+.mkt-win { color: #059669; }
+.mkt-loss { color: #e11d48; }
+
+.mkt-league-index {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+
+.mkt-league-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  color: inherit;
+}
+
+.mkt-league-card:hover {
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.mkt-league-card strong {
+  font-size: 1.15rem;
+}
+
+.mkt-league-card span {
+  color: var(--mkt-muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.mkt-standings .mkt-stores {
+  margin-top: 10px;
+  pointer-events: none;
 }

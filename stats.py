@@ -63,6 +63,14 @@ try:
 except Exception as exc:
     logging.getLogger(__name__).debug("Mobile API skipped: %s", exc)
 
+try:
+    from api.league_db import create_leagues_tables
+    from api.public_web import register_public_web
+    create_leagues_tables()
+    register_public_web(app)
+except Exception as exc:
+    logging.getLogger(__name__).error("Public league pages skipped: %s", exc)
+
 # Set up Flask logging to console
 def setup_logging():
     handler = logging.StreamHandler()  # This will log to the console

@@ -1,0 +1,17 @@
+{% extends "marketing_base.html" %}
+{% block title %}League unavailable | PlayTracker{% endblock %}
+
+{% block extra_head %}
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+<section class="mkt-standings">
+    <p class="mkt-kicker">PlayTracker</p>
+    <h1>This league is not on the web</h1>
+    <p class="mkt-lead">Private leagues stay with their members. If you were invited, open PlayTracker and join with an invite code. Public leagues live on the <a href="/leagues">league list</a>.</p>
+    <div class="mkt-cta-row">
+        <a class="mkt-btn mkt-btn-primary" href="/leagues">See public leagues</a>
+    </div>
+</section>
+{% endblock %}

@@ -20,11 +20,14 @@ KEEP_EXACT = {
     "/privacy",
     "/terms",
     "/about",
+    "/leagues",
+    "/l",
 }
 
 KEEP_STARTSWITH = (
     "/admin/settings",
     "/admin/import",
+    "/l/",
 )
 
 

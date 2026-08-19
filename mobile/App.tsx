@@ -1,12 +1,13 @@
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { Linking, StyleSheet } from 'react-native';
 
 import { BrandLockup } from './src/components/BrandLockup';
 import { GradientBackground } from './src/components/GradientBackground';
 import { AuthProvider, useAuth } from './src/lib/auth';
+import { parseLeagueSlugFromUrl } from './src/lib/leagueLinks';
 import { hasSeenIntroRecently } from './src/lib/onboarding';
 import type { RootStackParamList } from './src/navigation/types';
 import { AddGameScreen } from './src/screens/AddGameScreen';
@@ -22,6 +23,8 @@ import { SignUpScreen } from './src/screens/SignUpScreen';
 import { WelcomeScreen } from './src/screens/WelcomeScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
+let pendingLeagueSlug: string | null = null;
 
 const navTheme = {
   ...DefaultTheme,
@@ -30,6 +33,18 @@ const navTheme = {
     background: 'transparent',
   },
 };
+
+function stashLeagueLink(url: string | null) {
+  const slug = parseLeagueSlugFromUrl(url);
+  if (slug) pendingLeagueSlug = slug;
+}
+
+function consumePendingLeague(canOpen: boolean) {
+  if (!canOpen || !pendingLeagueSlug || !navigationRef.isReady()) return;
+  const slug = pendingLeagueSlug;
+  pendingLeagueSlug = null;
+  navigationRef.navigate('League', { slug, name: '' });
+}
 
 function AppNavigator() {
   const { token, loading: authLoading } = useAuth();
@@ -55,6 +70,20 @@ function AppNavigator() {
       active = false;
     };
   }, [authLoading, token]);
+
+  useEffect(() => {
+    function handleUrl(url: string | null) {
+      stashLeagueLink(url);
+      consumePendingLeague(Boolean(token) && gateReady);
+    }
+    Linking.getInitialURL().then(handleUrl);
+    const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url));
+    return () => sub.remove();
+  }, [token, gateReady]);
+
+  useEffect(() => {
+    consumePendingLeague(Boolean(token) && gateReady && !authLoading);
+  }, [gateReady, token, authLoading]);
 
   if (authLoading || !gateReady) {
     return (
@@ -103,11 +132,17 @@ function AppNavigator() {
 export default function App() {
   return (
     <AuthProvider>
-      <NavigationContainer theme={navTheme}>
-        <AppNavigator />
-        <StatusBar style="dark" />
-      </NavigationContainer>
+      <AppRoot />
     </AuthProvider>
+  );
+}
+
+function AppRoot() {
+  return (
+    <NavigationContainer ref={navigationRef} theme={navTheme}>
+      <AppNavigator />
+      <StatusBar style="dark" />
+    </NavigationContainer>
   );
 }
 

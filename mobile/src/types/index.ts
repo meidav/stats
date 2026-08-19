@@ -42,6 +42,7 @@ export type League = {
   focus?: 'sports' | 'table' | 'mixed';
   icon?: string | null;
   invite_code?: string;
+  share_url?: string | null;
   role?: string;
   sports: Sport[];
   created_at: string;

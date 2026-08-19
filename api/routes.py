@@ -40,12 +40,14 @@ from api.league_db import (
     get_leagues_for_user,
     get_sport_by_id,
     get_sports_for_league,
+    league_share_url,
     league_to_dict,
     search_public_leagues,
     sport_to_dict,
     update_league,
     delete_league,
     user_can_access_league,
+    user_is_league_member,
 )
 from api.sport_templates import (
     TEMPLATE_CATEGORIES,
@@ -253,10 +255,10 @@ def register_routes(api):
         if not user_can_access_league(user_id, league):
             return jsonify({"error": "access denied"}), 403
 
-        is_member = user_id and user_can_access_league(user_id, league)
-        include_invite = is_member and league.get("owner_id") == user_id
+        is_member = user_is_league_member(user_id, league)
+        include_invite = is_member and league.get("visibility") == "private"
         payload = league_to_dict(league, include_invite_code=include_invite)
-        if user_id:
+        if is_member:
             if league.get("owner_id") == user_id:
                 payload["role"] = "owner"
             elif user_can_edit_league(user_id, league["id"]):
@@ -352,7 +354,9 @@ def register_routes(api):
                         "name": league["name"],
                         "slug": league["slug"],
                         "description": league["description"],
+                        "visibility": "public",
                         "sport_count": league["sport_count"],
+                        "share_url": league_share_url(league),
                         "created_at": league["created_at"],
                     }
                     for league in leagues

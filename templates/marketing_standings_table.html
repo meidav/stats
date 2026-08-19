@@ -1,0 +1,26 @@
+<div class="mkt-table-wrap">
+    <table class="mkt-table">
+        <thead>
+            <tr>
+                <th class="mkt-col-rank">#</th>
+                <th class="mkt-col-player">Player</th>
+                <th class="mkt-col-stat mkt-win">W</th>
+                <th class="mkt-col-stat mkt-loss">L</th>
+                <th class="mkt-col-stat">%</th>
+                <th class="mkt-col-stat">G</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td class="mkt-col-rank">{{ loop.index }}</td>
+                <td class="mkt-col-player">{{ row.player }}</td>
+                <td class="mkt-col-stat mkt-win">{{ row.wins }}</td>
+                <td class="mkt-col-stat mkt-loss">{{ row.losses }}</td>
+                <td class="mkt-col-stat">{{ (row.win_pct * 100)|round|int }}</td>
+                <td class="mkt-col-stat">{{ row.games }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
