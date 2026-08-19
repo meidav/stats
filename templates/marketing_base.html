@@ -16,9 +16,7 @@
     <input type="checkbox" id="mkt-nav-toggle" class="mkt-nav-toggle" hidden>
     <header class="mkt-header">
         <a class="mkt-brand" href="/">
-            <span class="mkt-logo-plate mkt-logo-plate-nav">
-                <img class="mkt-brand-mark" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="PlayTracker">
-            </span>
+            <img class="mkt-brand-mark" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="PlayTracker">
             <span class="mkt-tag">Track everything you play</span>
         </a>
         <label for="mkt-nav-toggle" class="mkt-burger" aria-label="Open menu">
@@ -26,7 +24,6 @@
         </label>
         <nav class="mkt-nav">
             <label for="mkt-nav-toggle" class="mkt-nav-close" aria-label="Close menu"></label>
-            <a class="mkt-nav-link {% block nav_app %}{% endblock %}" href="/">Get the app</a>
             <a class="mkt-nav-link {% block nav_about %}{% endblock %}" href="/about">About</a>
             <a class="mkt-nav-link mkt-nav-login {% block nav_login %}{% endblock %}" href="/login">Login</a>
         </nav>
@@ -38,7 +35,8 @@
 
     <footer class="mkt-footer">
         <p class="mkt-copy">
-            Copyright {{ current_year }} Arbel Industries
+            &copy; {{ current_year }}
+            <a href="https://arbelindustries.com" rel="noopener">Arbel Industries</a>
             <span class="mkt-copy-dot">·</span>
             <a href="/privacy">Privacy</a>
             <span class="mkt-copy-dot">·</span>

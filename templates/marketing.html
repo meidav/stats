@@ -1,6 +1,5 @@
 {% extends "marketing_base.html" %}
-{% block title %}PlayTracker | Get the app{% endblock %}
-{% block nav_app %}is-active{% endblock %}
+{% block title %}PlayTracker{% endblock %}
 
 {% block content %}
 <section class="mkt-hero">
@@ -10,17 +9,18 @@
         <img class="mkt-hero-logo" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="">
     </span>
     <p class="mkt-lead">Track everything you play. Leagues, standings, and game night in one place, from beach volleyball to chess.</p>
-    <div class="mkt-hero-actions">
-        <a class="mkt-btn mkt-btn-primary mkt-btn-disabled" href="/" aria-disabled="true">Get the app</a>
-    </div>
-    <div class="mkt-stores mkt-stores-hero">
-        <span class="mkt-store mkt-store-apple mkt-store-disabled" title="Coming soon">Download on the App Store</span>
-        <span class="mkt-store mkt-store-play mkt-store-disabled" title="Coming soon">Get it on Google Play</span>
+    <div class="mkt-stores" aria-label="App store listings coming soon">
+        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/app-store.svg') }}" alt="Download on the App Store" width="148" height="44">
+        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/google-play.svg') }}" alt="Get it on Google Play" width="155" height="44">
     </div>
     <p class="mkt-soon">Store listings are not live yet. These buttons stay off until we ship.</p>
 </section>
 
-<section class="mkt-phones" aria-label="App preview">
+<section class="mkt-phones-wrap" aria-label="App preview, for placement only">
+    <div class="mkt-tape mkt-tape-fpo" aria-hidden="true">
+        <span>FPO · FPO · FPO · FPO · FPO · FPO · FPO</span>
+    </div>
+    <div class="mkt-phones">
     <article class="mkt-phone">
         <p class="mkt-phone-label">My leagues</p>
         <div class="mkt-device">
@@ -79,6 +79,7 @@
             </div>
         </div>
     </article>
+    </div>
 </section>
 
 <section class="mkt-features" id="why">
