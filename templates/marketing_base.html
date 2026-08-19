@@ -7,7 +7,7 @@
     <meta name="description" content="PlayTracker: track everything you play. Leagues, standings, and game night in one app.">
     <meta name="theme-color" content="#3b0764">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/playtracker-logo.svg') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/playtracker-logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,8 +19,11 @@
     <input type="checkbox" id="mkt-nav-toggle" class="mkt-nav-toggle" hidden>
     <header class="mkt-header">
         <a class="mkt-brand" href="/">
-            <img class="mkt-brand-mark" src="{{ url_for('static', filename='img/playtracker-logo.svg') }}" alt="PlayTracker">
-            <span class="mkt-tag">Track everything you play</span>
+            <img class="mkt-brand-icon" src="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}" alt="">
+            <span class="mkt-brand-copy">
+                <span class="mkt-brand-name">PlayTracker</span>
+                <span class="mkt-tag">Track everything you play</span>
+            </span>
         </a>
         <label for="mkt-nav-toggle" class="mkt-burger" aria-label="Open menu">
             <span></span><span></span><span></span>

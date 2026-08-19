@@ -55,10 +55,29 @@ a:hover { text-decoration: underline; }
 }
 .mkt-brand:hover { text-decoration: none; }
 
-.mkt-brand-mark {
+.mkt-brand-icon {
   display: block;
-  height: 56px;
+  height: 52px;
   width: auto;
+  flex: 0 0 auto;
+}
+
+.mkt-brand-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  gap: 1px;
+}
+
+.mkt-brand-name {
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-weight: 800;
+  font-size: 1.28rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: #fff;
 }
 
 .mkt-logo-plate {
@@ -72,9 +91,9 @@ a:hover { text-decoration: underline; }
 
 .mkt-logo-plate-hero {
   display: flex;
-  width: min(280px, 72vw);
+  width: min(220px, 58vw);
   margin: 8px 0 16px;
-  padding: 18px 22px 16px;
+  padding: 22px 20px 18px;
   border-radius: 32px;
 }
 
@@ -522,12 +541,15 @@ a:hover { text-decoration: underline; }
     transform: none;
     z-index: -1;
   }
-  .mkt-brand-mark {
+  .mkt-brand-icon {
     height: 44px;
   }
+  .mkt-brand-name {
+    font-size: 1.05rem;
+  }
   .mkt-tag {
-    font-size: 0.72rem;
-    line-height: 1.2;
+    font-size: 0.68rem;
+    line-height: 1.15;
   }
   .mkt-phones {
     justify-content: flex-start;
