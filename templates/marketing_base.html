@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>{% block title %}PlayTracker{% endblock %}</title>
     <meta name="description" content="PlayTracker: track everything you play. Leagues, standings, and game night in one app.">
+    <meta name="theme-color" content="#3b0764">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/playtracker-logo.svg') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/playtracker-logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +26,7 @@
         </label>
         <nav class="mkt-nav">
             <label for="mkt-nav-toggle" class="mkt-nav-close" aria-label="Close menu"></label>
-            <a class="mkt-nav-link {% block nav_about %}{% endblock %}" href="/about">About</a>
+            <a class="mkt-nav-link mkt-nav-about {% block nav_about %}{% endblock %}" href="/about">About</a>
             <a class="mkt-nav-link mkt-nav-login {% block nav_login %}{% endblock %}" href="/login">Login</a>
         </nav>
     </header>

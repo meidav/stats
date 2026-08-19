@@ -2,10 +2,10 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
+import { BrandLockup } from './src/components/BrandLockup';
 import { GradientBackground } from './src/components/GradientBackground';
-import { colors } from './src/constants/theme';
 import { AuthProvider, useAuth } from './src/lib/auth';
 import { hasSeenIntroRecently } from './src/lib/onboarding';
 import type { RootStackParamList } from './src/navigation/types';
@@ -59,7 +59,7 @@ function AppNavigator() {
   if (authLoading || !gateReady) {
     return (
       <GradientBackground style={styles.loader}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <BrandLockup size={168} />
       </GradientBackground>
     );
   }

@@ -36,10 +36,10 @@ export function CollapsibleSection({
     setOpen(next);
     Animated.timing(progress, {
       toValue: next ? 1 : 0,
-      duration: next ? 360 : 480,
+      duration: next ? 260 : 220,
       easing: next
         ? Easing.out(Easing.cubic)
-        : Easing.bezier(0.6, 0.04, 0.78, 0.18),
+        : Easing.in(Easing.cubic),
       useNativeDriver: false,
     }).start(() => {
       setAnimating(false);
@@ -58,25 +58,17 @@ export function CollapsibleSection({
     inputRange: [0, 1],
     outputRange: [0, Math.max(bodyHeight, 1)],
   });
-  const rotateX = progress.interpolate({
+  const translateY = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: ['72deg', '0deg'],
+    outputRange: [-Math.max(bodyHeight * 0.55, 36), 0],
   });
-  const scaleY = progress.interpolate({
+  const scaleX = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.12, 1],
-  });
-  const bodyOpacity = progress.interpolate({
-    inputRange: [0, 0.28, 1],
-    outputRange: [0, 0.25, 1],
+    outputRange: [0.28, 1],
   });
   const headerPad = progress.interpolate({
     inputRange: [0, 1],
     outputRange: [18, 8],
-  });
-  const headerScale = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1.045, 1],
   });
 
   return (
@@ -86,10 +78,7 @@ export function CollapsibleSection({
           style={[
             styles.header,
             !open && styles.headerCollapsed,
-            {
-              paddingVertical: headerPad,
-              transform: [{ scale: headerScale }],
-            },
+            { paddingVertical: headerPad },
           ]}
         >
           <Text style={[styles.title, !open && styles.titleCollapsed]}>{title}</Text>
@@ -110,16 +99,16 @@ export function CollapsibleSection({
       <Animated.View
         style={[
           styles.body,
-          {
-            height: open && !animating ? undefined : height,
-            opacity: bodyOpacity,
-            transform: [{ perspective: 760 }, { rotateX }, { scaleY }],
-          },
+          { height: open && !animating ? undefined : height },
         ]}
       >
-        <View onLayout={onBodyLayout} collapsable={false}>
+        <Animated.View
+          collapsable={false}
+          onLayout={onBodyLayout}
+          style={{ transform: [{ translateY }, { scaleX }] }}
+        >
           {children}
-        </View>
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -136,6 +125,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 14,
     marginBottom: spacing.sm,
+    zIndex: 2,
   },
   headerCollapsed: {
     backgroundColor: 'rgba(255, 252, 248, 0.72)',
