@@ -102,7 +102,7 @@ export function YearFilterRow({ years, selectedYear, totalGames, onSelect }: Pro
 
 const styles = StyleSheet.create({
   wrap: {
-    marginBottom: 4,
+    marginBottom: spacing.md,
     alignItems: 'center',
   },
   trigger: {

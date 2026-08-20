@@ -72,7 +72,7 @@ export function CollapsibleSection({
   });
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, !open && styles.wrapCollapsed]}>
       <TouchableOpacity onPress={toggle} activeOpacity={0.85}>
         <Animated.View
           style={[
@@ -117,6 +117,9 @@ export function CollapsibleSection({
 const styles = StyleSheet.create({
   wrap: {
     marginBottom: spacing.lg,
+  },
+  wrapCollapsed: {
+    marginBottom: spacing.sm,
   },
   header: {
     flexDirection: 'row',

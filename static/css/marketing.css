@@ -882,8 +882,12 @@ a:hover { text-decoration: underline; }
   position: relative;
   display: flex;
   justify-content: center;
-  margin: 0 auto 6px;
+  margin: 0 auto 16px;
   z-index: 4;
+}
+
+.mkt-player-hero + .mkt-year {
+  margin-top: 16px;
 }
 
 .mkt-year-trigger {
@@ -1018,6 +1022,10 @@ a:hover { text-decoration: underline; }
 .mkt-fold {
   margin: 0 0 24px;
   text-align: left;
+}
+
+.mkt-fold.is-closed {
+  margin-bottom: 8px;
 }
 
 .mkt-fold-head {
