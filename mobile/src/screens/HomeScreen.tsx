@@ -273,22 +273,19 @@ export function HomeScreen({ navigation }: Props) {
                     ) : null}
                   </View>
                 </GlassCard>
-                <View
-                  style={[
-                    styles.gamesBadge,
-                    gameCount === 0 && styles.gamesBadgeEmpty,
-                  ]}
+                <LinearGradient
+                  colors={
+                    gameCount === 0
+                      ? (['#A8A29E', '#78716C'] as const)
+                      : (['#F09A5C', '#D96B2C'] as const)
+                  }
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.gamesBadge}
                   accessibilityLabel={gamesLabel}
                 >
-                  <Text
-                    style={[
-                      styles.gamesBadgeText,
-                      gameCount === 0 && styles.gamesBadgeTextEmpty,
-                    ]}
-                  >
-                    {gameCount}
-                  </Text>
-                </View>
+                  <Text style={styles.gamesBadgeText}>{gameCount}</Text>
+                </LinearGradient>
               </View>
             );
           }}
@@ -502,29 +499,22 @@ const styles = StyleSheet.create({
     height: 22,
     paddingHorizontal: 6,
     borderRadius: 999,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: 'rgba(255, 252, 248, 0.95)',
-    shadowColor: '#1E3A8A',
-    shadowOpacity: 0.2,
+    shadowColor: '#9A3412',
+    shadowOpacity: 0.22,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-  gamesBadgeEmpty: {
-    backgroundColor: 'rgba(100, 116, 139, 0.85)',
-  },
   gamesBadgeText: {
     color: '#fff',
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '600',
     fontVariant: ['tabular-nums'],
     lineHeight: 13,
-  },
-  gamesBadgeTextEmpty: {
-    color: '#fff',
   },
   footer: {
     flexDirection: 'row',
