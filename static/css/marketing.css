@@ -1204,7 +1204,7 @@ a:hover { text-decoration: underline; }
   padding-left: 16px;
   padding-right: 12px;
   color: #334155;
-  text-align: right;
+  text-align: center;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }

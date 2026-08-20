@@ -149,8 +149,7 @@ const styles = StyleSheet.create({
   rank: {
     flexShrink: 0,
     color: colors.textMuted,
-    textAlign: 'right',
-    paddingRight: 8,
+    textAlign: 'center',
   },
   player: {
     flex: 1,
