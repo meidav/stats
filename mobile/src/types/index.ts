@@ -46,6 +46,7 @@ export type League = {
   share_url?: string | null;
   role?: string;
   sports: Sport[];
+  game_count?: number;
   created_at: string;
   updated_at: string;
 };

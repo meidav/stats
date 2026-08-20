@@ -214,6 +214,8 @@ export function HomeScreen({ navigation }: Props) {
             const sport = item.sports?.[0];
             const canEdit = item.role === 'owner' || item.role === 'admin';
             const displayIcon = selectedIconForLeague(item);
+            const gameCount = item.game_count ?? 0;
+            const gamesLabel = gameCount === 1 ? '1 game' : `${gameCount} games`;
             return (
               <GlassCard style={styles.leagueCard}>
                 <View style={styles.leagueRow}>
@@ -242,11 +244,37 @@ export function HomeScreen({ navigation }: Props) {
                       <LeagueIcon id="trophy" size={26} />
                     )}
                     <View style={styles.leagueCopy}>
-                      <Text style={styles.cardTitle}>{item.name}</Text>
+                      <Text style={styles.cardTitle} numberOfLines={2}>
+                        {item.name}
+                      </Text>
                       <Text style={styles.cardMeta} numberOfLines={1}>
-                        {sport?.name || 'No games yet'}
+                        {sport?.name || 'No sport yet'}
                         {' · '}
                         {item.visibility}
+                      </Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.gamesPill,
+                        gameCount === 0 && styles.gamesPillEmpty,
+                      ]}
+                      accessibilityLabel={gamesLabel}
+                    >
+                      <Text
+                        style={[
+                          styles.gamesPillCount,
+                          gameCount === 0 && styles.gamesPillCountEmpty,
+                        ]}
+                      >
+                        {gameCount}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.gamesPillLabel,
+                          gameCount === 0 && styles.gamesPillLabelEmpty,
+                        ]}
+                      >
+                        {gameCount === 1 ? 'game' : 'games'}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -440,15 +468,15 @@ const styles = StyleSheet.create({
   },
   leagueRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: spacing.sm,
   },
   leagueMain: {
     flex: 1,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: spacing.md,
-    paddingTop: 2,
+    minWidth: 0,
   },
   leagueCopy: {
     flex: 1,
@@ -466,6 +494,39 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 13,
     textTransform: 'capitalize',
+  },
+  gamesPill: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 44,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 10,
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+  },
+  gamesPillEmpty: {
+    backgroundColor: 'rgba(15, 23, 42, 0.06)',
+  },
+  gamesPillCount: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: colors.primaryDark,
+    fontVariant: ['tabular-nums'],
+    lineHeight: 18,
+  },
+  gamesPillCountEmpty: {
+    color: colors.textMuted,
+  },
+  gamesPillLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.primaryDark,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+    marginTop: 1,
+  },
+  gamesPillLabelEmpty: {
+    color: colors.textMuted,
   },
   footer: {
     flexDirection: 'row',

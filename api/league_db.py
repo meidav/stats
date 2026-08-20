@@ -299,7 +299,11 @@ def get_leagues_for_user(user_id):
     )
     rows = db_manager.execute_query(
         """
-        SELECT l.*, COALESCE(lm.role, 'owner') AS role
+        SELECT l.*,
+               COALESCE(lm.role, 'owner') AS role,
+               (
+                 SELECT COUNT(*) FROM league_games g WHERE g.league_id = l.id
+               ) AS game_count
         FROM leagues l
         LEFT JOIN league_members lm
           ON lm.league_id = l.id AND lm.user_id = ?
@@ -508,6 +512,8 @@ def league_to_dict(league, include_invite_code=False):
         data["invite_code"] = league["invite_code"]
     if league.get("role"):
         data["role"] = league["role"]
+    if "game_count" in league and league["game_count"] is not None:
+        data["game_count"] = int(league["game_count"])
     return data
 
 
