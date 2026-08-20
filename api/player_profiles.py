@@ -8,29 +8,61 @@ from api.brand import APP_URL
 from db_utils import db_manager
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-UPLOAD_DIR = os.environ.get(
-    "LEAGUE_PLAYER_UPLOAD_DIR",
-    os.path.join(BASE_DIR, "static", "uploads", "league-players"),
-)
 ALLOWED_PHOTO_EXT = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_PHOTO_BYTES = 2 * 1024 * 1024
+PHOTO_MIME = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+}
+
+
+def get_upload_dir():
+    env = os.environ.get("LEAGUE_PLAYER_UPLOAD_DIR")
+    if env:
+        return env
+    volume = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
+    if volume:
+        return os.path.join(volume, "uploads", "league-players")
+    db_path = os.environ.get("DATABASE_PATH") or ""
+    if db_path.startswith("/data"):
+        return os.path.join("/data", "uploads", "league-players")
+    return os.path.join(BASE_DIR, "static", "uploads", "league-players")
+
+
+def _photo_path(filename):
+    return os.path.join(get_upload_dir(), filename)
+
+
+def _ensure_profile_columns(cursor):
+    cursor.execute("PRAGMA table_info(sport_player_profiles)")
+    existing = [row[1] for row in cursor.fetchall()]
+    if "photo_bytes" not in existing:
+        cursor.execute("ALTER TABLE sport_player_profiles ADD COLUMN photo_bytes BLOB")
+    if "photo_mime" not in existing:
+        cursor.execute("ALTER TABLE sport_player_profiles ADD COLUMN photo_mime TEXT")
 
 
 def ensure_player_profile_table():
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(get_upload_dir(), exist_ok=True)
     with db_manager.get_connection() as conn:
-        conn.execute(
+        cursor = conn.cursor()
+        cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS sport_player_profiles (
                 sport_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 photo_filename TEXT,
+                photo_bytes BLOB,
+                photo_mime TEXT,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (sport_id, name),
                 FOREIGN KEY (sport_id) REFERENCES sports(id)
             )
             """
         )
+        _ensure_profile_columns(cursor)
 
 
 def _slugify_name(name):
@@ -38,15 +70,12 @@ def _slugify_name(name):
     return slug[:40] or "player"
 
 
-def _photo_path(filename):
-    return os.path.join(UPLOAD_DIR, filename)
-
-
 def get_player_profile(sport_id, name):
     ensure_player_profile_table()
     row = db_manager.execute_query(
         """
-        SELECT sport_id, name, photo_filename
+        SELECT sport_id, name, photo_filename, photo_mime,
+               CASE WHEN photo_bytes IS NULL THEN 0 ELSE 1 END AS has_photo
         FROM sport_player_profiles
         WHERE sport_id = ? AND name = ?
         """,
@@ -56,24 +85,90 @@ def get_player_profile(sport_id, name):
     return dict(row) if row else None
 
 
-def get_player_photo_url(sport_id, name, absolute=True):
-    profile = get_player_profile(sport_id, name)
-    filename = (profile or {}).get("photo_filename")
-    if not filename:
-        return None
-    path = _photo_path(filename)
-    if not os.path.isfile(path):
-        return None
-    try:
-        mtime = os.path.getmtime(path)
-    except OSError:
-        mtime = 0
-    url = f"/static/uploads/league-players/{filename}"
+def _media_url(filename, mtime=0):
+    url = f"/media/league-players/{filename}"
     if mtime:
         url = f"{url}?v={int(mtime)}"
-    if absolute:
-        return f"{APP_URL}{url}"
     return url
+
+
+def get_player_photo_url(sport_id, name, absolute=True):
+    profile = get_player_profile(sport_id, name)
+    if not profile:
+        return None
+    filename = profile.get("photo_filename")
+    has_photo = bool(profile.get("has_photo") or filename)
+    if not has_photo:
+        return None
+    if filename:
+        path = _photo_path(filename)
+        mtime = 0
+        if os.path.isfile(path):
+            try:
+                mtime = os.path.getmtime(path)
+            except OSError:
+                mtime = 0
+            url = _media_url(filename, mtime)
+            return f"{APP_URL}{url}" if absolute else url
+        if profile.get("has_photo"):
+            _restore_photo_file(sport_id, name)
+            url = _media_url(filename)
+            return f"{APP_URL}{url}" if absolute else url
+        return None
+    return None
+
+
+def _restore_photo_file(sport_id, name):
+    row = db_manager.execute_query(
+        """
+        SELECT photo_filename, photo_bytes
+        FROM sport_player_profiles
+        WHERE sport_id = ? AND name = ?
+        """,
+        (sport_id, name),
+        fetch_one=True,
+    )
+    if not row or not row["photo_bytes"] or not row["photo_filename"]:
+        return
+    dest = _photo_path(row["photo_filename"])
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    if os.path.isfile(dest):
+        return
+    with open(dest, "wb") as handle:
+        handle.write(row["photo_bytes"])
+
+
+def get_photo_by_filename(filename):
+    ensure_player_profile_table()
+    safe = os.path.basename(filename or "")
+    if not safe or safe != filename or ".." in filename:
+        return None
+    row = db_manager.execute_query(
+        """
+        SELECT photo_filename, photo_bytes, photo_mime
+        FROM sport_player_profiles
+        WHERE photo_filename = ?
+        """,
+        (safe,),
+        fetch_one=True,
+    )
+    if not row:
+        return None
+    path = _photo_path(safe)
+    data = row["photo_bytes"]
+    if data and not os.path.isfile(path):
+        os.makedirs(get_upload_dir(), exist_ok=True)
+        with open(path, "wb") as handle:
+            handle.write(data)
+    if not os.path.isfile(path) and not data:
+        return None
+    return {
+        "filename": safe,
+        "path": path if os.path.isfile(path) else None,
+        "bytes": data,
+        "mime": row["photo_mime"] or "image/jpeg",
+        "directory": get_upload_dir(),
+    }
 
 
 def _decode_photo_payload(photo):
@@ -107,7 +202,7 @@ def _decode_photo_payload(photo):
 
 def save_player_photo(sport_id, name, photo):
     ensure_player_profile_table()
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(get_upload_dir(), exist_ok=True)
     data, ext = _decode_photo_payload(photo)
     if ext not in ALLOWED_PHOTO_EXT:
         raise ValueError("photo must be a jpg, png, or webp")
@@ -119,15 +214,22 @@ def save_player_photo(sport_id, name, photo):
         handle.write(data)
 
     old_name = (existing or {}).get("photo_filename")
+    mime = PHOTO_MIME.get(ext, "image/jpeg")
     with db_manager.get_connection() as conn:
         conn.execute(
             """
-            INSERT INTO sport_player_profiles (sport_id, name, photo_filename, updated_at)
-            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+            INSERT INTO sport_player_profiles (
+                sport_id, name, photo_filename, photo_bytes, photo_mime, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(sport_id, name)
-            DO UPDATE SET photo_filename = excluded.photo_filename, updated_at = CURRENT_TIMESTAMP
+            DO UPDATE SET
+                photo_filename = excluded.photo_filename,
+                photo_bytes = excluded.photo_bytes,
+                photo_mime = excluded.photo_mime,
+                updated_at = CURRENT_TIMESTAMP
             """,
-            (sport_id, name, filename),
+            (sport_id, name, filename, data, mime),
         )
     if old_name and old_name != filename:
         old_path = _photo_path(old_name)
@@ -146,10 +248,16 @@ def clear_player_photo(sport_id, name):
     with db_manager.get_connection() as conn:
         conn.execute(
             """
-            INSERT INTO sport_player_profiles (sport_id, name, photo_filename, updated_at)
-            VALUES (?, ?, NULL, CURRENT_TIMESTAMP)
+            INSERT INTO sport_player_profiles (
+                sport_id, name, photo_filename, photo_bytes, photo_mime, updated_at
+            )
+            VALUES (?, ?, NULL, NULL, NULL, CURRENT_TIMESTAMP)
             ON CONFLICT(sport_id, name)
-            DO UPDATE SET photo_filename = NULL, updated_at = CURRENT_TIMESTAMP
+            DO UPDATE SET
+                photo_filename = NULL,
+                photo_bytes = NULL,
+                photo_mime = NULL,
+                updated_at = CURRENT_TIMESTAMP
             """,
             (sport_id, name),
         )

@@ -1,4 +1,4 @@
-from flask import abort, redirect, render_template, request
+from flask import abort, redirect, render_template, request, send_from_directory, Response
 from urllib.parse import quote, unquote
 from datetime import date
 
@@ -14,7 +14,7 @@ from api.league_db import (
     search_public_leagues,
     sport_to_dict,
 )
-from api.player_profiles import get_player_photo_url
+from api.player_profiles import get_photo_by_filename, get_player_photo_url
 from api.stats_service import compute_player_stats, compute_sport_stats
 from api.web_present import (
     annotate_stat_rows,
@@ -122,6 +122,17 @@ def _sport_block(league, sport, year_arg=None):
 
 
 def register_public_web(app):
+    @app.route("/media/league-players/<filename>")
+    def league_player_photo(filename):
+        photo = get_photo_by_filename(filename)
+        if not photo:
+            abort(404)
+        if photo.get("path"):
+            return send_from_directory(photo["directory"], photo["filename"])
+        if photo.get("bytes"):
+            return Response(photo["bytes"], mimetype=photo.get("mime") or "image/jpeg")
+        abort(404)
+
     @app.route("/leagues")
     def public_leagues_index():
         _abort_if_arbel()

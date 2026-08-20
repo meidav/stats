@@ -6,6 +6,7 @@ ARBEL_PREFIX = "/arbel"
 KEEP_PREFIXES = (
     "/api",
     "/static",
+    "/media",
 )
 
 KEEP_EXACT = {

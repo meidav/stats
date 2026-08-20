@@ -123,12 +123,16 @@ def create_leagues_tables():
                 sport_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 photo_filename TEXT,
+                photo_bytes BLOB,
+                photo_mime TEXT,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (sport_id, name),
                 FOREIGN KEY (sport_id) REFERENCES sports(id)
             )
             """
         )
+        _ensure_column(cursor, "sport_player_profiles", "photo_bytes", "BLOB")
+        _ensure_column(cursor, "sport_player_profiles", "photo_mime", "TEXT")
         _ensure_column(cursor, "leagues", "focus", "TEXT NOT NULL DEFAULT 'mixed'")
         _ensure_column(cursor, "leagues", "icon", "TEXT")
 

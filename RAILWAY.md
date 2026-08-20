@@ -27,6 +27,8 @@ Railway also sets `RAILWAY_VOLUME_MOUNT_PATH` automatically at runtime.
 
 **If you skip the volume for now:** leave `DATABASE_PATH` unset. The app will work but data resets on each redeploy.
 
+Player photos are stored in the SQLite database and also cached under `/data/uploads/league-players` when the volume is mounted. Do not keep them only in `static/uploads/`; that folder is replaced on every deploy.
+
 ## 3. Required environment variables
 
 | Variable | Value | Notes |
