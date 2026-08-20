@@ -878,6 +878,143 @@ a:hover { text-decoration: underline; }
   color: #fff;
 }
 
+.mkt-year {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 6px;
+  z-index: 4;
+}
+
+.mkt-year-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(37, 99, 235, 0.28);
+  color: #0f172a;
+}
+
+.mkt-year-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.mkt-year-label {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.mkt-year-count {
+  font-weight: 800;
+  font-size: 12px;
+  color: #1d4ed8;
+  background: rgba(37, 99, 235, 0.12);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.mkt-year-chevron {
+  width: 16px;
+  height: 16px;
+  color: #1d4ed8;
+}
+
+.mkt-year[open] .mkt-year-chevron {
+  transform: rotate(180deg);
+}
+
+.mkt-year-menu {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translateX(-50%);
+  width: min(320px, calc(100vw - 40px));
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  background: linear-gradient(160deg, #bfdbfe 0%, #ddd6fe 48%, #fed7aa 100%);
+  box-shadow: 0 18px 40px rgba(30, 58, 138, 0.18);
+  text-align: left;
+}
+
+.mkt-year-title {
+  margin: 0;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.mkt-year-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.mkt-year-option:hover {
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.mkt-year-option.is-active {
+  background: #2563eb;
+  color: #fff;
+}
+
+.mkt-year-option span:last-child {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.mkt-year-option.is-active span:last-child {
+  color: #fff;
+}
+
+.mkt-year-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: rgba(15, 23, 42, 0.14);
+}
+
+.mkt-section-hint {
+  margin: 0 0 8px;
+  padding: 0 4px;
+  font-size: 13px;
+  color: #64748b;
+  text-align: left;
+}
+
+.mkt-load-more {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mkt-load-more:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 .mkt-fold {
   margin: 0 0 24px;
   text-align: left;
@@ -1017,6 +1154,7 @@ a:hover { text-decoration: underline; }
 .mkt-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .mkt-table th,
@@ -1054,11 +1192,17 @@ a:hover { text-decoration: underline; }
 
 .mkt-col-player {
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .mkt-col-stat {
-  width: 40px;
+  width: 48px;
+  min-width: 44px;
   text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .mkt-player-link {

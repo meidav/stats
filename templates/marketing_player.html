@@ -1,5 +1,5 @@
 {% extends "marketing_base.html" %}
-{% from "marketing_league_macros.html" import pair_table %}
+{% from "marketing_league_macros.html" import pair_table, year_picker %}
 {% block title %}{{ player.player }} | {{ league.name }} | PlayTracker{% endblock %}
 {% block nav_leagues %}is-active{% endblock %}
 {% block body_class %}mkt-app-page{% endblock %}
@@ -26,6 +26,8 @@
             <p class="mkt-player-sub">{{ league.name }} · {{ sport.name }}</p>
         </div>
     </div>
+
+    {{ year_picker(years, selected_year, all_time_games, year_base) }}
 
     <div class="mkt-kpi-grid">
         <div class="mkt-glass mkt-kpi">

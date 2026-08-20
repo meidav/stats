@@ -1,9 +1,19 @@
 from collections import Counter, defaultdict
 from datetime import date
 
-from api.game_db import get_games_for_sport
+from api.game_db import get_games_for_sport, get_sport_years
 from api.league_db import get_sport_by_id
 from api.sport_templates import get_template, typical_win_score_for
+
+# Share of league games a player must have played to appear in main standings.
+STANDINGS_MIN_GAMES_PCT = 0.05
+
+
+def min_games_for_standings(total_games):
+    """Auto-scale qualification threshold (default 5% of games in the current view)."""
+    if total_games <= 0:
+        return 1
+    return max(1, int(total_games * STANDINGS_MIN_GAMES_PCT))
 
 
 def _is_on_day(game_date, day):
@@ -46,14 +56,25 @@ def _rows_from_games(games, min_games=1):
     return stats
 
 
+def _occasional_from_games(games, min_games):
+    if min_games <= 1:
+        return []
+    all_stats = _rows_from_games(games, min_games=1)
+    occasional = [row for row in all_stats if row["games"] < min_games]
+    occasional.sort(key=lambda s: (s["win_pct"], s["wins"], s["plus_minus"]), reverse=True)
+    return occasional
+
+
 def compute_sport_stats(sport_id, year=None, min_games=None, today=None):
     sport = get_sport_by_id(sport_id)
     if not sport:
         raise ValueError("sport not found")
 
     if min_games is None:
-        min_games = sport.get("min_games_for_rank") or 1
-    games = get_games_for_sport(sport_id, year=year, limit=10000)
+        games = get_games_for_sport(sport_id, year=year, limit=10000)
+        min_games = min_games_for_standings(len(games))
+    else:
+        games = get_games_for_sport(sport_id, year=year, limit=10000)
     today_key = today or date.today().isoformat()
     today_games = [game for game in games if _is_on_day(game.get("game_date"), today_key)]
 
@@ -61,8 +82,11 @@ def compute_sport_stats(sport_id, year=None, min_games=None, today=None):
         "sport_id": sport_id,
         "year": year or "all",
         "min_games": min_games,
+        "min_games_pct": STANDINGS_MIN_GAMES_PCT,
         "total_games": len(games),
         "stats": _rows_from_games(games, min_games=min_games),
+        "occasional_stats": _occasional_from_games(games, min_games),
+        "years": get_sport_years(sport_id),
         "today_stats": _rows_from_games(today_games, min_games=1) if today_games else [],
     }
 

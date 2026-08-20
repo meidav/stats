@@ -1,9 +1,10 @@
 from flask import abort, redirect, render_template, request
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
+from datetime import date
 
 from arbel_prefix import is_arbel_request
 from api.brand import APP_NAME, APP_URL
-from api.game_db import get_games_for_sport
+from api.game_db import count_games_for_sport, get_games_for_sport, get_sport_years
 from api.league_db import (
     get_league_by_slug,
     get_sports_for_league,
@@ -16,11 +17,15 @@ from api.league_db import (
 from api.stats_service import compute_player_stats, compute_sport_stats
 from api.web_present import (
     annotate_stat_rows,
+    league_path,
     present_games,
     present_player,
     present_public_league_card,
     with_sport_glyph,
 )
+
+
+GAMES_PAGE_SIZE = 50
 
 
 def _abort_if_arbel():
@@ -50,19 +55,67 @@ def _pick_sport(sports, sport_id_arg):
     return sports[0]
 
 
-def _sport_block(league, sport):
+def _resolve_year(year_arg, years):
+    year_ids = [item["year"] for item in years or [] if item.get("year")]
+    current = str(date.today().year)
+    requested = (year_arg or "").strip().lower()
+    if requested in ("all", "all-time"):
+        return None
+    if requested and requested in year_ids:
+        return requested
+    if current in year_ids:
+        return current
+    return year_ids[0] if year_ids else None
+
+
+def _sport_block(league, sport, year_arg=None):
     payload = with_sport_glyph(sport_to_dict(sport))
+    years = get_sport_years(sport["id"])
+    year = _resolve_year(year_arg, years)
+    current_year = str(date.today().year)
+    show_today = year is None or year == current_year
     try:
-        stats = compute_sport_stats(sport["id"], min_games=1)
+        stats = compute_sport_stats(
+            sport["id"],
+            year=year,
+            today=date.today().isoformat() if show_today else None,
+        )
     except ValueError:
-        stats = {"stats": [], "today_stats": [], "total_games": 0}
+        stats = {
+            "stats": [],
+            "occasional_stats": [],
+            "today_stats": [],
+            "total_games": 0,
+            "min_games": 1,
+        }
     win_loss = payload.get("score_mode") == "win_loss"
-    games = present_games(get_games_for_sport(sport["id"], limit=200) or [], win_loss=win_loss)
+    games = present_games(
+        get_games_for_sport(sport["id"], year=year, limit=GAMES_PAGE_SIZE) or [],
+        win_loss=win_loss,
+    )
+    games_total = count_games_for_sport(sport["id"], year=year)
+    slug = league["slug"]
+    sport_id = sport["id"]
     return {
         "sport": payload,
-        "stats": annotate_stat_rows(stats.get("stats") or [], league["slug"], sport["id"]),
-        "today_stats": annotate_stat_rows(stats.get("today_stats") or [], league["slug"], sport["id"]),
+        "year": year,
+        "years": years,
+        "all_time_games": sum(item.get("games") or 0 for item in years),
+        "min_games": stats.get("min_games") or 1,
+        "total_games": stats.get("total_games") or 0,
+        "stats": annotate_stat_rows(stats.get("stats") or [], slug, sport_id, year=year),
+        "occasional_stats": annotate_stat_rows(
+            stats.get("occasional_stats") or [], slug, sport_id, year=year
+        ),
+        "today_stats": annotate_stat_rows(
+            stats.get("today_stats") or [], slug, sport_id, year=year
+        ),
         "games": games,
+        "games_total": games_total,
+        "has_more": len(games) < games_total,
+        "games_limit": GAMES_PAGE_SIZE,
+        "win_loss": win_loss,
+        "league_url": league_path(slug, sport_id, year),
     }
 
 
@@ -88,10 +141,14 @@ def register_public_web(app):
 
         sports = get_sports_for_league(league["id"]) or []
         selected = _pick_sport(sports, request.args.get("sport"))
-        block = _sport_block(league, selected) if selected else None
+        year_arg = request.args.get("year")
+        block = _sport_block(league, selected, year_arg=year_arg) if selected else None
         tabs = [with_sport_glyph(sport_to_dict(sport)) for sport in sports]
         payload = league_to_dict(league)
         share_url = league_share_url(league) or f"{APP_URL}/l/{league['slug']}"
+        selected_year = block["year"] if block else None
+        for tab in tabs:
+            tab["href"] = league_path(league["slug"], tab["id"], selected_year)
         return render_template(
             "marketing_league.html",
             league=payload,
@@ -118,8 +175,10 @@ def register_public_web(app):
         if not name:
             return render_template("marketing_league_unavailable.html"), 404
 
+        years = get_sport_years(sport["id"])
+        year = _resolve_year(request.args.get("year"), years)
         try:
-            profile = compute_player_stats(sport["id"], name)
+            profile = compute_player_stats(sport["id"], name, year=year)
         except ValueError:
             return render_template("marketing_league_unavailable.html"), 404
 
@@ -130,8 +189,12 @@ def register_public_web(app):
             "marketing_player.html",
             league=payload,
             sport=sport_payload,
-            player=present_player(profile, league["slug"], sport["id"]),
-            league_url=f"/l/{league['slug']}?sport={sport['id']}",
+            player=present_player(profile, league["slug"], sport["id"], year=year),
+            league_url=league_path(league["slug"], sport["id"], year),
+            years=years,
+            selected_year=year,
+            all_time_games=sum(item.get("games") or 0 for item in years),
+            year_base=f"/l/{league['slug']}/p/{quote(name, safe='')}?sport={sport['id']}",
             share_url=share_url,
             app_scheme_url=f"playtracker://l/{league['slug']}",
             app_name=APP_NAME,

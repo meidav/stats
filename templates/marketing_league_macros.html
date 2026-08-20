@@ -1,3 +1,39 @@
+{% macro year_picker(years, selected_year, all_time_games, base) %}
+{% if years|length > 1 %}
+{% set joiner = '&' if '?' in base else '?' %}
+{% set selected = namespace(label='All time', count=all_time_games) %}
+{% for item in years %}
+    {% if selected_year == item.year %}
+        {% set selected.label = item.year %}
+        {% set selected.count = item.games %}
+    {% endif %}
+{% endfor %}
+<details class="mkt-year">
+    <summary class="mkt-year-trigger">
+        <span class="mkt-year-label">{{ selected.label }}</span>
+        <span class="mkt-year-count">{{ selected.count }}</span>
+        <svg class="mkt-year-chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </summary>
+    <div class="mkt-year-menu">
+        <p class="mkt-year-title">Standings year</p>
+        {% for item in years %}
+        <a class="mkt-year-option{% if selected_year == item.year %} is-active{% endif %}" href="{{ base }}{{ joiner }}year={{ item.year }}">
+            <span>{{ item.year }}</span>
+            <span>{{ item.games }}</span>
+        </a>
+        {% endfor %}
+        <div class="mkt-year-divider"></div>
+        <a class="mkt-year-option{% if selected_year is none %} is-active{% endif %}" href="{{ base }}{{ joiner }}year=all">
+            <span>All time</span>
+            <span>{{ all_time_games }}</span>
+        </a>
+    </div>
+</details>
+{% endif %}
+{% endmacro %}
+
 {% macro fold(title, count, closed=false) %}
 <section class="mkt-fold{% if closed %} is-closed{% endif %}" data-fold>
     <button class="mkt-fold-head" type="button" data-fold-toggle aria-expanded="{{ 'false' if closed else 'true' }}">

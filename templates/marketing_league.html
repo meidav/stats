@@ -1,5 +1,5 @@
 {% extends "marketing_base.html" %}
-{% from "marketing_league_macros.html" import fold, standings_table, game_list, sport_mark %}
+{% from "marketing_league_macros.html" import fold, standings_table, game_list, sport_mark, year_picker %}
 {% block title %}{{ league.name }} | PlayTracker{% endblock %}
 {% block nav_leagues %}is-active{% endblock %}
 {% block body_class %}mkt-app-page{% endblock %}
@@ -23,7 +23,7 @@
     {% if sport_tabs|length > 1 %}
     <nav class="mkt-sport-tabs" aria-label="Sports">
         {% for sport in sport_tabs %}
-        <a class="mkt-sport-tab{% if block and sport.id == block.sport.id %} is-active{% endif %}" href="/l/{{ league.slug }}?sport={{ sport.id }}">
+        <a class="mkt-sport-tab{% if block and sport.id == block.sport.id %} is-active{% endif %}" href="{{ sport.href }}">
             {{ sport_mark(sport) }}
             <span>{{ sport.name }}</span>
         </a>
@@ -41,6 +41,8 @@
     {% endif %}
 
     {% if block %}
+        {{ year_picker(block.years, block.year, block.all_time_games, '/l/' ~ league.slug ~ '?sport=' ~ block.sport.id) }}
+
         {% if block.today_stats %}
         {% call fold("Today's stats", block.today_stats|length) %}
             {{ standings_table(block.today_stats) }}
@@ -48,17 +50,40 @@
         {% endif %}
 
         {% call fold("Standings", block.stats|length) %}
+            {% if block.min_games > 1 and block.total_games > 0 %}
+            <p class="mkt-section-hint">{{ block.min_games }}+ games to rank (5% of {{ block.total_games }} games{% if block.year %} in {{ block.year }}{% endif %})</p>
+            {% endif %}
             {% if block.stats %}
                 {{ standings_table(block.stats) }}
             {% else %}
                 <div class="mkt-empty-card">
-                    <p>No games yet. Standings show up after someone logs a result in the app.</p>
+                    <p>No one has {{ block.min_games }}+ games yet{% if block.year %} in {{ block.year }}{% endif %}.</p>
                 </div>
             {% endif %}
         {% endcall %}
 
-        {% call fold("Games", block.games|length, closed=true) %}
+        {% if block.occasional_stats %}
+        {% call fold("Occasional players", block.occasional_stats|length, closed=true) %}
+            <p class="mkt-section-hint">Under {{ block.min_games }} games (5% threshold{% if block.year %} in {{ block.year }}{% endif %})</p>
+            {{ standings_table(block.occasional_stats) }}
+        {% endcall %}
+        {% endif %}
+
+        {% call fold("Games", block.games_total, closed=true) %}
             {{ game_list(block.games) }}
+            {% if block.has_more %}
+            <button
+                type="button"
+                class="mkt-load-more"
+                data-load-more
+                data-sport="{{ block.sport.id }}"
+                data-year="{{ block.year or '' }}"
+                data-offset="{{ block.games|length }}"
+                data-total="{{ block.games_total }}"
+                data-limit="{{ block.games_limit }}"
+                data-win-loss="{{ '1' if block.win_loss else '0' }}"
+            >Load more ({{ block.games|length }} of {{ block.games_total }})</button>
+            {% endif %}
         {% endcall %}
     {% else %}
     <div class="mkt-empty-card">
@@ -79,4 +104,5 @@
 
 {% block extra_js %}
     <script src="{{ url_for('static', filename='js/marketing-folds.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/marketing-league.js') }}"></script>
 {% endblock %}

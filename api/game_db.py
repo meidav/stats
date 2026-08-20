@@ -159,13 +159,42 @@ def get_player_names_for_user(user_id):
     return sorted(names, key=lambda name: name.lower())
 
 
-def get_games_for_sport(sport_id, year=None, limit=100, offset=0):
+def _sport_games_where(sport_id, year=None):
     params = [sport_id]
-    sql = "SELECT * FROM league_games WHERE sport_id = ?"
+    sql = "FROM league_games WHERE sport_id = ?"
     if year:
         sql += " AND strftime('%Y', game_date) = ?"
         params.append(str(year))
-    sql += " ORDER BY game_date DESC LIMIT ? OFFSET ?"
+    return sql, params
+
+
+def count_games_for_sport(sport_id, year=None):
+    where_sql, params = _sport_games_where(sport_id, year=year)
+    row = db_manager.execute_query(
+        f"SELECT COUNT(*) AS n {where_sql}",
+        tuple(params),
+        fetch_one=True,
+    )
+    return int(row["n"]) if row else 0
+
+
+def get_sport_years(sport_id):
+    rows = db_manager.execute_query(
+        """
+        SELECT strftime('%Y', game_date) AS year, COUNT(*) AS games
+        FROM league_games
+        WHERE sport_id = ?
+        GROUP BY year
+        ORDER BY year DESC
+        """,
+        (sport_id,),
+    )
+    return [{"year": row["year"], "games": row["games"]} for row in rows or []]
+
+
+def get_games_for_sport(sport_id, year=None, limit=100, offset=0):
+    where_sql, params = _sport_games_where(sport_id, year=year)
+    sql = f"SELECT * {where_sql} ORDER BY game_date DESC LIMIT ? OFFSET ?"
     params.extend([limit, offset])
 
     rows = db_manager.execute_query(sql, tuple(params))

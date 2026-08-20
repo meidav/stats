@@ -34,20 +34,27 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
         </View>
         {stats.map((row, index) => (
           <View key={row.player} style={[styles.dataRow, index % 2 === 1 && styles.altRow]}>
-            <Text style={[styles.td, styles.rank]}>{index + 1}</Text>
+            <Text style={[styles.td, styles.rank]} numberOfLines={1}>
+              {index + 1}
+            </Text>
             <TouchableOpacity style={styles.player} onPress={() => onPlayerPress(row.player)}>
               <Text style={styles.playerName} numberOfLines={1}>
                 {row.player}
               </Text>
             </TouchableOpacity>
-            <Text style={[styles.td, styles.stat, { color: colors.win }]}>{row.wins}</Text>
-            <Text style={[styles.td, styles.stat, { color: colors.loss }]}>{row.losses}</Text>
+            <Text style={[styles.td, styles.stat, { color: colors.win }]} numberOfLines={1}>
+              {row.wins}
+            </Text>
+            <Text style={[styles.td, styles.stat, { color: colors.loss }]} numberOfLines={1}>
+              {row.losses}
+            </Text>
             <Text
               style={[
                 styles.td,
                 styles.pct,
                 { color: winPctColor(row.win_pct, colors) },
               ]}
+              numberOfLines={1}
             >
               {(row.win_pct * 100).toFixed(0)}
             </Text>
@@ -65,11 +72,14 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
                           : colors.neutral,
                   },
                 ]}
+                numberOfLines={1}
               >
                 {formatPlusMinus(row.plus_minus ?? 0)}
               </Text>
             ) : (
-              <Text style={[styles.td, styles.pm, { color: colors.neutral }]}>{row.games}</Text>
+              <Text style={[styles.td, styles.pm, { color: colors.neutral }]} numberOfLines={1}>
+                {row.games}
+              </Text>
             )}
           </View>
         ))}
@@ -120,13 +130,16 @@ const styles = StyleSheet.create({
   td: {
     fontSize: 15,
     fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   rank: {
-    width: 28,
+    width: 26,
+    flexShrink: 0,
     color: colors.textMuted,
   },
   player: {
     flex: 1,
+    minWidth: 0,
     paddingRight: spacing.sm,
   },
   playerName: {
@@ -137,15 +150,18 @@ const styles = StyleSheet.create({
     textDecorationColor: 'rgba(37, 99, 235, 0.35)',
   },
   stat: {
-    width: 28,
+    width: 40,
+    flexShrink: 0,
     textAlign: 'right',
   },
   pct: {
     width: 36,
+    flexShrink: 0,
     textAlign: 'right',
   },
   pm: {
-    width: 40,
+    width: 48,
+    flexShrink: 0,
     textAlign: 'right',
   },
 });

@@ -38,9 +38,23 @@ def player_initials(name):
     return f"{parts[0][0]}{parts[-1][0]}".upper()
 
 
-def player_href(slug, player, sport_id):
+def year_query_value(year):
+    if year in (None, "", "all", "all-time"):
+        return "all"
+    return str(year)
+
+
+def league_path(slug, sport_id=None, year=None):
+    params = []
+    if sport_id is not None:
+        params.append(f"sport={sport_id}")
+    params.append(f"year={year_query_value(year)}")
+    return f"/l/{slug}?{'&'.join(params)}"
+
+
+def player_href(slug, player, sport_id, year=None):
     encoded = quote(str(player or ""), safe="")
-    return f"/l/{slug}/p/{encoded}?sport={sport_id}"
+    return f"/l/{slug}/p/{encoded}?sport={sport_id}&year={year_query_value(year)}"
 
 
 def sport_glyph(sport):
@@ -140,11 +154,11 @@ def present_public_league_card(league):
     }
 
 
-def annotate_stat_rows(rows, slug, sport_id):
+def annotate_stat_rows(rows, slug, sport_id, year=None):
     annotated = []
     for row in rows or []:
         item = dict(row)
-        item["href"] = player_href(slug, row.get("player"), sport_id)
+        item["href"] = player_href(slug, row.get("player"), sport_id, year=year)
         item["pct_class"] = win_pct_class(row.get("win_pct"))
         item["pct_label"] = str(int(round(float(row.get("win_pct") or 0) * 100)))
         annotated.append(item)
@@ -203,7 +217,7 @@ def present_games(games, win_loss=False):
     return presented
 
 
-def present_player(profile, slug, sport_id):
+def present_player(profile, slug, sport_id, year=None):
     data = dict(profile)
     data["initials"] = player_initials(profile.get("player"))
     data["pct_label"] = f"{int(round(float(profile.get('win_pct') or 0) * 100))}%"
@@ -223,6 +237,6 @@ def present_player(profile, slug, sport_id):
         data["streak_label"] = f"Streak · #{rank} of {field_size}"
     else:
         data["streak_label"] = "Streak"
-    data["partners"] = annotate_stat_rows(profile.get("partners"), slug, sport_id)
-    data["opponents"] = annotate_stat_rows(profile.get("opponents"), slug, sport_id)
+    data["partners"] = annotate_stat_rows(profile.get("partners"), slug, sport_id, year=year)
+    data["opponents"] = annotate_stat_rows(profile.get("opponents"), slug, sport_id, year=year)
     return data

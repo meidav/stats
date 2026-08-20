@@ -111,10 +111,17 @@ export const api = {
       body: payload,
     }),
 
+  getLeagueIconUsage: () =>
+    request<{
+      sports_leagues: number;
+      games_leagues: number;
+      icon_counts: Record<string, number>;
+    }>('/league-icons'),
+
   updateLeague: (
     token: string,
     slug: string,
-    payload: { name?: string; icon?: string | null },
+    payload: { name?: string; icon?: string | null; visibility?: string },
   ) =>
     request<import('../types').League>(`/leagues/${slug}`, {
       method: 'PUT',
@@ -128,11 +135,27 @@ export const api = {
       token,
     }),
 
-  getSportStats: (sportId: number, token?: string | null, minGames = 1, today?: string) =>
-    request<import('../types').SportStats>(
-      `/sports/${sportId}/stats?min_games=${minGames}${today ? `&today=${today}` : ''}`,
+  getSportStats: (
+    sportId: number,
+    token?: string | null,
+    options?: { minGames?: number; today?: string; year?: string | null },
+  ) => {
+    const params = new URLSearchParams();
+    if (options?.minGames != null) {
+      params.set('min_games', String(options.minGames));
+    }
+    if (options?.today) {
+      params.set('today', options.today);
+    }
+    if (options?.year) {
+      params.set('year', options.year);
+    }
+    const query = params.toString();
+    return request<import('../types').SportStats>(
+      `/sports/${sportId}/stats${query ? `?${query}` : ''}`,
       { token },
-    ),
+    );
+  },
 
   getPlayerStats: (sportId: number, playerName: string, token?: string | null) =>
     request<import('../types').PlayerProfile>(
@@ -149,8 +172,27 @@ export const api = {
       { token },
     ),
 
-  getSportGames: (sportId: number, token?: string | null) =>
-    request<{ games: import('../types').Game[] }>(`/sports/${sportId}/games`, { token }),
+  getSportGames: (
+    sportId: number,
+    token?: string | null,
+    options?: { year?: string | null; limit?: number; offset?: number },
+  ) => {
+    const params = new URLSearchParams();
+    if (options?.year) {
+      params.set('year', options.year);
+    }
+    if (options?.limit != null) {
+      params.set('limit', String(options.limit));
+    }
+    if (options?.offset != null) {
+      params.set('offset', String(options.offset));
+    }
+    const query = params.toString();
+    return request<import('../types').SportGamesPage>(
+      `/sports/${sportId}/games${query ? `?${query}` : ''}`,
+      { token },
+    );
+  },
 
   addGame: (
     token: string,

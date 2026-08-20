@@ -1,4 +1,5 @@
 from urllib.parse import unquote
+import os
 
 from flask import jsonify, request
 from flask_jwt_extended import (
@@ -8,7 +9,7 @@ from flask_jwt_extended import (
     verify_jwt_in_request,
 )
 
-from auth import get_user_by_email, get_user_by_username, verify_password
+from auth import get_user_by_email, get_user_by_id, get_user_by_username, verify_password
 from api.auth_service import (
     authenticate_with_email,
     register_with_email,
@@ -24,6 +25,7 @@ from api.google_auth import (
 )
 from api.game_db import (
     add_game,
+    count_games_for_sport,
     delete_game,
     game_to_dict,
     get_game_by_id,
@@ -40,6 +42,7 @@ from api.league_db import (
     get_leagues_for_user,
     get_sport_by_id,
     get_sports_for_league,
+    league_icon_usage,
     league_share_url,
     league_to_dict,
     search_public_leagues,
@@ -56,6 +59,7 @@ from api.sport_templates import (
     list_templates,
     public_template,
 )
+from api.legacy_vb_import import import_legacy_doubles_vb
 from api.stats_service import compute_player_stats, compute_score_hints, compute_sport_stats
 
 
@@ -77,6 +81,10 @@ def register_routes(api):
             "templates": [public_template(t) for t in list_templates()],
             "categories": list(TEMPLATE_CATEGORIES),
         })
+
+    @api.route("/league-icons", methods=["GET"])
+    def league_icons():
+        return jsonify(league_icon_usage())
 
     @api.route("/auth/login", methods=["POST"])
     def api_login():
@@ -286,6 +294,8 @@ def register_routes(api):
             fields["name"] = data.get("name")
         if "icon" in data:
             fields["icon"] = data.get("icon")
+        if "visibility" in data:
+            fields["visibility"] = data.get("visibility")
         try:
             updated = update_league(league["id"], **fields)
         except ValueError as exc:
@@ -297,6 +307,43 @@ def register_routes(api):
             sport_to_dict(s) for s in get_sports_for_league(updated["id"]) or []
         ]
         return jsonify(payload)
+
+    @api.route("/leagues/<slug>/import-legacy-vb", methods=["POST"])
+    @jwt_required()
+    def import_legacy_vb_route(slug):
+        user_id = int(get_jwt_identity())
+        league = get_league_by_slug(slug)
+        if not league:
+            return jsonify({"error": "league not found"}), 404
+        if league.get("owner_id") != user_id:
+            return jsonify({"error": "permission denied"}), 403
+
+        source_db = os.environ.get("LEGACY_VB_SOURCE_DB")
+        if not source_db or not os.path.isfile(source_db):
+            return jsonify({
+                "error": "legacy VB source database is not configured on the server",
+            }), 503
+
+        user = get_user_by_id(user_id)
+        if not user:
+            return jsonify({"error": "user not found"}), 404
+
+        data = request.get_json(silent=True) or {}
+        dedupe = data.get("dedupe", True)
+
+        try:
+            result = import_legacy_doubles_vb(
+                email=user.email,
+                source_db=source_db,
+                league_slug=slug,
+                dedupe=bool(dedupe),
+            )
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        except FileNotFoundError as exc:
+            return jsonify({"error": str(exc)}), 503
+
+        return jsonify(result)
 
     @api.route("/leagues/<slug>", methods=["DELETE"])
     @jwt_required()
@@ -381,7 +428,16 @@ def register_routes(api):
         limit = min(int(request.args.get("limit", 50)), 200)
         offset = int(request.args.get("offset", 0))
         games = get_games_for_sport(sport_id, year=year, limit=limit, offset=offset)
-        return jsonify({"games": [game_to_dict(g) for g in games]})
+        total = count_games_for_sport(sport_id, year=year)
+        return jsonify(
+            {
+                "games": [game_to_dict(g) for g in games],
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+                "has_more": offset + len(games) < total,
+            }
+        )
 
     @api.route("/sports/<int:sport_id>/games", methods=["POST"])
     @jwt_required()

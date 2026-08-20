@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
+import { YearFilterRow } from '../components/YearFilterRow';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { GameList } from '../components/GameList';
@@ -34,30 +35,103 @@ import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'League'>;
 
+const GAMES_PAGE_SIZE = 50;
+
 export function LeagueScreen({ route, navigation }: Props) {
   const { slug, name, role: routeRole } = route.params;
   const { token } = useAuth();
   const [league, setLeague] = useState<League | null>(null);
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [stats, setStats] = useState<PlayerStat[]>([]);
+  const [occasionalStats, setOccasionalStats] = useState<PlayerStat[]>([]);
   const [todayStats, setTodayStats] = useState<PlayerStat[]>([]);
   const [games, setGames] = useState<Game[]>([]);
+  const [gamesTotal, setGamesTotal] = useState(0);
+  const [hasMoreGames, setHasMoreGames] = useState(false);
+  const [loadingMoreGames, setLoadingMoreGames] = useState(false);
+  const [minGames, setMinGames] = useState(10);
+  const [years, setYears] = useState<Array<{ year: string; games: number }>>([]);
+  const [selectedYear, setSelectedYear] = useState<string | null>(() =>
+    String(new Date().getFullYear()),
+  );
+  const [totalGames, setTotalGames] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [deleteGame, setDeleteGame] = useState<Game | null>(null);
   const [deleting, setDeleting] = useState(false);
   const selectedIdRef = useRef<number | null>(null);
+  const selectedYearRef = useRef<string | null>(selectedYear);
+  selectedYearRef.current = selectedYear;
 
-  const loadStats = useCallback(async (sport: Sport) => {
+  const loadStats = useCallback(async (sport: Sport, year: string | null) => {
+    const currentYear = String(new Date().getFullYear());
+    const showToday = !year || year === currentYear;
     const [statsData, gamesData] = await Promise.all([
-      api.getSportStats(sport.id, token, 1, localToday()),
-      api.getSportGames(sport.id, token),
+      api.getSportStats(sport.id, token, {
+        today: showToday ? localToday() : undefined,
+        year,
+      }),
+      api.getSportGames(sport.id, token, {
+        year,
+        limit: GAMES_PAGE_SIZE,
+        offset: 0,
+      }),
     ]);
     setStats(statsData.stats);
+    setOccasionalStats(statsData.occasional_stats ?? []);
     setTodayStats(statsData.today_stats ?? []);
+    setMinGames(statsData.min_games);
+    setYears(statsData.years ?? []);
+    setTotalGames(statsData.total_games);
     setGames(gamesData.games ?? []);
+    setGamesTotal(gamesData.total ?? gamesData.games?.length ?? 0);
+    setHasMoreGames(gamesData.has_more ?? false);
+    const availableYears = statsData.years ?? [];
+    if (year && availableYears.length > 0 && !availableYears.some((item) => item.year === year)) {
+      const fallback = availableYears[0].year;
+      setSelectedYear(fallback);
+      const [fallbackStats, fallbackGames] = await Promise.all([
+        api.getSportStats(sport.id, token, {
+          today: fallback === String(new Date().getFullYear()) ? localToday() : undefined,
+          year: fallback,
+        }),
+        api.getSportGames(sport.id, token, {
+          year: fallback,
+          limit: GAMES_PAGE_SIZE,
+          offset: 0,
+        }),
+      ]);
+      setStats(fallbackStats.stats);
+      setOccasionalStats(fallbackStats.occasional_stats ?? []);
+      setTodayStats(fallbackStats.today_stats ?? []);
+      setMinGames(fallbackStats.min_games);
+      setYears(fallbackStats.years ?? []);
+      setTotalGames(fallbackStats.total_games);
+      setGames(fallbackGames.games ?? []);
+      setGamesTotal(fallbackGames.total ?? fallbackGames.games?.length ?? 0);
+      setHasMoreGames(fallbackGames.has_more ?? false);
+    }
   }, [token]);
+
+  const loadMoreGames = useCallback(async () => {
+    if (!selectedSport || loadingMoreGames || !hasMoreGames) return;
+    setLoadingMoreGames(true);
+    try {
+      const gamesData = await api.getSportGames(selectedSport.id, token, {
+        year: selectedYear,
+        limit: GAMES_PAGE_SIZE,
+        offset: games.length,
+      });
+      setGames((prev) => [...prev, ...(gamesData.games ?? [])]);
+      setGamesTotal(gamesData.total ?? games.length + (gamesData.games?.length ?? 0));
+      setHasMoreGames(gamesData.has_more ?? false);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not load more games');
+    } finally {
+      setLoadingMoreGames(false);
+    }
+  }, [selectedSport, loadingMoreGames, hasMoreGames, token, selectedYear, games.length]);
 
   useFocusEffect(
     useCallback(() => {
@@ -76,11 +150,16 @@ export function LeagueScreen({ route, navigation }: Props) {
           selectedIdRef.current = sport?.id ?? null;
           setSelectedSport(sport);
           if (sport) {
-            await loadStats(sport);
+            await loadStats(sport, selectedYearRef.current);
           } else {
             setStats([]);
+            setOccasionalStats([]);
             setTodayStats([]);
             setGames([]);
+            setGamesTotal(0);
+            setHasMoreGames(false);
+            setYears([]);
+            setTotalGames(0);
           }
           setError('');
         } catch (err) {
@@ -104,9 +183,25 @@ export function LeagueScreen({ route, navigation }: Props) {
   async function selectSport(sport: Sport) {
     selectedIdRef.current = sport.id;
     setSelectedSport(sport);
+    const year = String(new Date().getFullYear());
+    setSelectedYear(year);
     setLoading(true);
     try {
-      await loadStats(sport);
+      await loadStats(sport, year);
+      setError('');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not load stats');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function selectYear(year: string | null) {
+    if (!selectedSport || year === selectedYear) return;
+    setSelectedYear(year);
+    setLoading(true);
+    try {
+      await loadStats(selectedSport, year);
       setError('');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not load stats');
@@ -128,11 +223,16 @@ export function LeagueScreen({ route, navigation }: Props) {
       selectedIdRef.current = sport?.id ?? null;
       setSelectedSport(sport);
       if (sport) {
-        await loadStats(sport);
+        await loadStats(sport, selectedYear);
       } else {
         setStats([]);
+        setOccasionalStats([]);
         setTodayStats([]);
         setGames([]);
+        setGamesTotal(0);
+        setHasMoreGames(false);
+        setYears([]);
+        setTotalGames(0);
       }
       setError('');
     } catch (err) {
@@ -204,7 +304,7 @@ export function LeagueScreen({ route, navigation }: Props) {
     try {
       await api.deleteGame(token, deleteGame.id);
       setDeleteGame(null);
-      await loadStats(selectedSport);
+      await loadStats(selectedSport, selectedYear);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not delete game');
       setDeleteGame(null);
@@ -223,6 +323,13 @@ export function LeagueScreen({ route, navigation }: Props) {
     });
   }
 
+  const allTimeGames = years.reduce((sum, item) => sum + item.games, 0) || totalGames;
+  const yearLabel = selectedYear ?? 'All time';
+  const standingsHint =
+    minGames > 1 && totalGames > 0
+      ? `${minGames}+ games to rank (5% of ${totalGames} games${selectedYear ? ` in ${selectedYear}` : ''})`
+      : undefined;
+
   return (
     <ScreenScaffold>
       <View style={styles.topBar}>
@@ -230,28 +337,47 @@ export function LeagueScreen({ route, navigation }: Props) {
           <Ionicons name="chevron-back" size={24} color={colors.primary} />
         </TouchableOpacity>
         <View style={styles.topBarSpacer} />
-        {canShare ? (
-          <TouchableOpacity
-            onPress={handleShare}
-            style={styles.shareButton}
-            accessibilityLabel="Share league"
-          >
-            <Ionicons name="share-outline" size={22} color={colors.primary} />
-          </TouchableOpacity>
-        ) : null}
-        {selectedSport && isMember ? (
-          <TouchableOpacity onPress={openAddGame} activeOpacity={0.85}>
-            <LinearGradient
-              colors={[...gradients.button]}
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              style={styles.addButton}
+        <View style={styles.topActions}>
+          {canEdit ? (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('EditLeague', {
+                  slug,
+                  name: leagueName,
+                  icon: league?.icon ?? null,
+                  visibility: league?.visibility,
+                  sportTemplateId: league?.sports?.[0]?.template_id,
+                })
+              }
+              style={styles.blueAction}
+              accessibilityLabel="Edit league"
             >
-              <Ionicons name="add" size={18} color="#fff" />
-              <Text style={styles.addButtonText}>Game</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        ) : null}
+              <Ionicons name="pencil" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          ) : null}
+          {canShare ? (
+            <TouchableOpacity
+              onPress={handleShare}
+              style={styles.blueAction}
+              accessibilityLabel="Share league"
+            >
+              <Ionicons name="share-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          ) : null}
+          {selectedSport && isMember ? (
+            <TouchableOpacity onPress={openAddGame} activeOpacity={0.85}>
+              <LinearGradient
+                colors={[...gradients.button]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={styles.addButton}
+              >
+                <Ionicons name="add" size={18} color="#fff" />
+                <Text style={styles.addButtonText}>Game</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
 
       <Text
@@ -311,9 +437,9 @@ export function LeagueScreen({ route, navigation }: Props) {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />
           }
-          contentContainerStyle={stats.length === 0 ? styles.emptyList : styles.list}
+          contentContainerStyle={totalGames === 0 ? styles.emptyList : styles.list}
         >
-          {stats.length === 0 ? (
+          {totalGames === 0 ? (
             <GlassCard style={styles.emptyCard}>
               {selectedSport ? (
                 <TemplateGlyph
@@ -343,19 +469,50 @@ export function LeagueScreen({ route, navigation }: Props) {
             </GlassCard>
           ) : (
             <>
+              <YearFilterRow
+                years={years}
+                selectedYear={selectedYear}
+                totalGames={allTimeGames}
+                onSelect={selectYear}
+              />
               {todayStats.length > 0 ? (
                 <CollapsibleSection title="Today's stats" count={todayStats.length}>
                   <StatsTable stats={todayStats} onPlayerPress={openPlayer} />
                 </CollapsibleSection>
               ) : null}
               <CollapsibleSection title="Standings" count={stats.length}>
-                <StatsTable
-                  stats={stats}
-                  showPlusMinus={false}
-                  onPlayerPress={openPlayer}
-                />
+                {standingsHint ? (
+                  <Text style={styles.sectionHint}>{standingsHint}</Text>
+                ) : null}
+                {stats.length > 0 ? (
+                  <StatsTable
+                    stats={stats}
+                    showPlusMinus={false}
+                    onPlayerPress={openPlayer}
+                  />
+                ) : (
+                  <Text style={styles.sectionEmpty}>
+                    No one has {minGames}+ games yet for {yearLabel.toLowerCase()}.
+                  </Text>
+                )}
               </CollapsibleSection>
-              <CollapsibleSection title="Games" count={games.length}>
+              {occasionalStats.length > 0 ? (
+                <CollapsibleSection
+                  title="Occasional players"
+                  count={occasionalStats.length}
+                  defaultOpen={false}
+                >
+                  <Text style={styles.sectionHint}>
+                    Under {minGames} games (5% threshold{selectedYear ? ` in ${selectedYear}` : ''})
+                  </Text>
+                  <StatsTable
+                    stats={occasionalStats}
+                    showPlusMinus={false}
+                    onPlayerPress={openPlayer}
+                  />
+                </CollapsibleSection>
+              ) : null}
+              <CollapsibleSection title="Games" count={gamesTotal}>
                 <GameList
                   games={games}
                   canEdit={!!canEdit}
@@ -363,6 +520,22 @@ export function LeagueScreen({ route, navigation }: Props) {
                   onEdit={openEditGame}
                   onDelete={setDeleteGame}
                 />
+                {hasMoreGames ? (
+                  <TouchableOpacity
+                    style={styles.loadMore}
+                    onPress={loadMoreGames}
+                    disabled={loadingMoreGames}
+                    activeOpacity={0.85}
+                  >
+                    {loadingMoreGames ? (
+                      <ActivityIndicator color={colors.primary} />
+                    ) : (
+                      <Text style={styles.loadMoreText}>
+                        Load more ({games.length} of {gamesTotal})
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                ) : null}
               </CollapsibleSection>
             </>
           )}
@@ -426,6 +599,11 @@ const styles = StyleSheet.create({
   topBarSpacer: {
     flex: 1,
   },
+  topActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   back: {
     width: 44,
     height: 44,
@@ -434,14 +612,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.35)',
   },
-  shareButton: {
+  blueAction: {
     width: 44,
     height: 44,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-    marginRight: spacing.sm,
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
   },
   leagueName: {
     fontSize: 26,
@@ -472,11 +649,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   addButton: {
+    height: 44,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 4,
     paddingHorizontal: spacing.md,
-    paddingVertical: 10,
     borderRadius: 12,
   },
   addButtonText: {
@@ -553,6 +731,32 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 16,
+  },
+  sectionHint: {
+    fontSize: 13,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
+    paddingHorizontal: 4,
+  },
+  sectionEmpty: {
+    fontSize: 14,
+    color: colors.textMuted,
+    textAlign: 'center',
+    paddingVertical: spacing.md,
+  },
+  loadMore: {
+    marginTop: spacing.sm,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.22)',
+  },
+  loadMoreText: {
+    color: colors.primaryDark,
+    fontWeight: '700',
+    fontSize: 15,
   },
   modalScrim: {
     flex: 1,

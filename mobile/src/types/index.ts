@@ -77,7 +77,17 @@ export type SportStats = {
   min_games: number;
   total_games: number;
   stats: PlayerStat[];
+  occasional_stats?: PlayerStat[];
+  years?: Array<{ year: string; games: number }>;
   today_stats?: PlayerStat[];
+};
+
+export type SportGamesPage = {
+  games: Game[];
+  total: number;
+  limit: number;
+  offset: number;
+  has_more: boolean;
 };
 
 export type PlayerProfile = {

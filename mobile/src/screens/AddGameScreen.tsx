@@ -97,7 +97,7 @@ export function AddGameScreen({ route, navigation }: Props) {
         api.getSportGames(sportId, token).catch(() => ({ games: [] as Array<{ winners: string[]; losers: string[] }> })),
         ...leagues.flatMap((league) =>
           (league.sports || []).map((sport) =>
-            api.getSportStats(sport.id, token, 1).catch(() => ({ stats: [] as Array<{ player: string }> })),
+            api.getSportStats(sport.id, token, { minGames: 1 }).catch(() => ({ stats: [] as Array<{ player: string }> })),
           ),
         ),
       ]);
