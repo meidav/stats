@@ -320,6 +320,10 @@ export function LeagueScreen({ route, navigation }: Props) {
       playerName,
       sportName: selectedSport.name,
       leagueName,
+      leagueSlug: slug,
+      sportTemplateId: selectedSport.template_id,
+      sportCategory: selectedSport.category,
+      leagueIcon: league?.icon ?? null,
     });
   }
 

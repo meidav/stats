@@ -1,5 +1,5 @@
 {% extends "marketing_base.html" %}
-{% from "marketing_league_macros.html" import pair_table, year_picker %}
+{% from "marketing_league_macros.html" import pair_table, year_picker, sport_mark %}
 {% block title %}{{ player.player }} | {{ league.name }} | PlayTracker{% endblock %}
 {% block nav_leagues %}is-active{% endblock %}
 {% block body_class %}mkt-app-page{% endblock %}
@@ -20,10 +20,25 @@
     </a>
 
     <div class="mkt-player-hero">
-        <div class="mkt-avatar" aria-hidden="true">{{ player.initials }}</div>
+        <div class="mkt-avatar" aria-hidden="true">
+            {% if player.avatar_url %}
+            <img src="{{ player.avatar_url }}" alt="">
+            {% else %}
+            {{ player.initials }}
+            {% endif %}
+        </div>
         <div class="mkt-player-hero-text">
             <h1>{{ player.player }}</h1>
-            <p class="mkt-player-sub">{{ league.name }} · {{ sport.name }}</p>
+            <div class="mkt-player-pills">
+                <a class="mkt-profile-pill" href="{{ league_url }}">
+                    {{ sport_mark(league_mark) }}
+                    <span>{{ league.name }}</span>
+                </a>
+                <span class="mkt-profile-pill">
+                    {{ sport_mark(sport) }}
+                    <span>{{ sport.name }}</span>
+                </span>
+            </div>
         </div>
     </div>
 

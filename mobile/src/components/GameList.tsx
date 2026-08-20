@@ -42,7 +42,7 @@ export function GameList({ games, canEdit, winLoss, onEdit, onDelete }: Props) {
           <View style={[styles.team, styles.winner]}>
             <View style={styles.players}>
               {game.winners.map((name) => (
-                <Text key={name} style={styles.player} numberOfLines={1}>
+                <Text key={name} style={styles.player}>
                   {name}
                 </Text>
               ))}
@@ -55,7 +55,7 @@ export function GameList({ games, canEdit, winLoss, onEdit, onDelete }: Props) {
           <View style={[styles.team, styles.loser]}>
             <View style={styles.players}>
               {game.losers.map((name) => (
-                <Text key={name} style={styles.playerLoser} numberOfLines={1}>
+                <Text key={name} style={styles.playerLoser}>
                   {name}
                 </Text>
               ))}

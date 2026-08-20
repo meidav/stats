@@ -46,3 +46,20 @@ export async function shareLeague(
     await Share.share({ title: league.name, message });
   }
 }
+
+export function playerWebUrl(slug: string, playerName: string, sportId: number) {
+  return `${APP_URL}/l/${encodeURIComponent(slug)}/p/${encodeURIComponent(playerName)}?sport=${sportId}`;
+}
+
+export async function sharePlayerProfile(options: {
+  playerName: string;
+  leagueName: string;
+  url: string;
+}) {
+  const title = `${options.playerName} stats in ${options.leagueName} on ${APP_NAME}`;
+  if (Platform.OS === 'ios') {
+    await Share.share({ title, message: title, url: options.url });
+    return;
+  }
+  await Share.share({ title, message: `${title}\n${options.url}` });
+}

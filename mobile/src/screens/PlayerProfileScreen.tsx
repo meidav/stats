@@ -1,30 +1,44 @@
+import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GlassCard } from '../components/GlassCard';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { LeagueIcon } from '../components/LeagueIcon';
 import { ScreenScaffold } from '../components/ScreenScaffold';
+import { TemplateGlyph } from '../components/TemplateGlyph';
 import { colors, spacing } from '../constants/theme';
 import { formatPlusMinus, initials, winPctColor } from '../lib/names';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { sharePlayerProfile } from '../lib/leagueLinks';
 import type { PlayerProfile, PlayerStat } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PlayerProfile'>;
 
 export function PlayerProfileScreen({ route, navigation }: Props) {
-  const { sportId, playerName, sportName, leagueName } = route.params;
+  const {
+    sportId,
+    playerName,
+    sportName,
+    leagueName,
+    leagueSlug,
+    sportTemplateId,
+    sportCategory,
+    leagueIcon,
+  } = route.params;
   const { token } = useAuth();
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,6 +70,17 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
     }, [sportId, playerName, token]),
   );
 
+  const displayName = profile?.player || playerName;
+  const displayLeague = profile?.league?.name || leagueName;
+  const displaySport = profile?.sport?.name || sportName;
+  const slug = profile?.league?.slug || leagueSlug;
+  const icon = profile?.league?.icon ?? leagueIcon ?? null;
+  const templateId = profile?.sport?.template_id || sportTemplateId;
+  const category = profile?.sport?.category || sportCategory;
+  const shareUrl = profile?.share_url || null;
+  const canShare = Boolean(shareUrl);
+  const canEdit = Boolean(profile?.can_edit);
+
   const streakColor = profile?.streak.endsWith('W')
     ? colors.win
     : profile?.streak.endsWith('L')
@@ -66,14 +91,64 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
     navigation.push('PlayerProfile', {
       sportId,
       playerName: name,
-      sportName,
-      leagueName,
+      sportName: displaySport,
+      leagueName: displayLeague,
+      leagueSlug: slug,
+      sportTemplateId: templateId,
+      sportCategory: category,
+      leagueIcon: icon,
     });
+  }
+
+  async function handleShare() {
+    if (!shareUrl) return;
+    try {
+      await sharePlayerProfile({
+        playerName: displayName,
+        leagueName: displayLeague,
+        url: shareUrl,
+      });
+    } catch {
+      // Share sheet cancelled or unavailable.
+    }
   }
 
   return (
     <ScreenScaffold>
-      <ScreenHeader title={playerName} onBack={() => navigation.goBack()} />
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back} accessibilityLabel="Back">
+          <Ionicons name="chevron-back" size={24} color={colors.primary} />
+        </TouchableOpacity>
+        <View style={styles.topBarSpacer} />
+        <View style={styles.topActions}>
+          {canEdit ? (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('EditPlayer', {
+                  sportId,
+                  playerName: displayName,
+                  avatarUrl: profile?.avatar_url ?? null,
+                  sportName: displaySport,
+                  leagueName: displayLeague,
+                  leagueSlug: slug,
+                  sportTemplateId: templateId,
+                  sportCategory: category,
+                  leagueIcon: icon,
+                })
+              }
+              style={styles.blueAction}
+              accessibilityLabel="Edit player"
+            >
+              <Ionicons name="pencil" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          ) : null}
+          {canShare ? (
+            <TouchableOpacity onPress={handleShare} style={styles.blueAction} accessibilityLabel="Share player">
+              <Ionicons name="share-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      </View>
       <ErrorBanner message={error} />
       {loading ? (
         <ActivityIndicator style={styles.loader} color={colors.primary} />
@@ -81,13 +156,46 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.hero}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials(profile.player)}</Text>
+              {profile.avatar_url ? (
+                <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarText}>{initials(profile.player)}</Text>
+              )}
             </View>
             <View style={styles.heroText}>
               <Text style={styles.name}>{profile.player}</Text>
-              <Text style={styles.subtitle}>
-                {leagueName} · {sportName}
-              </Text>
+              <View style={styles.pills}>
+                {slug ? (
+                  <TouchableOpacity
+                    style={styles.pill}
+                    onPress={() => navigation.navigate('League', { slug, name: displayLeague })}
+                    activeOpacity={0.85}
+                  >
+                    <LeagueIcon id={icon} size={16} />
+                    <Text style={styles.pillText} numberOfLines={1}>
+                      {displayLeague}
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.pill}>
+                    <LeagueIcon id={icon} size={16} />
+                    <Text style={styles.pillText} numberOfLines={1}>
+                      {displayLeague}
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.pill}>
+                  {templateId ? (
+                    <TemplateGlyph
+                      template={{ id: templateId, category: category || 'custom' }}
+                      size={16}
+                    />
+                  ) : null}
+                  <Text style={styles.pillText} numberOfLines={1}>
+                    {displaySport}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
 
@@ -175,6 +283,12 @@ function PairTable({
   rows: PlayerStat[];
   onPress: (name: string) => void;
 }) {
+  const { width } = useWindowDimensions();
+  const compact = width < 640;
+  const cellSize = compact ? 13 : 15;
+  const headerSize = compact ? 10 : 12;
+  const statWidth = compact ? 28 : 36;
+  const rowPadH = compact ? 10 : 16;
   if (rows.length === 0) return null;
   return (
     <View style={styles.pairWrap}>
@@ -182,28 +296,28 @@ function PairTable({
         {title}
       </Text>
       <GlassCard style={styles.pairCard}>
-        <View style={styles.pairHeader}>
-          <Text style={[styles.pairTh, styles.pairPlayer]}>Player</Text>
-          <Text style={[styles.pairTh, { color: colors.neutral }]}>%</Text>
-          <Text style={[styles.pairTh, { color: colors.win }]}>W</Text>
-          <Text style={[styles.pairTh, { color: colors.loss }]}>L</Text>
-          <Text style={[styles.pairTh, { color: colors.neutral }]}>G</Text>
+        <View style={[styles.pairHeader, { paddingHorizontal: rowPadH }]}>
+          <Text style={[styles.pairTh, styles.pairPlayer, { fontSize: headerSize }]}>Player</Text>
+          <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>%</Text>
+          <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.win }]}>W</Text>
+          <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.loss }]}>L</Text>
+          <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>G</Text>
         </View>
         {rows.map((row, index) => (
           <TouchableOpacity
             key={row.player}
-            style={[styles.pairRow, index % 2 === 1 && styles.pairAlt]}
+            style={[styles.pairRow, { paddingHorizontal: rowPadH }, index % 2 === 1 && styles.pairAlt]}
             onPress={() => onPress(row.player)}
           >
-            <Text style={[styles.pairPlayer, styles.pairName]} numberOfLines={1}>
+            <Text style={[styles.pairPlayer, styles.pairName, { fontSize: cellSize }]}>
               {row.player}
             </Text>
-            <Text style={[styles.pairTd, { color: winPctColor(row.win_pct, colors) }]}>
+            <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: winPctColor(row.win_pct, colors) }]}>
               {(row.win_pct * 100).toFixed(0)}
             </Text>
-            <Text style={[styles.pairTd, { color: colors.win }]}>{row.wins}</Text>
-            <Text style={[styles.pairTd, { color: colors.loss }]}>{row.losses}</Text>
-            <Text style={[styles.pairTd, { color: colors.neutral }]}>{row.games}</Text>
+            <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.win }]}>{row.wins}</Text>
+            <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.loss }]}>{row.losses}</Text>
+            <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.neutral }]}>{row.games}</Text>
           </TouchableOpacity>
         ))}
       </GlassCard>
@@ -212,6 +326,37 @@ function PairTable({
 }
 
 const styles = StyleSheet.create({
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  topBarSpacer: {
+    flex: 1,
+  },
+  topActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  back: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
+  },
+  blueAction: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+  },
   loader: {
     marginTop: spacing.xl,
   },
@@ -232,6 +377,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 72,
+    height: 72,
   },
   avatarText: {
     color: '#fff',
@@ -240,16 +390,36 @@ const styles = StyleSheet.create({
   },
   heroText: {
     flex: 1,
+    minWidth: 0,
   },
   name: {
     fontSize: 26,
     fontWeight: '800',
     color: colors.text,
   },
-  subtitle: {
-    marginTop: 4,
-    color: colors.textMuted,
-    fontSize: 14,
+  pills: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 10,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    maxWidth: '100%',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(219, 234, 254, 0.62)',
+    borderWidth: 1,
+    borderColor: 'rgba(147, 197, 253, 0.95)',
+  },
+  pillText: {
+    color: '#1E3A8A',
+    fontWeight: '700',
+    fontSize: 13,
+    flexShrink: 1,
   },
   kpiGrid: {
     flexDirection: 'row',
@@ -324,18 +494,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
   },
   pairTh: {
-    width: 32,
     textAlign: 'right',
-    fontSize: 12,
     fontWeight: '800',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
   },
   pairTd: {
-    width: 32,
     textAlign: 'right',
     fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+    flexShrink: 0,
   },
   pairPlayer: {
     flex: 1,
+    minWidth: 0,
+    paddingRight: 6,
+    textAlign: 'left',
   },
   pairName: {
     color: colors.primary,

@@ -106,4 +106,9 @@ export type PlayerProfile = {
   last_results: string[];
   partners: PlayerStat[];
   opponents: PlayerStat[];
+  avatar_url?: string | null;
+  can_edit?: boolean;
+  share_url?: string | null;
+  league?: Pick<League, 'id' | 'name' | 'slug' | 'visibility' | 'icon' | 'share_url'>;
+  sport?: Pick<Sport, 'id' | 'name' | 'template_id' | 'category'>;
 };

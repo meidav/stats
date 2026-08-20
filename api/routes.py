@@ -45,12 +45,20 @@ from api.league_db import (
     league_icon_usage,
     league_share_url,
     league_to_dict,
+    player_share_url,
     search_public_leagues,
     sport_to_dict,
     update_league,
     delete_league,
     user_can_access_league,
     user_is_league_member,
+)
+from api.player_profiles import (
+    clear_player_photo,
+    get_player_photo_url,
+    player_exists_in_sport,
+    rename_player_in_sport,
+    save_player_photo,
 )
 from api.sport_templates import (
     TEMPLATE_CATEGORIES,
@@ -61,6 +69,24 @@ from api.sport_templates import (
 )
 from api.legacy_vb_import import import_legacy_doubles_vb
 from api.stats_service import compute_player_stats, compute_score_hints, compute_sport_stats
+
+
+def _player_payload(stats, league, sport, user_id=None):
+    name = stats.get("player")
+    payload = dict(stats)
+    payload["avatar_url"] = get_player_photo_url(sport["id"], name)
+    payload["can_edit"] = bool(user_id and user_can_edit_league(user_id, league["id"]))
+    payload["share_url"] = player_share_url(league, name, sport["id"])
+    payload["league"] = {
+        "id": league["id"],
+        "name": league["name"],
+        "slug": league["slug"],
+        "visibility": league.get("visibility"),
+        "icon": league.get("icon"),
+        "share_url": league_share_url(league),
+    }
+    payload["sport"] = sport_to_dict(sport)
+    return payload
 
 
 def register_routes(api):
@@ -521,8 +547,44 @@ def register_routes(api):
             return jsonify({"error": "access denied"}), 403
 
         year = request.args.get("year")
-        stats = compute_player_stats(sport_id, unquote(player_name), year=year)
-        return jsonify(stats)
+        name = unquote(player_name).strip()
+        stats = compute_player_stats(sport_id, name, year=year)
+        return jsonify(_player_payload(stats, league, sport, user_id))
+
+    @api.route("/sports/<int:sport_id>/players/<path:player_name>", methods=["PATCH"])
+    @jwt_required()
+    def edit_player_profile(sport_id, player_name):
+        user_id = int(get_jwt_identity())
+        sport = get_sport_by_id(sport_id)
+        if not sport:
+            return jsonify({"error": "sport not found"}), 404
+
+        league = get_league_by_id(sport["league_id"])
+        if not league:
+            return jsonify({"error": "league not found"}), 404
+        if not user_can_edit_league(user_id, sport["league_id"]):
+            return jsonify({"error": "permission denied"}), 403
+
+        current_name = unquote(player_name).strip()
+        if not player_exists_in_sport(sport_id, current_name):
+            return jsonify({"error": "player not found"}), 404
+
+        data = request.get_json(silent=True) or {}
+        next_name = current_name
+        if "name" in data and data.get("name") is not None:
+            next_name = str(data.get("name") or "").strip()
+        try:
+            if next_name != current_name:
+                next_name = rename_player_in_sport(sport_id, current_name, next_name)
+            if data.get("photo"):
+                save_player_photo(sport_id, next_name, data.get("photo"))
+            elif data.get("photo") is None and "photo" in data:
+                clear_player_photo(sport_id, next_name)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+        stats = compute_player_stats(sport_id, next_name)
+        return jsonify(_player_payload(stats, league, sport, user_id))
 
     @api.route("/games/<int:game_id>", methods=["PUT"])
     @jwt_required()

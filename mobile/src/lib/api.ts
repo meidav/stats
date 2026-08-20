@@ -157,10 +157,36 @@ export const api = {
     );
   },
 
-  getPlayerStats: (sportId: number, playerName: string, token?: string | null) =>
+  getPlayerStats: (
+    sportId: number,
+    playerName: string,
+    token?: string | null,
+    options?: { year?: string | null },
+  ) => {
+    const params = new URLSearchParams();
+    if (options?.year) {
+      params.set('year', options.year);
+    }
+    const query = params.toString();
+    return request<import('../types').PlayerProfile>(
+      `/sports/${sportId}/players/${encodeURIComponent(playerName)}${query ? `?${query}` : ''}`,
+      { token },
+    );
+  },
+
+  updatePlayer: (
+    token: string,
+    sportId: number,
+    playerName: string,
+    payload: { name?: string; photo?: string | null },
+  ) =>
     request<import('../types').PlayerProfile>(
       `/sports/${sportId}/players/${encodeURIComponent(playerName)}`,
-      { token },
+      {
+        method: 'PATCH',
+        token,
+        body: payload,
+      },
     ),
 
   getMyPlayers: (token: string) =>

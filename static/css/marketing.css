@@ -1348,27 +1348,46 @@ a:hover { text-decoration: underline; }
 
 .mkt-player-hero {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
   gap: 16px;
+  width: 100%;
   margin: 0 0 24px;
 }
 
-.mkt-avatar {
+.mkt-player-hero .mkt-avatar {
   width: 72px;
   height: 72px;
   border-radius: 36px;
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
+  overflow: hidden;
   background: #2563eb;
   color: #fff;
   font-size: 24px;
   font-weight: 800;
 }
 
+.mkt-player-hero .mkt-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mkt-player-hero-text {
+  min-width: 0;
+  flex: 1;
+}
+
 .mkt-player-hero-text h1 {
   margin: 0;
   text-align: left;
-  font-size: 26px;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
 }
 
 .mkt-player-sub {
@@ -1377,11 +1396,77 @@ a:hover { text-decoration: underline; }
   font-size: 14px;
 }
 
+.mkt-player-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.mkt-profile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.62);
+  border: 1px solid rgba(147, 197, 253, 0.95);
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+a.mkt-profile-pill:hover {
+  text-decoration: none;
+  background: rgba(219, 234, 254, 0.9);
+}
+
+.mkt-profile-pill .mkt-sport-mark,
+.mkt-profile-pill .mkt-sport-mark-text {
+  width: 16px;
+  height: 16px;
+  font-size: 14px;
+}
+
+.mkt-player-page .mkt-cta-row,
+.mkt-player-page .mkt-soon {
+  text-align: center;
+}
+
+.mkt-player-page .mkt-soon {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 720px) {
+  .mkt-player-hero {
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .mkt-player-hero .mkt-avatar {
+    width: 112px;
+    height: 112px;
+    border-radius: 56px;
+    font-size: 36px;
+  }
+
+  .mkt-player-hero-text h1 {
+    font-size: 2.6rem;
+  }
+}
+
 .mkt-kpi-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 0 0 24px;
+}
+
+.mkt-player-page .mkt-kpi-grid {
+  max-width: 36rem;
 }
 
 .mkt-kpi {

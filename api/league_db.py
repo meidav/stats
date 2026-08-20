@@ -117,6 +117,18 @@ def create_leagues_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_sports_league_id ON sports(league_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_league_games_sport_id ON league_games(sport_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_league_games_league_id ON league_games(league_id)")
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS sport_player_profiles (
+                sport_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                photo_filename TEXT,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (sport_id, name),
+                FOREIGN KEY (sport_id) REFERENCES sports(id)
+            )
+            """
+        )
         _ensure_column(cursor, "leagues", "focus", "TEXT NOT NULL DEFAULT 'mixed'")
         _ensure_column(cursor, "leagues", "icon", "TEXT")
 
@@ -360,6 +372,15 @@ def league_share_url(league):
     if not league_is_linkable(league) or not league.get("slug"):
         return None
     return f"{APP_URL}/l/{league['slug']}"
+
+
+def player_share_url(league, player_name, sport_id):
+    if not league_is_linkable(league) or not league.get("slug") or not player_name:
+        return None
+    from urllib.parse import quote
+
+    encoded = quote(str(player_name), safe="")
+    return f"{APP_URL}/l/{league['slug']}/p/{encoded}?sport={sport_id}"
 
 
 def user_is_league_member(user_id, league):

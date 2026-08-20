@@ -1,3 +1,5 @@
+import type { Sport } from '../types';
+
 export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
@@ -36,5 +38,20 @@ export type RootStackParamList = {
     playerName: string;
     sportName: string;
     leagueName: string;
+    leagueSlug?: string;
+    sportTemplateId?: string;
+    sportCategory?: Sport['category'];
+    leagueIcon?: string | null;
+  };
+  EditPlayer: {
+    sportId: number;
+    playerName: string;
+    avatarUrl?: string | null;
+    sportName: string;
+    leagueName: string;
+    leagueSlug?: string;
+    sportTemplateId?: string;
+    sportCategory?: Sport['category'];
+    leagueIcon?: string | null;
   };
 };

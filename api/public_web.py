@@ -14,9 +14,11 @@ from api.league_db import (
     search_public_leagues,
     sport_to_dict,
 )
+from api.player_profiles import get_player_photo_url
 from api.stats_service import compute_player_stats, compute_sport_stats
 from api.web_present import (
     annotate_stat_rows,
+    league_mark,
     league_path,
     present_games,
     present_player,
@@ -184,12 +186,15 @@ def register_public_web(app):
 
         payload = league_to_dict(league)
         sport_payload = with_sport_glyph(sport_to_dict(sport))
+        presented = present_player(profile, league["slug"], sport["id"], year=year)
+        presented["avatar_url"] = get_player_photo_url(sport["id"], name, absolute=False)
         share_url = league_share_url(league) or f"{APP_URL}/l/{league['slug']}"
         return render_template(
             "marketing_player.html",
             league=payload,
             sport=sport_payload,
-            player=present_player(profile, league["slug"], sport["id"], year=year),
+            league_mark=league_mark(payload.get("icon"), sport_payload),
+            player=presented,
             league_url=league_path(league["slug"], sport["id"], year),
             years=years,
             selected_year=year,
