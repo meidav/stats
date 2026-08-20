@@ -217,20 +217,20 @@ export function HomeScreen({ navigation }: Props) {
             const gameCount = item.game_count ?? 0;
             const gamesLabel = gameCount === 1 ? '1 game' : `${gameCount} games`;
             return (
-              <GlassCard style={styles.leagueCard}>
-                <View style={styles.leagueRow}>
-                  <TouchableOpacity
-                    style={styles.leagueMain}
-                    activeOpacity={0.85}
-                    onPress={() =>
-                      navigation.navigate('League', {
-                        slug: item.slug,
-                        name: item.name,
-                        role: item.role,
-                      })
-                    }
-                  >
-                    <View style={styles.iconCol} accessibilityLabel={gamesLabel}>
+              <View style={styles.leagueCardWrap}>
+                <GlassCard style={styles.leagueCard}>
+                  <View style={styles.leagueRow}>
+                    <TouchableOpacity
+                      style={styles.leagueMain}
+                      activeOpacity={0.85}
+                      onPress={() =>
+                        navigation.navigate('League', {
+                          slug: item.slug,
+                          name: item.name,
+                          role: item.role,
+                        })
+                      }
+                    >
                       {displayIcon ? (
                         <LeagueIcon id={displayIcon} size={24} />
                       ) : sport ? (
@@ -244,44 +244,52 @@ export function HomeScreen({ navigation }: Props) {
                       ) : (
                         <LeagueIcon id="trophy" size={24} />
                       )}
-                      <Text
-                        style={[
-                          styles.gamesUnderIcon,
-                          gameCount === 0 && styles.gamesUnderIconEmpty,
-                        ]}
-                      >
-                        {gameCount}
-                      </Text>
-                    </View>
-                    <View style={styles.leagueCopy}>
-                      <Text style={styles.cardTitle} numberOfLines={2}>
-                        {item.name}
-                      </Text>
-                      <Text style={styles.cardMeta} numberOfLines={1}>
-                        {sport?.name || 'No sport yet'}
-                        {' · '}
-                        {item.visibility}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                  {canEdit ? (
-                    <IconActionRow
-                      onEdit={() =>
-                        navigation.navigate('EditLeague', {
-                          slug: item.slug,
-                          name: item.name,
-                          icon: item.icon ?? null,
-                          visibility: item.visibility,
-                          sportTemplateId: sport?.template_id,
-                        })
-                      }
-                      onDelete={() => openDelete(item)}
-                      editLabel={`Edit ${item.name}`}
-                      deleteLabel={`Delete ${item.name}`}
-                    />
-                  ) : null}
+                      <View style={styles.leagueCopy}>
+                        <Text style={styles.cardTitle} numberOfLines={2}>
+                          {item.name}
+                        </Text>
+                        <Text style={styles.cardMeta} numberOfLines={1}>
+                          {sport?.name || 'No sport yet'}
+                          {' · '}
+                          {item.visibility}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                    {canEdit ? (
+                      <IconActionRow
+                        onEdit={() =>
+                          navigation.navigate('EditLeague', {
+                            slug: item.slug,
+                            name: item.name,
+                            icon: item.icon ?? null,
+                            visibility: item.visibility,
+                            sportTemplateId: sport?.template_id,
+                          })
+                        }
+                        onDelete={() => openDelete(item)}
+                        editLabel={`Edit ${item.name}`}
+                        deleteLabel={`Delete ${item.name}`}
+                      />
+                    ) : null}
+                  </View>
+                </GlassCard>
+                <View
+                  style={[
+                    styles.gamesBadge,
+                    gameCount === 0 && styles.gamesBadgeEmpty,
+                  ]}
+                  accessibilityLabel={gamesLabel}
+                >
+                  <Text
+                    style={[
+                      styles.gamesBadgeText,
+                      gameCount === 0 && styles.gamesBadgeTextEmpty,
+                    ]}
+                  >
+                    {gameCount}
+                  </Text>
                 </View>
-              </GlassCard>
+              </View>
             );
           }}
         />
@@ -403,6 +411,7 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingHorizontal: spacing.lg,
+    paddingTop: 8,
     paddingBottom: spacing.lg,
   },
   emptyList: {
@@ -448,10 +457,13 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 15,
   },
+  leagueCardWrap: {
+    position: 'relative',
+    marginBottom: 20,
+  },
   leagueCard: {
     paddingVertical: 12,
     paddingHorizontal: 12,
-    marginBottom: spacing.md,
   },
   leagueRow: {
     flexDirection: 'row',
@@ -464,22 +476,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     minWidth: 0,
-  },
-  iconCol: {
-    width: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-  },
-  gamesUnderIcon: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: colors.primaryDark,
-    fontVariant: ['tabular-nums'],
-    lineHeight: 13,
-  },
-  gamesUnderIconEmpty: {
-    color: colors.textMuted,
   },
   leagueCopy: {
     flex: 1,
@@ -497,6 +493,38 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 13,
     textTransform: 'capitalize',
+  },
+  gamesBadge: {
+    position: 'absolute',
+    top: -7,
+    right: -4,
+    minWidth: 22,
+    height: 22,
+    paddingHorizontal: 6,
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 252, 248, 0.95)',
+    shadowColor: '#1E3A8A',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  gamesBadgeEmpty: {
+    backgroundColor: 'rgba(100, 116, 139, 0.85)',
+  },
+  gamesBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+    lineHeight: 13,
+  },
+  gamesBadgeTextEmpty: {
+    color: '#fff',
   },
   footer: {
     flexDirection: 'row',
