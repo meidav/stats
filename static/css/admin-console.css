@@ -26,6 +26,9 @@ body {
   line-height: 1.35;
   background: linear-gradient(180deg, var(--ac-sky) 0%, var(--ac-lilac) 52%, var(--ac-peach) 100%);
   background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 a { color: var(--ac-violet); text-decoration: none; }
@@ -138,7 +141,34 @@ a:hover { text-decoration: underline; }
 }
 .ac-signout:hover { background: rgba(255,255,255,0.08); }
 
-.ac-main { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+.ac-main { flex: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+
+.ac-footer {
+  margin-top: 24px;
+  padding: 22px 24px max(40px, env(safe-area-inset-bottom));
+  background: var(--ac-peach);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.ac-footer-copy {
+  margin: 0;
+  text-align: center;
+  color: var(--ac-ink);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.55;
+  padding: 0 8px;
+}
+
+.ac-footer-copy a {
+  color: var(--ac-ink);
+  font-weight: 700;
+}
+
+.ac-footer-dot {
+  margin: 0 8px;
+  color: var(--ac-muted);
+}
 
 .ac-page-head {
   display: flex;
@@ -220,9 +250,46 @@ h1 {
   border: 1px solid var(--ac-line);
   background: #fffaf5;
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   font: inherit;
   color: var(--ac-ink);
+}
+
+.ac-password {
+  position: relative;
+  display: block;
+}
+
+.ac-password input {
+  padding-right: 44px;
+}
+
+.ac-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ac-violet);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.ac-password-toggle:hover {
+  background: rgba(196, 181, 253, 0.35);
+  color: var(--ac-purple);
+}
+
+.ac-password-toggle svg {
+  width: 18px;
+  height: 18px;
 }
 
 .ac-filters select { width: auto; min-width: 140px; }
@@ -443,12 +510,16 @@ h1 {
 
 .ac-facts dd { margin: 3px 0 0; font-weight: 650; }
 
-.ac-safety {
-  background: rgba(253, 186, 116, 0.45);
-  border: 1px solid rgba(91, 33, 182, 0.18);
+.ac-safety,
+.ac-notice {
+  background: #fdba74;
+  color: #3b0764;
+  border: 1px solid rgba(91, 33, 182, 0.28);
   border-radius: 12px;
   padding: 10px 12px;
-  font-size: 0.82rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin: 0;
 }
 
 .ac-section-title {
@@ -485,22 +556,43 @@ h1 {
 .ac-year-links a { font-size: 0.82rem; font-weight: 650; }
 .ac-year-links a.is-active { color: var(--ac-purple); text-decoration: underline; }
 
-.ac-login-page {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+.ac-login-page,
+.ac-auth-page .ac-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
 }
 
-.ac-login-card {
-  width: min(420px, 100%);
+.ac-login-card,
+.ac-modal {
+  width: min(440px, 100%);
   background: var(--ac-paper);
   border: 1px solid var(--ac-line);
   border-radius: 22px;
   padding: 28px 24px;
   display: flex;
   flex-direction: column;
+  gap: 14px;
+}
+
+.ac-modal h1 {
+  text-align: center;
+}
+
+.ac-modal .ac-kicker {
+  text-align: center;
+}
+
+.ac-modal form {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+}
+
+.ac-modal .ac-btn-primary {
+  width: 100%;
+  padding: 12px 16px;
 }
 
 .ac-login-brand { text-align: center; }
@@ -522,7 +614,13 @@ h1 {
   color: var(--ac-violet);
 }
 .ac-login-note { margin: 0; color: var(--ac-muted); font-size: 0.84rem; text-align: center; }
-.ac-field span { display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 4px; color: var(--ac-muted); }
+.ac-field > span:not(.ac-password) {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--ac-muted);
+}
 .ac-alert {
   margin: 0;
   background: #ffe4e6;
@@ -537,4 +635,8 @@ h1 {
   .ac-page-head { flex-direction: column; align-items: flex-start; }
   .ac-header-bar { flex-wrap: wrap; }
   .ac-nav { order: 3; width: 100%; }
+  .ac-footer {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
 }

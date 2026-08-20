@@ -43,5 +43,36 @@
     <main class="ac-main">
         {% block content %}{% endblock %}
     </main>
+    <footer class="ac-footer">
+        <p class="ac-footer-copy">
+            &copy; {{ current_year }}
+            <a href="https://arbelindustries.com" rel="noopener">Arbel Industries</a>.
+            All rights reserved.
+            <span class="ac-footer-dot">·</span>
+            <a href="/privacy">Privacy</a>
+            <span class="ac-footer-dot">·</span>
+            <a href="/terms">Terms</a>
+        </p>
+    </footer>
+    <script>
+    (function () {
+        var eye = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        var eyeOff = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        document.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-password-toggle]');
+            if (!button) return;
+            var wrap = button.closest('.ac-password');
+            var input = wrap && wrap.querySelector('input');
+            var icon = button.querySelector('svg');
+            if (!input || !icon) return;
+            var hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            icon.innerHTML = hidden ? eyeOff : eye;
+            button.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
+            button.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+        });
+    })();
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
