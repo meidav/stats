@@ -20,23 +20,18 @@ import { upsertCachedLeague } from '../lib/leagueCache';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import type { LeagueFocus } from '../lib/focus';
+import { hintForVisibility, VISIBILITY_OPTIONS, type LeagueVisibility } from '../lib/visibility';
 import type { SportTemplate } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateLeague'>;
-
-const VISIBILITY_OPTIONS = [
-  { id: 'public', label: 'Public' },
-  { id: 'unlisted', label: 'Unlisted' },
-  { id: 'private', label: 'Private' },
-] as const;
 
 export function CreateLeagueScreen({ navigation }: Props) {
   const { token } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
   const nameY = useRef(0);
   const [name, setName] = useState('');
-  const [visibility, setVisibility] = useState<'public' | 'private' | 'unlisted'>('public');
+  const [visibility, setVisibility] = useState<LeagueVisibility>('public');
   const [focus, setFocus] = useState<LeagueFocus>('sports');
   const [templates, setTemplates] = useState<SportTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState('beach_volleyball_2s');
@@ -187,6 +182,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
             </TouchableOpacity>
           ))}
         </View>
+        <Text style={styles.hint}>{hintForVisibility(visibility)}</Text>
 
         <Text style={styles.label}>{copy.firstGameLabel}</Text>
         <View style={styles.grid}>

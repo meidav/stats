@@ -24,6 +24,7 @@ import { BrandLockup } from '../components/BrandLockup';
 import { APP_TAGLINE } from '../constants/brand';
 import { colors, gradients, spacing } from '../constants/theme';
 import { copyForFocus, focusFromLeagues } from '../lib/focus';
+import { selectedIconForLeague } from '../lib/leagueIcons';
 import { useAuth } from '../lib/auth';
 import { ApiError, api } from '../lib/api';
 import { loadCachedLeagues, removeCachedLeague, saveCachedLeagues } from '../lib/leagueCache';
@@ -139,7 +140,7 @@ export function HomeScreen({ navigation }: Props) {
       }
     >
       <View style={styles.hero}>
-        <BrandLockup size={120} />
+        <BrandLockup size={96} />
         <Text style={styles.tagline}>{APP_TAGLINE}</Text>
       </View>
 
@@ -212,6 +213,7 @@ export function HomeScreen({ navigation }: Props) {
           renderItem={({ item }) => {
             const sport = item.sports?.[0];
             const canEdit = item.role === 'owner' || item.role === 'admin';
+            const displayIcon = selectedIconForLeague(item);
             return (
               <GlassCard style={styles.leagueCard}>
                 <View style={styles.leagueRow}>
@@ -226,8 +228,8 @@ export function HomeScreen({ navigation }: Props) {
                       })
                     }
                   >
-                    {item.icon ? (
-                      <LeagueIcon id={item.icon} size={26} />
+                    {displayIcon ? (
+                      <LeagueIcon id={displayIcon} size={26} />
                     ) : sport ? (
                       <TemplateGlyph
                         template={{
@@ -240,10 +242,8 @@ export function HomeScreen({ navigation }: Props) {
                       <LeagueIcon id="trophy" size={26} />
                     )}
                     <View style={styles.leagueCopy}>
-                      <Text style={styles.cardTitle} numberOfLines={1}>
-                        {item.name}
-                      </Text>
-                      <Text style={styles.cardMeta}>
+                      <Text style={styles.cardTitle}>{item.name}</Text>
+                      <Text style={styles.cardMeta} numberOfLines={1}>
                         {sport?.name || 'No games yet'}
                         {' · '}
                         {item.visibility}
@@ -257,6 +257,8 @@ export function HomeScreen({ navigation }: Props) {
                           slug: item.slug,
                           name: item.name,
                           icon: item.icon ?? null,
+                          visibility: item.visibility,
+                          sportTemplateId: sport?.template_id,
                         })
                       }
                       onDelete={() => openDelete(item)}
@@ -369,13 +371,13 @@ const styles = StyleSheet.create({
   },
   tagline: {
     marginTop: spacing.sm,
-    fontSize: 16,
+    fontSize: 15,
     color: colors.text,
     fontWeight: '600',
     textAlign: 'center',
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '800',
     color: colors.text,
     textAlign: 'center',
@@ -383,7 +385,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   loader: {
-    marginTop: spacing.xl,
+    marginTop: spacing.lg,
   },
   list: {
     paddingHorizontal: spacing.lg,
@@ -433,32 +435,36 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   leagueCard: {
-    padding: spacing.lg,
+    padding: spacing.md,
     marginBottom: spacing.md,
   },
   leagueRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: spacing.sm,
   },
   leagueMain: {
     flex: 1,
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: spacing.md,
+    paddingTop: 2,
   },
   leagueCopy: {
     flex: 1,
+    minWidth: 0,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
     color: colors.text,
+    lineHeight: 21,
   },
   cardMeta: {
-    marginTop: spacing.xs,
+    marginTop: 2,
     color: colors.textMuted,
     fontWeight: '600',
+    fontSize: 13,
     textTransform: 'capitalize',
   },
   footer: {

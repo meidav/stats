@@ -1,6 +1,5 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
 
 import { iconForTemplate } from '../lib/templateIcons';
 import type { SportTemplate } from '../types';
@@ -61,32 +60,36 @@ export function FanHand({ size }: { size: number }) {
 }
 
 export function CheckerGlyph({ size }: { size: number }) {
-  const disc = size * 0.72;
-  const groove = disc * 0.58;
+  const back = size * 0.58;
+  const front = size * 0.62;
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <View
         style={{
-          width: disc,
-          height: disc,
-          borderRadius: disc / 2,
-          backgroundColor: '#1C1917',
+          position: 'absolute',
+          top: size * 0.1,
+          width: back,
+          height: back,
+          borderRadius: back / 2,
+          backgroundColor: '#B91C1C',
           borderWidth: StyleSheet.hairlineWidth,
-          borderColor: '#0C0A09',
+          borderColor: '#7F1D1D',
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: size * 0.08,
+          width: front,
+          height: front,
+          borderRadius: front / 2,
+          backgroundColor: '#1C1917',
+          borderWidth: Math.max(1.5, front * 0.08),
+          borderColor: 'rgba(255, 255, 255, 0.28)',
           alignItems: 'center',
           justifyContent: 'center',
         }}
-      >
-        <View
-          style={{
-            width: groove,
-            height: groove,
-            borderRadius: groove / 2,
-            borderWidth: Math.max(1.5, disc * 0.09),
-            borderColor: 'rgba(255, 255, 255, 0.2)',
-          }}
-        />
-      </View>
+      />
     </View>
   );
 }
@@ -94,12 +97,16 @@ export function CheckerGlyph({ size }: { size: number }) {
 export function ChessKnightGlyph({ size }: { size: number }) {
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <Svg width={size} height={size} viewBox="0 0 24 24">
-        <Path
-          fill="#0F172A"
-          d="M4.8 20.2h14.4v1.6H4.8zM8.2 19.2c.35-1.35.95-2.45 1.75-3.35 2.15-1.25 3.55-3.45 3.55-5.95 0-2.85-2.15-5.1-5-5.1-1.15 0-2.15.35-2.95.95L6.7 4.35C7.8 3.5 9.25 3 10.8 3c4 0 7 3.15 7 7.1 0 2.85-1.5 5.25-3.85 6.55.75 1.05 1.25 2.25 1.55 3.55h-1.85c-.25-1.05-.7-2-1.3-2.8-.7-.95-1.55-1.7-2.5-2.25V19.2H8.2zm-.45-9.55c.45-1.7 1.55-2.95 3-3.55L9.4 4.2C7.35 5.15 5.9 7.3 5.9 9.75c0 .7.12 1.35.34 1.95l1.51-2.05z"
-        />
-      </Svg>
+      <Text
+        style={{
+          fontSize: size,
+          lineHeight: size + 2,
+          includeFontPadding: false,
+          textAlign: 'center',
+        }}
+      >
+        ♞
+      </Text>
     </View>
   );
 }

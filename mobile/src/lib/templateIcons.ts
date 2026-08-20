@@ -7,7 +7,7 @@ export function iconForTemplate(template: Pick<SportTemplate, 'id' | 'category'>
   if (id === 'indoor_volleyball' || id === 'vollis') return '🏐';
   if (id.startsWith('tennis')) return '🎾';
   if (id.startsWith('basketball')) return '🏀';
-  if (id === 'chess') return '♚';
+  if (id === 'chess') return '♞';
   if (id === 'checkers') return '●';
   if (id === 'monopoly') return '🎩';
   if (id === 'backgammon' || id === 'yahtzee') return '🎲';

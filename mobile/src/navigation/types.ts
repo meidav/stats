@@ -7,7 +7,13 @@ export type RootStackParamList = {
   Home: undefined;
   CreateLeague: undefined;
   League: { slug: string; name?: string; role?: string };
-  EditLeague: { slug: string; name: string; icon?: string | null };
+  EditLeague: {
+    slug: string;
+    name: string;
+    icon?: string | null;
+    visibility?: 'public' | 'private' | 'unlisted';
+    sportTemplateId?: string;
+  };
   AddGame: {
     sportId: number;
     sportName: string;
