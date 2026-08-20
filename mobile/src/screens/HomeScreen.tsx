@@ -230,19 +230,29 @@ export function HomeScreen({ navigation }: Props) {
                       })
                     }
                   >
-                    {displayIcon ? (
-                      <LeagueIcon id={displayIcon} size={26} />
-                    ) : sport ? (
-                      <TemplateGlyph
-                        template={{
-                          id: sport.template_id,
-                          category: sport.category || 'custom',
-                        }}
-                        size={26}
-                      />
-                    ) : (
-                      <LeagueIcon id="trophy" size={26} />
-                    )}
+                    <View style={styles.iconCol} accessibilityLabel={gamesLabel}>
+                      {displayIcon ? (
+                        <LeagueIcon id={displayIcon} size={24} />
+                      ) : sport ? (
+                        <TemplateGlyph
+                          template={{
+                            id: sport.template_id,
+                            category: sport.category || 'custom',
+                          }}
+                          size={24}
+                        />
+                      ) : (
+                        <LeagueIcon id="trophy" size={24} />
+                      )}
+                      <Text
+                        style={[
+                          styles.gamesUnderIcon,
+                          gameCount === 0 && styles.gamesUnderIconEmpty,
+                        ]}
+                      >
+                        {gameCount}
+                      </Text>
+                    </View>
                     <View style={styles.leagueCopy}>
                       <Text style={styles.cardTitle} numberOfLines={2}>
                         {item.name}
@@ -251,30 +261,6 @@ export function HomeScreen({ navigation }: Props) {
                         {sport?.name || 'No sport yet'}
                         {' · '}
                         {item.visibility}
-                      </Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.gamesPill,
-                        gameCount === 0 && styles.gamesPillEmpty,
-                      ]}
-                      accessibilityLabel={gamesLabel}
-                    >
-                      <Text
-                        style={[
-                          styles.gamesPillCount,
-                          gameCount === 0 && styles.gamesPillCountEmpty,
-                        ]}
-                      >
-                        {gameCount}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.gamesPillLabel,
-                          gameCount === 0 && styles.gamesPillLabelEmpty,
-                        ]}
-                      >
-                        {gameCount === 1 ? 'game' : 'games'}
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -463,7 +449,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   leagueCard: {
-    padding: spacing.md,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     marginBottom: spacing.md,
   },
   leagueRow: {
@@ -475,8 +462,24 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: 10,
     minWidth: 0,
+  },
+  iconCol: {
+    width: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  gamesUnderIcon: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: colors.primaryDark,
+    fontVariant: ['tabular-nums'],
+    lineHeight: 13,
+  },
+  gamesUnderIconEmpty: {
+    color: colors.textMuted,
   },
   leagueCopy: {
     flex: 1,
@@ -494,39 +497,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 13,
     textTransform: 'capitalize',
-  },
-  gamesPill: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 44,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 10,
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-  },
-  gamesPillEmpty: {
-    backgroundColor: 'rgba(15, 23, 42, 0.06)',
-  },
-  gamesPillCount: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: colors.primaryDark,
-    fontVariant: ['tabular-nums'],
-    lineHeight: 18,
-  },
-  gamesPillCountEmpty: {
-    color: colors.textMuted,
-  },
-  gamesPillLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.primaryDark,
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-    marginTop: 1,
-  },
-  gamesPillLabelEmpty: {
-    color: colors.textMuted,
   },
   footer: {
     flexDirection: 'row',
