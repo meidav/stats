@@ -277,7 +277,7 @@ export function HomeScreen({ navigation }: Props) {
                   colors={
                     gameCount === 0
                       ? (['#A8A29E', '#78716C'] as const)
-                      : (['#F09A5C', '#D96B2C'] as const)
+                      : (['#A78BFA', '#7C3AED'] as const)
                   }
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: 'rgba(255, 252, 248, 0.95)',
-    shadowColor: '#9A3412',
+    shadowColor: '#5B21B6',
     shadowOpacity: 0.22,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
