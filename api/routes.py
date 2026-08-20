@@ -62,6 +62,7 @@ from api.player_profiles import (
 )
 from api.sport_templates import (
     TEMPLATE_CATEGORIES,
+    default_icon_for_template,
     focus_for_template,
     get_template,
     list_templates,
@@ -134,6 +135,11 @@ def register_routes(api):
             return jsonify({"error": "invalid credentials"}), 401
 
         token = create_access_token(identity=str(user.id))
+        try:
+            from api.admin_data import touch_last_seen
+            touch_last_seen(user.id)
+        except Exception:
+            pass
         return jsonify({"access_token": token, "user": user_payload(user)})
 
     @api.route("/auth/register", methods=["POST"])
@@ -151,6 +157,11 @@ def register_routes(api):
             return jsonify({"error": str(exc)}), 400
 
         token = create_access_token(identity=str(user.id))
+        try:
+            from api.admin_data import touch_last_seen
+            touch_last_seen(user.id)
+        except Exception:
+            pass
         return jsonify({"access_token": token, "user": user_payload(user)}), 201
 
     @api.route("/auth/forgot-password", methods=["POST"])
@@ -178,6 +189,11 @@ def register_routes(api):
             return jsonify({"error": str(exc)}), 400
 
         access_token = create_access_token(identity=str(user.id))
+        try:
+            from api.admin_data import touch_last_seen
+            touch_last_seen(user.id)
+        except Exception:
+            pass
         return jsonify({"access_token": access_token, "user": user_payload(user)})
 
     @api.route("/auth/google", methods=["POST"])
@@ -199,6 +215,11 @@ def register_routes(api):
             return jsonify({"error": str(exc)}), 401
 
         token = create_access_token(identity=str(user["id"]))
+        try:
+            from api.admin_data import touch_last_seen
+            touch_last_seen(user["id"])
+        except Exception:
+            pass
         return jsonify({"access_token": token, "user": user})
 
     @api.route("/leagues", methods=["POST"])
@@ -248,6 +269,9 @@ def register_routes(api):
                 score_direction=data.get("score_direction"),
             )
             sports.append(sport_to_dict(sport))
+            icon = data.get("icon") or default_icon_for_template(sport_template_id)
+            if icon:
+                league = update_league(league["id"], icon=icon)
 
         payload = league_to_dict(league, include_invite_code=True)
         payload["sports"] = sports

@@ -13,6 +13,9 @@ export const LEAGUE_ICONS = [
   { id: 'dice', kind: 'emoji', glyph: '🎲', family: 'games' },
   { id: 'chess', kind: 'chess', glyph: '♞', family: 'games' },
   { id: 'checkers', kind: 'checker', glyph: '●', family: 'games' },
+  { id: 'monopoly', kind: 'emoji', glyph: '🎩', family: 'games' },
+  { id: 'scrabble', kind: 'emoji', glyph: '🔤', family: 'games' },
+  { id: 'catan', kind: 'emoji', glyph: '🏕️', family: 'games' },
   { id: 'game', kind: 'emoji', glyph: '🎮', family: 'games' },
   { id: 'puzzle', kind: 'emoji', glyph: '🧩', family: 'games' },
   { id: 'trophy', kind: 'emoji', glyph: '🏆', family: 'general' },
@@ -62,8 +65,10 @@ export function iconIdForSport(sport?: { template_id: string; category?: string 
   if (id.startsWith('basketball')) return 'basketball';
   if (id === 'chess') return 'chess';
   if (id === 'checkers') return 'checkers';
+  if (id === 'monopoly') return 'monopoly';
+  if (id === 'scrabble') return 'scrabble';
+  if (id === 'catan') return 'catan';
   if (id === 'backgammon' || id === 'yahtzee') return 'dice';
-  if (id === 'scrabble' || id === 'catan' || id === 'monopoly') return 'puzzle';
   if (sport.category === 'cards' || id === 'uno') return 'cards';
   if (sport.category === 'sports') return 'medal';
   if (sport.category === 'board') return 'puzzle';

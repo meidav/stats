@@ -231,6 +231,40 @@ def focus_for_template(template_id):
     return "mixed"
 
 
+def default_icon_for_template(template_id):
+    """Match mobile iconIdForSport so create and edit share the same marks."""
+    template = get_template(template_id) or {}
+    tid = str(template_id or "")
+    category = template.get("category")
+    if tid.startswith("beach_volleyball") or tid == "vollis":
+        return "beach_volleyball"
+    if tid == "indoor_volleyball":
+        return "volleyball"
+    if tid.startswith("tennis"):
+        return "tennis"
+    if tid.startswith("basketball"):
+        return "basketball"
+    if tid == "chess":
+        return "chess"
+    if tid == "checkers":
+        return "checkers"
+    if tid == "monopoly":
+        return "monopoly"
+    if tid == "scrabble":
+        return "scrabble"
+    if tid == "catan":
+        return "catan"
+    if tid in ("backgammon", "yahtzee"):
+        return "dice"
+    if category == "cards" or tid == "uno":
+        return "cards"
+    if category == "sports":
+        return "medal"
+    if category == "board":
+        return "puzzle"
+    return None
+
+
 TYPICAL_WIN_SCORES = {
     "beach_volleyball_2s": 21,
     "beach_volleyball_4s": 21,
