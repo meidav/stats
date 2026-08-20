@@ -165,6 +165,6 @@ const styles = StyleSheet.create({
   },
   stat: {
     flexShrink: 0,
-    textAlign: 'right',
+    textAlign: 'center',
   },
 });

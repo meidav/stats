@@ -1228,7 +1228,7 @@ a:hover { text-decoration: underline; }
 .mkt-col-stat {
   width: 3.5rem;
   min-width: 0;
-  text-align: right;
+  text-align: center;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
