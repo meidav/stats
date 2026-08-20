@@ -774,7 +774,7 @@ a:hover { text-decoration: underline; }
 }
 
 .mkt-standings {
-  max-width: 720px;
+  max-width: 920px;
   width: 100%;
   margin: 0 auto;
   padding: 28px 20px 48px;
@@ -1167,8 +1167,9 @@ a:hover { text-decoration: underline; }
 
 .mkt-table th,
 .mkt-table td {
-  padding: 10px 12px;
+  padding: 10px 8px;
   font-weight: 700;
+  vertical-align: middle;
 }
 
 .mkt-table th {
@@ -1189,9 +1190,13 @@ a:hover { text-decoration: underline; }
 }
 
 .mkt-col-rank {
-  width: 28px;
+  width: 4rem;
+  padding-left: 16px;
+  padding-right: 12px;
   color: #334155;
-  text-align: left;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .mkt-table .mkt-col-rank {
@@ -1200,17 +1205,23 @@ a:hover { text-decoration: underline; }
 
 .mkt-col-player {
   text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: break-word;
+  padding-left: 4px;
+  padding-right: 10px;
 }
 
 .mkt-col-stat {
-  width: 48px;
-  min-width: 44px;
+  width: 3.5rem;
+  min-width: 0;
   text-align: right;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+.mkt-table th.mkt-col-stat:last-child,
+.mkt-table td.mkt-col-stat:last-child {
+  padding-right: 16px;
 }
 
 .mkt-player-link {
@@ -1218,6 +1229,7 @@ a:hover { text-decoration: underline; }
   font-weight: 700;
   text-decoration: underline;
   text-decoration-color: rgba(37, 99, 235, 0.35);
+  overflow-wrap: break-word;
 }
 
 .mkt-player-link:hover {
@@ -1513,7 +1525,47 @@ a:hover { text-decoration: underline; }
 }
 
 .mkt-pair-table .mkt-col-stat {
-  width: 32px;
+  width: 3.25rem;
+}
+
+@media (max-width: 640px) {
+  .mkt-table th,
+  .mkt-table td {
+    padding: 8px 4px;
+  }
+
+  .mkt-table th {
+    font-size: 10px;
+    letter-spacing: 0.03em;
+  }
+
+  .mkt-table td {
+    font-size: 12.5px;
+  }
+
+  .mkt-col-rank {
+    width: 2.55rem;
+    padding-left: 10px;
+    padding-right: 6px;
+  }
+
+  .mkt-col-player {
+    padding-left: 2px;
+    padding-right: 6px;
+  }
+
+  .mkt-col-stat {
+    width: 2rem;
+  }
+
+  .mkt-table th.mkt-col-stat:last-child,
+  .mkt-table td.mkt-col-stat:last-child {
+    padding-right: 10px;
+  }
+
+  .mkt-pair-table .mkt-col-stat {
+    width: 2rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
