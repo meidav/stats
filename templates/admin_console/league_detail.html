@@ -1,0 +1,126 @@
+{% extends "admin_console/base.html" %}
+{% block title %}{{ league.name }} | PlayTracker admin{% endblock %}
+{% block nav_leagues %}is-active{% endblock %}
+
+{% block content %}
+<section class="ac-page">
+    <p class="ac-crumb"><a href="{{ url_for('admin_console.leagues') }}">Leagues</a> / {{ league.name }}</p>
+
+    <header class="ac-page-head">
+        <div>
+            <p class="ac-kicker">Read-only standings</p>
+            <h1>{{ league.name }}</h1>
+        </div>
+        <span class="ac-vis ac-vis-{{ league.visibility }}">{{ league.visibility }}</span>
+    </header>
+
+    <dl class="ac-facts">
+        <div>
+            <dt>Slug</dt>
+            <dd>{{ league.slug }}</dd>
+        </div>
+        <div>
+            <dt>Owner</dt>
+            <dd>
+                {% if owner %}
+                <a href="{{ url_for('admin_console.user_detail', user_id=owner.id) }}">{{ owner.username }}</a>
+                <span class="ac-muted">{{ owner.email }}</span>
+                {% else %}
+                Unknown
+                {% endif %}
+            </dd>
+        </div>
+        <div>
+            <dt>Focus</dt>
+            <dd>{{ league.focus }}</dd>
+        </div>
+        {% if league.invite_code %}
+        <div>
+            <dt>Invite code</dt>
+            <dd><code>{{ league.invite_code }}</code></dd>
+        </div>
+        {% endif %}
+    </dl>
+
+    {% if sport_tabs|length > 1 %}
+    <nav class="ac-tabs" aria-label="Sports">
+        {% for sport in sport_tabs %}
+        <a class="ac-tab{% if block and sport.id == block.sport.id %} is-active{% endif %}" href="{{ sport.href }}">{{ sport.name }}</a>
+        {% endfor %}
+    </nav>
+    {% elif block %}
+    <p class="ac-sport-label">{{ block.sport.name }}</p>
+    {% endif %}
+
+    {% if block and block.years|length > 1 %}
+    <p class="ac-year-links">
+        {% for item in block.years %}
+        <a class="{% if block.year == item.year %}is-active{% endif %}" href="{{ url_for('admin_console.league_detail', league_id=league.id, sport=block.sport.id, year=item.year) }}">{{ item.year }}</a>
+        {% endfor %}
+        <a class="{% if block.year is none %}is-active{% endif %}" href="{{ url_for('admin_console.league_detail', league_id=league.id, sport=block.sport.id, year='all') }}">All time</a>
+    </p>
+    {% endif %}
+
+    {% if not block %}
+    <p class="ac-empty">This league has no sports yet.</p>
+    {% else %}
+    <h2 class="ac-section-title">Standings{% if block.year %} {{ block.year }}{% endif %}</h2>
+    {% if block.stats %}
+    <div class="ac-table-wrap">
+        <table class="ac-table">
+            <thead>
+                <tr>
+                    <th class="ac-num">#</th>
+                    <th>Player</th>
+                    <th class="ac-num">W</th>
+                    <th class="ac-num">L</th>
+                    <th class="ac-num">%</th>
+                    <th class="ac-num">G</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in block.stats %}
+                <tr>
+                    <td class="ac-num">{{ loop.index }}</td>
+                    <td>{{ row.player }}</td>
+                    <td class="ac-num ac-win">{{ row.wins }}</td>
+                    <td class="ac-num ac-loss">{{ row.losses }}</td>
+                    <td class="ac-num">{{ row.pct_label }}</td>
+                    <td class="ac-num">{{ row.games }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="ac-empty">No ranked players yet{% if block.year %} in {{ block.year }}{% endif %}.</p>
+    {% endif %}
+
+    {% if block.occasional_stats %}
+    <h2 class="ac-section-title">Occasional</h2>
+    <div class="ac-table-wrap">
+        <table class="ac-table">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th class="ac-num">W</th>
+                    <th class="ac-num">L</th>
+                    <th class="ac-num">G</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in block.occasional_stats %}
+                <tr>
+                    <td>{{ row.player }}</td>
+                    <td class="ac-num ac-win">{{ row.wins }}</td>
+                    <td class="ac-num ac-loss">{{ row.losses }}</td>
+                    <td class="ac-num">{{ row.games }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    {% endif %}
+</section>
+{% endblock %}

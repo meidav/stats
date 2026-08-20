@@ -1,0 +1,108 @@
+{% extends "admin_console/base.html" %}
+{% block title %}Leagues | PlayTracker admin{% endblock %}
+{% block nav_leagues %}is-active{% endblock %}
+
+{% block content %}
+<section class="ac-page">
+    <header class="ac-page-head">
+        <div>
+            <p class="ac-kicker">Directory</p>
+            <h1>Leagues</h1>
+        </div>
+        <p class="ac-page-meta">Public, unlisted, and private. Visibility filters on the marketing site do not apply here.</p>
+    </header>
+
+    <div class="ac-kpis">
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.leagues }}</div>
+            <div class="ac-kpi-label">All</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.public_leagues }}</div>
+            <div class="ac-kpi-label">Public</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.unlisted_leagues }}</div>
+            <div class="ac-kpi-label">Unlisted</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.private_leagues }}</div>
+            <div class="ac-kpi-label">Private</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.games }}</div>
+            <div class="ac-kpi-label">Games</div>
+        </div>
+    </div>
+
+    <form class="ac-filters" method="GET" action="{{ url_for('admin_console.leagues') }}">
+        <label class="ac-search">
+            <span class="ac-sr">Search</span>
+            <input type="search" name="q" value="{{ query }}" placeholder="Search name, slug, or owner">
+        </label>
+        <label>
+            <span class="ac-sr">Visibility</span>
+            <select name="visibility">
+                <option value="">All visibilities</option>
+                {% for item in visibilities %}
+                <option value="{{ item }}" {% if visibility == item %}selected{% endif %}>{{ item|capitalize }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="ac-btn-secondary">Filter</button>
+        {% if query or visibility %}
+        <a class="ac-text-link" href="{{ url_for('admin_console.leagues') }}">Clear</a>
+        {% endif %}
+    </form>
+
+    <p class="ac-result-count">{{ leagues|length }} league{% if leagues|length != 1 %}s{% endif %}</p>
+
+    {% if not leagues %}
+    <p class="ac-empty">No leagues match these filters.</p>
+    {% else %}
+    <div class="ac-table-wrap">
+        <table class="ac-table">
+            <thead>
+                <tr>
+                    <th>League</th>
+                    <th>Visibility</th>
+                    <th>Owner</th>
+                    <th>Sport</th>
+                    <th class="ac-num">Members</th>
+                    <th class="ac-num">Games</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for league in leagues %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('admin_console.league_detail', league_id=league.id) }}">{{ league.name }}</a>
+                        <div class="ac-muted">{{ league.slug }}</div>
+                    </td>
+                    <td><span class="ac-vis ac-vis-{{ league.visibility }}">{{ league.visibility }}</span></td>
+                    <td>
+                        {% if league.owner_id %}
+                        <a href="{{ url_for('admin_console.user_detail', user_id=league.owner_id) }}">{{ league.owner_username or league.owner_email }}</a>
+                        {% else %}
+                        {{ league.owner_username or league.owner_email or 'Unknown' }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if league.sport_name %}
+                        {{ league.sport_name }}
+                        {% elif league.sport_count %}
+                        {{ league.sport_count }} sports
+                        {% else %}
+                        None
+                        {% endif %}
+                    </td>
+                    <td class="ac-num">{{ league.member_count or 0 }}</td>
+                    <td class="ac-num">{{ league.game_count or 0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

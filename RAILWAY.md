@@ -52,6 +52,10 @@ Optional:
 3. At your domain registrar, add the CNAME records Railway provides.
 4. Wait for DNS + SSL (usually a few minutes).
 
+The super-admin console lives at `/admin-console` on this host (for example `https://playtracker.org/admin-console/login`). It uses its own cookie and JWT audience. Signing in at `/login` on the marketing site does not grant console access.
+
+To serve the console on a dedicated host, add `admin.playtracker.org` as a custom domain. That host only serves `/admin-console` (plus static files). Optional env: `ADMIN_HOST=admin.playtracker.org`.
+
 ## 5. Verify deployment
 
 ```bash

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Admin sign in | PlayTracker</title>
+    <meta name="theme-color" content="#3b0764">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-console.css') }}">
+</head>
+<body class="ac-login-page">
+    <main class="ac-login-wrap">
+        <form class="ac-login-card" method="POST" action="{{ url_for('admin_console.login') }}">
+            <input type="hidden" name="csrf_token" value="{{ admin_csrf_token }}">
+            {% if request.args.get('next') %}
+            <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+            {% endif %}
+            <div class="ac-login-brand">
+                <img src="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}" alt="">
+                <p class="ac-login-name">PlayTracker</p>
+                <p class="ac-login-kicker">Super-admin console</p>
+            </div>
+            <p class="ac-login-note">This sign-in is only for PlayTracker operators. It is not the member web login.</p>
+            {% if error %}
+            <p class="ac-alert" role="alert">{{ error }}</p>
+            {% endif %}
+            <label class="ac-field">
+                <span>Email or username</span>
+                <input type="text" name="email" autocomplete="username" required autofocus>
+            </label>
+            <label class="ac-field">
+                <span>Password</span>
+                <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <button type="submit" class="ac-btn-primary">Sign in</button>
+        </form>
+    </main>
+</body>
+</html>

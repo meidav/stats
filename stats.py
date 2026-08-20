@@ -71,6 +71,12 @@ try:
 except Exception as exc:
     logging.getLogger(__name__).error("Public league pages skipped: %s", exc)
 
+try:
+    from api.admin_console import init_admin_console
+    init_admin_console(app)
+except Exception as exc:
+    logging.getLogger(__name__).error("Admin console skipped: %s", exc)
+
 # Set up Flask logging to console
 def setup_logging():
     handler = logging.StreamHandler()  # This will log to the console
@@ -86,6 +92,12 @@ def _template_globals():
 
 @app.before_request
 def _redirect_legacy_stats():
+    try:
+        from api.admin_console import is_admin_host
+        if is_admin_host():
+            return None
+    except Exception:
+        pass
     return redirect_legacy_to_arbel()
 
 # TIME OFFSET

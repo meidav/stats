@@ -333,14 +333,26 @@ def get_sport_by_id(sport_id):
 
 
 def search_public_leagues(query=None, limit=20):
+    return _search_leagues(query=query, limit=limit, visibility="public", admin=False)
+
+
+def list_leagues_for_admin(query=None, visibility=None, limit=500):
+    """Every league, including private and unlisted. Admin console only."""
+    return _search_leagues(query=query, limit=limit, visibility=visibility, admin=True)
+
+
+def _search_leagues(query=None, limit=20, visibility=None, admin=False):
     params = []
-    sql = """
+    extra_cols = "l.owner_id, l.invite_code," if admin else ""
+    sql = f"""
         SELECT l.id, l.name, l.slug, l.description, l.visibility, l.icon, l.focus,
+               {extra_cols}
                l.created_at, l.updated_at,
                u.email AS owner_email,
                u.username AS owner_username,
                COUNT(DISTINCT s.id) AS sport_count,
                COUNT(DISTINCT g.id) AS game_count,
+               COUNT(DISTINCT lm.user_id) AS member_count,
                (
                  SELECT s2.name FROM sports s2
                  WHERE s2.league_id = l.id
@@ -355,17 +367,36 @@ def search_public_leagues(query=None, limit=20):
         LEFT JOIN users u ON u.id = l.owner_id
         LEFT JOIN sports s ON s.league_id = l.id
         LEFT JOIN league_games g ON g.league_id = l.id
-        WHERE l.visibility = 'public'
+        LEFT JOIN league_members lm ON lm.league_id = l.id
+        WHERE 1 = 1
     """
+    if visibility:
+        sql += " AND l.visibility = ?"
+        params.append(visibility)
     if query:
-        sql += " AND (l.name LIKE ? OR l.description LIKE ?)"
-        pattern = f"%{query.strip()}%"
-        params.extend([pattern, pattern])
+        if admin:
+            sql += " AND (l.name LIKE ? OR l.description LIKE ? OR l.slug LIKE ? OR u.email LIKE ? OR u.username LIKE ?)"
+            pattern = f"%{query.strip()}%"
+            params.extend([pattern, pattern, pattern, pattern, pattern])
+        else:
+            sql += " AND (l.name LIKE ? OR l.description LIKE ?)"
+            pattern = f"%{query.strip()}%"
+            params.extend([pattern, pattern])
     sql += " GROUP BY l.id ORDER BY l.updated_at DESC LIMIT ?"
     params.append(limit)
 
     rows = db_manager.execute_query(sql, tuple(params))
     return [_row_to_dict(row) for row in rows]
+
+
+def sync_owner_memberships():
+    db_manager.execute_query(
+        """
+        INSERT OR IGNORE INTO league_members (league_id, user_id, role)
+        SELECT id, owner_id, 'owner' FROM leagues
+        """,
+        fetch_all=False,
+    )
 
 
 def league_is_linkable(league):

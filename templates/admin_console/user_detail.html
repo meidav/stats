@@ -1,0 +1,87 @@
+{% extends "admin_console/base.html" %}
+{% block title %}{{ user.username }} | PlayTracker admin{% endblock %}
+{% block nav_users %}is-active{% endblock %}
+
+{% block content %}
+<section class="ac-page">
+    <p class="ac-crumb"><a href="{{ url_for('admin_console.users') }}">Users</a> / {{ user.username }}</p>
+
+    <header class="ac-detail-head">
+        <div class="ac-avatar ac-avatar-lg" aria-hidden="true">{{ user.initials }}</div>
+        <div>
+            <h1>{{ user.username }}</h1>
+            <p class="ac-user-meta">
+                <span>{{ user.email }}</span>
+                {% if user.is_admin %}<span class="ac-pill ac-pill-admin">Super-admin</span>{% endif %}
+                {% if is_self %}<span class="ac-pill">You</span>{% endif %}
+            </p>
+        </div>
+    </header>
+
+    <dl class="ac-facts">
+        <div>
+            <dt>Last active</dt>
+            <dd>{{ user.last_active_label }}</dd>
+        </div>
+        <div>
+            <dt>Created</dt>
+            <dd>{{ (user.created_at or '')[:10] or 'Unknown' }}</dd>
+        </div>
+        <div>
+            <dt>Leagues</dt>
+            <dd>{{ user.league_count }}</dd>
+        </div>
+        <div>
+            <dt>Games in those leagues</dt>
+            <dd>{{ user.game_count }}</dd>
+        </div>
+    </dl>
+
+    {% if is_self or lockout_protected %}
+    <p class="ac-safety">This account cannot be demoted or deleted from the console. PlayTracker always keeps at least one super-admin.</p>
+    {% endif %}
+
+    <h2 class="ac-section-title">Leagues</h2>
+    <p class="ac-hint">Privacy settings do not hide leagues in this view.</p>
+
+    {% if not user.leagues %}
+    <p class="ac-empty">This user does not belong to any leagues.</p>
+    {% else %}
+    <div class="ac-table-wrap">
+        <table class="ac-table">
+            <thead>
+                <tr>
+                    <th>League</th>
+                    <th>Visibility</th>
+                    <th>Role</th>
+                    <th>Sport</th>
+                    <th class="ac-num">Games</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for league in user.leagues %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('admin_console.league_detail', league_id=league.id) }}">{{ league.name }}</a>
+                        <div class="ac-muted">{{ league.slug }}</div>
+                    </td>
+                    <td><span class="ac-vis ac-vis-{{ league.visibility }}">{{ league.visibility }}</span></td>
+                    <td>{{ league.role }}</td>
+                    <td>
+                        {% if league.sport_name %}
+                        {{ league.sport_name }}
+                        {% elif league.sport_count %}
+                        {{ league.sport_count }} sports
+                        {% else %}
+                        None
+                        {% endif %}
+                    </td>
+                    <td class="ac-num">{{ league.game_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Admin | PlayTracker{% endblock %}</title>
+    <meta name="theme-color" content="#3b0764">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-console.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <header class="ac-header">
+        <div class="ac-header-bar">
+            <a class="ac-brand" href="{{ url_for('admin_console.users') }}">
+                <img class="ac-brand-icon" src="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}" alt="">
+                <span class="ac-brand-copy">
+                    <span class="ac-brand-name">PlayTracker</span>
+                    <span class="ac-brand-sub">Admin console</span>
+                </span>
+            </a>
+            {% if admin_user and not must_change_password %}
+            <nav class="ac-nav" aria-label="Admin">
+                <a class="ac-nav-link {% block nav_users %}{% endblock %}" href="{{ url_for('admin_console.users') }}">Users</a>
+                <a class="ac-nav-link {% block nav_leagues %}{% endblock %}" href="{{ url_for('admin_console.leagues') }}">Leagues</a>
+            </nav>
+            {% endif %}
+            {% if admin_user %}
+            <div class="ac-session">
+                <span class="ac-session-email">{{ admin_user.email }}</span>
+                <form method="POST" action="{{ url_for('admin_console.logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ admin_csrf_token }}">
+                    <button type="submit" class="ac-signout">Sign out</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+    <main class="ac-main">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

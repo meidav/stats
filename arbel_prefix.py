@@ -28,6 +28,7 @@ KEEP_EXACT = {
 KEEP_STARTSWITH = (
     "/admin/settings",
     "/admin/import",
+    "/admin-console",
     "/l/",
 )
 
