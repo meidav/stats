@@ -7,6 +7,7 @@ import {
   CheckerGlyph,
   ChessKnightGlyph,
   FanHand,
+  ScrabbleTileGlyph,
 } from './TemplateGlyph';
 
 export function LeagueIcon({ id, size = 26 }: { id?: string | null; size?: number }) {
@@ -22,6 +23,9 @@ export function LeagueIcon({ id, size = 26 }: { id?: string | null; size?: numbe
   }
   if (kind === 'chess') {
     return <ChessKnightGlyph size={size} />;
+  }
+  if (kind === 'scrabble') {
+    return <ScrabbleTileGlyph size={size} />;
   }
   const glyph = glyphForIcon(id);
   if (!glyph) return null;

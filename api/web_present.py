@@ -77,7 +77,7 @@ def sport_glyph(sport):
     elif template_id in ("backgammon", "yahtzee"):
         mark = "🎲"
     elif template_id == "scrabble":
-        mark = "🔤"
+        return {"glyph_src": "img/games/scrabble-tile.svg", "glyph": ""}
     elif template_id == "catan":
         mark = "🏕️"
     elif template_id == "custom":
@@ -111,7 +111,7 @@ LEAGUE_ICON_MARKS = {
     "chess": {"glyph_src": None, "glyph": "♞"},
     "checkers": {"glyph_src": None, "glyph": "●"},
     "monopoly": {"glyph_src": None, "glyph": "🎩"},
-    "scrabble": {"glyph_src": None, "glyph": "🔤"},
+    "scrabble": {"glyph_src": "img/games/scrabble-tile.svg", "glyph": ""},
     "catan": {"glyph_src": None, "glyph": "🏕️"},
     "game": {"glyph_src": None, "glyph": "🎮"},
     "puzzle": {"glyph_src": None, "glyph": "🧩"},

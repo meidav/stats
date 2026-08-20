@@ -111,6 +111,58 @@ export function ChessKnightGlyph({ size }: { size: number }) {
   );
 }
 
+export function ScrabbleTileGlyph({ size }: { size: number }) {
+  const radius = Math.max(3, size * 0.18);
+  const letterSize = size * 0.58;
+  const pointSize = Math.max(7, size * 0.28);
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: radius,
+        backgroundColor: '#F3E6C8',
+        borderWidth: StyleSheet.hairlineWidth * 2,
+        borderColor: '#C4A574',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#8B6914',
+        shadowOpacity: 0.22,
+        shadowRadius: 2,
+        shadowOffset: { width: 0, height: 1 },
+        elevation: 2,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: letterSize,
+          lineHeight: letterSize + 2,
+          fontWeight: '800',
+          color: '#1C1917',
+          includeFontPadding: false,
+          marginTop: size * 0.02,
+        }}
+      >
+        A
+      </Text>
+      <Text
+        style={{
+          position: 'absolute',
+          right: size * 0.1,
+          bottom: size * 0.06,
+          fontSize: pointSize,
+          lineHeight: pointSize + 1,
+          fontWeight: '700',
+          color: '#44403C',
+          includeFontPadding: false,
+        }}
+      >
+        1
+      </Text>
+    </View>
+  );
+}
+
 export function CustomGlyph({ size }: { size: number }) {
   const stroke = Math.max(2, size * 0.14);
   const arm = size * 0.42;
@@ -180,6 +232,9 @@ export function TemplateGlyph({
   }
   if (template.id === 'chess') {
     return <ChessKnightGlyph size={size} />;
+  }
+  if (template.id === 'scrabble') {
+    return <ScrabbleTileGlyph size={size} />;
   }
   if (template.id === 'custom') {
     return <CustomGlyph size={size} />;

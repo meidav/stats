@@ -11,7 +11,7 @@ export function iconForTemplate(template: Pick<SportTemplate, 'id' | 'category'>
   if (id === 'checkers') return '●';
   if (id === 'monopoly') return '🎩';
   if (id === 'backgammon' || id === 'yahtzee') return '🎲';
-  if (id === 'scrabble') return '🔤';
+  if (id === 'scrabble') return 'A';
   if (id === 'catan') return '🏕️';
   if (id === 'custom') return '+';
 
