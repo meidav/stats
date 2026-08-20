@@ -18,6 +18,7 @@
 <body class="{% block body_class %}{% endblock %}">
     <input type="checkbox" id="mkt-nav-toggle" class="mkt-nav-toggle" hidden>
     <header class="mkt-header">
+        <div class="mkt-header-bar">
         <a class="mkt-brand" href="/">
             <img class="mkt-brand-icon" src="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}" alt="">
             <span class="mkt-brand-copy">
@@ -34,6 +35,7 @@
             <a class="mkt-nav-link mkt-nav-leagues {% block nav_leagues %}{% endblock %}" href="/leagues">Leagues</a>
             <a class="mkt-nav-link mkt-nav-login {% block nav_login %}{% endblock %}" href="/login">Login</a>
         </nav>
+        </div>
     </header>
 
     <main>

@@ -7,6 +7,8 @@
   --mkt-peach: #fdba74;
   --mkt-lilac: #c4b5fd;
   --mkt-sky: #93c5fd;
+  --mkt-page-width: 920px;
+  --mkt-page-pad: 20px;
 }
 
 * { box-sizing: border-box; }
@@ -30,17 +32,26 @@ a { color: var(--mkt-blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 .mkt-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 28px;
-  padding-top: max(14px, env(safe-area-inset-top));
   position: sticky;
   top: 0;
   z-index: 20;
   background: linear-gradient(90deg, #3b0764, #5b21b6 55%, #6d28d9);
   border-bottom: 1px solid rgba(196, 181, 253, 0.35);
+}
+
+.mkt-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: var(--mkt-page-width);
+  margin: 0 auto;
+  padding: 14px var(--mkt-page-pad);
+  padding-top: max(14px, env(safe-area-inset-top));
+  padding-left: max(var(--mkt-page-pad), env(safe-area-inset-left));
+  padding-right: max(var(--mkt-page-pad), env(safe-area-inset-right));
+  position: relative;
 }
 
 .mkt-brand {
@@ -188,9 +199,9 @@ a:hover { text-decoration: underline; }
 .mkt-features,
 .mkt-about,
 .mkt-legal {
-  max-width: 920px;
+  max-width: var(--mkt-page-width);
   margin: 0 auto;
-  padding: 48px 24px 24px;
+  padding: 48px var(--mkt-page-pad) 24px;
   text-align: center;
 }
 
@@ -523,12 +534,11 @@ a:hover { text-decoration: underline; }
     margin: 0 12px;
     background: #fff;
   }
-  .mkt-header {
-    position: sticky;
-    padding: 12px 16px;
+  .mkt-header-bar {
+    padding: 12px var(--mkt-page-pad);
     padding-top: max(12px, env(safe-area-inset-top));
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
+    padding-left: max(var(--mkt-page-pad), env(safe-area-inset-left));
+    padding-right: max(var(--mkt-page-pad), env(safe-area-inset-right));
   }
   .mkt-footer {
     padding-left: max(16px, env(safe-area-inset-left));
@@ -774,12 +784,12 @@ a:hover { text-decoration: underline; }
 }
 
 .mkt-standings {
-  max-width: 920px;
+  max-width: var(--mkt-page-width);
   width: 100%;
   margin: 0 auto;
-  padding: 28px 20px 48px;
-  padding-left: max(20px, env(safe-area-inset-left));
-  padding-right: max(20px, env(safe-area-inset-right));
+  padding: 28px var(--mkt-page-pad) 48px;
+  padding-left: max(var(--mkt-page-pad), env(safe-area-inset-left));
+  padding-right: max(var(--mkt-page-pad), env(safe-area-inset-right));
   text-align: center;
   box-sizing: border-box;
 }
@@ -1211,6 +1221,10 @@ a:hover { text-decoration: underline; }
   padding-right: 10px;
 }
 
+.mkt-player-page .mkt-col-player {
+  padding-left: 16px;
+}
+
 .mkt-col-stat {
   width: 3.5rem;
   min-width: 0;
@@ -1466,7 +1480,9 @@ a.mkt-profile-pill:hover {
 }
 
 .mkt-player-page .mkt-kpi-grid {
-  max-width: 36rem;
+  width: 100%;
+  max-width: none;
+  gap: 10px;
 }
 
 .mkt-kpi {
@@ -1475,10 +1491,18 @@ a.mkt-profile-pill:hover {
   text-align: center;
 }
 
+.mkt-player-page .mkt-kpi {
+  padding: 18px 10px;
+}
+
 .mkt-kpi-value {
   display: block;
   font-size: 22px;
   font-weight: 800;
+}
+
+.mkt-player-page .mkt-kpi-value {
+  font-size: 26px;
 }
 
 .mkt-kpi-label {
@@ -1521,6 +1545,36 @@ a.mkt-profile-pill:hover {
 
 .mkt-result-dot.is-win { background: #059669; }
 .mkt-result-dot.is-loss { background: #e11d48; }
+
+@media (min-width: 720px) {
+  .mkt-player-page .mkt-kpi-grid {
+    gap: 14px;
+  }
+
+  .mkt-player-page .mkt-kpi {
+    padding: 26px 14px;
+  }
+
+  .mkt-player-page .mkt-kpi-value {
+    font-size: 34px;
+  }
+
+  .mkt-player-page .mkt-kpi-label {
+    margin-top: 6px;
+    font-size: 12px;
+  }
+
+  .mkt-player-page .mkt-result-dots {
+    gap: 10px;
+  }
+
+  .mkt-player-page .mkt-result-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 21px;
+    font-size: 15px;
+  }
+}
 
 .mkt-league-index {
   list-style: none;
@@ -1637,6 +1691,10 @@ a.mkt-profile-pill:hover {
   .mkt-col-player {
     padding-left: 2px;
     padding-right: 6px;
+  }
+
+  .mkt-player-page .mkt-col-player {
+    padding-left: 12px;
   }
 
   .mkt-col-stat {
