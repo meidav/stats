@@ -20,9 +20,10 @@
                     {% if league.activity %}
                     <span class="mkt-league-activity">{{ league.activity }}</span>
                     {% endif %}
-                    <span class="mkt-league-meta">
-                        {{ league.games_label }}{% if league.host %} · Hosted by {{ league.host }}{% endif %}
-                    </span>
+                    <span class="mkt-league-meta">{{ league.games_label }}</span>
+                    {% if league.host %}
+                    <span class="mkt-league-host">Hosted by {{ league.host }}</span>
+                    {% endif %}
                     {% if league.description %}
                     <span class="mkt-league-note">{{ league.description }}</span>
                     {% endif %}
