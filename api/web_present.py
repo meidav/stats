@@ -1,6 +1,8 @@
 from datetime import datetime
 from urllib.parse import quote
 
+from api.sport_templates import get_template
+
 
 def win_pct_class(pct):
     value = float(pct or 0)
@@ -81,6 +83,61 @@ def with_sport_glyph(sport):
     data = dict(sport or {})
     data.update(sport_glyph(data))
     return data
+
+
+LEAGUE_ICON_MARKS = {
+    "beach_volleyball": {"glyph_src": "img/sports/beach-volleyball.png", "glyph": ""},
+    "volleyball": {"glyph_src": None, "glyph": "🏐"},
+    "tennis": {"glyph_src": None, "glyph": "🎾"},
+    "basketball": {"glyph_src": None, "glyph": "🏀"},
+    "soccer": {"glyph_src": None, "glyph": "⚽"},
+    "target": {"glyph_src": None, "glyph": "🎯"},
+    "cards": {"glyph_src": None, "glyph": "🃏"},
+    "dice": {"glyph_src": None, "glyph": "🎲"},
+    "chess": {"glyph_src": None, "glyph": "♞"},
+    "checkers": {"glyph_src": None, "glyph": "●"},
+    "game": {"glyph_src": None, "glyph": "🎮"},
+    "puzzle": {"glyph_src": None, "glyph": "🧩"},
+    "trophy": {"glyph_src": None, "glyph": "🏆"},
+    "medal": {"glyph_src": None, "glyph": "🏅"},
+    "crown": {"glyph_src": None, "glyph": "👑"},
+    "star": {"glyph_src": None, "glyph": "⭐"},
+    "fire": {"glyph_src": None, "glyph": "🔥"},
+    "lightning": {"glyph_src": None, "glyph": "⚡"},
+}
+
+
+def league_mark(icon_id, sport=None):
+    if icon_id and icon_id in LEAGUE_ICON_MARKS:
+        return dict(LEAGUE_ICON_MARKS[icon_id])
+    return sport_glyph(sport or {})
+
+
+def present_public_league_card(league):
+    template = get_template(league.get("template_id")) or {}
+    sport = {
+        "template_id": league.get("template_id"),
+        "category": template.get("category"),
+    }
+    mark = league_mark(league.get("icon"), sport)
+    games = int(league.get("game_count") or 0)
+    if games == 1:
+        games_label = "1 game logged"
+    elif games:
+        games_label = f"{games} games logged"
+    else:
+        games_label = "No games yet"
+    host = (league.get("owner_email") or league.get("owner_username") or "").strip()
+    return {
+        "name": league.get("name") or "",
+        "slug": league.get("slug") or "",
+        "activity": league.get("sport_name") or "",
+        "games_label": games_label,
+        "host": host,
+        "description": league.get("description") or "",
+        "glyph_src": mark.get("glyph_src"),
+        "glyph": mark.get("glyph"),
+    }
 
 
 def annotate_stat_rows(rows, slug, sport_id):

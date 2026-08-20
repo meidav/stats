@@ -159,7 +159,7 @@ def create_league(owner_id, name, visibility="public", description=None, slug=No
     return get_league_by_id(league_id)
 
 
-def update_league(league_id, name=None, icon=_UNSET):
+def update_league(league_id, name=None, icon=_UNSET, visibility=_UNSET):
     league = get_league_by_id(league_id)
     if not league:
         raise ValueError("league not found")
@@ -174,15 +174,24 @@ def update_league(league_id, name=None, icon=_UNSET):
     else:
         next_icon = str(icon).strip() or None
 
+    next_visibility = league.get("visibility") or "public"
+    next_invite = league.get("invite_code")
+    if visibility is not _UNSET:
+        next_visibility = str(visibility).strip()
+        if next_visibility not in VISIBILITY_OPTIONS:
+            raise ValueError(f"visibility must be one of {VISIBILITY_OPTIONS}")
+        if next_visibility == "private" and not next_invite:
+            next_invite = _invite_code()
+
     with db_manager.get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
             """
             UPDATE leagues
-            SET name = ?, icon = ?, updated_at = CURRENT_TIMESTAMP
+            SET name = ?, icon = ?, visibility = ?, invite_code = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
             """,
-            (next_name, next_icon, league_id),
+            (next_name, next_icon, next_visibility, next_invite, league_id),
         )
     return get_league_by_id(league_id)
 
@@ -310,10 +319,26 @@ def get_sport_by_id(sport_id):
 def search_public_leagues(query=None, limit=20):
     params = []
     sql = """
-        SELECT l.id, l.name, l.slug, l.description, l.visibility, l.created_at,
-               COUNT(DISTINCT s.id) AS sport_count
+        SELECT l.id, l.name, l.slug, l.description, l.visibility, l.icon, l.focus,
+               l.created_at, l.updated_at,
+               u.email AS owner_email,
+               u.username AS owner_username,
+               COUNT(DISTINCT s.id) AS sport_count,
+               COUNT(DISTINCT g.id) AS game_count,
+               (
+                 SELECT s2.name FROM sports s2
+                 WHERE s2.league_id = l.id
+                 ORDER BY s2.created_at ASC LIMIT 1
+               ) AS sport_name,
+               (
+                 SELECT s2.template_id FROM sports s2
+                 WHERE s2.league_id = l.id
+                 ORDER BY s2.created_at ASC LIMIT 1
+               ) AS template_id
         FROM leagues l
+        LEFT JOIN users u ON u.id = l.owner_id
         LEFT JOIN sports s ON s.league_id = l.id
+        LEFT JOIN league_games g ON g.league_id = l.id
         WHERE l.visibility = 'public'
     """
     if query:
@@ -354,6 +379,58 @@ def user_can_access_league(user_id, league):
     if league_is_linkable(league):
         return True
     return user_is_league_member(user_id, league)
+
+
+def _classify_league_family(league, template_ids):
+    focus = league.get("focus") or "mixed"
+    if focus == "sports":
+        return "sports"
+    if focus == "table":
+        return "games"
+    sports = 0
+    games = 0
+    for template_id in template_ids:
+        family = focus_for_template(template_id)
+        if family == "sports":
+            sports += 1
+        elif family == "table":
+            games += 1
+    if sports > games:
+        return "sports"
+    if games > sports:
+        return "games"
+    if sports:
+        return "sports"
+    if games:
+        return "games"
+    return None
+
+
+def league_icon_usage():
+    leagues = [_row_to_dict(row) for row in db_manager.execute_query("SELECT id, focus, icon FROM leagues") or []]
+    sport_rows = [_row_to_dict(row) for row in db_manager.execute_query("SELECT league_id, template_id FROM sports") or []]
+    templates_by_league = {}
+    for row in sport_rows:
+        templates_by_league.setdefault(row["league_id"], []).append(row["template_id"])
+
+    sports_leagues = 0
+    games_leagues = 0
+    icon_counts = {}
+    for league in leagues:
+        family = _classify_league_family(league, templates_by_league.get(league["id"], []))
+        if family == "sports":
+            sports_leagues += 1
+        elif family == "games":
+            games_leagues += 1
+        icon = (league["icon"] or "").strip() if league["icon"] else ""
+        if icon:
+            icon_counts[icon] = icon_counts.get(icon, 0) + 1
+
+    return {
+        "sports_leagues": sports_leagues,
+        "games_leagues": games_leagues,
+        "icon_counts": icon_counts,
+    }
 
 
 def league_to_dict(league, include_invite_code=False):

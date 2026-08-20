@@ -14,7 +14,13 @@ from api.league_db import (
     sport_to_dict,
 )
 from api.stats_service import compute_player_stats, compute_sport_stats
-from api.web_present import annotate_stat_rows, present_games, present_player, with_sport_glyph
+from api.web_present import (
+    annotate_stat_rows,
+    present_games,
+    present_player,
+    present_public_league_card,
+    with_sport_glyph,
+)
 
 
 def _abort_if_arbel():
@@ -65,17 +71,7 @@ def register_public_web(app):
     def public_leagues_index():
         _abort_if_arbel()
         leagues = search_public_leagues(query=None, limit=100)
-        cards = []
-        for league in leagues:
-            cards.append(
-                {
-                    "name": league["name"],
-                    "slug": league["slug"],
-                    "description": league.get("description") or "",
-                    "sport_count": league.get("sport_count") or 0,
-                    "url": f"{APP_URL}/l/{league['slug']}",
-                }
-            )
+        cards = [present_public_league_card(league) for league in leagues]
         return render_template("marketing_leagues.html", leagues=cards)
 
     @app.route("/l")

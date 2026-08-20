@@ -1,4 +1,5 @@
 {% extends "marketing_base.html" %}
+{% from "marketing_league_macros.html" import sport_mark %}
 {% block title %}Public leagues | PlayTracker{% endblock %}
 {% block nav_leagues %}is-active{% endblock %}
 
@@ -13,12 +14,19 @@
         {% for league in leagues %}
         <li>
             <a class="mkt-league-card" href="/l/{{ league.slug }}">
-                <strong>{{ league.name }}</strong>
-                {% if league.description %}
-                <span>{{ league.description }}</span>
-                {% else %}
-                <span>{{ league.sport_count }} {{ 'sport' if league.sport_count == 1 else 'sports' }}</span>
-                {% endif %}
+                <span class="mkt-league-mark">{{ sport_mark(league) }}</span>
+                <span class="mkt-league-copy">
+                    <strong>{{ league.name }}</strong>
+                    {% if league.activity %}
+                    <span class="mkt-league-activity">{{ league.activity }}</span>
+                    {% endif %}
+                    <span class="mkt-league-meta">
+                        {{ league.games_label }}{% if league.host %} · Hosted by {{ league.host }}{% endif %}
+                    </span>
+                    {% if league.description %}
+                    <span class="mkt-league-note">{{ league.description }}</span>
+                    {% endif %}
+                </span>
             </a>
         </li>
         {% endfor %}
