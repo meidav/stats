@@ -1,0 +1,43 @@
+{% extends "marketing_base.html" %}
+{% block title %}{{ code }} | PlayTracker{% endblock %}
+
+{% block extra_head %}
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block body_class %}mkt-error-page{% endblock %}
+
+{% block content %}
+<section class="mkt-error">
+    <div class="mkt-error-mark" data-flavor="{{ flavor.id }}" aria-hidden="true">
+        {% if flavor.id == 'cards' %}
+        <span class="mkt-error-fan">
+            <span class="mkt-error-card" data-suit="s">A</span>
+            <span class="mkt-error-card" data-suit="h">K</span>
+            <span class="mkt-error-card" data-suit="d">Q</span>
+        </span>
+        {% elif flavor.glyph_src %}
+        <img src="{{ url_for('static', filename=flavor.glyph_src) }}" alt="">
+        {% else %}
+        <span class="mkt-error-glyph">{{ flavor.glyph }}</span>
+        {% endif %}
+    </div>
+    <p class="mkt-kicker">{{ flavor.kicker }}</p>
+    <p class="mkt-error-code">{{ code }}</p>
+    <h1>{{ flavor.title }}</h1>
+    <p class="mkt-lead">{{ flavor.lead }}</p>
+    <div class="mkt-cta-row">
+        <a class="mkt-btn mkt-btn-primary" href="/">Home</a>
+        {% if code >= 500 %}
+        <a class="mkt-btn mkt-btn-secondary" href="javascript:location.reload()">Try again</a>
+        {% elif code == 401 %}
+        <a class="mkt-btn mkt-btn-secondary" href="/login">Login</a>
+        {% else %}
+        <a class="mkt-btn mkt-btn-secondary" href="/leagues">Public leagues</a>
+        {% endif %}
+    </div>
+    {% if detail %}
+    <pre class="mkt-error-detail">{{ detail }}</pre>
+    {% endif %}
+</section>
+{% endblock %}

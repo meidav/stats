@@ -1839,31 +1839,11 @@ def marketing_terms():
     return render_template('marketing_legal.html', page='terms')
 
 
-@app.errorhandler(404)
-def not_found_error(error):
-    if request.path.startswith('/api'):
-        return jsonify({"error": "not found"}), 404
-    return render_template(
-        'error.html',
-        code=404,
-        title='Ball went long',
-        message='This page is out of boundaries.',
-    ), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    import traceback
-    app.logger.error(traceback.format_exc())
-    detail = None
-    if app.debug:
-        detail = traceback.format_exc()
-    return render_template(
-        'error.html',
-        code=500,
-        title='Whiffed that one',
-        message='Something spiked the server. The ball is still in play though. Try again or head back to stats.',
-        detail=detail,
-    ), 500
+try:
+    from api.error_pages import register_error_pages
+    register_error_pages(app)
+except Exception as exc:
+    logging.getLogger(__name__).error("Error pages skipped: %s", exc)
 
 
 app.wsgi_app = ArbelPrefixMiddleware(app.wsgi_app)
