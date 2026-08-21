@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { CommonActions } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
@@ -74,7 +75,7 @@ export function EditPlayerScreen({ route, navigation }: Props) {
       if (nextName !== initialName) payload.name = nextName;
       if (photoPayload !== undefined) payload.photo = photoPayload;
       const saved = await api.updatePlayer(token, sportId, initialName, payload);
-      navigation.navigate('PlayerProfile', {
+      const params = {
         sportId,
         playerName: saved.player,
         sportName: saved.sport?.name || route.params.sportName,
@@ -83,6 +84,23 @@ export function EditPlayerScreen({ route, navigation }: Props) {
         sportTemplateId: saved.sport?.template_id || route.params.sportTemplateId,
         sportCategory: saved.sport?.category || route.params.sportCategory,
         leagueIcon: saved.league?.icon ?? route.params.leagueIcon,
+      };
+      navigation.dispatch((state) => {
+        const routes = state.routes.slice(0, -1);
+        const previous = routes[routes.length - 1];
+        if (previous?.name === 'PlayerProfile') {
+          routes[routes.length - 1] = {
+            ...previous,
+            params: { ...previous.params, ...params },
+          };
+        } else {
+          routes.push({ name: 'PlayerProfile', params });
+        }
+        return CommonActions.reset({
+          ...state,
+          index: routes.length - 1,
+          routes,
+        });
       });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not save player');
