@@ -1765,7 +1765,7 @@ a.mkt-profile-pill:hover {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 1.5px rgba(59, 7, 100, 0.55);
+  -webkit-text-stroke: 4px rgba(59, 7, 100, 0.7);
   paint-order: stroke fill;
 }
 
