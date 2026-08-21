@@ -200,10 +200,13 @@ def _decode_photo_payload(photo):
     return data, ext
 
 
-def save_player_photo(sport_id, name, photo):
+def save_player_photo_bytes(sport_id, name, data, ext=".jpg"):
     ensure_player_profile_table()
     os.makedirs(get_upload_dir(), exist_ok=True)
-    data, ext = _decode_photo_payload(photo)
+    if not data:
+        raise ValueError("photo is empty")
+    if len(data) > MAX_PHOTO_BYTES:
+        raise ValueError("photo is too large")
     if ext not in ALLOWED_PHOTO_EXT:
         raise ValueError("photo must be a jpg, png, or webp")
 
@@ -239,6 +242,11 @@ def save_player_photo(sport_id, name, photo):
             except OSError:
                 pass
     return get_player_photo_url(sport_id, name)
+
+
+def save_player_photo(sport_id, name, photo):
+    data, ext = _decode_photo_payload(photo)
+    return save_player_photo_bytes(sport_id, name, data, ext)
 
 
 def clear_player_photo(sport_id, name):
