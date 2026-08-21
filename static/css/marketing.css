@@ -16,6 +16,7 @@
 html {
   margin: 0;
   min-height: 100%;
+  min-height: 100dvh;
   background: #fdba74;
 }
 
@@ -42,6 +43,7 @@ main {
   position: sticky;
   top: 0;
   z-index: 20;
+  flex-shrink: 0;
   background: linear-gradient(90deg, #3b0764, #5b21b6 55%, #6d28d9);
   border-bottom: 1px solid rgba(196, 181, 253, 0.35);
 }
@@ -502,6 +504,7 @@ main {
 
 .mkt-footer {
   margin-top: auto;
+  flex-shrink: 0;
   padding: 22px 24px max(40px, env(safe-area-inset-bottom));
   background: var(--mkt-peach);
   border-top: 1px solid rgba(255, 255, 255, 0.35);
@@ -1724,14 +1727,20 @@ a.mkt-profile-pill:hover {
   }
 }
 
+.mkt-error-page main {
+  display: flex;
+  flex-direction: column;
+}
+
 .mkt-error {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-height: calc(100vh - 180px);
+  flex: 1 0 auto;
   max-width: var(--mkt-page-width);
+  width: 100%;
   margin: 0 auto;
   padding: 48px var(--mkt-page-pad) 64px;
 }
