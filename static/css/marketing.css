@@ -1749,7 +1749,7 @@ a.mkt-profile-pill:hover {
   margin: 0 0 12px;
   font-family: Fredoka, "Avenir Next", sans-serif;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.03em;
   color: #3b0764;
 }
@@ -1761,10 +1761,12 @@ a.mkt-profile-pill:hover {
   font-weight: 800;
   line-height: 0.9;
   letter-spacing: -0.04em;
-  background: linear-gradient(135deg, #5b21b6 0%, #c4b5fd 48%, #fdba74 100%);
+  background: linear-gradient(135deg, #5b21b6 0%, #ffffff 50%, #fdba74 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  -webkit-text-stroke: 1.5px rgba(59, 7, 100, 0.55);
+  paint-order: stroke fill;
 }
 
 .mkt-error-mark {
