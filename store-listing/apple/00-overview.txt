@@ -1,0 +1,25 @@
+PlayTracker Stats - App Store Connect listing copy
+==================================================
+App Store display name: PlayTracker Stats
+Bundle ID: org.playtracker.app
+SKU: playtracker-ios
+Primary language: English (U.S.)
+Primary category: Sports
+Secondary category: Lifestyle
+Age rating: 4+
+
+How to use
+----------
+Open each .txt file in this folder and paste into the matching
+App Store Connect field on iOS App Version 1.0 (Prepare for Submission).
+
+Files
+-----
+promotional-text.txt   - Promotional Text (170)
+description.txt        - Description (4000)
+keywords.txt           - Keywords (100)
+urls-and-metadata.txt  - Support URL, Marketing URL, Copyright, Version
+whats-new.txt          - What's New (for version 1.0)
+review-notes.txt       - App Review Information notes (optional but helpful)
+
+Screenshots and the build are still TODO. Leave those empty for now.

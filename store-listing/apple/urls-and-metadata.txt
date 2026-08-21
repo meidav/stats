@@ -1,0 +1,39 @@
+Support URL
+-----------
+https://playtracker.org/about
+
+Marketing URL
+-------------
+https://playtracker.org
+
+Privacy Policy URL (App Information)
+------------------------------------
+https://playtracker.org/privacy
+
+Terms of Use URL (if asked)
+---------------------------
+https://playtracker.org/terms
+
+Copyright
+---------
+2026 Arbel Industries
+
+Version
+-------
+1.0
+
+Contact email (App Review / support)
+------------------------------------
+hello@playtracker.org
+
+Company
+-------
+Arbel Industries
+https://arbelindustries.com
+
+Notes
+-----
+- Support URL and Marketing URL both work if you prefer playtracker.org for both.
+- Copyright year: update each calendar year if you re-submit.
+- Routing App Coverage File: leave empty (not a routing app).
+- App Clip / iMessage App: leave collapsed / unused.

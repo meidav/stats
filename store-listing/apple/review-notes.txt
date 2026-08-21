@@ -1,0 +1,22 @@
+PlayTracker is a league and standings app for sports and game night.
+
+Demo / review account
+---------------------
+Email: (create a dedicated reviewer account before submit, e.g. review@playtracker.org)
+Password: (set when you create the account)
+
+Please:
+1. Sign in with the account above
+2. Open My leagues
+3. Open a sample league with games already logged
+4. Check Standings, year filter, Games, and Share
+
+Notes for review
+----------------
+- No in-app purchases or subscriptions
+- No ads
+- Account creation is required to create leagues and log games
+- Shared league links open a public web view at playtracker.org
+- Sign in with Apple / Google may be enabled in a later build; email login works now
+
+Contact: hello@playtracker.org

@@ -1,0 +1,58 @@
+App name (30)
+-------------
+PlayTracker Stats
+
+Short description
+-----------------
+See short-description.txt
+
+Full description
+----------------
+See full-description.txt
+
+Application website
+-------------------
+https://playtracker.org
+
+Privacy Policy
+--------------
+https://playtracker.org/privacy
+
+Terms of Service (optional field)
+---------------------------------
+https://playtracker.org/terms
+
+Support email
+-------------
+hello@playtracker.org
+
+Support website (optional)
+--------------------------
+https://playtracker.org/about
+
+Category
+--------
+Sports
+
+Tags / keywords (Play Console may offer free-form tags)
+-------------------------------------------------------
+leagues, standings, volleyball, tennis, chess, sports stats, scorekeeper, game night
+
+Contact / developer
+-------------------
+Arbel Industries
+hello@playtracker.org
+https://arbelindustries.com
+
+Content rating
+--------------
+Complete the IARC questionnaire in Play Console.
+Expect Everyone / low maturity for a stats app with no chat ads or violence.
+
+Data safety (separate form)
+---------------------------
+Collected: email/account info, user-generated league and game content, app activity as needed to run the service.
+Shared: with league members for standings; with hosting providers to operate the app.
+Not sold. Not used for ads.
+Encryption in transit: Yes (HTTPS).
+Users can request deletion: Yes (email hello@playtracker.org until in-app delete ships).

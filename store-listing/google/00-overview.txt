@@ -1,0 +1,20 @@
+PlayTracker - Google Play listing copy
+======================================
+Working title: PlayTracker Stats
+Package name: org.playtracker.app
+Default language: English (United States)
+App category: Sports (Lifestyle secondary if available)
+
+How to use
+----------
+Create the Play Console app, then paste each file into the matching
+Store listing field.
+
+Files
+-----
+short-description.txt  - Short description (80)
+full-description.txt   - Full description (4000)
+urls-and-metadata.txt  - Privacy URL, support email, website, etc.
+
+Graphics still TODO: 512 icon, 1024x500 feature graphic, phone screenshots.
+Data safety form is a separate Play Console step (not in these text files).
