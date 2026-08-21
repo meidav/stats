@@ -1,5 +1,5 @@
 {% extends "marketing_base.html" %}
-{% block title %}{{ code }} | PlayTracker{% endblock %}
+{% block title %}{% if kind == 'league' %}League not found | PlayTracker{% else %}{{ code }} | PlayTracker{% endif %}{% endblock %}
 
 {% block extra_head %}
     <meta name="robots" content="noindex, nofollow">
@@ -23,10 +23,16 @@
         {% endif %}
     </div>
     <p class="mkt-kicker">{{ flavor.kicker }}</p>
+    {% if kind != 'league' %}
     <p class="mkt-error-code">{{ code }}</p>
+    {% endif %}
     <h1>{{ flavor.title }}</h1>
     <p class="mkt-lead">{{ flavor.lead }}</p>
     <div class="mkt-cta-row">
+        {% if kind == 'league' %}
+        <a class="mkt-btn mkt-btn-primary" href="/leagues">See public leagues</a>
+        <a class="mkt-btn mkt-btn-secondary" href="/">Home</a>
+        {% else %}
         <a class="mkt-btn mkt-btn-primary" href="/">Home</a>
         {% if code >= 500 %}
         <a class="mkt-btn mkt-btn-secondary" href="javascript:location.reload()">Try again</a>
@@ -34,6 +40,7 @@
         <a class="mkt-btn mkt-btn-secondary" href="/login">Login</a>
         {% else %}
         <a class="mkt-btn mkt-btn-secondary" href="/leagues">Public leagues</a>
+        {% endif %}
         {% endif %}
     </div>
     {% if detail %}

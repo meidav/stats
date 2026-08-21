@@ -37,6 +37,11 @@ class ErrorPageTests(unittest.TestCase):
         def locked():
             abort(403)
 
+        @app.route("/l/<slug>")
+        def fake_league(slug):
+            from api.error_pages import render_league_unavailable
+            return render_league_unavailable()
+
         register_error_pages(app)
         cls.app = app
         cls.flavors = ERROR_FLAVORS
@@ -108,6 +113,43 @@ class ErrorPageTests(unittest.TestCase):
         html = response.get_data(as_text=True)
         self.assertEqual(response.status_code, 403)
         self.assertIn("Just visiting", html)
+
+    def test_missing_league_stays_fun_and_points_to_public_list(self):
+        response = self.client.get("/l/not-a-real-league?play=cards")
+        html = response.get_data(as_text=True)
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("Misdeal", html)
+        self.assertIn("See public leagues", html)
+        self.assertIn("invite code", html)
+        self.assertNotIn('class="mkt-error-code"', html)
+        self.assertNotIn("Arbel's Stats", html)
+
+    def test_unknown_path_is_not_treated_as_legacy_arbel(self):
+        from arbel_prefix import is_legacy_arbel_path
+
+        self.assertFalse(is_legacy_arbel_path("/blah"))
+        self.assertFalse(is_legacy_arbel_path("/about"))
+        self.assertFalse(is_legacy_arbel_path("/l/not-a-real-league"))
+        self.assertTrue(is_legacy_arbel_path("/games"))
+        self.assertTrue(is_legacy_arbel_path("/games/2024"))
+        self.assertTrue(is_legacy_arbel_path("/vollis_stats/"))
+        self.assertTrue(is_legacy_arbel_path("/edit_vollis_game/12/"))
+        self.assertTrue(is_legacy_arbel_path("/admin/users"))
+        self.assertFalse(is_legacy_arbel_path("/admin"))
+        self.assertFalse(is_legacy_arbel_path("/admin-console"))
+
+    def test_legacy_routes_still_redirect_to_arbel(self):
+        from flask import Flask
+        from arbel_prefix import redirect_legacy_to_arbel
+
+        app = Flask(__name__)
+        app.before_request(redirect_legacy_to_arbel)
+        client = app.test_client()
+        bounced = client.get("/games/", follow_redirects=False)
+        self.assertEqual(bounced.status_code, 302)
+        self.assertTrue(bounced.headers["Location"].endswith("/arbel/games/"))
+        stayed = client.get("/blah", follow_redirects=False)
+        self.assertEqual(stayed.status_code, 404)
 
 
 if __name__ == "__main__":

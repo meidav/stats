@@ -16,6 +16,7 @@ from api.league_db import (
 )
 from api.player_profiles import get_photo_by_filename, get_player_photo_url
 from api.stats_service import compute_player_stats, compute_sport_stats
+from api.error_pages import render_league_unavailable
 from api.web_present import (
     annotate_stat_rows,
     league_mark,
@@ -150,7 +151,7 @@ def register_public_web(app):
         _abort_if_arbel()
         league = _linkable_league(slug)
         if not league:
-            return render_template("marketing_league_unavailable.html"), 404
+            return render_league_unavailable()
 
         sports = get_sports_for_league(league["id"]) or []
         selected = _pick_sport(sports, request.args.get("sport"))
@@ -177,23 +178,23 @@ def register_public_web(app):
         _abort_if_arbel()
         league = _linkable_league(slug)
         if not league:
-            return render_template("marketing_league_unavailable.html"), 404
+            return render_league_unavailable()
 
         sports = get_sports_for_league(league["id"]) or []
         sport = _pick_sport(sports, request.args.get("sport"))
         if not sport:
-            return render_template("marketing_league_unavailable.html"), 404
+            return render_league_unavailable()
 
         name = unquote(player_name or "").strip()
         if not name:
-            return render_template("marketing_league_unavailable.html"), 404
+            return render_league_unavailable()
 
         years = get_sport_years(sport["id"])
         year = _resolve_year(request.args.get("year"), years)
         try:
             profile = compute_player_stats(sport["id"], name, year=year)
         except ValueError:
-            return render_template("marketing_league_unavailable.html"), 404
+            return render_league_unavailable()
 
         payload = league_to_dict(league)
         sport_payload = with_sport_glyph(sport_to_dict(sport))

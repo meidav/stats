@@ -422,7 +422,28 @@ def render_web_error(code, error=None):
         code=code,
         flavor=flavor,
         detail=detail,
+        kind="http",
     ), code
+
+
+LEAGUE_UNAVAILABLE_LEAD = (
+    "This league is not on the public web. If you were invited, open PlayTracker "
+    "and join with an invite code. Anyone can browse the public list."
+)
+
+
+def render_league_unavailable():
+    flavor_id = (request.args.get("play") or "").strip() or None
+    flavor = pick_error_flavor(404, flavor_id=flavor_id)
+    flavor = dict(flavor)
+    flavor["lead"] = LEAGUE_UNAVAILABLE_LEAD
+    return render_template(
+        "marketing_error.html",
+        code=404,
+        flavor=flavor,
+        detail=None,
+        kind="league",
+    ), 404
 
 
 def register_error_pages(app):
