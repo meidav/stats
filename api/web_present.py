@@ -144,13 +144,11 @@ def present_public_league_card(league):
         games_label = f"{games} games logged"
     else:
         games_label = "No games yet"
-    host = (league.get("owner_email") or league.get("owner_username") or "").strip()
     return {
         "name": league.get("name") or "",
         "slug": league.get("slug") or "",
         "activity": league.get("sport_name") or "",
         "games_label": games_label,
-        "host": host,
         "description": league.get("description") or "",
         "glyph_src": mark.get("glyph_src"),
         "glyph": mark.get("glyph"),
