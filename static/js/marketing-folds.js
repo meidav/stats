@@ -8,4 +8,12 @@
       toggle.setAttribute("aria-expanded", closed ? "false" : "true");
     });
   });
+
+  document.addEventListener("click", function (event) {
+    document.querySelectorAll("details.mkt-year[open]").forEach(function (picker) {
+      if (!picker.contains(event.target)) {
+        picker.removeAttribute("open");
+      }
+    });
+  });
 })();

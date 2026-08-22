@@ -102,3 +102,7 @@
     <p class="mkt-soon">Open in PlayTracker is coming soon.</p>
 </section>
 {% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/marketing-folds.js') }}"></script>
+{% endblock %}
