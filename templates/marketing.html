@@ -15,27 +15,36 @@
     </div>
 </section>
 
-<section class="mkt-shots-wrap" aria-label="PlayTracker app screenshots">
-    <div class="mkt-shots">
-        <figure class="mkt-shot">
-            <img src="{{ url_for('static', filename='img/screenshots/intro.jpg') }}" width="828" height="1792" alt="Track everything you play. Volleyball, tennis, basketball, and more.">
-        </figure>
-        <figure class="mkt-shot">
-            <img src="{{ url_for('static', filename='img/screenshots/my-leagues.jpg') }}" width="828" height="1792" alt="Every league in one place, from beach volleyball to chess and gin." loading="lazy">
-        </figure>
-        <figure class="mkt-shot">
-            <img src="{{ url_for('static', filename='img/screenshots/standings.jpg') }}" width="828" height="1792" alt="Standings that stay current when you log a game." loading="lazy">
-        </figure>
-        <figure class="mkt-shot">
-            <img src="{{ url_for('static', filename='img/screenshots/add-game.jpg') }}" width="828" height="1792" alt="Log a game in seconds with names, scores, and date." loading="lazy">
-        </figure>
-        <figure class="mkt-shot">
-            <img src="{{ url_for('static', filename='img/screenshots/player.jpg') }}" width="828" height="1792" alt="Player profiles with win streaks, partner stats, and history." loading="lazy">
-        </figure>
-        <figure class="mkt-shot">
-            <img src="{{ url_for('static', filename='img/screenshots/new-league.jpg') }}" width="828" height="1792" alt="Start a sports or game night league from a template." loading="lazy">
-        </figure>
+<section class="mkt-shots-wrap" data-shots aria-roledescription="carousel" aria-label="PlayTracker app screenshots">
+    <div class="mkt-shots-stage">
+        <button type="button" class="mkt-shots-arrow is-prev" data-shots-prev aria-label="Previous screenshot">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <div class="mkt-shots" data-shots-track>
+            <figure class="mkt-shot">
+                <img src="{{ url_for('static', filename='img/screenshots/intro.jpg') }}" width="828" height="1792" alt="Track everything you play. Volleyball, tennis, basketball, and more.">
+            </figure>
+            <figure class="mkt-shot">
+                <img src="{{ url_for('static', filename='img/screenshots/my-leagues.jpg') }}" width="828" height="1792" alt="Every league in one place, from beach volleyball to chess and gin.">
+            </figure>
+            <figure class="mkt-shot">
+                <img src="{{ url_for('static', filename='img/screenshots/standings.jpg') }}" width="828" height="1792" alt="Standings that stay current when you log a game.">
+            </figure>
+            <figure class="mkt-shot">
+                <img src="{{ url_for('static', filename='img/screenshots/add-game.jpg') }}" width="828" height="1792" alt="Log a game in seconds with names, scores, and date.">
+            </figure>
+            <figure class="mkt-shot">
+                <img src="{{ url_for('static', filename='img/screenshots/player.jpg') }}" width="828" height="1792" alt="Player profiles with win streaks, partner stats, and history.">
+            </figure>
+            <figure class="mkt-shot">
+                <img src="{{ url_for('static', filename='img/screenshots/new-league.jpg') }}" width="828" height="1792" alt="Start a sports or game night league from a template.">
+            </figure>
+        </div>
+        <button type="button" class="mkt-shots-arrow is-next" data-shots-next aria-label="Next screenshot">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
     </div>
+    <div class="mkt-shots-dots" data-shots-dots></div>
 </section>
 
 <section class="mkt-features" id="why">
@@ -71,4 +80,8 @@
         </li>
     </ul>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/marketing-shots.js') }}"></script>
 {% endblock %}
