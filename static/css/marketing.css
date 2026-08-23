@@ -357,9 +357,9 @@ main {
   top: 50%;
   width: min(292px, 38vw);
   margin: 0;
-  padding: 20px;
-  border-radius: 28px;
-  background: rgba(196, 181, 253, 0.5);
+  padding: 12px;
+  border-radius: 24px;
+  background: rgba(91, 33, 182, 0.7);
   border: 0;
   box-shadow: 0 18px 40px rgba(46, 16, 101, 0.16);
   transform: translate(-50%, -50%)
