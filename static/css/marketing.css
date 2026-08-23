@@ -329,12 +329,34 @@ main {
   margin: 12px 0 0;
 }
 
-.mkt-phones-wrap {
+.mkt-phones-wrap,
+.mkt-shots-wrap {
   position: relative;
   overflow: hidden;
   width: 100%;
   margin: 0 0 8px;
   padding: 28px 0 56px;
+}
+
+.mkt-shots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 18px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 24px 0;
+}
+
+.mkt-shot {
+  margin: 0;
+}
+
+.mkt-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(30, 58, 138, 0.18);
 }
 
 .mkt-phones {
@@ -606,7 +628,9 @@ main {
     line-height: 1.15;
     font-weight: 500;
   }
-  .mkt-phones {
+  .mkt-phones,
+  .mkt-shots {
+    display: flex;
     justify-content: flex-start;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -616,8 +640,14 @@ main {
     padding: 8px 20px 0;
     scrollbar-width: none;
   }
-  .mkt-phones::-webkit-scrollbar {
+  .mkt-phones::-webkit-scrollbar,
+  .mkt-shots::-webkit-scrollbar {
     display: none;
+  }
+  .mkt-shot {
+    flex: 0 0 72vw;
+    max-width: 280px;
+    scroll-snap-align: center;
   }
   .mkt-phone {
     flex: 0 0 72vw;
