@@ -153,7 +153,7 @@
       });
       window.setTimeout(function () {
         if (lightboxBusy && incoming.parentNode) finish();
-      }, 700);
+      }, 480);
     }
 
     if (incoming.complete) play();
