@@ -201,6 +201,8 @@ SPORT_TEMPLATES = [
 
 VISIBILITY_OPTIONS = ("public", "private", "unlisted")
 SCORE_DIRECTIONS = ("higher_wins", "lower_wins")
+# Create/update only sports or table. mixed remains valid for legacy leagues in the DB.
+CREATE_FOCUS_OPTIONS = ("sports", "table")
 FOCUS_OPTIONS = ("sports", "table", "mixed")
 TEMPLATE_CATEGORIES = (
     {"id": "sports", "name": "Sports"},
@@ -223,12 +225,12 @@ def list_templates():
 def focus_for_template(template_id):
     template = get_template(template_id)
     if not template:
-        return "mixed"
+        return "sports"
     if template["category"] == "sports":
         return "sports"
     if template["category"] in ("cards", "board"):
         return "table"
-    return "mixed"
+    return "sports"
 
 
 def default_icon_for_template(template_id):
