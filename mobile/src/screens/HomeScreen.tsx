@@ -268,10 +268,7 @@ export function HomeScreen({ navigation }: Props) {
       ) : (
         <ScrollView
           style={styles.emptyScroll}
-          contentContainerStyle={[
-            styles.emptyHost,
-            compactEmpty && styles.emptyHostCompact,
-          ]}
+          contentContainerStyle={styles.emptyHost}
           showsVerticalScrollIndicator={false}
           bounces={false}
         >
@@ -442,15 +439,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  emptyHostCompact: {
-    justifyContent: 'flex-start',
-    paddingTop: spacing.xs,
+    paddingVertical: spacing.sm,
   },
   emptyStack: {
     width: '100%',
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   emptyStackTablet: {
     // Match roughly one half of the previous side-by-side pair.
@@ -458,7 +451,7 @@ const styles = StyleSheet.create({
     maxWidth: 440,
   },
   emptyStackCompact: {
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   emptyCard: {
     padding: spacing.xl,
