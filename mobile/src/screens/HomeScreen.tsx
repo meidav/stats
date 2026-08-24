@@ -21,7 +21,7 @@ import { TemplateGlyph } from '../components/TemplateGlyph';
 import { LeagueIcon } from '../components/LeagueIcon';
 import { IconActionRow } from '../components/IconActionRow';
 import { BrandLockup } from '../components/BrandLockup';
-import { AccountFooter } from '../components/AccountFooter';
+import { AccountFooter, accentLilac } from '../components/AccountFooter';
 import { GradientButton } from '../components/GradientButton';
 import { SecondaryButton } from '../components/SecondaryButton';
 import { APP_TAGLINE } from '../constants/brand';
@@ -161,13 +161,19 @@ export function HomeScreen({ navigation }: Props) {
               tintColor={colors.primary}
             />
           }
-          contentContainerStyle={[
-            hasLeagues ? styles.list : styles.emptyList,
-            contentWidthStyle,
-          ]}
+          contentContainerStyle={
+            hasLeagues
+              ? [styles.list, contentMaxWidth ? { alignItems: 'center' } : null]
+              : styles.emptyList
+          }
           ListFooterComponent={
             hasLeagues ? (
-              <View style={styles.footerActions}>
+              <View
+                style={[
+                  styles.footerActions,
+                  contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null,
+                ]}
+              >
                 <SecondaryButton
                   label="Browse public leagues"
                   onPress={() => navigation.navigate('DiscoverLeagues')}
@@ -199,20 +205,33 @@ export function HomeScreen({ navigation }: Props) {
             error ? (
               <Text style={styles.retryHint}>Pull down to try again.</Text>
             ) : (
-              <View style={[styles.emptyStack, isTablet && styles.emptyStackRow]}>
+              <View
+                style={[
+                  styles.emptyStack,
+                  isTablet && styles.emptyStackRow,
+                  contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null,
+                ]}
+              >
                 <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
-                  <Ionicons name="earth" size={48} color={colors.primary} style={styles.emptyGlyph} />
-                  <Text
-                    style={styles.emptyTitle}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.8}
-                  >
-                    View public leagues
-                  </Text>
-                  <Text style={styles.emptyBody}>
-                    Browse open leagues on PlayTracker and check standings before you create your own.
-                  </Text>
+                  <View style={styles.emptyCardTop}>
+                    <Ionicons
+                      name="earth"
+                      size={48}
+                      color={accentLilac}
+                      style={styles.emptyGlyph}
+                    />
+                    <Text
+                      style={styles.emptyTitle}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      View public leagues
+                    </Text>
+                    <Text style={styles.emptyBody}>
+                      Browse open leagues on PlayTracker and check standings before you create your own.
+                    </Text>
+                  </View>
                   <SecondaryButton
                     label="Browse public leagues"
                     onPress={() => navigation.navigate('DiscoverLeagues')}
@@ -221,18 +240,20 @@ export function HomeScreen({ navigation }: Props) {
                 </GlassCard>
 
                 <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
-                  <Text style={styles.emptyEmoji}>🏆</Text>
-                  <Text
-                    style={styles.emptyTitle}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.8}
-                  >
-                    {copy.homeEmpty}
-                  </Text>
-                  <Text style={styles.emptyBody}>
-                    A league is one sport or one game night. Standings live here after you add games.
-                  </Text>
+                  <View style={styles.emptyCardTop}>
+                    <Text style={styles.emptyEmoji}>🏆</Text>
+                    <Text
+                      style={styles.emptyTitle}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.8}
+                    >
+                      {copy.homeEmpty}
+                    </Text>
+                    <Text style={styles.emptyBody}>
+                      A league is one sport or one game night. Standings live here after you add games.
+                    </Text>
+                  </View>
                   <GradientButton
                     label="Create a league"
                     onPress={() => navigation.navigate('CreateLeague')}
@@ -249,7 +270,12 @@ export function HomeScreen({ navigation }: Props) {
             const gameCount = item.game_count ?? 0;
             const gamesLabel = gameCount === 1 ? '1 game' : `${gameCount} games`;
             return (
-              <View style={styles.leagueCardWrap}>
+              <View
+                style={[
+                  styles.leagueCardWrap,
+                  contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null,
+                ]}
+              >
                 <GlassCard style={styles.leagueCard}>
                   <View style={styles.leagueRow}>
                     <TouchableOpacity
@@ -405,6 +431,7 @@ const styles = StyleSheet.create({
   emptyList: {
     flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
   },
@@ -417,11 +444,16 @@ const styles = StyleSheet.create({
   },
   emptyCard: {
     padding: spacing.xl,
-    alignItems: 'center',
+    alignItems: 'stretch',
+    justifyContent: 'space-between',
+    gap: spacing.md,
   },
   emptyCardHalf: {
     flex: 1,
     minWidth: 280,
+  },
+  emptyCardTop: {
+    alignItems: 'center',
   },
   emptyGlyph: {
     marginBottom: spacing.md,
@@ -429,6 +461,7 @@ const styles = StyleSheet.create({
   emptyEmoji: {
     fontSize: 48,
     marginBottom: spacing.md,
+    textAlign: 'center',
   },
   emptyTitle: {
     fontSize: 20,
@@ -443,7 +476,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: colors.textMuted,
     textAlign: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: 0,
   },
   emptyCta: {
     alignSelf: 'stretch',

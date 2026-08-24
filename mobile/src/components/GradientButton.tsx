@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
   },
   gradient: {
     paddingVertical: 16,
+    minHeight: 52,
     alignItems: 'center',
     justifyContent: 'center',
   },

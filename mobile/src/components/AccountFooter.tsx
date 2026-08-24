@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { SecondaryButton } from './SecondaryButton';
 import { colors, spacing } from '../constants/theme';
 import { useAuth } from '../lib/auth';
+
+/** Soft dark lilac used for discover / public-league accents (not primary blue). */
+export const accentLilac = '#5B21B6';
 
 /**
  * Shared account strip: email + Sign out. Used on home, discover, and similar hubs.
@@ -37,12 +42,17 @@ export function AccountFooter() {
             end={{ x: 1, y: 1 }}
             style={styles.modalCard}
           >
-            <Text style={styles.modalTitle}>Sign out?</Text>
+            <View style={styles.modalHeader}>
+              <Ionicons name="log-out-outline" size={26} color={colors.primaryDark} />
+              <Text style={styles.modalTitle}>Sign out?</Text>
+            </View>
             <Text style={styles.modalBody}>You can sign back in anytime with the same account.</Text>
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.stay} onPress={() => setSignOutOpen(false)}>
-                <Text style={styles.stayText}>Stay signed in</Text>
-              </TouchableOpacity>
+              <SecondaryButton
+                label="Stay signed in"
+                onPress={() => setSignOutOpen(false)}
+                style={styles.modalButton}
+              />
               <TouchableOpacity
                 style={styles.confirm}
                 onPress={async () => {
@@ -97,12 +107,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(37, 99, 235, 0.28)',
   },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: spacing.sm,
+  },
   modalTitle: {
     fontSize: 20,
     fontWeight: '800',
     color: '#1E3A8A',
     textAlign: 'center',
-    marginBottom: spacing.sm,
   },
   modalBody: {
     fontSize: 15,
@@ -113,20 +129,11 @@ const styles = StyleSheet.create({
   },
   modalActions: {
     flexDirection: 'row',
+    alignItems: 'stretch',
     gap: spacing.sm,
   },
-  stay: {
+  modalButton: {
     flex: 1,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.72)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-  },
-  stayText: {
-    color: colors.primary,
-    fontWeight: '700',
-    fontSize: 15,
   },
   confirm: {
     flex: 1,
@@ -135,6 +142,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
+    minHeight: 52,
   },
   confirmText: {
     color: '#fff',
