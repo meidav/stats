@@ -7,6 +7,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   ResetPassword: { email?: string } | undefined;
   Home: undefined;
+  DiscoverLeagues: undefined;
   CreateLeague: undefined;
   League: { slug: string; name?: string; role?: string };
   EditLeague: {
@@ -25,6 +26,7 @@ export type RootStackParamList = {
     sideKind?: 'player' | 'team';
     focus?: 'sports' | 'table' | 'mixed';
     leagueName?: string;
+    sportCategory?: Sport['category'];
     gameId?: number;
     winners?: string[];
     losers?: string[];

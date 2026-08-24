@@ -2,30 +2,35 @@ import { NavigationContainer, DefaultTheme, createNavigationContainerRef } from 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { Linking, StyleSheet } from 'react-native';
+import { ActivityIndicator, Image, Linking, StyleSheet, Text } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { enableScreens } from 'react-native-screens';
 
-import { BrandLockup } from './src/components/BrandLockup';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { GradientBackground } from './src/components/GradientBackground';
 import { AuthProvider, useAuth } from './src/lib/auth';
 import { parseLeagueSlugFromUrl } from './src/lib/leagueLinks';
 import { hasSeenIntroRecently } from './src/lib/onboarding';
 import type { RootStackParamList } from './src/navigation/types';
-import { AddGameScreen } from './src/screens/AddGameScreen';
-import { CreateLeagueScreen } from './src/screens/CreateLeagueScreen';
-import { EditLeagueScreen } from './src/screens/EditLeagueScreen';
-import { EditPlayerScreen } from './src/screens/EditPlayerScreen';
-import { ForgotPasswordScreen } from './src/screens/ForgotPasswordScreen';
-import { HomeScreen } from './src/screens/HomeScreen';
-import { LeagueScreen } from './src/screens/LeagueScreen';
-import { LoginScreen } from './src/screens/LoginScreen';
-import { PlayerProfileScreen } from './src/screens/PlayerProfileScreen';
-import { ResetPasswordScreen } from './src/screens/ResetPasswordScreen';
-import { SignUpScreen } from './src/screens/SignUpScreen';
-import { WelcomeScreen } from './src/screens/WelcomeScreen';
+
+const logoPng = require('./assets/playtracker-logo.png');
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const navigationRef = createNavigationContainerRef<RootStackParamList>();
 let pendingLeagueSlug: string | null = null;
+let screensEnabled = false;
+
+function ensureScreensEnabled() {
+  if (screensEnabled) return;
+  screensEnabled = true;
+  enableScreens(true);
+}
+
+const screenOptions = {
+  headerShown: false,
+  contentStyle: { backgroundColor: 'transparent' as const },
+};
 
 const navTheme = {
   ...DefaultTheme,
@@ -47,26 +52,127 @@ function consumePendingLeague(canOpen: boolean) {
   navigationRef.navigate('League', { slug, name: '' });
 }
 
+function BootScreen({ status }: { status: string }) {
+  return (
+    <GradientBackground style={styles.loader}>
+      <Image source={logoPng} style={styles.logo} resizeMode="contain" />
+      <ActivityIndicator color="#FFFFFF" style={styles.spinner} />
+      <Text style={styles.status}>{status}</Text>
+    </GradientBackground>
+  );
+}
+
+function AuthStack({ showIntro }: { showIntro: boolean }) {
+  ensureScreensEnabled();
+  return (
+    <Stack.Navigator
+      initialRouteName={showIntro ? 'Welcome' : 'Login'}
+      screenOptions={screenOptions}
+    >
+      <Stack.Screen
+        name="Welcome"
+        getComponent={() => require('./src/screens/WelcomeScreen').WelcomeScreen}
+      />
+      <Stack.Screen
+        name="Login"
+        getComponent={() => require('./src/screens/LoginScreen').LoginScreen}
+      />
+      <Stack.Screen
+        name="SignUp"
+        getComponent={() => require('./src/screens/SignUpScreen').SignUpScreen}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        getComponent={() => require('./src/screens/ForgotPasswordScreen').ForgotPasswordScreen}
+      />
+      <Stack.Screen
+        name="ResetPassword"
+        getComponent={() => require('./src/screens/ResetPasswordScreen').ResetPasswordScreen}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function MainStack() {
+  ensureScreensEnabled();
+  return (
+    <Stack.Navigator initialRouteName="Home" screenOptions={screenOptions}>
+      <Stack.Screen
+        name="Home"
+        getComponent={() => require('./src/screens/HomeScreen').HomeScreen}
+      />
+      <Stack.Screen
+        name="DiscoverLeagues"
+        getComponent={() => require('./src/screens/DiscoverLeaguesScreen').DiscoverLeaguesScreen}
+      />
+      <Stack.Screen
+        name="CreateLeague"
+        getComponent={() => require('./src/screens/CreateLeagueScreen').CreateLeagueScreen}
+      />
+      <Stack.Screen
+        name="EditLeague"
+        getComponent={() => require('./src/screens/EditLeagueScreen').EditLeagueScreen}
+      />
+      <Stack.Screen
+        name="EditPlayer"
+        getComponent={() => require('./src/screens/EditPlayerScreen').EditPlayerScreen}
+      />
+      <Stack.Screen
+        name="League"
+        getComponent={() => require('./src/screens/LeagueScreen').LeagueScreen}
+      />
+      <Stack.Screen
+        name="AddGame"
+        getComponent={() => require('./src/screens/AddGameScreen').AddGameScreen}
+      />
+      <Stack.Screen
+        name="PlayerProfile"
+        getComponent={() => require('./src/screens/PlayerProfileScreen').PlayerProfileScreen}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function AppNavigator() {
   const { token, loading: authLoading } = useAuth();
   const [gateReady, setGateReady] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [status, setStatus] = useState('Restoring session...');
 
   useEffect(() => {
     let active = true;
-    setGateReady(false);
+
     async function decideStart() {
-      if (authLoading) return;
-      if (token) {
-        if (active) setGateReady(true);
+      if (authLoading) {
+        setStatus('Restoring session...');
         return;
       }
-      const seen = await hasSeenIntroRecently();
-      if (!active) return;
-      setShowIntro(!seen);
-      setGateReady(true);
+
+      if (token) {
+        if (active) {
+          setStatus('Opening leagues...');
+          setGateReady(true);
+        }
+        return;
+      }
+
+      try {
+        setStatus('Checking intro...');
+        const seen = await hasSeenIntroRecently();
+        if (!active) return;
+        setShowIntro(!seen);
+        setStatus(seen ? 'Opening sign in...' : 'Opening intro...');
+      } catch {
+        if (!active) return;
+        setShowIntro(true);
+        setStatus('Opening intro...');
+      } finally {
+        if (active) setGateReady(true);
+      }
     }
+
     decideStart();
+
     return () => {
       active = false;
     };
@@ -77,7 +183,7 @@ function AppNavigator() {
       stashLeagueLink(url);
       consumePendingLeague(Boolean(token) && gateReady);
     }
-    Linking.getInitialURL().then(handleUrl);
+    Linking.getInitialURL().then(handleUrl).catch(() => {});
     const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url));
     return () => sub.remove();
   }, [token, gateReady]);
@@ -87,71 +193,63 @@ function AppNavigator() {
   }, [gateReady, token, authLoading]);
 
   if (authLoading || !gateReady) {
-    return (
-      <GradientBackground style={styles.loader}>
-        <BrandLockup size={168} />
-      </GradientBackground>
-    );
+    return <BootScreen status={status} />;
   }
 
-  const initialRouteName = token ? 'Home' : showIntro ? 'Welcome' : 'Login';
+  if (token) {
+    return <MainStack />;
+  }
 
-  const stack = (
-    <GradientBackground>
-    <Stack.Navigator
-      initialRouteName={initialRouteName}
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: 'transparent' },
-      }}
-    >
-      {!token ? (
-        <>
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-        </>
-      ) : (
-        <>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="CreateLeague" component={CreateLeagueScreen} />
-          <Stack.Screen name="EditLeague" component={EditLeagueScreen} />
-          <Stack.Screen name="EditPlayer" component={EditPlayerScreen} />
-          <Stack.Screen name="League" component={LeagueScreen} />
-          <Stack.Screen name="AddGame" component={AddGameScreen} />
-          <Stack.Screen name="PlayerProfile" component={PlayerProfileScreen} />
-        </>
-      )}
-    </Stack.Navigator>
-    </GradientBackground>
-  );
-
-  return stack;
+  return <AuthStack showIntro={showIntro} />;
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppRoot />
-    </AuthProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <GestureHandlerRootView style={styles.root}>
+          <AuthProvider>
+            <AppRoot />
+          </AuthProvider>
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 
 function AppRoot() {
   return (
     <NavigationContainer ref={navigationRef} theme={navTheme}>
-      <AppNavigator />
+      <GradientBackground>
+        <AppNavigator />
+      </GradientBackground>
       <StatusBar style="dark" />
     </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   loader: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  logo: {
+    width: 168,
+    height: 168,
+  },
+  spinner: {
+    marginTop: 24,
+  },
+  status: {
+    marginTop: 16,
+    color: '#FDE68A',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

@@ -2,13 +2,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useRef, useState } from 'react';
 import {
-  Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,6 +18,7 @@ import { GradientButton } from '../components/GradientButton';
 import { BeachVolleyballMark } from '../components/TemplateGlyph';
 import { APP_TAGLINE } from '../constants/brand';
 import { colors, glass, spacing } from '../constants/theme';
+import { useContentMaxWidth } from '../lib/layout';
 import { markIntroSeen } from '../lib/onboarding';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -37,20 +38,23 @@ const SLIDES = [
   {
     emoji: '🏆',
     title: 'Leagues that stick',
-    body: 'Create a league for your crew, see standings, and build a history of what you play.',
+    body: 'Create a league for one sport or one game night. Standings and history stay clear.',
   },
 ] as const;
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SLIDE_WIDTH = SCREEN_WIDTH;
-
 export function WelcomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const contentMaxWidth = useContentMaxWidth();
   const scrollRef = useRef<ScrollView>(null);
   const finishing = useRef(false);
   const [index, setIndex] = useState(0);
   const isLast = index === SLIDES.length - 1;
   const isFirst = index === 0;
+  const slideWidth = screenWidth;
+  const cardWidthStyle = contentMaxWidth
+    ? { width: contentMaxWidth, alignSelf: 'center' as const }
+    : { width: '100%' as const };
 
   useFocusEffect(
     useCallback(() => {
@@ -74,7 +78,7 @@ export function WelcomeScreen({ navigation }: Props) {
 
   function goToSlide(nextIndex: number) {
     setIndex(nextIndex);
-    scrollRef.current?.scrollTo({ x: nextIndex * SLIDE_WIDTH, animated: true });
+    scrollRef.current?.scrollTo({ x: nextIndex * slideWidth, animated: true });
   }
 
   function handleNext() {
@@ -94,14 +98,14 @@ export function WelcomeScreen({ navigation }: Props) {
 
   function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
     const x = event.nativeEvent.contentOffset.x;
-    const lastStart = SLIDE_WIDTH * (SLIDES.length - 1);
-    if (x > lastStart + SLIDE_WIDTH * 0.28) {
+    const lastStart = slideWidth * (SLIDES.length - 1);
+    if (x > lastStart + slideWidth * 0.28) {
       finish();
     }
   }
 
   function handleScrollEnd(event: NativeSyntheticEvent<NativeScrollEvent>) {
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / SLIDE_WIDTH);
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / slideWidth);
     if (nextIndex >= SLIDES.length) {
       finish();
       return;
@@ -131,8 +135,8 @@ export function WelcomeScreen({ navigation }: Props) {
         contentContainerStyle={styles.carouselContent}
       >
         {SLIDES.map((item) => (
-          <View key={item.title} style={styles.slidePage}>
-            <View style={styles.slide}>
+          <View key={item.title} style={[styles.slidePage, { width: slideWidth }]}>
+            <View style={[styles.slide, cardWidthStyle]}>
               {'graphic' in item ? (
                 <View style={styles.graphicWrap}>
                   <BeachVolleyballMark size={96} />
@@ -145,7 +149,7 @@ export function WelcomeScreen({ navigation }: Props) {
             </View>
           </View>
         ))}
-        <View style={styles.slidePage} />
+        <View style={[styles.slidePage, { width: slideWidth }]} />
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.lg }]}>
@@ -158,7 +162,7 @@ export function WelcomeScreen({ navigation }: Props) {
           ))}
         </View>
 
-        <View style={styles.navRow}>
+        <View style={[styles.navRow, cardWidthStyle]}>
           <TouchableOpacity
             style={[styles.secondaryButton, isFirst && styles.secondaryButtonDisabled]}
             onPress={handlePrevious}
@@ -226,7 +230,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   slidePage: {
-    width: SLIDE_WIDTH,
     paddingHorizontal: spacing.lg,
     justifyContent: 'center',
   },
@@ -286,6 +289,7 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
+    alignItems: 'center',
   },
   navRow: {
     flexDirection: 'row',

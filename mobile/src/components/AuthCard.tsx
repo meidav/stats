@@ -12,6 +12,7 @@ import {
 import { BrandLockup } from './BrandLockup';
 import { APP_TAGLINE } from '../constants/brand';
 import { colors, glass, spacing } from '../constants/theme';
+import { useContentMaxWidth } from '../lib/layout';
 
 type Props = {
   children: React.ReactNode;
@@ -21,6 +22,8 @@ type Props = {
 };
 
 export function AuthCard({ children, subtitle, style, footer }: Props) {
+  const contentMaxWidth = useContentMaxWidth();
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -31,7 +34,7 @@ export function AuthCard({ children, subtitle, style, footer }: Props) {
         keyboardShouldPersistTaps="handled"
         bounces={false}
       >
-        <View style={[styles.card, style]}>
+        <View style={[styles.card, contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null, style]}>
           <View style={styles.brandWrap}>
             <BrandLockup size={132} />
           </View>
@@ -63,6 +66,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     padding: spacing.lg,
   },
   belowCard: {
