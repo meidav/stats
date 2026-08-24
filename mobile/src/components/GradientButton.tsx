@@ -1,12 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, StyleProp, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
 
 import { gradients } from '../constants/theme';
 
@@ -15,7 +9,7 @@ type Props = {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function GradientButton({ label, onPress, disabled, loading, style }: Props) {
@@ -35,7 +29,9 @@ export function GradientButton({ label, onPress, disabled, loading, style }: Pro
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.label} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}>
+            {label}
+          </Text>
         )}
       </LinearGradient>
     </TouchableOpacity>

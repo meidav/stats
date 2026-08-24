@@ -20,6 +20,7 @@ import { CollapsibleSection } from '../components/CollapsibleSection';
 import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
 import { ScreenScaffold } from '../components/ScreenScaffold';
+import { SportTypePill } from '../components/SportTypePill';
 import { StatsTable } from '../components/StatsTable';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { colors, gradients, spacing } from '../constants/theme';
@@ -142,7 +143,9 @@ export function LeagueScreen({ route, navigation }: Props) {
           const leagueData = await api.getLeague(slug, token);
           if (!active) return;
           setLeague(leagueData);
-          await upsertCachedLeague(leagueData);
+          if (leagueData.role) {
+            await upsertCachedLeague(leagueData);
+          }
           const sport =
             leagueData.sports.find((item) => item.id === selectedIdRef.current) ??
             leagueData.sports[0] ??
@@ -215,7 +218,9 @@ export function LeagueScreen({ route, navigation }: Props) {
     try {
       const leagueData = await api.getLeague(slug, token);
       setLeague(leagueData);
-      await upsertCachedLeague(leagueData);
+      if (leagueData.role) {
+        await upsertCachedLeague(leagueData);
+      }
       const sport =
         leagueData.sports.find((item) => item.id === selectedIdRef.current) ??
         leagueData.sports[0] ??
@@ -268,6 +273,7 @@ export function LeagueScreen({ route, navigation }: Props) {
       sportId: selectedSport.id,
       sportName: selectedSport.name,
       templateId: selectedSport.template_id,
+      sportCategory: selectedSport.category,
       playersPerSide: selectedSport.players_per_side,
       scoreMode: selectedSport.score_mode,
       sideKind: selectedSport.side_kind,
@@ -282,6 +288,7 @@ export function LeagueScreen({ route, navigation }: Props) {
       sportId: selectedSport.id,
       sportName: selectedSport.name,
       templateId: selectedSport.template_id,
+      sportCategory: selectedSport.category,
       playersPerSide: selectedSport.players_per_side,
       scoreMode: selectedSport.score_mode,
       sideKind: selectedSport.side_kind,
@@ -393,18 +400,12 @@ export function LeagueScreen({ route, navigation }: Props) {
         {leagueName}
       </Text>
       {selectedSport ? (
-        <View style={styles.sportMeta}>
-          <TemplateGlyph
-            template={{
-              id: selectedSport.template_id,
-              category: selectedSport.category || 'custom',
-            }}
-            size={18}
-          />
-          <Text style={styles.sportMetaText} numberOfLines={1}>
-            {selectedSport.name}
-          </Text>
-        </View>
+        <SportTypePill
+          name={selectedSport.name}
+          templateId={selectedSport.template_id}
+          category={selectedSport.category || 'custom'}
+          style={{ marginTop: 8, marginBottom: spacing.md }}
+        />
       ) : null}
 
       {league && league.sports.length > 1 ? (
@@ -630,27 +631,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     textAlign: 'center',
     paddingHorizontal: spacing.lg,
-  },
-  sportMeta: {
-    marginTop: 8,
-    marginBottom: spacing.md,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: 'rgba(219, 234, 254, 0.62)',
-    borderWidth: 1,
-    borderColor: 'rgba(147, 197, 253, 0.95)',
-    maxWidth: '90%',
-  },
-  sportMetaText: {
-    color: '#1E3A8A',
-    fontWeight: '700',
-    fontSize: 13,
-    flexShrink: 1,
   },
   addButton: {
     height: 44,

@@ -13,9 +13,11 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
+import { AccountFooter } from '../components/AccountFooter';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GlassCard } from '../components/GlassCard';
 import { LeagueIcon } from '../components/LeagueIcon';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { colors, spacing } from '../constants/theme';
@@ -50,7 +52,7 @@ function iconForPublicLeague(item: PublicLeague) {
 }
 
 export function DiscoverLeaguesScreen({ navigation }: Props) {
-  const contentMaxWidth = useContentMaxWidth(560);
+  const contentMaxWidth = useContentMaxWidth(720);
   const [leagues, setLeagues] = useState<PublicLeague[]>([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -82,21 +84,15 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
   }
 
   return (
-    <ScreenScaffold
-      contentStyle={styles.scaffold}
-      footer={
-        <TouchableOpacity style={styles.backRow} onPress={() => navigation.goBack()}>
-          <Text style={styles.backText}>Back to my leagues</Text>
-        </TouchableOpacity>
-      }
-    >
+    <ScreenScaffold footer={<AccountFooter />}>
+      <ScreenHeader title="Public leagues" onBack={() => navigation.goBack()} />
+
       <View
         style={[
-          styles.header,
+          styles.body,
           contentMaxWidth ? { maxWidth: contentMaxWidth, alignSelf: 'center', width: '100%' } : null,
         ]}
       >
-        <Text style={styles.title}>Public leagues</Text>
         <Text style={styles.subtitle}>
           Browse open leagues on PlayTracker. Tap one to view standings and games.
         </Text>
@@ -116,96 +112,87 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
             <Ionicons name="search" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
+
+        <ErrorBanner message={error} />
+
+        {loading && leagues.length === 0 ? (
+          <ActivityIndicator style={styles.loader} color={colors.primary} />
+        ) : (
+          <FlatList
+            data={leagues}
+            keyExtractor={(item) => String(item.id)}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setRefreshing(true);
+                  load(query);
+                }}
+                tintColor={colors.primary}
+              />
+            }
+            contentContainerStyle={[
+              styles.list,
+              leagues.length === 0 ? styles.emptyList : null,
+            ]}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>
+                {error ? 'Pull down to try again.' : 'No public leagues match that search yet.'}
+              </Text>
+            }
+            renderItem={({ item }) => {
+              const displayIcon = iconForPublicLeague(item);
+              const sportLabel = item.sport_name
+                ? item.sport_name
+                : item.sport_count === 1
+                  ? '1 sport'
+                  : `${item.sport_count ?? 0} sports`;
+              return (
+                <GlassCard
+                  style={styles.card}
+                  onPress={() =>
+                    navigation.navigate('League', {
+                      slug: item.slug,
+                      name: item.name,
+                    })
+                  }
+                >
+                  <View style={styles.cardRow}>
+                    <View style={styles.iconWrap}>
+                      {displayIcon ? (
+                        <LeagueIcon id={displayIcon} size={26} />
+                      ) : item.template_id ? (
+                        <TemplateGlyph
+                          template={{ id: item.template_id, category: 'sports' }}
+                          size={24}
+                        />
+                      ) : (
+                        <LeagueIcon id="trophy" size={24} />
+                      )}
+                    </View>
+                    <View style={styles.cardCopy}>
+                      <Text style={styles.cardTitle} numberOfLines={1}>
+                        {item.name}
+                      </Text>
+                      <Text style={styles.cardMeta} numberOfLines={1}>
+                        {sportLabel} · public
+                      </Text>
+                    </View>
+                  </View>
+                </GlassCard>
+              );
+            }}
+          />
+        )}
       </View>
-
-      <ErrorBanner message={error} />
-
-      {loading && leagues.length === 0 ? (
-        <ActivityIndicator style={styles.loader} color={colors.primary} />
-      ) : (
-        <FlatList
-          data={leagues}
-          keyExtractor={(item) => String(item.id)}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                load(query);
-              }}
-              tintColor={colors.primary}
-            />
-          }
-          contentContainerStyle={[
-            styles.list,
-            contentMaxWidth ? { maxWidth: contentMaxWidth, alignSelf: 'center', width: '100%' } : null,
-            leagues.length === 0 ? styles.emptyList : null,
-          ]}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>
-              {error ? 'Pull down to try again.' : 'No public leagues match that search yet.'}
-            </Text>
-          }
-          renderItem={({ item }) => {
-            const displayIcon = iconForPublicLeague(item);
-            const sportLabel = item.sport_name
-              ? item.sport_name
-              : item.sport_count === 1
-                ? '1 sport'
-                : `${item.sport_count ?? 0} sports`;
-            return (
-              <GlassCard
-                style={styles.card}
-                onPress={() =>
-                  navigation.navigate('League', {
-                    slug: item.slug,
-                    name: item.name,
-                  })
-                }
-              >
-                <View style={styles.cardRow}>
-                  <View style={styles.iconWrap}>
-                    {displayIcon ? (
-                      <LeagueIcon id={displayIcon} size={26} />
-                    ) : item.template_id ? (
-                      <TemplateGlyph
-                        template={{ id: item.template_id, category: 'sports' }}
-                        size={24}
-                      />
-                    ) : (
-                      <LeagueIcon id="trophy" size={24} />
-                    )}
-                  </View>
-                  <View style={styles.cardCopy}>
-                    <Text style={styles.cardTitle} numberOfLines={2}>
-                      {item.name}
-                    </Text>
-                    <Text style={styles.cardMeta} numberOfLines={1}>
-                      {sportLabel} · public
-                    </Text>
-                  </View>
-                </View>
-              </GlassCard>
-            );
-          }}
-        />
-      )}
     </ScreenScaffold>
   );
 }
 
 const styles = StyleSheet.create({
-  scaffold: {
+  body: {
+    flex: 1,
     paddingHorizontal: spacing.lg,
-  },
-  header: {
-    marginBottom: spacing.md,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: spacing.sm,
   },
   subtitle: {
     fontSize: 15,
@@ -217,6 +204,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.sm,
     alignItems: 'center',
+    marginBottom: spacing.md,
   },
   searchInput: {
     flex: 1,
@@ -282,14 +270,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: colors.textMuted,
-  },
-  backRow: {
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  backText: {
-    color: colors.primary,
-    fontWeight: '700',
-    fontSize: 15,
   },
 });

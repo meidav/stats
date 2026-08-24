@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BrandLockup } from '../components/BrandLockup';
 import { GradientButton } from '../components/GradientButton';
+import { SecondaryButton } from '../components/SecondaryButton';
 import { BeachVolleyballMark } from '../components/TemplateGlyph';
 import { APP_TAGLINE } from '../constants/brand';
 import { colors, glass, spacing } from '../constants/theme';
@@ -163,25 +164,17 @@ export function WelcomeScreen({ navigation }: Props) {
         </View>
 
         <View style={[styles.navRow, cardWidthStyle]}>
-          <TouchableOpacity
-            style={[styles.secondaryButton, isFirst && styles.secondaryButtonDisabled]}
+          <SecondaryButton
+            label="Previous"
             onPress={handlePrevious}
             disabled={isFirst}
-          >
-            <Text
-              style={[
-                styles.secondaryButtonText,
-                isFirst && styles.secondaryButtonTextDisabled,
-              ]}
-            >
-              Previous
-            </Text>
-          </TouchableOpacity>
+            style={styles.navButton}
+          />
 
           <GradientButton
             label={isLast ? 'Get started' : 'Next'}
             onPress={handleNext}
-            style={styles.primaryButtonFlex}
+            style={styles.navButton}
           />
         </View>
 
@@ -296,29 +289,7 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     gap: spacing.sm,
   },
-  secondaryButton: {
-    flex: 1,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.25)',
-    backgroundColor: 'rgba(91, 33, 182, 0.22)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-  },
-  secondaryButtonDisabled: {
-    borderColor: 'rgba(148, 163, 184, 0.35)',
-    backgroundColor: 'rgba(49, 16, 101, 0.18)',
-  },
-  secondaryButtonText: {
-    color: colors.onGlass,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  secondaryButtonTextDisabled: {
-    color: colors.onGlassMuted,
-  },
-  primaryButtonFlex: {
+  navButton: {
     flex: 1,
   },
 });

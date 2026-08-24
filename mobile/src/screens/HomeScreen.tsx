@@ -21,6 +21,9 @@ import { TemplateGlyph } from '../components/TemplateGlyph';
 import { LeagueIcon } from '../components/LeagueIcon';
 import { IconActionRow } from '../components/IconActionRow';
 import { BrandLockup } from '../components/BrandLockup';
+import { AccountFooter } from '../components/AccountFooter';
+import { GradientButton } from '../components/GradientButton';
+import { SecondaryButton } from '../components/SecondaryButton';
 import { APP_TAGLINE } from '../constants/brand';
 import { colors, gradients, spacing } from '../constants/theme';
 import { copyForFocus, focusFromLeagues } from '../lib/focus';
@@ -29,15 +32,14 @@ import { useAuth } from '../lib/auth';
 import { ApiError, api } from '../lib/api';
 import { useContentMaxWidth, useIsTablet } from '../lib/layout';
 import { loadCachedLeagues, removeCachedLeague, saveCachedLeagues } from '../lib/leagueCache';
-import { GlobeMark } from '../components/TemplateGlyph';
 import type { League } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
-  const { token, user, logout } = useAuth();
-  const contentMaxWidth = useContentMaxWidth(560);
+  const { token } = useAuth();
+  const contentMaxWidth = useContentMaxWidth(820);
   const isTablet = useIsTablet();
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +48,6 @@ export function HomeScreen({ navigation }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<League | null>(null);
   const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
   const [deleting, setDeleting] = useState(false);
-  const [signOutOpen, setSignOutOpen] = useState(false);
 
   const contentWidthStyle = contentMaxWidth
     ? { maxWidth: contentMaxWidth, width: '100%' as const, alignSelf: 'center' as const }
@@ -58,19 +59,17 @@ export function HomeScreen({ navigation }: Props) {
     try {
       const result = await api.getMyLeagues(token);
       const next = result.leagues ?? [];
-      if (next.length === 0) {
-        const cached = await loadCachedLeagues();
-        if (cached.length > 0) {
-          setLeagues(cached);
-          setError('');
-          return;
-        }
-      }
+      // Always trust a successful /mine response, including an empty list.
+      // Falling back to cache here caused viewed public leagues to appear as "mine".
       setLeagues(next);
       setError('');
       await saveCachedLeagues(next);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not load leagues');
+      const cached = await loadCachedLeagues();
+      if (cached.length > 0) {
+        setLeagues(cached);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -134,19 +133,7 @@ export function HomeScreen({ navigation }: Props) {
   }
 
   return (
-    <ScreenScaffold
-      footer={
-        <View style={styles.footer}>
-          <Text style={styles.user} numberOfLines={1}>
-            {user?.email || user?.username}
-          </Text>
-          <Text style={styles.footerDot}>·</Text>
-          <TouchableOpacity onPress={() => setSignOutOpen(true)}>
-            <Text style={styles.logoutText}>Sign out</Text>
-          </TouchableOpacity>
-        </View>
-      }
-    >
+    <ScreenScaffold footer={<AccountFooter />}>
       <View style={styles.hero}>
         <BrandLockup size={96} />
         <Text style={styles.tagline}>{APP_TAGLINE}</Text>
@@ -181,18 +168,17 @@ export function HomeScreen({ navigation }: Props) {
           ListFooterComponent={
             hasLeagues ? (
               <View style={styles.footerActions}>
-                <TouchableOpacity
+                <SecondaryButton
+                  label="Browse public leagues"
                   onPress={() => navigation.navigate('DiscoverLeagues')}
-                  activeOpacity={0.85}
-                  style={styles.secondaryCtaButton}
+                  style={styles.ctaHalf}
                 >
-                  <GlobeMark size={18} />
-                  <Text style={styles.secondaryCtaButtonText}>Browse public</Text>
-                </TouchableOpacity>
+                  <Ionicons name="earth" size={18} color={colors.onGlass} />
+                </SecondaryButton>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('CreateLeague')}
                   activeOpacity={0.85}
-                  style={styles.primaryCtaWrap}
+                  style={styles.ctaHalf}
                 >
                   <LinearGradient
                     colors={[...gradients.button]}
@@ -201,7 +187,9 @@ export function HomeScreen({ navigation }: Props) {
                     style={styles.newLeagueButton}
                   >
                     <Ionicons name="add" size={18} color="#fff" />
-                    <Text style={styles.newLeagueText}>{copy.newAction}</Text>
+                    <Text style={styles.newLeagueText} numberOfLines={1}>
+                      {copy.newAction}
+                    </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
@@ -213,47 +201,43 @@ export function HomeScreen({ navigation }: Props) {
             ) : (
               <View style={[styles.emptyStack, isTablet && styles.emptyStackRow]}>
                 <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
-                  <Text style={styles.emptyEmoji}>🏆</Text>
-                  <Text style={styles.emptyTitle}>{copy.homeEmpty}</Text>
-                  <Text style={styles.emptyBody}>
-                    A league is one sport or one game night. Standings live here after you add games.
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate('CreateLeague')}
-                    activeOpacity={0.85}
+                  <Ionicons name="earth" size={48} color={colors.primary} style={styles.emptyGlyph} />
+                  <Text
+                    style={styles.emptyTitle}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
                   >
-                    <LinearGradient
-                      colors={[...gradients.button]}
-                      start={{ x: 0, y: 0.5 }}
-                      end={{ x: 1, y: 0.5 }}
-                      style={styles.emptyButton}
-                    >
-                      <Text style={styles.emptyButtonText}>Create a league</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </GlassCard>
-
-                <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
-                  <View style={styles.emptyGlyph}>
-                    <GlobeMark size={52} />
-                  </View>
-                  <Text style={styles.emptyTitle}>View public leagues</Text>
+                    View public leagues
+                  </Text>
                   <Text style={styles.emptyBody}>
                     Browse open leagues on PlayTracker and check standings before you create your own.
                   </Text>
-                  <TouchableOpacity
+                  <SecondaryButton
+                    label="Browse public leagues"
                     onPress={() => navigation.navigate('DiscoverLeagues')}
-                    activeOpacity={0.85}
+                    style={styles.emptyCta}
+                  />
+                </GlassCard>
+
+                <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
+                  <Text style={styles.emptyEmoji}>🏆</Text>
+                  <Text
+                    style={styles.emptyTitle}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
                   >
-                    <LinearGradient
-                      colors={[...gradients.button]}
-                      start={{ x: 0, y: 0.5 }}
-                      end={{ x: 1, y: 0.5 }}
-                      style={styles.emptyButton}
-                    >
-                      <Text style={styles.emptyButtonText}>Browse public leagues</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
+                    {copy.homeEmpty}
+                  </Text>
+                  <Text style={styles.emptyBody}>
+                    A league is one sport or one game night. Standings live here after you add games.
+                  </Text>
+                  <GradientButton
+                    label="Create a league"
+                    onPress={() => navigation.navigate('CreateLeague')}
+                    style={styles.emptyCta}
+                  />
                 </GlassCard>
               </View>
             )
@@ -385,47 +369,6 @@ export function HomeScreen({ navigation }: Props) {
           </LinearGradient>
         </View>
       </Modal>
-
-      <Modal
-        visible={signOutOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSignOutOpen(false)}
-      >
-        <View style={styles.signOutScrim}>
-          <LinearGradient
-            colors={['#BFDBFE', '#C4B5FD', '#93C5FD']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.signOutCard}
-          >
-            <View style={styles.signOutHeader}>
-              <Ionicons name="log-out-outline" size={26} color={colors.primaryDark} />
-              <Text style={styles.signOutTitle}>Sign out?</Text>
-            </View>
-            <Text style={styles.signOutBody}>
-              You can sign back in anytime with the same account.
-            </Text>
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.signOutStay}
-                onPress={() => setSignOutOpen(false)}
-              >
-                <Text style={styles.signOutStayText}>Stay signed in</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.signOutConfirm}
-                onPress={async () => {
-                  setSignOutOpen(false);
-                  await logout();
-                }}
-              >
-                <Text style={styles.signOutConfirmText}>Sign out</Text>
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-        </View>
-      </Modal>
     </ScreenScaffold>
   );
 }
@@ -478,6 +421,7 @@ const styles = StyleSheet.create({
   },
   emptyCardHalf: {
     flex: 1,
+    minWidth: 280,
   },
   emptyGlyph: {
     marginBottom: spacing.md,
@@ -492,6 +436,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     textAlign: 'center',
     marginBottom: spacing.sm,
+    width: '100%',
   },
   emptyBody: {
     fontSize: 15,
@@ -500,6 +445,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.lg,
   },
+  emptyCta: {
+    alignSelf: 'stretch',
+  },
   footerActions: {
     flexDirection: 'row',
     alignItems: 'stretch',
@@ -507,33 +455,24 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.sm,
     marginBottom: spacing.md,
-    paddingHorizontal: spacing.sm,
   },
-  secondaryCtaButton: {
+  ctaHalf: {
     flex: 1,
-    maxWidth: 220,
+  },
+  newLeagueButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.35)',
-    backgroundColor: 'rgba(255, 252, 248, 0.72)',
+    gap: 4,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
+    borderRadius: 12,
+    minHeight: 52,
   },
-  secondaryCtaButtonText: {
-    color: colors.primary,
+  newLeagueText: {
+    color: '#fff',
     fontWeight: '700',
     fontSize: 15,
-  },
-  primaryCtaWrap: {
-    flex: 1,
-    maxWidth: 220,
-  },
-  newLeagueWrap: {
-    alignItems: 'center',
   },
   emptyButton: {
     borderRadius: 12,
@@ -612,41 +551,6 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
     lineHeight: 13,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  user: {
-    color: colors.textMuted,
-    fontSize: 13,
-    maxWidth: '62%',
-  },
-  footerDot: {
-    color: colors.textMuted,
-  },
-  logoutText: {
-    color: colors.primary,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  newLeagueButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  newLeagueText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 15,
-  },
   modalScrim: {
     flex: 1,
     backgroundColor: 'rgba(127, 29, 29, 0.48)',
@@ -706,62 +610,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#9F1239',
   },
   modalDeleteText: {
-    fontWeight: '700',
-    color: '#fff',
-  },
-  signOutScrim: {
-    flex: 1,
-    backgroundColor: 'rgba(30, 58, 138, 0.42)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  signOutCard: {
-    width: '100%',
-    maxWidth: 400,
-    borderRadius: 20,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.28)',
-  },
-  signOutHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    marginBottom: spacing.sm,
-  },
-  signOutTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  signOutBody: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  signOutStay: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: 'rgba(49, 16, 101, 0.4)',
-  },
-  signOutStayText: {
-    fontWeight: '700',
-    color: '#fff',
-  },
-  signOutConfirm: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: colors.primary,
-  },
-  signOutConfirmText: {
     fontWeight: '700',
     color: '#fff',
   },
