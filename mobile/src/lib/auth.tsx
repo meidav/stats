@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { api } from './api';
 import { clearCachedLeagues } from './leagueCache';
 import { clearCachedPlayers } from './playerCache';
+import type { AppleFullName } from './socialAuth';
 import type { User } from '../types';
 
 const TOKEN_KEY = 'playtracker_token';
@@ -17,6 +18,7 @@ type AuthContextValue = {
   register: (email: string, password: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
+  loginWithApple: (identityToken: string, fullName?: AppleFullName | null) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -36,7 +38,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ]);
         if (storedToken && storedUser) {
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch {
+            await AsyncStorage.removeItem(USER_KEY);
+          }
         }
       } finally {
         setLoading(false);
@@ -72,6 +78,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await persistSession(result.access_token, result.user);
   }, [persistSession]);
 
+  const loginWithApple = useCallback(
+    async (identityToken: string, fullName?: AppleFullName | null) => {
+      const result = await api.loginWithApple(identityToken, fullName);
+      await persistSession(result.access_token, result.user);
+    },
+    [persistSession],
+  );
+
   const logout = useCallback(async () => {
     setToken(null);
     setUser(null);
@@ -82,8 +96,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ token, user, loading, login, register, resetPassword, loginWithGoogle, logout }),
-    [token, user, loading, login, register, resetPassword, loginWithGoogle, logout],
+    () => ({
+      token,
+      user,
+      loading,
+      login,
+      register,
+      resetPassword,
+      loginWithGoogle,
+      loginWithApple,
+      logout,
+    }),
+    [
+      token,
+      user,
+      loading,
+      login,
+      register,
+      resetPassword,
+      loginWithGoogle,
+      loginWithApple,
+      logout,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

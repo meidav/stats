@@ -1,14 +1,13 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { AuthCard, authInputStyle } from '../components/AuthCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
 import { PasswordField } from '../components/PasswordField';
-import { AppleLogo, GoogleLogo } from '../components/icons';
-import { colors, gradients, spacing } from '../constants/theme';
+import { SocialSignIn } from '../components/SocialSignIn';
+import { colors, spacing } from '../constants/theme';
 import { ApiError } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import type { RootStackParamList } from '../navigation/types';
@@ -20,19 +19,118 @@ export function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [socialBusy, setSocialBusy] = useState(false);
   const [error, setError] = useState('');
+  const submittingRef = useRef(false);
+  const emailRef = useRef('');
+  const passwordRef = useRef('');
+  const autofillPendingRef = useRef(false);
+  const autofillTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function handleLogin() {
-    setLoading(true);
-    setError('');
-    try {
-      await login(email.trim(), password);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Login failed');
-    } finally {
-      setLoading(false);
+  const attemptLogin = useCallback(
+    async (emailValue?: string, passwordValue?: string) => {
+      if (submittingRef.current || loading) return;
+
+      const nextEmail = (emailValue ?? emailRef.current).trim();
+      const nextPassword = passwordValue ?? passwordRef.current;
+      if (!nextEmail || !nextPassword) {
+        setError('Enter your email and password.');
+        return;
+      }
+
+      submittingRef.current = true;
+      setLoading(true);
+      setError('');
+      Keyboard.dismiss();
+      try {
+        await login(nextEmail, nextPassword);
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'Login failed');
+      } finally {
+        submittingRef.current = false;
+        setLoading(false);
+      }
+    },
+    [loading, login],
+  );
+
+  const scheduleAutofillLogin = useCallback(
+    (retry = 0) => {
+      if (autofillTimerRef.current) {
+        clearTimeout(autofillTimerRef.current);
+      }
+
+      autofillTimerRef.current = setTimeout(() => {
+        autofillTimerRef.current = null;
+        if (!autofillPendingRef.current) return;
+
+        const nextEmail = emailRef.current.trim();
+        const nextPassword = passwordRef.current;
+        if (!nextEmail || !nextPassword) {
+          if (retry < 5) {
+            scheduleAutofillLogin(retry + 1);
+          }
+          return;
+        }
+
+        autofillPendingRef.current = false;
+        attemptLogin(nextEmail, nextPassword);
+      }, 100);
+    },
+    [attemptLogin],
+  );
+
+  const noteAutofillFill = useCallback(() => {
+    autofillPendingRef.current = true;
+    scheduleAutofillLogin();
+  }, [scheduleAutofillLogin]);
+
+  useEffect(() => {
+    emailRef.current = email;
+    passwordRef.current = password;
+  }, [email, password]);
+
+  useEffect(() => {
+    return () => {
+      if (autofillTimerRef.current) {
+        clearTimeout(autofillTimerRef.current);
+      }
+    };
+  }, []);
+
+  function handleEmailChange(text: string) {
+    const bulkFill =
+      (email.length === 0 && text.includes('@')) ||
+      text.length - email.length > 3;
+    emailRef.current = text;
+    setEmail(text);
+    if (bulkFill) {
+      noteAutofillFill();
     }
   }
+
+  function handlePasswordChange(text: string) {
+    const bulkFill =
+      (password.length === 0 && text.length >= 4) ||
+      text.length - password.length > 3;
+    passwordRef.current = text;
+    setPassword(text);
+    if (bulkFill) {
+      noteAutofillFill();
+    }
+  }
+
+  useEffect(() => {
+    if (!autofillPendingRef.current) return;
+    if (email.trim() && password) {
+      scheduleAutofillLogin();
+    }
+  }, [email, password, scheduleAutofillLogin]);
+
+  const handleLogin = useCallback(() => {
+    autofillPendingRef.current = false;
+    attemptLogin();
+  }, [attemptLogin]);
 
   return (
     <AuthCard
@@ -42,28 +140,11 @@ export function LoginScreen({ navigation }: Props) {
         </TouchableOpacity>
       }
     >
-      <TouchableOpacity style={[styles.socialButton, styles.appleButton]} disabled>
-        <AppleLogo />
-        <Text style={styles.appleButtonText}>Sign in with Apple</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.socialButton} disabled>
-        <LinearGradient
-          colors={[...gradients.button]}
-          start={{ x: 0, y: 0.5 }}
-          end={{ x: 1, y: 0.5 }}
-          style={styles.googleGradient}
-        >
-          <GoogleLogo />
-          <Text style={styles.googleButtonText}>Sign in with Google</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-
-      <View style={styles.dividerRow}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or sign in with email</Text>
-        <View style={styles.dividerLine} />
-      </View>
+      <SocialSignIn
+        onError={setError}
+        onBusyChange={setSocialBusy}
+        disabled={loading}
+      />
 
       <TextInput
         style={authInputStyle}
@@ -72,17 +153,32 @@ export function LoginScreen({ navigation }: Props) {
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="email-address"
-        textContentType="emailAddress"
-        autoComplete="email"
+        textContentType="username"
+        autoComplete="username"
+        importantForAutofill="yes"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={handleEmailChange}
+        onEndEditing={() => {
+          if (autofillPendingRef.current && emailRef.current.trim() && passwordRef.current) {
+            noteAutofillFill();
+          }
+        }}
+        returnKeyType="next"
       />
       <PasswordField
         placeholder="Password"
         textContentType="password"
         autoComplete="password"
+        importantForAutofill="yes"
+        returnKeyType="go"
         value={password}
-        onChangeText={setPassword}
+        onChangeText={handlePasswordChange}
+        onSubmitEditing={handleLogin}
+        onEndEditing={() => {
+          if (autofillPendingRef.current && emailRef.current.trim() && passwordRef.current) {
+            noteAutofillFill();
+          }
+        }}
       />
 
       <ErrorBanner message={error} />
@@ -90,7 +186,7 @@ export function LoginScreen({ navigation }: Props) {
       <GradientButton
         label="Sign In"
         onPress={handleLogin}
-        disabled={loading}
+        disabled={loading || socialBusy}
         loading={loading}
       />
 
@@ -108,55 +204,6 @@ export function LoginScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  socialButton: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
-    opacity: 0.72,
-  },
-  appleButton: {
-    backgroundColor: '#111827',
-    padding: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 8,
-  },
-  appleButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  googleGradient: {
-    padding: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 8,
-  },
-  googleButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginVertical: spacing.md,
-  },
-  dividerLine: {
-    flex: 1,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(255, 247, 237, 0.35)',
-  },
-  dividerText: {
-    color: colors.onGlassMuted,
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-  },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',

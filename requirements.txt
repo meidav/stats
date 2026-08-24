@@ -30,3 +30,5 @@ Flask-CORS==4.0.0
 gunicorn==21.2.0
 pytz
 google-auth==2.29.0
+# Apple Sign In identity token verification (RS256 needs the crypto extra)
+PyJWT[crypto]==2.9.0

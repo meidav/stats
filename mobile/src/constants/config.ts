@@ -18,9 +18,6 @@ export const GOOGLE_WEB_CLIENT_ID = extra.googleWebClientId || '';
 export const GOOGLE_IOS_CLIENT_ID = extra.googleIosClientId || '';
 export const GOOGLE_ANDROID_CLIENT_ID = extra.googleAndroidClientId || '';
 
+// Google and Apple sign-in rely on native modules that Expo Go does not bundle.
 export const IS_EXPO_GO =
   Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
-
-export const googleSignInEnabled = Boolean(GOOGLE_WEB_CLIENT_ID) && !IS_EXPO_GO;
-
-export const EXPO_AUTH_REDIRECT_URI = 'https://auth.expo.io/@stacktracker/playtracker';

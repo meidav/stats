@@ -95,8 +95,11 @@ def create_user(username, email, password, is_admin=False):
         return False
 
 def verify_password(user, password):
-    """Verify user password"""
-    return check_password_hash(user.password_hash, password)
+    """Verify user password. Social-only accounts have no hash and can never match."""
+    password_hash = getattr(user, 'password_hash', None)
+    if not password_hash or not password:
+        return False
+    return check_password_hash(password_hash, password)
 
 def admin_required(f):
     """Decorator to require admin access"""

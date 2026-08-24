@@ -17,6 +17,12 @@ from api.auth_service import (
     reset_password_with_token,
     user_payload,
 )
+from api.apple_auth import (
+    apple_auth_configured,
+    build_display_name,
+    find_or_create_apple_user,
+    verify_apple_identity_token,
+)
 from api.brand import APP_DOMAIN, APP_NAME, APP_TAGLINE, APP_URL
 from api.google_auth import (
     find_or_create_google_user,
@@ -222,6 +228,35 @@ def register_routes(api):
             pass
         return jsonify({"access_token": token, "user": user})
 
+    @api.route("/auth/apple", methods=["POST"])
+    def api_apple_login():
+        data = request.get_json(silent=True) or {}
+        identity_token = (
+            data.get("identity_token") or data.get("identityToken") or ""
+        )
+        if not identity_token:
+            return jsonify({"error": "identity_token is required"}), 400
+        if not apple_auth_configured():
+            return jsonify({"error": "Apple sign-in is not configured on the server"}), 503
+
+        try:
+            claims = verify_apple_identity_token(identity_token)
+            user = find_or_create_apple_user(
+                apple_sub=claims["sub"],
+                email=claims.get("email"),
+                display_name=build_display_name(data.get("full_name") or data.get("fullName")),
+            )
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 401
+
+        token = create_access_token(identity=str(user["id"]))
+        try:
+            from api.admin_data import touch_last_seen
+            touch_last_seen(user["id"])
+        except Exception:
+            pass
+        return jsonify({"access_token": token, "user": user})
+
     @api.route("/leagues", methods=["POST"])
     @jwt_required()
     def create_league_route():
@@ -239,7 +274,7 @@ def register_routes(api):
         focus = data.get("focus")
         if not focus and sport_template_id:
             focus = focus_for_template(sport_template_id)
-        focus = focus or "mixed"
+        focus = focus or "sports"
 
         try:
             league = create_league(

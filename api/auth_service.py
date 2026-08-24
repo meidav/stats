@@ -56,6 +56,7 @@ def user_payload(user):
         "username": user.username,
         "email": user.email,
         "is_admin": user.is_admin,
+        "display_name": getattr(user, "display_name", None),
     }
 
 

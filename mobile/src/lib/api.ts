@@ -86,6 +86,15 @@ export const api = {
       body: { id_token: idToken },
     }),
 
+  loginWithApple: (
+    identityToken: string,
+    fullName?: { givenName?: string | null; familyName?: string | null } | null,
+  ) =>
+    request<{ access_token: string; user: import('../types').User }>('/auth/apple', {
+      method: 'POST',
+      body: { identity_token: identityToken, full_name: fullName ?? null },
+    }),
+
   getTemplates: () =>
     request<{ templates: import('../types').SportTemplate[] }>('/sports/templates'),
 
@@ -102,7 +111,7 @@ export const api = {
       visibility: string;
       sport_template_id?: string;
       description?: string;
-      focus?: 'sports' | 'table' | 'mixed';
+      focus?: 'sports' | 'table';
     },
   ) =>
     request<import('../types').League>('/leagues', {
