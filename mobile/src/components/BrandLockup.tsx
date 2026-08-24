@@ -1,15 +1,19 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
+import { Image, StyleSheet, ViewStyle } from 'react-native';
 
 import { PlayTrackerLogo } from './PlayTrackerLogo';
 
 type Props = {
   size?: number;
   style?: ViewStyle;
+  /** Prefer PNG on the critical boot path; SVG elsewhere. */
+  mode?: 'svg' | 'image';
 };
 
-export function BrandLockup({ size = 148, style }: Props) {
+const logoPng = require('../../assets/playtracker-logo.png');
+
+export function BrandLockup({ size = 148, style, mode = 'svg' }: Props) {
   return (
     <LinearGradient
       colors={['#3B0764', '#5B21B6', '#6D28D9']}
@@ -17,7 +21,11 @@ export function BrandLockup({ size = 148, style }: Props) {
       end={{ x: 1, y: 1 }}
       style={[styles.card, style]}
     >
-      <PlayTrackerLogo size={size} />
+      {mode === 'image' ? (
+        <Image source={logoPng} style={{ width: size, height: size }} resizeMode="contain" />
+      ) : (
+        <PlayTrackerLogo size={size} />
+      )}
     </LinearGradient>
   );
 }

@@ -14,11 +14,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BrandLockup } from '../components/BrandLockup';
+import { GradientBackground } from '../components/GradientBackground';
 import { GradientButton } from '../components/GradientButton';
 import { SecondaryButton } from '../components/SecondaryButton';
 import { BeachVolleyballMark } from '../components/TemplateGlyph';
 import { APP_TAGLINE } from '../constants/brand';
-import { colors, glass, spacing } from '../constants/theme';
+import { colors, glassPeach, spacing } from '../constants/theme';
 import { useContentMaxWidth } from '../lib/layout';
 import { markIntroSeen } from '../lib/onboarding';
 import type { RootStackParamList } from '../navigation/types';
@@ -115,74 +116,76 @@ export function WelcomeScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + spacing.lg }]}>
-        <View style={styles.hero}>
-          <BrandLockup size={148} />
-          <Text style={styles.tagline}>{APP_TAGLINE}</Text>
-        </View>
-      </View>
-
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        bounces={false}
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        onMomentumScrollEnd={handleScrollEnd}
-        scrollEventThrottle={16}
-        style={styles.carousel}
-        contentContainerStyle={styles.carouselContent}
-      >
-        {SLIDES.map((item) => (
-          <View key={item.title} style={[styles.slidePage, { width: slideWidth }]}>
-            <View style={[styles.slide, cardWidthStyle]}>
-              {'graphic' in item ? (
-                <View style={styles.graphicWrap}>
-                  <BeachVolleyballMark size={96} />
-                </View>
-              ) : (
-                <Text style={styles.emoji}>{item.emoji}</Text>
-              )}
-              <Text style={styles.slideTitle}>{item.title}</Text>
-              <Text style={styles.slideBody}>{item.body}</Text>
-            </View>
+    <GradientBackground>
+      <View style={styles.container}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.lg }]}>
+          <View style={styles.hero}>
+            <BrandLockup size={148} />
+            <Text style={styles.tagline}>{APP_TAGLINE}</Text>
           </View>
-        ))}
-        <View style={[styles.slidePage, { width: slideWidth }]} />
-      </ScrollView>
+        </View>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.lg }]}>
-        <View style={styles.dots}>
-          {SLIDES.map((item, dotIndex) => (
-            <View
-              key={item.title}
-              style={[styles.dot, dotIndex === index && styles.dotActive]}
-            />
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          bounces={false}
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          onMomentumScrollEnd={handleScrollEnd}
+          scrollEventThrottle={16}
+          style={styles.carousel}
+          contentContainerStyle={styles.carouselContent}
+        >
+          {SLIDES.map((item) => (
+            <View key={item.title} style={[styles.slidePage, { width: slideWidth }]}>
+              <View style={[styles.slide, cardWidthStyle]}>
+                {'graphic' in item ? (
+                  <View style={styles.graphicWrap}>
+                    <BeachVolleyballMark size={96} />
+                  </View>
+                ) : (
+                  <Text style={styles.emoji}>{item.emoji}</Text>
+                )}
+                <Text style={styles.slideTitle}>{item.title}</Text>
+                <Text style={styles.slideBody}>{item.body}</Text>
+              </View>
+            </View>
           ))}
+          <View style={[styles.slidePage, { width: slideWidth }]} />
+        </ScrollView>
+
+        <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.lg }]}>
+          <View style={styles.dots}>
+            {SLIDES.map((item, dotIndex) => (
+              <View
+                key={item.title}
+                style={[styles.dot, dotIndex === index && styles.dotActive]}
+              />
+            ))}
+          </View>
+
+          <View style={[styles.navRow, cardWidthStyle]}>
+            <SecondaryButton
+              label="Previous"
+              onPress={handlePrevious}
+              disabled={isFirst}
+              style={styles.navButton}
+            />
+
+            <GradientButton
+              label={isLast ? 'Get started' : 'Next'}
+              onPress={handleNext}
+              style={styles.navButton}
+            />
+          </View>
+
+          <TouchableOpacity style={styles.skipButton} onPress={finish}>
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
         </View>
-
-        <View style={[styles.navRow, cardWidthStyle]}>
-          <SecondaryButton
-            label="Previous"
-            onPress={handlePrevious}
-            disabled={isFirst}
-            style={styles.navButton}
-          />
-
-          <GradientButton
-            label={isLast ? 'Get started' : 'Next'}
-            onPress={handleNext}
-            style={styles.navButton}
-          />
-        </View>
-
-        <TouchableOpacity style={styles.skipButton} onPress={finish}>
-          <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
       </View>
-    </View>
+    </GradientBackground>
   );
 }
 
@@ -227,18 +230,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   slide: {
-    backgroundColor: glass.backgroundColor,
+    backgroundColor: glassPeach.backgroundColor,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: glass.borderColor,
+    borderColor: glassPeach.borderColor,
     padding: spacing.xl,
     minHeight: 260,
     justifyContent: 'center',
-    shadowColor: glass.shadowColor,
-    shadowOpacity: glass.shadowOpacity,
-    shadowRadius: glass.shadowRadius,
-    shadowOffset: glass.shadowOffset,
-    elevation: glass.elevation,
+    shadowColor: glassPeach.shadowColor,
+    shadowOpacity: glassPeach.shadowOpacity,
+    shadowRadius: glassPeach.shadowRadius,
+    shadowOffset: glassPeach.shadowOffset,
+    elevation: glassPeach.elevation,
   },
   graphicWrap: {
     alignItems: 'center',

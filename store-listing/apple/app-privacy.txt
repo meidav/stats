@@ -1,0 +1,79 @@
+App Store Connect - App Privacy answers (PlayTracker)
+=====================================================
+Privacy Policy URL: https://playtracker.org/privacy
+User Privacy Choices URL: leave blank
+
+1) Do you or your third-party partners collect data from this app?
+------------------------------------------------------------------
+YES, we collect data from this app
+
+Why: email/password accounts, league and game data, optional player
+photos, and normal server logs are stored on playtracker.org (Railway).
+There is no ad SDK and no third-party analytics SDK in the app today.
+
+
+2) Data types to select
+-----------------------
+Check ONLY these:
+
+Contact Info
+  [x] Email Address
+
+Identifiers
+  [x] User ID
+      (account id / username used to identify the signed-in user)
+
+User Content
+  [x] Photos or Videos
+      (optional player photos uploaded from the device)
+  [x] Gameplay Content
+      (games results, scores, standings history)
+  [x] Other User Content
+      (league names, player names, descriptions, icons metadata)
+
+Diagnostics
+  [x] Other Diagnostic Data
+      (server/access logs such as IP and basic request/error logs
+       used to keep the Service running; matches the privacy policy)
+
+Leave unchecked: Name, Phone, Physical Address, Health, Fitness,
+Financial, Location, Sensitive Info, Contacts, Emails/Text Messages,
+Audio, Customer Support, Browsing History, Search History, Device ID,
+Purchases, Product Interaction, Advertising Data, Crash Data,
+Performance Data, Other Data.
+
+Notes:
+- Account "username" is User ID, not Name (Apple's Name = first/last).
+- No Sentry/Firebase Analytics/ads, so skip Product Interaction and
+  Crash Data unless you add those SDKs later.
+- When Apple/Google Sign-In ships, still Email Address + User ID
+  (and Name only if you store given name from the provider).
+
+
+3) For EACH selected type, answer the follow-ups the same way
+-------------------------------------------------------------
+Used for Tracking?
+  No
+
+Linked to the User's Identity?
+  Yes
+  (tied to the signed-in account)
+
+Purposes (check only what applies):
+  [x] App Functionality
+  [ ] Third-Party Advertising
+  [ ] Developer's Advertising or Marketing
+  [ ] Analytics
+  [ ] Product Personalization
+  [ ] Other Purposes
+
+If Apple shows "Account Management" as a purpose, also check it for
+Email Address and User ID.
+
+
+4) After the questionnaire
+--------------------------
+- Confirm Privacy Policy URL is https://playtracker.org/privacy
+- Publish the privacy answers when ASC lets you
+- Revisit this label when you add analytics, ads, crash reporting,
+  or Sign in with Apple/Google if those change what you store

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { BrandLockup } from './BrandLockup';
+import { GradientBackground } from './GradientBackground';
 import { APP_TAGLINE } from '../constants/brand';
 import { colors, glass, spacing } from '../constants/theme';
 import { useContentMaxWidth } from '../lib/layout';
@@ -25,26 +26,28 @@ export function AuthCard({ children, subtitle, style, footer }: Props) {
   const contentMaxWidth = useContentMaxWidth();
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        bounces={false}
+    <GradientBackground>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={[styles.card, contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null, style]}>
-          <View style={styles.brandWrap}>
-            <BrandLockup size={132} />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+        >
+          <View style={[styles.card, contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null, style]}>
+            <View style={styles.brandWrap}>
+              <BrandLockup size={132} />
+            </View>
+            <Text style={styles.tagline}>{APP_TAGLINE}</Text>
+            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+            {children}
           </View>
-          <Text style={styles.tagline}>{APP_TAGLINE}</Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-          {children}
-        </View>
-        {footer ? <View style={styles.belowCard}>{footer}</View> : null}
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {footer ? <View style={styles.belowCard}>{footer}</View> : null}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </GradientBackground>
   );
 }
 

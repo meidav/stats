@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -27,21 +27,31 @@ export function CollapsibleSection({
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
   const progress = useRef(new Animated.Value(defaultOpen ? 1 : 0)).current;
+  const activeAnim = useRef<Animated.CompositeAnimation | null>(null);
   const [bodyHeight, setBodyHeight] = useState(0);
   const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      activeAnim.current?.stop();
+      progress.stopAnimation();
+    };
+  }, [progress]);
 
   function toggle() {
     const next = !open;
     setAnimating(true);
     setOpen(next);
-    Animated.timing(progress, {
+    activeAnim.current?.stop();
+    activeAnim.current = Animated.timing(progress, {
       toValue: next ? 1 : 0,
       duration: next ? 260 : 220,
       easing: next
         ? Easing.out(Easing.cubic)
         : Easing.in(Easing.cubic),
       useNativeDriver: false,
-    }).start(() => {
+    });
+    activeAnim.current.start(() => {
       setAnimating(false);
     });
   }

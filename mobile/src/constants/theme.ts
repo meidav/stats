@@ -46,6 +46,16 @@ export const glassLight = {
   elevation: 3,
 } as const;
 
+export const glassPeach = {
+  backgroundColor: 'rgba(253, 186, 116, 0.55)',
+  borderColor: 'rgba(251, 146, 60, 0.5)',
+  shadowColor: '#C2410C',
+  shadowOpacity: 0.12,
+  shadowRadius: 16,
+  shadowOffset: { width: 0, height: 8 },
+  elevation: 3,
+} as const;
+
 export const spacing = {
   xs: 4,
   sm: 8,

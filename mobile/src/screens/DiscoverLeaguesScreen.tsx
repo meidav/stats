@@ -16,6 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { AccountFooter } from '../components/AccountFooter';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GlassCard } from '../components/GlassCard';
+import { GamesCountBadge, gamesBadgeRoom, gamesBadgeRoomTablet } from '../components/GamesCountBadge';
 import { LeagueIcon } from '../components/LeagueIcon';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
@@ -23,7 +24,7 @@ import { TemplateGlyph } from '../components/TemplateGlyph';
 import { colors, spacing } from '../constants/theme';
 import { ApiError, api } from '../lib/api';
 import { selectedIconForLeague } from '../lib/leagueIcons';
-import { useContentMaxWidth } from '../lib/layout';
+import { useIsTablet } from '../lib/layout';
 import type { Sport } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -38,6 +39,7 @@ type PublicLeague = {
   sport_count?: number;
   sport_name?: string | null;
   template_id?: string | null;
+  game_count?: number;
   share_url?: string | null;
 };
 
@@ -52,7 +54,7 @@ function iconForPublicLeague(item: PublicLeague) {
 }
 
 export function DiscoverLeaguesScreen({ navigation }: Props) {
-  const contentMaxWidth = useContentMaxWidth(720);
+  const isTablet = useIsTablet();
   const [leagues, setLeagues] = useState<PublicLeague[]>([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -87,12 +89,7 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
     <ScreenScaffold footer={<AccountFooter />}>
       <ScreenHeader title="Public leagues" onBack={() => navigation.goBack()} />
 
-      <View
-        style={[
-          styles.body,
-          contentMaxWidth ? { maxWidth: contentMaxWidth, alignSelf: 'center', width: '100%' } : null,
-        ]}
-      >
+      <View style={[styles.body, isTablet && styles.bodyTablet]}>
         <Text style={styles.subtitle}>
           Browse open leagues on PlayTracker. Tap one to view standings and games.
         </Text>
@@ -131,10 +128,7 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
                 tintColor={colors.primary}
               />
             }
-            contentContainerStyle={[
-              styles.list,
-              leagues.length === 0 ? styles.emptyList : null,
-            ]}
+            contentContainerStyle={[styles.list, leagues.length === 0 ? styles.emptyList : null]}
             ListEmptyComponent={
               <Text style={styles.emptyText}>
                 {error ? 'Pull down to try again.' : 'No public leagues match that search yet.'}
@@ -147,39 +141,49 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
                 : item.sport_count === 1
                   ? '1 sport'
                   : `${item.sport_count ?? 0} sports`;
+              const gameCount = item.game_count ?? 0;
               return (
-                <GlassCard
-                  style={styles.card}
-                  onPress={() =>
-                    navigation.navigate('League', {
-                      slug: item.slug,
-                      name: item.name,
-                    })
-                  }
+                <View
+                  style={[
+                    styles.cardWrap,
+                    gamesBadgeRoom,
+                    isTablet && gamesBadgeRoomTablet,
+                  ]}
                 >
-                  <View style={styles.cardRow}>
-                    <View style={styles.iconWrap}>
-                      {displayIcon ? (
-                        <LeagueIcon id={displayIcon} size={26} />
-                      ) : item.template_id ? (
-                        <TemplateGlyph
-                          template={{ id: item.template_id, category: 'sports' }}
-                          size={24}
-                        />
-                      ) : (
-                        <LeagueIcon id="trophy" size={24} />
-                      )}
+                  <GlassCard
+                    style={styles.card}
+                    onPress={() =>
+                      navigation.navigate('League', {
+                        slug: item.slug,
+                        name: item.name,
+                      })
+                    }
+                  >
+                    <View style={styles.cardRow}>
+                      <View style={styles.iconWrap}>
+                        {displayIcon ? (
+                          <LeagueIcon id={displayIcon} size={26} />
+                        ) : item.template_id ? (
+                          <TemplateGlyph
+                            template={{ id: item.template_id, category: 'sports' }}
+                            size={24}
+                          />
+                        ) : (
+                          <LeagueIcon id="trophy" size={24} />
+                        )}
+                      </View>
+                      <View style={styles.cardCopy}>
+                        <Text style={styles.cardTitle} numberOfLines={1}>
+                          {item.name}
+                        </Text>
+                        <Text style={styles.cardMeta} numberOfLines={1}>
+                          {sportLabel} · public
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.cardCopy}>
-                      <Text style={styles.cardTitle} numberOfLines={1}>
-                        {item.name}
-                      </Text>
-                      <Text style={styles.cardMeta} numberOfLines={1}>
-                        {sportLabel} · public
-                      </Text>
-                    </View>
-                  </View>
-                </GlassCard>
+                  </GlassCard>
+                  <GamesCountBadge count={gameCount} />
+                </View>
               );
             }}
           />
@@ -192,7 +196,14 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
+    width: '100%',
+    alignSelf: 'center',
     paddingHorizontal: spacing.lg,
+  },
+  bodyTablet: {
+    width: '75%',
+    maxWidth: 720,
+    paddingHorizontal: spacing.md,
   },
   subtitle: {
     fontSize: 15,
@@ -230,6 +241,7 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: spacing.lg,
+    paddingTop: 4,
   },
   emptyList: {
     flexGrow: 1,
@@ -241,9 +253,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingVertical: spacing.xl,
   },
+  cardWrap: {
+    position: 'relative',
+    marginBottom: spacing.sm,
+  },
   card: {
     padding: spacing.md,
-    marginBottom: spacing.sm,
   },
   cardRow: {
     flexDirection: 'row',

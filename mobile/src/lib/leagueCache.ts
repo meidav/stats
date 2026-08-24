@@ -19,7 +19,12 @@ export async function saveCachedLeagues(leagues: League[]) {
 
 export async function upsertCachedLeague(league: League) {
   const existing = await loadCachedLeagues();
-  const next = [league, ...existing.filter((item) => item.id !== league.id)];
+  const index = existing.findIndex((item) => item.id === league.id);
+  // Keep list order stable. Viewing/editing a league must not bump it to the top.
+  const next =
+    index >= 0
+      ? existing.map((item, i) => (i === index ? { ...item, ...league } : item))
+      : [...existing, league];
   await saveCachedLeagues(next);
   return next;
 }

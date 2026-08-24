@@ -3,6 +3,9 @@ export type User = {
   username: string;
   email: string;
   is_admin: boolean;
+  /** Optional; filled once Apple/Google sign-in stores a real name. */
+  display_name?: string | null;
+  first_name?: string | null;
 };
 
 export type SportTemplate = {

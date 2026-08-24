@@ -1,9 +1,9 @@
 import { useWindowDimensions } from 'react-native';
 
-/** Treat as tablet / large layout when the shorter dimension clears phone width. */
+/** Treat as tablet / large layout when width clears phone landscape. */
 export const TABLET_MIN_WIDTH = 700;
 
-/** Comfortable phone-card width; half an iPad portrait is roughly this size. */
+/** Comfortable form width for auth / welcome on tablet. */
 export const CONTENT_MAX_WIDTH = 440;
 
 export function useIsTablet() {
@@ -12,8 +12,8 @@ export function useIsTablet() {
 }
 
 /**
- * Max width for hero cards, auth forms, and empty states.
- * Phones stay full-bleed (parent padding handles margins). Tablets cap near half width.
+ * Optional cap for single-column forms (login, welcome).
+ * List screens should stay full-bleed with horizontal padding instead.
  */
 export function useContentMaxWidth(max = CONTENT_MAX_WIDTH) {
   const { width } = useWindowDimensions();

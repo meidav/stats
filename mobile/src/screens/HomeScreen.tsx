@@ -7,15 +7,18 @@ import {
   FlatList,
   Modal,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GlassCard } from '../components/GlassCard';
+import { GamesCountBadge, gamesBadgeRoom, gamesBadgeRoomTablet } from '../components/GamesCountBadge';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { LeagueIcon } from '../components/LeagueIcon';
@@ -30,7 +33,7 @@ import { copyForFocus, focusFromLeagues } from '../lib/focus';
 import { selectedIconForLeague } from '../lib/leagueIcons';
 import { useAuth } from '../lib/auth';
 import { ApiError, api } from '../lib/api';
-import { useContentMaxWidth, useIsTablet } from '../lib/layout';
+import { useIsTablet } from '../lib/layout';
 import { loadCachedLeagues, removeCachedLeague, saveCachedLeagues } from '../lib/leagueCache';
 import type { League } from '../types';
 import type { RootStackParamList } from '../navigation/types';
@@ -39,8 +42,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
   const { token } = useAuth();
-  const contentMaxWidth = useContentMaxWidth(820);
+  const { height: windowHeight } = useWindowDimensions();
   const isTablet = useIsTablet();
+  const compactEmpty = !isTablet && windowHeight < 860;
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -48,10 +52,6 @@ export function HomeScreen({ navigation }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<League | null>(null);
   const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
   const [deleting, setDeleting] = useState(false);
-
-  const contentWidthStyle = contentMaxWidth
-    ? { maxWidth: contentMaxWidth, width: '100%' as const, alignSelf: 'center' as const }
-    : null;
 
   const loadLeagues = useCallback(async (showSpinner = false) => {
     if (!token) return;
@@ -134,46 +134,37 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <ScreenScaffold footer={<AccountFooter />}>
-      <View style={styles.hero}>
-        <BrandLockup size={96} />
-        <Text style={styles.tagline}>{APP_TAGLINE}</Text>
+      <View style={[styles.hero, compactEmpty && styles.heroCompact]}>
+        <BrandLockup size={compactEmpty ? 72 : 96} />
+        <Text style={[styles.tagline, compactEmpty && styles.taglineCompact]}>{APP_TAGLINE}</Text>
       </View>
 
       {hasLeagues ? (
-        <Text style={[styles.sectionTitle, contentWidthStyle]}>{copy.homeTitle}</Text>
+        <Text style={styles.sectionTitle}>{copy.homeTitle}</Text>
       ) : null}
 
       <ErrorBanner message={error} />
 
       {loading && !hasLeagues ? (
         <ActivityIndicator style={styles.loader} color={colors.primary} />
-      ) : (
-        <FlatList
-          data={leagues}
-          keyExtractor={(item) => String(item.id)}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                loadLeagues();
-              }}
-              tintColor={colors.primary}
-            />
-          }
-          contentContainerStyle={
-            hasLeagues
-              ? [styles.list, contentMaxWidth ? { alignItems: 'center' } : null]
-              : styles.emptyList
-          }
-          ListFooterComponent={
-            hasLeagues ? (
-              <View
-                style={[
-                  styles.footerActions,
-                  contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null,
-                ]}
-              >
+      ) : hasLeagues ? (
+        <View style={[styles.listColumn, isTablet && styles.listColumnTablet]}>
+          <FlatList
+            data={leagues}
+            keyExtractor={(item) => String(item.id)}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setRefreshing(true);
+                  loadLeagues();
+                }}
+                tintColor={colors.primary}
+              />
+            }
+            contentContainerStyle={styles.list}
+            ListFooterComponent={
+              <View style={styles.footerActions}>
                 <SecondaryButton
                   label="Browse public leagues"
                   onPress={() => navigation.navigate('DiscoverLeagues')}
@@ -199,155 +190,154 @@ export function HomeScreen({ navigation }: Props) {
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
-            ) : null
-          }
-          ListEmptyComponent={
-            error ? (
-              <Text style={styles.retryHint}>Pull down to try again.</Text>
-            ) : (
-              <View
-                style={[
-                  styles.emptyStack,
-                  isTablet && styles.emptyStackRow,
-                  contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null,
-                ]}
-              >
-                <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
-                  <View style={styles.emptyCardTop}>
-                    <Ionicons
-                      name="earth"
-                      size={48}
-                      color={accentLilac}
-                      style={styles.emptyGlyph}
-                    />
-                    <Text
-                      style={styles.emptyTitle}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.8}
-                    >
-                      View public leagues
-                    </Text>
-                    <Text style={styles.emptyBody}>
-                      Browse open leagues on PlayTracker and check standings before you create your own.
-                    </Text>
-                  </View>
-                  <SecondaryButton
-                    label="Browse public leagues"
-                    onPress={() => navigation.navigate('DiscoverLeagues')}
-                    style={styles.emptyCta}
-                  />
-                </GlassCard>
-
-                <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
-                  <View style={styles.emptyCardTop}>
-                    <Text style={styles.emptyEmoji}>🏆</Text>
-                    <Text
-                      style={styles.emptyTitle}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.8}
-                    >
-                      {copy.homeEmpty}
-                    </Text>
-                    <Text style={styles.emptyBody}>
-                      A league is one sport or one game night. Standings live here after you add games.
-                    </Text>
-                  </View>
-                  <GradientButton
-                    label="Create a league"
-                    onPress={() => navigation.navigate('CreateLeague')}
-                    style={styles.emptyCta}
-                  />
-                </GlassCard>
-              </View>
-            )
-          }
-          renderItem={({ item }) => {
-            const sport = item.sports?.[0];
-            const canEdit = item.role === 'owner' || item.role === 'admin';
-            const displayIcon = selectedIconForLeague(item);
-            const gameCount = item.game_count ?? 0;
-            const gamesLabel = gameCount === 1 ? '1 game' : `${gameCount} games`;
-            return (
-              <View
-                style={[
-                  styles.leagueCardWrap,
-                  contentMaxWidth ? { maxWidth: contentMaxWidth, width: '100%' } : null,
-                ]}
-              >
-                <GlassCard style={styles.leagueCard}>
-                  <View style={styles.leagueRow}>
-                    <TouchableOpacity
-                      style={styles.leagueMain}
-                      activeOpacity={0.85}
-                      onPress={() =>
-                        navigation.navigate('League', {
-                          slug: item.slug,
-                          name: item.name,
-                          role: item.role,
-                        })
-                      }
-                    >
-                      {displayIcon ? (
-                        <LeagueIcon id={displayIcon} size={24} />
-                      ) : sport ? (
-                        <TemplateGlyph
-                          template={{
-                            id: sport.template_id,
-                            category: sport.category || 'custom',
-                          }}
-                          size={24}
-                        />
-                      ) : (
-                        <LeagueIcon id="trophy" size={24} />
-                      )}
-                      <View style={styles.leagueCopy}>
-                        <Text style={styles.cardTitle} numberOfLines={2}>
-                          {item.name}
-                        </Text>
-                        <Text style={styles.cardMeta} numberOfLines={1}>
-                          {sport?.name || 'No sport yet'}
-                          {' · '}
-                          {item.visibility}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                    {canEdit ? (
-                      <IconActionRow
-                        onEdit={() =>
-                          navigation.navigate('EditLeague', {
+            }
+            renderItem={({ item }) => {
+              const sport = item.sports?.[0];
+              const canEdit = item.role === 'owner' || item.role === 'admin';
+              const displayIcon = selectedIconForLeague(item);
+              const gameCount = item.game_count ?? 0;
+              return (
+                <View
+                  style={[
+                    styles.leagueCardWrap,
+                    gamesBadgeRoom,
+                    isTablet && gamesBadgeRoomTablet,
+                  ]}
+                >
+                  <GlassCard style={styles.leagueCard}>
+                    <View style={styles.leagueRow}>
+                      <TouchableOpacity
+                        style={styles.leagueMain}
+                        activeOpacity={0.85}
+                        onPress={() =>
+                          navigation.navigate('League', {
                             slug: item.slug,
                             name: item.name,
-                            icon: item.icon ?? null,
-                            visibility: item.visibility,
-                            sportTemplateId: sport?.template_id,
+                            role: item.role,
                           })
                         }
-                        onDelete={() => openDelete(item)}
-                        editLabel={`Edit ${item.name}`}
-                        deleteLabel={`Delete ${item.name}`}
-                      />
-                    ) : null}
-                  </View>
-                </GlassCard>
-                <LinearGradient
-                  colors={
-                    gameCount === 0
-                      ? (['#A8A29E', '#78716C'] as const)
-                      : (['#A78BFA', '#7C3AED'] as const)
-                  }
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.gamesBadge}
-                  accessibilityLabel={gamesLabel}
-                >
-                  <Text style={styles.gamesBadgeText}>{gameCount}</Text>
-                </LinearGradient>
-              </View>
-            );
-          }}
-        />
+                      >
+                        {displayIcon ? (
+                          <LeagueIcon id={displayIcon} size={24} />
+                        ) : sport ? (
+                          <TemplateGlyph
+                            template={{
+                              id: sport.template_id,
+                              category: sport.category || 'custom',
+                            }}
+                            size={24}
+                          />
+                        ) : (
+                          <LeagueIcon id="trophy" size={24} />
+                        )}
+                        <View style={styles.leagueCopy}>
+                          <Text style={styles.cardTitle} numberOfLines={2}>
+                            {item.name}
+                          </Text>
+                          <Text style={styles.cardMeta} numberOfLines={1}>
+                            {sport?.name || 'No sport yet'}
+                            {' · '}
+                            {item.visibility}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                      {canEdit ? (
+                        <IconActionRow
+                          onEdit={() =>
+                            navigation.navigate('EditLeague', {
+                              slug: item.slug,
+                              name: item.name,
+                              icon: item.icon ?? null,
+                              visibility: item.visibility,
+                              sportTemplateId: sport?.template_id,
+                            })
+                          }
+                          onDelete={() => openDelete(item)}
+                          editLabel={`Edit ${item.name}`}
+                          deleteLabel={`Delete ${item.name}`}
+                        />
+                      ) : null}
+                    </View>
+                  </GlassCard>
+                  <GamesCountBadge count={gameCount} />
+                </View>
+              );
+            }}
+          />
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.emptyScroll}
+          contentContainerStyle={[
+            styles.emptyHost,
+            compactEmpty && styles.emptyHostCompact,
+          ]}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          {error ? (
+            <Text style={styles.retryHint}>Pull down to try again.</Text>
+          ) : (
+            <View
+              style={[
+                styles.emptyStack,
+                isTablet && styles.emptyStackTablet,
+                compactEmpty && styles.emptyStackCompact,
+              ]}
+            >
+              <GlassCard style={[styles.emptyCard, compactEmpty && styles.emptyCardCompact]}>
+                <View style={styles.emptyCardTop}>
+                  <Text style={[styles.emptyEmoji, compactEmpty && styles.emptyEmojiCompact]}>
+                    🏆
+                  </Text>
+                  <Text
+                    style={[styles.emptyTitle, compactEmpty && styles.emptyTitleCompact]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
+                  >
+                    {copy.homeEmpty}
+                  </Text>
+                  <Text style={[styles.emptyBody, compactEmpty && styles.emptyBodyCompact]}>
+                    A league is one sport or one game night. Standings live here after you add games.
+                  </Text>
+                </View>
+                <GradientButton
+                  label="Create a league"
+                  onPress={() => navigation.navigate('CreateLeague')}
+                  style={styles.emptyCta}
+                />
+              </GlassCard>
+
+              <GlassCard style={[styles.emptyCard, compactEmpty && styles.emptyCardCompact]}>
+                <View style={styles.emptyCardTop}>
+                  <Ionicons
+                    name="earth"
+                    size={compactEmpty ? 36 : 48}
+                    color={accentLilac}
+                    style={[styles.emptyGlyph, compactEmpty && styles.emptyGlyphCompact]}
+                  />
+                  <Text
+                    style={[styles.emptyTitle, compactEmpty && styles.emptyTitleCompact]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.8}
+                  >
+                    View public leagues
+                  </Text>
+                  <Text style={[styles.emptyBody, compactEmpty && styles.emptyBodyCompact]}>
+                    Browse open leagues on PlayTracker and check standings before you create your own.
+                  </Text>
+                </View>
+                <SecondaryButton
+                  label="Browse public leagues"
+                  onPress={() => navigation.navigate('DiscoverLeagues')}
+                  style={styles.emptyCta}
+                />
+              </GlassCard>
+            </View>
+          )}
+        </ScrollView>
       )}
 
       <Modal
@@ -405,12 +395,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
   },
+  heroCompact: {
+    marginBottom: spacing.sm,
+  },
   tagline: {
     marginTop: spacing.sm,
     fontSize: 15,
     color: colors.text,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  taglineCompact: {
+    marginTop: spacing.xs,
+    fontSize: 14,
   },
   sectionTitle: {
     fontSize: 20,
@@ -423,24 +420,45 @@ const styles = StyleSheet.create({
   loader: {
     marginTop: spacing.lg,
   },
+  listColumn: {
+    flex: 1,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  listColumnTablet: {
+    width: '75%',
+    maxWidth: 720,
+  },
   list: {
     paddingHorizontal: spacing.lg,
     paddingTop: 8,
     paddingBottom: spacing.lg,
   },
-  emptyList: {
+  emptyScroll: {
+    flex: 1,
+  },
+  emptyHost: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  emptyHostCompact: {
+    justifyContent: 'flex-start',
+    paddingTop: spacing.xs,
   },
   emptyStack: {
+    width: '100%',
     gap: spacing.md,
   },
-  emptyStackRow: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
+  emptyStackTablet: {
+    // Match roughly one half of the previous side-by-side pair.
+    width: '50%',
+    maxWidth: 440,
+  },
+  emptyStackCompact: {
+    gap: spacing.sm,
   },
   emptyCard: {
     padding: spacing.xl,
@@ -448,9 +466,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.md,
   },
-  emptyCardHalf: {
-    flex: 1,
-    minWidth: 280,
+  emptyCardCompact: {
+    padding: spacing.lg,
+    gap: spacing.sm,
   },
   emptyCardTop: {
     alignItems: 'center',
@@ -458,10 +476,17 @@ const styles = StyleSheet.create({
   emptyGlyph: {
     marginBottom: spacing.md,
   },
+  emptyGlyphCompact: {
+    marginBottom: spacing.sm,
+  },
   emptyEmoji: {
     fontSize: 48,
     marginBottom: spacing.md,
     textAlign: 'center',
+  },
+  emptyEmojiCompact: {
+    fontSize: 36,
+    marginBottom: spacing.sm,
   },
   emptyTitle: {
     fontSize: 20,
@@ -471,12 +496,20 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     width: '100%',
   },
+  emptyTitleCompact: {
+    fontSize: 17,
+    marginBottom: spacing.xs,
+  },
   emptyBody: {
     fontSize: 15,
     lineHeight: 22,
     color: colors.textMuted,
     textAlign: 'center',
     marginBottom: 0,
+  },
+  emptyBodyCompact: {
+    fontSize: 14,
+    lineHeight: 20,
   },
   emptyCta: {
     alignSelf: 'stretch',
@@ -558,31 +591,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 13,
     textTransform: 'capitalize',
-  },
-  gamesBadge: {
-    position: 'absolute',
-    top: -7,
-    right: -4,
-    minWidth: 22,
-    height: 22,
-    paddingHorizontal: 6,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 252, 248, 0.95)',
-    shadowColor: '#5B21B6',
-    shadowOpacity: 0.22,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  gamesBadgeText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-    lineHeight: 13,
   },
   modalScrim: {
     flex: 1,

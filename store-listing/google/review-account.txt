@@ -1,0 +1,16 @@
+Play Console testing / review account
+=====================================
+User name / email: playtest@playtracker.org
+Password: PlayReview-26!
+
+Dedicated account for Google Play review, internal testing tracks,
+and shared QA. Same credentials as App Store Connect review notes.
+
+Sample leagues on this account
+------------------------------
+- PT Test BVB 2's (public, Beach Volleyball 2's)
+- PT Test Gin Stats (unlisted)
+- PT Test Chess Stats (unlisted)
+
+Keep a few sample games on the BVB league before submitting so
+reviewers see standings immediately.

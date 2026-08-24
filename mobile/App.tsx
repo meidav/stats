@@ -2,7 +2,7 @@ import { NavigationContainer, DefaultTheme, createNavigationContainerRef } from 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Linking, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Image, Linking, LogBox, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableScreens } from 'react-native-screens';
@@ -13,6 +13,10 @@ import { AuthProvider, useAuth } from './src/lib/auth';
 import { parseLeagueSlugFromUrl } from './src/lib/leagueLinks';
 import { hasSeenIntroRecently } from './src/lib/onboarding';
 import type { RootStackParamList } from './src/navigation/types';
+
+// Harmless Fabric / native-stack transition noise:
+// https://github.com/react-navigation/react-navigation/issues/11564
+LogBox.ignoreLogs(['Sending `onAnimatedValueUpdate` with no listeners registered.']);
 
 const logoPng = require('./assets/playtracker-logo.png');
 
@@ -220,9 +224,9 @@ export default function App() {
 function AppRoot() {
   return (
     <NavigationContainer ref={navigationRef} theme={navTheme}>
-      <GradientBackground>
+      <View style={styles.root}>
         <AppNavigator />
-      </GradientBackground>
+      </View>
       <StatusBar style="dark" />
     </NavigationContainer>
   );

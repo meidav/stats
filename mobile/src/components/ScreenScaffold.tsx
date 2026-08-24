@@ -6,8 +6,9 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { GradientBackground } from './GradientBackground';
 import { spacing } from '../constants/theme';
 
 type Props = {
@@ -18,19 +19,41 @@ type Props = {
 };
 
 /**
- * Owns top safe-area padding so content never sits under the status bar on
- * iPhone or iPad. Footer handles the home indicator separately.
+ * Owns safe-area padding via insets. Each screen paints its own gradient so
+ * native-stack transitions do not show overlapping content through transparency.
  */
 export function ScreenScaffold({ children, footer, contentStyle, keyboard }: Props) {
+  const insets = useSafeAreaInsets();
+
   const body = (
-    <SafeAreaView style={styles.root} edges={['top', 'left', 'right']}>
-      <View style={[styles.body, contentStyle]}>{children}</View>
-      {footer ? (
-        <SafeAreaView edges={['bottom']} style={styles.footer}>
-          {footer}
-        </SafeAreaView>
-      ) : null}
-    </SafeAreaView>
+    <GradientBackground>
+      <View style={styles.root}>
+        <View
+          style={[
+            styles.body,
+            {
+              paddingTop: insets.top + spacing.sm,
+              paddingLeft: insets.left,
+              paddingRight: insets.right,
+            },
+            contentStyle,
+          ]}
+        >
+          {children}
+        </View>
+        {footer ? (
+          <View
+            style={{
+              paddingBottom: Math.max(insets.bottom, spacing.sm),
+              paddingLeft: insets.left,
+              paddingRight: insets.right,
+            }}
+          >
+            {footer}
+          </View>
+        ) : null}
+      </View>
+    </GradientBackground>
   );
 
   if (!keyboard) return body;
@@ -51,9 +74,5 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
-    paddingTop: spacing.sm,
-  },
-  footer: {
-    paddingBottom: spacing.sm,
   },
 });

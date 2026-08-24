@@ -16,5 +16,14 @@ short-description.txt  - Short description (80)
 full-description.txt   - Full description (4000)
 urls-and-metadata.txt  - Privacy URL, support email, website, etc.
 
-Graphics still TODO: 512 icon, 1024x500 feature graphic, phone screenshots.
+Graphics
+--------
+512 icon:            static/img/promo/play-icon-512.png
+1024x500 feature:    static/img/promo/play-feature-graphic.png
+Phone screenshots:   drop into static/img/promo/ when ready
+
+Version (align with mobile/app.json)
+------------------------------------
+1.1.1 (versionCode 11)
+
 Data safety form is a separate Play Console step (not in these text files).

@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -14,8 +14,8 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
+import { SportTypePill } from '../components/SportTypePill';
 import { colors, spacing } from '../constants/theme';
-import { copyForFocus } from '../lib/focus';
 import { formatLocalDateTime, parseLocalDateTime } from '../lib/datetime';
 import { autoCapWords } from '../lib/names';
 import {
@@ -41,6 +41,33 @@ function padNames(names: string[] | undefined, count: number) {
   return next.slice(0, count);
 }
 
+const SUGGESTION_LIMIT = 5;
+
+function recentNamesFromGames(games: Array<{ winners: string[]; losers: string[] }>) {
+  const seen = new Set<string>();
+  const recent: string[] = [];
+  for (const game of games) {
+    for (const raw of [...game.winners, ...game.losers]) {
+      const name = raw.trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      recent.push(name);
+    }
+  }
+  return recent;
+}
+
+function suggestionRank(name: string, query: string) {
+  const lower = name.toLowerCase();
+  const q = query.toLowerCase();
+  if (lower.startsWith(q)) return 1000 - lower.length;
+  const index = lower.indexOf(q);
+  if (index >= 0) return 500 - index;
+  return -1;
+}
+
 export function AddGameScreen({ route, navigation }: Props) {
   const {
     sportId,
@@ -49,7 +76,7 @@ export function AddGameScreen({ route, navigation }: Props) {
     playersPerSide,
     scoreMode = 'points',
     sideKind = 'player',
-    focus = 'mixed',
+    sportCategory,
     gameId,
     winners,
     losers,
@@ -77,11 +104,43 @@ export function AddGameScreen({ route, navigation }: Props) {
   const [tennisSets, setTennisSets] = useState<TennisSetInput[]>(initialTennis.sets);
   const [playedAt, setPlayedAt] = useState(() => parseLocalDateTime(gameDate));
   const [players, setPlayers] = useState<string[]>([]);
+  const [recentPlayers, setRecentPlayers] = useState<string[]>([]);
   const [winnerHint, setWinnerHint] = useState<number | null>(null);
   const [loserHints, setLoserHints] = useState<number[]>([]);
   const [focusField, setFocusField] = useState<FocusField>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const nameRefs = useRef<Record<string, TextInput | null>>({});
+  const winnerScoreRef = useRef<TextInput>(null);
+  const loserScoreRef = useRef<TextInput>(null);
+
+  function nameKey(side: 'winner' | 'loser', index: number) {
+    return `${side}-${index}`;
+  }
+
+  function focusNextField(side: 'winner' | 'loser', index: number) {
+    if (side === 'winner' && index + 1 < playersPerSide) {
+      nameRefs.current[nameKey('winner', index + 1)]?.focus();
+      return;
+    }
+    if (side === 'winner') {
+      nameRefs.current[nameKey('loser', 0)]?.focus();
+      return;
+    }
+    if (side === 'loser' && index + 1 < playersPerSide) {
+      nameRefs.current[nameKey('loser', index + 1)]?.focus();
+      return;
+    }
+    if (!winLoss && !tennis) {
+      winnerScoreRef.current?.focus();
+    }
+  }
+
+  function chooseName(side: 'winner' | 'loser', index: number, name: string) {
+    updateName(side, index, name);
+    setFocusField(null);
+    requestAnimationFrame(() => focusNextField(side, index));
+  }
 
   useEffect(() => {
     if (!token) return;
@@ -103,6 +162,8 @@ export function AddGameScreen({ route, navigation }: Props) {
       ]);
       if (!active) return;
       const fromGames = (sportGames.games || []).flatMap((game) => [...game.winners, ...game.losers]);
+      const recent = recentNamesFromGames(sportGames.games || []);
+      setRecentPlayers(recent);
       const fromStats = sportStats.flatMap((item) => (item.stats || []).map((row) => row.player));
       const merged = await rememberPlayers([
         ...(remote.players || []),
@@ -148,13 +209,25 @@ export function AddGameScreen({ route, navigation }: Props) {
 
   function suggestionsFor(value: string) {
     const query = value.trim().toLowerCase();
-    const taken = [...winnerNames, ...loserNames]
-      .map((name) => name.trim().toLowerCase())
-      .filter((name) => name && name !== query);
-    return players
-      .filter((name) => !taken.includes(name.toLowerCase()))
-      .filter((name) => !query || name.toLowerCase().includes(query))
-      .slice(0, 8);
+    const taken = new Set(
+      [...winnerNames, ...loserNames]
+        .map((name) => name.trim().toLowerCase())
+        .filter(Boolean),
+    );
+    const available = (list: string[]) =>
+      list.filter((name) => !taken.has(name.trim().toLowerCase()));
+
+    if (!query) {
+      const pool = recentPlayers.length ? recentPlayers : players;
+      return available(pool).slice(0, SUGGESTION_LIMIT);
+    }
+
+    return available(players)
+      .map((name) => ({ name, rank: suggestionRank(name, query) }))
+      .filter((item) => item.rank >= 0)
+      .sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name))
+      .slice(0, SUGGESTION_LIMIT)
+      .map((item) => item.name);
   }
 
   function updateName(side: 'winner' | 'loser', index: number, value: string) {
@@ -230,12 +303,23 @@ export function AddGameScreen({ route, navigation }: Props) {
     label: string,
     index: number,
     value: string,
+    gridItem = false,
   ) {
-    const focused = focusField && typeof focusField === 'object' && focusField.side === side && focusField.index === index;
+    const focused =
+      focusField &&
+      typeof focusField === 'object' &&
+      focusField.side === side &&
+      focusField.index === index;
     const matches = focused ? suggestionsFor(value) : [];
     return (
-      <View key={`${side}-${index}`} style={styles.fieldWrap}>
+      <View
+        key={nameKey(side, index)}
+        style={[styles.fieldWrap, gridItem && styles.fieldGridItem, focused && styles.fieldFocused]}
+      >
         <TextInput
+          ref={(el) => {
+            nameRefs.current[nameKey(side, index)] = el;
+          }}
           style={styles.input}
           placeholder={label}
           placeholderTextColor={colors.textMuted}
@@ -251,16 +335,30 @@ export function AddGameScreen({ route, navigation }: Props) {
               <TouchableOpacity
                 key={name}
                 style={styles.suggestItem}
-                onPressIn={() => {
-                  updateName(side, index, name);
-                  setFocusField(null);
-                }}
+                onPress={() => chooseName(side, index, name)}
               >
                 <Text style={styles.suggestText}>{name}</Text>
               </TouchableOpacity>
             ))}
           </View>
         ) : null}
+      </View>
+    );
+  }
+
+  function renderNameFields(
+    side: 'winner' | 'loser',
+    labels: string[],
+    names: string[],
+  ) {
+    if (playersPerSide === 1) {
+      return renderNameField(side, labels[0], 0, names[0]);
+    }
+    return (
+      <View style={styles.nameGrid}>
+        {labels.map((label, index) =>
+          renderNameField(side, label, index, names[index], true),
+        )}
       </View>
     );
   }
@@ -281,7 +379,7 @@ export function AddGameScreen({ route, navigation }: Props) {
       }
     >
       <ScreenHeader
-        title={editing ? 'Edit game' : copyForFocus(focus).addGameTitle}
+        title={editing ? 'Edit game' : 'Add game'}
         onBack={() => navigation.goBack()}
       />
       <ScrollView
@@ -291,18 +389,22 @@ export function AddGameScreen({ route, navigation }: Props) {
         keyboardDismissMode="interactive"
         automaticallyAdjustKeyboardInsets
       >
-        <Text style={styles.subtitle}>{sportName}</Text>
-        <DateTimeField value={playedAt} onChange={setPlayedAt} />
+        <SportTypePill
+          name={sportName}
+          templateId={templateId}
+          category={sportCategory || 'custom'}
+          style={{ marginBottom: spacing.lg }}
+        />
 
         <Text style={styles.section}>
           {teamSides ? 'Winning team' : oneOnOne ? 'Winner' : 'Winners'}
         </Text>
-        {winnerLabels.map((label, index) => renderNameField('winner', label, index, winnerNames[index]))}
+        {renderNameFields('winner', winnerLabels, winnerNames)}
 
         <Text style={styles.section}>
           {teamSides ? 'Losing team' : oneOnOne ? 'Loser' : 'Losers'}
         </Text>
-        {loserLabels.map((label, index) => renderNameField('loser', label, index, loserNames[index]))}
+        {renderNameFields('loser', loserLabels, loserNames)}
 
         {winLoss ? (
           <Text style={styles.hint}>Just who won.</Text>
@@ -350,6 +452,7 @@ export function AddGameScreen({ route, navigation }: Props) {
             <View style={styles.scoreField}>
               <Text style={styles.label}>{teamSides ? 'Winning score' : 'Winner score'}</Text>
               <TextInput
+                ref={winnerScoreRef}
                 style={styles.input}
                 keyboardType="number-pad"
                 value={winnerScore}
@@ -389,6 +492,10 @@ export function AddGameScreen({ route, navigation }: Props) {
             </View>
           </View>
         )}
+
+        <View style={styles.playedWrap}>
+          <DateTimeField value={playedAt} onChange={setPlayedAt} />
+        </View>
       </ScrollView>
     </ScreenScaffold>
   );
@@ -404,10 +511,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: spacing.lg,
-  },
-  subtitle: {
-    color: colors.textMuted,
-    marginBottom: spacing.lg,
+    gap: spacing.sm,
   },
   section: {
     fontWeight: '700',
@@ -421,6 +525,21 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   fieldWrap: {
+    marginBottom: spacing.sm,
+  },
+  fieldGridItem: {
+    flexGrow: 1,
+    flexBasis: '45%',
+    minWidth: '45%',
+    marginBottom: 0,
+  },
+  fieldFocused: {
+    zIndex: 10,
+  },
+  nameGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
     marginBottom: spacing.sm,
   },
   input: {
@@ -492,6 +611,9 @@ const styles = StyleSheet.create({
   },
   scoreField: {
     flex: 1,
+  },
+  playedWrap: {
+    marginTop: spacing.lg,
   },
   chipRow: {
     flexDirection: 'row',

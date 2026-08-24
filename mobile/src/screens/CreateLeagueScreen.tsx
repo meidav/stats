@@ -20,19 +20,23 @@ import { upsertCachedLeague } from '../lib/leagueCache';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import type { LeagueFocus } from '../lib/focus';
+import { suggestLeagueName } from '../lib/names';
 import { hintForVisibility, VISIBILITY_OPTIONS, type LeagueVisibility } from '../lib/visibility';
 import type { SportTemplate } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateLeague'>;
 
+const PLACEHOLDER_COLOR = 'rgba(51, 65, 85, 0.42)';
+const PLACEHOLDER_ERROR_COLOR = 'rgba(220, 38, 38, 0.55)';
+
 export function CreateLeagueScreen({ navigation }: Props) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
   const nameY = useRef(0);
   const [name, setName] = useState('');
   const [visibility, setVisibility] = useState<LeagueVisibility>('public');
-  const [focus, setFocus] = useState<LeagueFocus>('sports');
+  const [focus, setFocus] = useState<Exclude<LeagueFocus, 'mixed'>>('sports');
   const [templates, setTemplates] = useState<SportTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState('beach_volleyball_2s');
   const [loading, setLoading] = useState(false);
@@ -53,8 +57,13 @@ export function CreateLeagueScreen({ navigation }: Props) {
     return visible;
   }, [templates, focus, selectedTemplate]);
   const copy = copyForFocus(focus);
+  const selectedTemplateMeta = templates.find((template) => template.id === selectedTemplate);
+  const namePlaceholder = useMemo(
+    () => suggestLeagueName(user, selectedTemplateMeta?.name || selectedTemplateMeta?.default_name),
+    [user, selectedTemplateMeta],
+  );
 
-  function handleFocusChange(next: LeagueFocus) {
+  function handleFocusChange(next: Exclude<LeagueFocus, 'mixed'>) {
     setFocus(next);
     const visible = templatesForFocus(templates, next);
     if (visible.some((template) => template.id === selectedTemplate)) {
@@ -159,8 +168,8 @@ export function CreateLeagueScreen({ navigation }: Props) {
           <Text style={styles.label}>Name</Text>
           <TextInput
             style={[styles.input, nameError && styles.inputError]}
-            placeholder={focus === 'table' ? 'Sunday game night' : 'Tuesday Night Crew'}
-            placeholderTextColor={nameError ? colors.danger : colors.textMuted}
+            placeholder={namePlaceholder}
+            placeholderTextColor={nameError ? PLACEHOLDER_ERROR_COLOR : PLACEHOLDER_COLOR}
             autoCapitalize="words"
             value={name}
             onChangeText={applyName}

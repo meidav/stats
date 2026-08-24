@@ -274,7 +274,10 @@ export const api = {
   discoverLeagues: (query?: string) =>
     request<{
       leagues: Array<
-        Pick<import('../types').League, 'id' | 'name' | 'slug' | 'description' | 'share_url' | 'icon'> & {
+        Pick<
+          import('../types').League,
+          'id' | 'name' | 'slug' | 'description' | 'share_url' | 'icon' | 'game_count'
+        > & {
           sport_count?: number;
           sport_name?: string | null;
           template_id?: string | null;

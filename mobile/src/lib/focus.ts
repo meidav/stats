@@ -2,10 +2,10 @@ import type { League, SportTemplate } from '../types';
 
 export type LeagueFocus = 'sports' | 'table' | 'mixed';
 
-export const FOCUS_OPTIONS: Array<{ id: LeagueFocus; label: string; hint: string }> = [
+/** Create-league choices only. Existing leagues may still report focus=mixed. */
+export const FOCUS_OPTIONS: Array<{ id: Exclude<LeagueFocus, 'mixed'>; label: string; hint: string }> = [
   { id: 'sports', label: 'Sports', hint: 'Matches, standings, and seasons' },
   { id: 'table', label: 'Game night', hint: 'Cards, board games, family' },
-  { id: 'mixed', label: 'Mix', hint: 'Sports and table games together' },
 ];
 
 export function templatesForFocus(templates: SportTemplate[], focus: LeagueFocus) {
@@ -15,6 +15,7 @@ export function templatesForFocus(templates: SportTemplate[], focus: LeagueFocus
   if (focus === 'table') {
     return templates.filter((t) => t.category === 'cards' || t.category === 'board' || t.category === 'custom');
   }
+  // Legacy mixed leagues: show everything when editing/viewing helpers need a list.
   return templates;
 }
 
