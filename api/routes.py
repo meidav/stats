@@ -487,7 +487,10 @@ def register_routes(api):
                         "slug": league["slug"],
                         "description": league["description"],
                         "visibility": "public",
+                        "icon": league.get("icon"),
                         "sport_count": league["sport_count"],
+                        "sport_name": league.get("sport_name"),
+                        "template_id": league.get("template_id"),
                         "share_url": league_share_url(league),
                         "created_at": league["created_at"],
                     }

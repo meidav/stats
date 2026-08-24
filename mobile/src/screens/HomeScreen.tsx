@@ -27,7 +27,9 @@ import { copyForFocus, focusFromLeagues } from '../lib/focus';
 import { selectedIconForLeague } from '../lib/leagueIcons';
 import { useAuth } from '../lib/auth';
 import { ApiError, api } from '../lib/api';
+import { useContentMaxWidth, useIsTablet } from '../lib/layout';
 import { loadCachedLeagues, removeCachedLeague, saveCachedLeagues } from '../lib/leagueCache';
+import { GlobeMark } from '../components/TemplateGlyph';
 import type { League } from '../types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -35,6 +37,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
   const { token, user, logout } = useAuth();
+  const contentMaxWidth = useContentMaxWidth(560);
+  const isTablet = useIsTablet();
   const [leagues, setLeagues] = useState<League[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -43,6 +47,10 @@ export function HomeScreen({ navigation }: Props) {
   const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
   const [deleting, setDeleting] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
+
+  const contentWidthStyle = contentMaxWidth
+    ? { maxWidth: contentMaxWidth, width: '100%' as const, alignSelf: 'center' as const }
+    : null;
 
   const loadLeagues = useCallback(async (showSpinner = false) => {
     if (!token) return;
@@ -144,7 +152,9 @@ export function HomeScreen({ navigation }: Props) {
         <Text style={styles.tagline}>{APP_TAGLINE}</Text>
       </View>
 
-      {hasLeagues ? <Text style={styles.sectionTitle}>{copy.homeTitle}</Text> : null}
+      {hasLeagues ? (
+        <Text style={[styles.sectionTitle, contentWidthStyle]}>{copy.homeTitle}</Text>
+      ) : null}
 
       <ErrorBanner message={error} />
 
@@ -164,50 +174,88 @@ export function HomeScreen({ navigation }: Props) {
               tintColor={colors.primary}
             />
           }
-          contentContainerStyle={hasLeagues ? styles.list : styles.emptyList}
+          contentContainerStyle={[
+            hasLeagues ? styles.list : styles.emptyList,
+            contentWidthStyle,
+          ]}
           ListFooterComponent={
             hasLeagues ? (
-              <TouchableOpacity
-                onPress={() => navigation.navigate('CreateLeague')}
-                activeOpacity={0.85}
-                style={styles.newLeagueWrap}
-              >
-                <LinearGradient
-                  colors={[...gradients.button]}
-                  start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
-                  style={styles.newLeagueButton}
+              <View style={styles.footerActions}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('DiscoverLeagues')}
+                  activeOpacity={0.85}
+                  style={styles.secondaryCtaButton}
                 >
-                  <Ionicons name="add" size={18} color="#fff" />
-                  <Text style={styles.newLeagueText}>{copy.newAction}</Text>
-                </LinearGradient>
-              </TouchableOpacity>
+                  <GlobeMark size={18} />
+                  <Text style={styles.secondaryCtaButtonText}>Browse public</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('CreateLeague')}
+                  activeOpacity={0.85}
+                  style={styles.primaryCtaWrap}
+                >
+                  <LinearGradient
+                    colors={[...gradients.button]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={styles.newLeagueButton}
+                  >
+                    <Ionicons name="add" size={18} color="#fff" />
+                    <Text style={styles.newLeagueText}>{copy.newAction}</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
             ) : null
           }
           ListEmptyComponent={
             error ? (
               <Text style={styles.retryHint}>Pull down to try again.</Text>
             ) : (
-              <GlassCard style={styles.emptyCard}>
-                <Text style={styles.emptyEmoji}>🏆</Text>
-                <Text style={styles.emptyTitle}>{copy.homeEmpty}</Text>
-                <Text style={styles.emptyBody}>
-                  A league can be sports, game night, or both. Standings live here after you add games.
-                </Text>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('CreateLeague')}
-                  activeOpacity={0.85}
-                >
-                  <LinearGradient
-                    colors={[...gradients.button]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={styles.emptyButton}
+              <View style={[styles.emptyStack, isTablet && styles.emptyStackRow]}>
+                <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
+                  <Text style={styles.emptyEmoji}>🏆</Text>
+                  <Text style={styles.emptyTitle}>{copy.homeEmpty}</Text>
+                  <Text style={styles.emptyBody}>
+                    A league is one sport or one game night. Standings live here after you add games.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('CreateLeague')}
+                    activeOpacity={0.85}
                   >
-                    <Text style={styles.emptyButtonText}>Create a league</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </GlassCard>
+                    <LinearGradient
+                      colors={[...gradients.button]}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={styles.emptyButton}
+                    >
+                      <Text style={styles.emptyButtonText}>Create a league</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </GlassCard>
+
+                <GlassCard style={[styles.emptyCard, isTablet && styles.emptyCardHalf]}>
+                  <View style={styles.emptyGlyph}>
+                    <GlobeMark size={52} />
+                  </View>
+                  <Text style={styles.emptyTitle}>View public leagues</Text>
+                  <Text style={styles.emptyBody}>
+                    Browse open leagues on PlayTracker and check standings before you create your own.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('DiscoverLeagues')}
+                    activeOpacity={0.85}
+                  >
+                    <LinearGradient
+                      colors={[...gradients.button]}
+                      start={{ x: 0, y: 0.5 }}
+                      end={{ x: 1, y: 0.5 }}
+                      style={styles.emptyButton}
+                    >
+                      <Text style={styles.emptyButtonText}>Browse public leagues</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </GlassCard>
+              </View>
             )
           }
           renderItem={({ item }) => {
@@ -367,9 +415,9 @@ export function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.signOutConfirm}
-                onPress={() => {
+                onPress={async () => {
                   setSignOutOpen(false);
-                  logout();
+                  await logout();
                 }}
               >
                 <Text style={styles.signOutConfirmText}>Sign out</Text>
@@ -417,9 +465,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
   },
+  emptyStack: {
+    gap: spacing.md,
+  },
+  emptyStackRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
   emptyCard: {
     padding: spacing.xl,
     alignItems: 'center',
+  },
+  emptyCardHalf: {
+    flex: 1,
+  },
+  emptyGlyph: {
+    marginBottom: spacing.md,
   },
   emptyEmoji: {
     fontSize: 48,
@@ -438,6 +499,41 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     marginBottom: spacing.lg,
+  },
+  footerActions: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+    paddingHorizontal: spacing.sm,
+  },
+  secondaryCtaButton: {
+    flex: 1,
+    maxWidth: 220,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.35)',
+    backgroundColor: 'rgba(255, 252, 248, 0.72)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+  },
+  secondaryCtaButtonText: {
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  primaryCtaWrap: {
+    flex: 1,
+    maxWidth: 220,
+  },
+  newLeagueWrap: {
+    alignItems: 'center',
   },
   emptyButton: {
     borderRadius: 12,
@@ -537,14 +633,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 15,
   },
-  newLeagueWrap: {
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-  },
   newLeagueButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 4,
     paddingHorizontal: spacing.xl,
     paddingVertical: 12,

@@ -6,7 +6,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { spacing } from '../constants/theme';
 
@@ -17,24 +17,20 @@ type Props = {
   keyboard?: boolean;
 };
 
+/**
+ * Owns top safe-area padding so content never sits under the status bar on
+ * iPhone or iPad. Footer handles the home indicator separately.
+ */
 export function ScreenScaffold({ children, footer, contentStyle, keyboard }: Props) {
-  const insets = useSafeAreaInsets();
-
   const body = (
-    <View style={styles.root}>
-      <View
-        style={[
-          styles.body,
-          { paddingTop: insets.top + spacing.sm },
-          contentStyle,
-        ]}
-      >
-        {children}
-      </View>
+    <SafeAreaView style={styles.root} edges={['top', 'left', 'right']}>
+      <View style={[styles.body, contentStyle]}>{children}</View>
       {footer ? (
-        <View style={{ paddingBottom: Math.max(insets.bottom, spacing.md) }}>{footer}</View>
+        <SafeAreaView edges={['bottom']} style={styles.footer}>
+          {footer}
+        </SafeAreaView>
       ) : null}
-    </View>
+    </SafeAreaView>
   );
 
   if (!keyboard) return body;
@@ -55,5 +51,9 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    paddingTop: spacing.sm,
+  },
+  footer: {
+    paddingBottom: spacing.sm,
   },
 });
