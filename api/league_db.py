@@ -4,7 +4,7 @@ import secrets
 from db_utils import db_manager
 from api.brand import APP_URL
 from api.sport_templates import (
-    FOCUS_OPTIONS,
+    CREATE_FOCUS_OPTIONS,
     VISIBILITY_OPTIONS,
     focus_for_template,
     get_template,
@@ -144,11 +144,11 @@ def _ensure_column(cursor, table, column, definition):
         cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
 
-def create_league(owner_id, name, visibility="public", description=None, slug=None, focus="mixed"):
+def create_league(owner_id, name, visibility="public", description=None, slug=None, focus="sports"):
     if visibility not in VISIBILITY_OPTIONS:
         raise ValueError(f"visibility must be one of {VISIBILITY_OPTIONS}")
-    if focus not in FOCUS_OPTIONS:
-        raise ValueError(f"focus must be one of {FOCUS_OPTIONS}")
+    if focus not in CREATE_FOCUS_OPTIONS:
+        raise ValueError(f"focus must be one of {CREATE_FOCUS_OPTIONS}")
 
     base_slug = _slugify(slug or name)
     final_slug = _unique_slug(base_slug)
@@ -255,19 +255,8 @@ def add_sport_to_league(league_id, template_id, name=None, players_per_side=None
 
 
 def widen_league_focus(league_id, template_id):
-    league = get_league_by_id(league_id)
-    if not league:
-        return
-    current = league.get("focus") or "mixed"
-    incoming = focus_for_template(template_id)
-    if current == "mixed" or incoming == "mixed" or current == incoming:
-        return
-    with db_manager.get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE leagues SET focus = 'mixed', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-            (league_id,),
-        )
+    """No-op: leagues stay sports or game night. One activity identity per league."""
+    return
 
 
 def get_league_by_id(league_id):
@@ -310,9 +299,10 @@ def get_leagues_for_user(user_id):
         WHERE l.owner_id = ? OR lm.user_id = ?
         GROUP BY l.id
         ORDER BY COALESCE(
-          (SELECT MAX(created_at) FROM league_games WHERE league_id = l.id),
+          (SELECT MAX(game_date) FROM league_games WHERE league_id = l.id),
           l.created_at
-        ) DESC
+        ) DESC,
+        l.id DESC
         """,
         (user_id, user_id, user_id),
     )
