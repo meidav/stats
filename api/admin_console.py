@@ -43,6 +43,7 @@ from api.admin_data import (
 from api.auth_service import authenticate_with_email
 from api.brand import APP_NAME
 from api.league_db import get_league_by_id, get_sports_for_league, league_to_dict, list_leagues_for_admin
+from api.roadmap_data import ROADMAP_PRINCIPLE, ROADMAP_SECTIONS
 from api.sport_templates import VISIBILITY_OPTIONS
 from auth import get_user_by_email, get_user_by_id, verify_password
 
@@ -508,6 +509,16 @@ def leagues():
         query=query,
         visibility=visibility,
         visibilities=VISIBILITY_OPTIONS,
+    )
+
+
+@admin_bp.route("/roadmap")
+@admin_login_required
+def roadmap():
+    return render_template(
+        "admin_console/roadmap.html",
+        sections=ROADMAP_SECTIONS,
+        principle=ROADMAP_PRINCIPLE,
     )
 
 

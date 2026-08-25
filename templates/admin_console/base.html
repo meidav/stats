@@ -27,6 +27,7 @@
             <nav class="ac-nav" aria-label="Admin">
                 <a class="ac-nav-link {% block nav_users %}{% endblock %}" href="{{ url_for('admin_console.users') }}">Users</a>
                 <a class="ac-nav-link {% block nav_leagues %}{% endblock %}" href="{{ url_for('admin_console.leagues') }}">Leagues</a>
+                <a class="ac-nav-link {% block nav_roadmap %}{% endblock %}" href="{{ url_for('admin_console.roadmap') }}">Roadmap</a>
             </nav>
             {% endif %}
             {% if admin_user %}

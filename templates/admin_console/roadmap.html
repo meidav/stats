@@ -1,0 +1,41 @@
+{% extends "admin_console/base.html" %}
+{% block title %}Roadmap | PlayTracker admin{% endblock %}
+{% block nav_roadmap %}is-active{% endblock %}
+
+{% block content %}
+<section class="ac-page">
+    <header class="ac-page-head">
+        <div>
+            <p class="ac-kicker">Product</p>
+            <h1>Roadmap</h1>
+        </div>
+        <p class="ac-page-meta">What we are building next. Internal only.</p>
+    </header>
+
+    <div class="ac-roadmap-principle">
+        <p>{{ principle }}</p>
+    </div>
+
+    {% for section in sections %}
+    <section class="ac-roadmap-section">
+        <header class="ac-roadmap-head">
+            <h2>{{ section.title }}</h2>
+            {% if section.subtitle %}
+            <p>{{ section.subtitle }}</p>
+            {% endif %}
+        </header>
+        <ul class="ac-roadmap-list">
+            {% for item in section.entries %}
+            <li class="ac-roadmap-item">
+                <div class="ac-roadmap-item-top">
+                    <h3>{{ item.title }}</h3>
+                    <span class="ac-roadmap-status ac-roadmap-status--{{ item.status }}">{{ item.status|replace('_', ' ') }}</span>
+                </div>
+                <p>{{ item.detail }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endfor %}
+</section>
+{% endblock %}

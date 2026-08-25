@@ -173,6 +173,15 @@ class AdminConsoleTests(unittest.TestCase):
         self.assertIn("Open Play", html)
         self.assertIn("Quiet League", html)
 
+    def test_roadmap_page_loads(self):
+        self._login_console()
+        response = self.client.get("/admin-console/roadmap")
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        self.assertIn("Roadmap", html)
+        self.assertIn("Account settings", html)
+        self.assertIn("Subscriptions", html)
+
     def test_admin_can_open_private_league(self):
         self._login_console()
         response = self.client.get(f"/admin-console/leagues/{self.private['id']}")

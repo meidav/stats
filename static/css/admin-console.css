@@ -638,6 +638,108 @@ h1 {
   font-size: 0.82rem;
 }
 
+.ac-roadmap-principle {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(253, 186, 116, 0.22);
+  border: 1px solid rgba(253, 186, 116, 0.45);
+  color: var(--ac-ink);
+  font-weight: 600;
+}
+
+.ac-roadmap-section {
+  margin-bottom: 24px;
+}
+
+.ac-roadmap-head {
+  margin-bottom: 10px;
+}
+
+.ac-roadmap-head h2 {
+  margin: 0;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-size: 1.15rem;
+  color: var(--ac-purple);
+}
+
+.ac-roadmap-head p {
+  margin: 4px 0 0;
+  color: var(--ac-muted);
+  font-size: 0.88rem;
+}
+
+.ac-roadmap-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.ac-roadmap-item {
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.ac-roadmap-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.ac-roadmap-item h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  color: var(--ac-ink);
+}
+
+.ac-roadmap-item p {
+  margin: 0;
+  color: var(--ac-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.ac-roadmap-status {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.ac-roadmap-status--planned {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  border-color: rgba(37, 99, 235, 0.22);
+}
+
+.ac-roadmap-status--exploring {
+  background: rgba(91, 33, 182, 0.12);
+  color: var(--ac-violet);
+  border-color: rgba(91, 33, 182, 0.22);
+}
+
+.ac-roadmap-status--in_progress {
+  background: rgba(5, 150, 105, 0.12);
+  color: var(--ac-win);
+  border-color: rgba(5, 150, 105, 0.22);
+}
+
+.ac-roadmap-status--principle {
+  background: rgba(253, 186, 116, 0.22);
+  color: #9a3412;
+  border-color: rgba(253, 186, 116, 0.45);
+}
+
 @media (max-width: 720px) {
   .ac-session-email { display: none; }
   .ac-page-head { flex-direction: column; align-items: flex-start; }
