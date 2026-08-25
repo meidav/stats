@@ -1,6 +1,7 @@
 from datetime import datetime
 from urllib.parse import quote
 
+from api.rank_utils import pair_rank_key, standings_rank_key, with_ranks
 from api.sport_templates import get_template
 
 
@@ -155,9 +156,11 @@ def present_public_league_card(league):
     }
 
 
-def annotate_stat_rows(rows, slug, sport_id, year=None):
+def annotate_stat_rows(rows, slug, sport_id, year=None, rank_mode="standings"):
+    key_fn = pair_rank_key if rank_mode == "pair" else standings_rank_key
+    ranked_rows = with_ranks(rows or [], key_fn)
     annotated = []
-    for row in rows or []:
+    for row in ranked_rows:
         item = dict(row)
         item["href"] = player_href(slug, row.get("player"), sport_id, year=year)
         item["pct_class"] = win_pct_class(row.get("win_pct"))
@@ -235,15 +238,20 @@ def present_player(profile, slug, sport_id, year=None):
     rank = profile.get("rank")
     field_size = profile.get("field_size")
     if rank:
-        data["streak_label"] = f"Streak · #{rank} of {field_size}"
+        data["win_pct_label"] = f"Win % · #{rank} of {field_size}"
     else:
-        data["streak_label"] = "Streak"
-    data["partners"] = annotate_stat_rows(profile.get("partners"), slug, sport_id, year=year)
-    data["occasional_partners"] = annotate_stat_rows(
-        profile.get("occasional_partners") or [], slug, sport_id, year=year
+        data["win_pct_label"] = "Win %"
+    data["streak_label"] = "Streak"
+    data["partners"] = annotate_stat_rows(
+        profile.get("partners"), slug, sport_id, year=year, rank_mode="pair"
     )
-    data["opponents"] = annotate_stat_rows(profile.get("opponents"), slug, sport_id, year=year)
+    data["occasional_partners"] = annotate_stat_rows(
+        profile.get("occasional_partners") or [], slug, sport_id, year=year, rank_mode="pair"
+    )
+    data["opponents"] = annotate_stat_rows(
+        profile.get("opponents"), slug, sport_id, year=year, rank_mode="pair"
+    )
     data["occasional_opponents"] = annotate_stat_rows(
-        profile.get("occasional_opponents") or [], slug, sport_id, year=year
+        profile.get("occasional_opponents") or [], slug, sport_id, year=year, rank_mode="pair"
     )
     return data

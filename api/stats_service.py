@@ -3,6 +3,7 @@ from datetime import date
 
 from api.game_db import get_games_for_sport, get_sport_years
 from api.league_db import get_sport_by_id
+from api.rank_utils import pair_rank_key, player_rank_in_rows, with_ranks
 from api.sport_templates import get_template, typical_win_score_for
 
 # Share of league games a player must have played to appear in main standings.
@@ -84,10 +85,10 @@ def compute_sport_stats(sport_id, year=None, min_games=None, today=None):
         "min_games": min_games,
         "min_games_pct": STANDINGS_MIN_GAMES_PCT,
         "total_games": len(games),
-        "stats": _rows_from_games(games, min_games=min_games),
-        "occasional_stats": _occasional_from_games(games, min_games),
+        "stats": with_ranks(_rows_from_games(games, min_games=min_games)),
+        "occasional_stats": with_ranks(_occasional_from_games(games, min_games)),
         "years": get_sport_years(sport_id),
-        "today_stats": _rows_from_games(today_games, min_games=1) if today_games else [],
+        "today_stats": with_ranks(_rows_from_games(today_games, min_games=1)) if today_games else [],
     }
 
 
@@ -155,12 +156,9 @@ def compute_player_stats(sport_id, player_name, year=None):
             count += 1
         streak = f"{count}{'W' if kind == 'win' else 'L'}"
 
-    standings = _rows_from_games(games, min_games=1)
-    rank = None
-    for index, row in enumerate(standings, start=1):
-        if row["player"] == player_name:
-            rank = index
-            break
+    league_min_games = min_games_for_standings(len(games))
+    standings = _rows_from_games(games, min_games=league_min_games)
+    rank, field_size = player_rank_in_rows(standings, player_name)
 
     def _pair_rows(pairs):
         rows = []
@@ -178,10 +176,10 @@ def compute_player_stats(sport_id, player_name, year=None):
                     "win_pct": round(win_pct, 4),
                 }
             )
-        rows.sort(key=lambda s: (s["win_pct"], s["games"]), reverse=True)
-        return rows
+        rows.sort(key=lambda s: (s["win_pct"], s["wins"], s["games"]), reverse=True)
+        return with_ranks(rows, pair_rank_key)
 
-    # Same 5% rule as league standings, based on this player's game count.
+    # Same 5% rule as partner/opponent tables, based on this player's game count.
     min_games = min_games_for_standings(total)
     partner_rows = _pair_rows(partners)
     opponent_rows = _pair_rows(opponents)

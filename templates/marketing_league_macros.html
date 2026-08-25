@@ -79,7 +79,7 @@
         <tbody>
             {% for row in rows %}
             <tr>
-                <td class="mkt-col-rank">{{ loop.index }}</td>
+                <td class="mkt-col-rank">{{ row.rank }}</td>
                 <td class="mkt-col-player">
                     <a class="mkt-player-link" href="{{ row.href }}">{{ row.player }}</a>
                 </td>
@@ -100,9 +100,9 @@
         <thead>
             <tr>
                 <th class="mkt-col-player">Player</th>
-                <th class="mkt-col-stat mkt-neutral">%</th>
                 <th class="mkt-col-stat mkt-win">W</th>
                 <th class="mkt-col-stat mkt-loss">L</th>
+                <th class="mkt-col-stat mkt-neutral">%</th>
                 <th class="mkt-col-stat mkt-neutral">G</th>
             </tr>
         </thead>
@@ -112,9 +112,9 @@
                 <td class="mkt-col-player">
                     <a class="mkt-player-link" href="{{ row.href }}">{{ row.player }}</a>
                 </td>
-                <td class="mkt-col-stat {{ row.pct_class }}">{{ row.pct_label }}</td>
                 <td class="mkt-col-stat mkt-win">{{ row.wins }}</td>
                 <td class="mkt-col-stat mkt-loss">{{ row.losses }}</td>
+                <td class="mkt-col-stat {{ row.pct_class }}">{{ row.pct_label }}</td>
                 <td class="mkt-col-stat mkt-neutral">{{ row.games }}</td>
             </tr>
             {% endfor %}

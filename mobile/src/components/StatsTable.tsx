@@ -4,6 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'r
 import { GlassCard } from './GlassCard';
 import { colors, spacing } from '../constants/theme';
 import { formatPlusMinus, winPctColor } from '../lib/names';
+import { competitionRanks } from '../lib/ranks';
 import type { PlayerStat } from '../types';
 
 type Props = {
@@ -32,6 +33,9 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
   const layout = useTableLayout();
   if (stats.length === 0) return null;
 
+  const ranks = competitionRanks(stats, 'standings');
+  const displayRanks = stats.map((row, index) => row.rank ?? ranks[index]);
+
   const rankStyle = [styles.rank, { width: layout.rankWidth }];
   const statStyle = [styles.stat, { width: layout.statWidth }];
   const pctStyle = [styles.stat, { width: layout.pctWidth }];
@@ -55,7 +59,9 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
         </View>
         {stats.map((row, index) => (
           <View key={row.player} style={[styles.dataRow, rowPad, index % 2 === 1 && styles.altRow]}>
-            <Text style={[styles.td, rankStyle, { fontSize: layout.cellSize }]}>{index + 1}</Text>
+            <Text style={[styles.td, rankStyle, { fontSize: layout.cellSize }]}>
+              {displayRanks[index]}
+            </Text>
             <TouchableOpacity style={styles.player} onPress={() => onPlayerPress(row.player)}>
               <Text style={[styles.playerName, { fontSize: layout.cellSize }]}>{row.player}</Text>
             </TouchableOpacity>

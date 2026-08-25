@@ -55,7 +55,7 @@
         </div>
         <div class="mkt-glass mkt-kpi">
             <span class="mkt-kpi-value {{ player.pct_class }}">{{ player.pct_label }}</span>
-            <span class="mkt-kpi-label">Win %</span>
+            <span class="mkt-kpi-label">{{ player.win_pct_label }}</span>
         </div>
         <div class="mkt-glass mkt-kpi">
             <span class="mkt-kpi-value mkt-neutral">{{ player.games }}</span>
@@ -82,7 +82,7 @@
     </div>
     {% endif %}
 
-    {% if player.partners %}
+    {% if sport.players_per_side > 1 and player.partners %}
     <section class="mkt-pair-block">
         <h2 class="mkt-win">Stats with partners ({{ player.partners|length }})</h2>
         {% if player.min_games and player.min_games > 1 %}
@@ -92,7 +92,7 @@
     </section>
     {% endif %}
 
-    {% if player.occasional_partners %}
+    {% if sport.players_per_side > 1 and player.occasional_partners %}
     <section class="mkt-pair-block">
         <h2 class="mkt-win">Occasional partners ({{ player.occasional_partners|length }})</h2>
         <p class="mkt-section-hint">Under {{ player.min_games }} games together</p>

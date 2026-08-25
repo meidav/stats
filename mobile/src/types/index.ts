@@ -73,6 +73,7 @@ export type PlayerStat = {
   games: number;
   win_pct: number;
   plus_minus?: number;
+  rank?: number;
 };
 
 export type SportStats = {
@@ -119,5 +120,5 @@ export type PlayerProfile = {
   can_edit?: boolean;
   share_url?: string | null;
   league?: Pick<League, 'id' | 'name' | 'slug' | 'visibility' | 'icon' | 'share_url'>;
-  sport?: Pick<Sport, 'id' | 'name' | 'template_id' | 'category' | 'score_mode'>;
+  sport?: Pick<Sport, 'id' | 'name' | 'template_id' | 'category' | 'score_mode' | 'players_per_side'>;
 };

@@ -22,5 +22,5 @@ and the same demo credentials above.
 
 Account deletion
 ----------------
-In the app: Home footer -> Delete account (two-step confirm).
+In the app: Home footer -> settings icon next to email -> Account -> Delete account (two-step confirm).
 Also documented at https://playtracker.org/privacy and /terms.

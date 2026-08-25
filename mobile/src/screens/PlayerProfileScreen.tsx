@@ -82,6 +82,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
   const shareUrl = profile?.share_url || null;
   const canShare = Boolean(shareUrl);
   const canEdit = Boolean(profile?.can_edit);
+  const hasPartners = (profile?.sport?.players_per_side ?? 1) > 1;
 
   const streakColor = profile?.streak.endsWith('W')
     ? colors.win
@@ -206,7 +207,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
             <Kpi value={String(profile.losses)} label="Losses" color={colors.loss} />
             <Kpi
               value={`${(profile.win_pct * 100).toFixed(0)}%`}
-              label="Win %"
+              label={profile.rank ? `Win % · #${profile.rank} of ${profile.field_size}` : 'Win %'}
               color={winPctColor(profile.win_pct, colors)}
             />
             <Kpi value={String(profile.games)} label="Games" color={colors.neutral} />
@@ -223,7 +224,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
             />
             <Kpi
               value={profile.streak}
-              label={profile.rank ? `Streak · #${profile.rank} of ${profile.field_size}` : 'Streak'}
+              label="Streak"
               color={streakColor}
             />
           </View>
@@ -247,19 +248,21 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
             </View>
           ) : null}
 
-          <CollapsibleSection
-            title="Stats with partners"
-            count={profile.partners.length}
-          >
-            {profile.min_games && profile.min_games > 1 ? (
-              <Text style={styles.sectionHint}>
-                {profile.min_games}+ games together (5% of this player's games)
-              </Text>
-            ) : null}
-            <PairTable rows={profile.partners} onPress={openPlayer} />
-          </CollapsibleSection>
+          {hasPartners ? (
+            <CollapsibleSection
+              title="Stats with partners"
+              count={profile.partners.length}
+            >
+              {profile.min_games && profile.min_games > 1 ? (
+                <Text style={styles.sectionHint}>
+                  {profile.min_games}+ games together (5% of this player's games)
+                </Text>
+              ) : null}
+              <PairTable rows={profile.partners} onPress={openPlayer} />
+            </CollapsibleSection>
+          ) : null}
 
-          {(profile.occasional_partners?.length ?? 0) > 0 ? (
+          {hasPartners && (profile.occasional_partners?.length ?? 0) > 0 ? (
             <CollapsibleSection
               title="Occasional partners"
               count={profile.occasional_partners!.length}
@@ -345,9 +348,9 @@ function PairTable({
     <GlassCard style={styles.pairCard}>
       <View style={[styles.pairHeader, { paddingHorizontal: rowPadH }]}>
         <Text style={[styles.pairTh, styles.pairPlayer, { fontSize: headerSize }]}>Player</Text>
-        <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>%</Text>
         <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.win }]}>W</Text>
         <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.loss }]}>L</Text>
+        <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>%</Text>
         <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>G</Text>
       </View>
       {rows.map((row, index) => (
@@ -359,11 +362,11 @@ function PairTable({
           <Text style={[styles.pairPlayer, styles.pairName, { fontSize: cellSize }]}>
             {row.player}
           </Text>
+          <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.win }]}>{row.wins}</Text>
+          <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.loss }]}>{row.losses}</Text>
           <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: winPctColor(row.win_pct, colors) }]}>
             {(row.win_pct * 100).toFixed(0)}
           </Text>
-          <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.win }]}>{row.wins}</Text>
-          <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.loss }]}>{row.losses}</Text>
           <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.neutral }]}>{row.games}</Text>
         </TouchableOpacity>
       ))}
@@ -549,13 +552,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.22)',
   },
   pairTh: {
-    textAlign: 'right',
+    textAlign: 'center',
     fontWeight: '800',
     letterSpacing: 0.3,
     textTransform: 'uppercase',
   },
   pairTd: {
-    textAlign: 'right',
+    textAlign: 'center',
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
     flexShrink: 0,
