@@ -1,41 +1,95 @@
 {% extends "admin_console/base.html" %}
 {% block title %}Roadmap | PlayTracker admin{% endblock %}
 {% block nav_roadmap %}is-active{% endblock %}
+{% block body_class %}ac-roadmap-page{% endblock %}
 
 {% block content %}
-<section class="ac-page">
+<section class="ac-page ac-roadmap">
     <header class="ac-page-head">
         <div>
             <p class="ac-kicker">Product</p>
             <h1>Roadmap</h1>
+            <p class="ac-roadmap-living">Living doc · updated {{ board.updated }}</p>
         </div>
-        <p class="ac-page-meta">What we are building next. Internal only.</p>
+        <p class="ac-page-meta">Internal only. Same shape as StackTracker: Now → Done.</p>
     </header>
 
     <div class="ac-roadmap-principle">
-        <p>{{ principle }}</p>
+        <p>{{ board.principle }}</p>
     </div>
 
-    {% for section in sections %}
-    <section class="ac-roadmap-section">
-        <header class="ac-roadmap-head">
-            <h2>{{ section.title }}</h2>
-            {% if section.subtitle %}
-            <p>{{ section.subtitle }}</p>
-            {% endif %}
-        </header>
-        <ul class="ac-roadmap-list">
-            {% for item in section.entries %}
-            <li class="ac-roadmap-item">
-                <div class="ac-roadmap-item-top">
-                    <h3>{{ item.title }}</h3>
-                    <span class="ac-roadmap-status ac-roadmap-status--{{ item.status }}">{{ item.status|replace('_', ' ') }}</span>
+    <div class="ac-roadmap-legend" aria-label="Categories">
+        {% for key, cat in board.categories.items() %}
+        <span class="ac-roadmap-legend-item">
+            <span class="ac-roadmap-dot" style="background: {{ cat.color }}"></span>
+            {{ cat.label }}
+        </span>
+        {% endfor %}
+        <span class="ac-roadmap-legend-item">
+            <span class="ac-roadmap-premium-mark">★</span>
+            Premium candidate
+        </span>
+    </div>
+
+    <div class="ac-roadmap-board">
+        {% for column in board.columns %}
+        <section class="ac-roadmap-col ac-roadmap-col--{{ column.id }}">
+            <header class="ac-roadmap-col-head">
+                <div class="ac-roadmap-col-title">
+                    <span class="ac-roadmap-col-dot" aria-hidden="true"></span>
+                    <h2>{{ column.label }}</h2>
+                    <span class="ac-roadmap-col-count">{{ column.count }}</span>
                 </div>
-                <p>{{ item.detail }}</p>
-            </li>
+                <p>{{ column.blurb }}</p>
+            </header>
+            <div class="ac-roadmap-col-body">
+                {% for item in column.entries %}
+                <article class="ac-roadmap-card{% if item.status == 'done' %} is-done{% endif %}{% if item.premium %} is-premium{% endif %}" style="--card-accent: {{ item.category_meta.color }}">
+                    <div class="ac-roadmap-card-top">
+                        <h3>{{ item.title }}</h3>
+                        {% if item.premium %}
+                        <span class="ac-roadmap-premium" title="Premium subscription candidate">★ Premium</span>
+                        {% endif %}
+                    </div>
+                    <div class="ac-roadmap-chips">
+                        {% if item.target %}
+                        <span class="ac-roadmap-chip ac-roadmap-chip--version">v{{ item.target }}</span>
+                        {% endif %}
+                        <span class="ac-roadmap-chip" style="--chip: {{ item.category_meta.color }}">{{ item.category_meta.label }}</span>
+                        {% if item.effort and item.status != 'done' %}
+                        <span class="ac-roadmap-chip ac-roadmap-chip--effort" title="Rough build size">{{ item.effort }}</span>
+                        {% endif %}
+                    </div>
+                    <p class="ac-roadmap-summary">{{ item.summary }}</p>
+                    {% if item.details %}
+                    <ul class="ac-roadmap-details">
+                        {% for line in item.details %}
+                        <li>{{ line }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </article>
+                {% else %}
+                <p class="ac-roadmap-empty">Nothing here yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+
+    {% if board.shipped %}
+    <section class="ac-roadmap-shipped">
+        <h2>Recently shipped</h2>
+        <div class="ac-roadmap-shipped-row">
+            {% for item in board.shipped %}
+            <span class="ac-roadmap-shipped-pill">
+                <span aria-hidden="true">✓</span>
+                {{ item.title }}
+                {% if item.target %}<em>v{{ item.target }}</em>{% endif %}
+            </span>
             {% endfor %}
-        </ul>
+        </div>
     </section>
-    {% endfor %}
+    {% endif %}
 </section>
 {% endblock %}

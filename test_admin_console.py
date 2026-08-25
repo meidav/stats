@@ -179,8 +179,10 @@ class AdminConsoleTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         html = response.get_data(as_text=True)
         self.assertIn("Roadmap", html)
-        self.assertIn("Account settings", html)
+        self.assertIn("ac-roadmap-board", html)
+        self.assertIn("Android parity", html)
         self.assertIn("Subscriptions", html)
+        self.assertIn("Recently shipped", html)
 
     def test_admin_can_open_private_league(self):
         self._login_console()
