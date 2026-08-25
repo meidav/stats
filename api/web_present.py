@@ -239,5 +239,11 @@ def present_player(profile, slug, sport_id, year=None):
     else:
         data["streak_label"] = "Streak"
     data["partners"] = annotate_stat_rows(profile.get("partners"), slug, sport_id, year=year)
+    data["occasional_partners"] = annotate_stat_rows(
+        profile.get("occasional_partners") or [], slug, sport_id, year=year
+    )
     data["opponents"] = annotate_stat_rows(profile.get("opponents"), slug, sport_id, year=year)
+    data["occasional_opponents"] = annotate_stat_rows(
+        profile.get("occasional_opponents") or [], slug, sport_id, year=year
+    )
     return data

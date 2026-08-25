@@ -20,6 +20,7 @@ type AuthContextValue = {
   loginWithGoogle: (idToken: string) => Promise<void>;
   loginWithApple: (identityToken: string, fullName?: AppleFullName | null) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -95,6 +96,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await clearCachedPlayers();
   }, []);
 
+  const deleteAccount = useCallback(async () => {
+    if (!token) {
+      throw new Error('Not signed in');
+    }
+    await api.deleteAccount(token);
+    await logout();
+  }, [token, logout]);
+
   const value = useMemo(
     () => ({
       token,
@@ -106,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loginWithGoogle,
       loginWithApple,
       logout,
+      deleteAccount,
     }),
     [
       token,
@@ -117,6 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loginWithGoogle,
       loginWithApple,
       logout,
+      deleteAccount,
     ],
   );
 

@@ -271,6 +271,12 @@ export const api = {
       token,
     }),
 
+  deleteAccount: (token: string) =>
+    request<{ success: boolean; message?: string }>('/auth/account', {
+      method: 'DELETE',
+      token,
+    }),
+
   discoverLeagues: (query?: string) =>
     request<{
       leagues: Array<

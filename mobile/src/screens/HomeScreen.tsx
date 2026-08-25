@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   },
   leagueCardWrap: {
     position: 'relative',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   leagueCard: {
     paddingVertical: 12,

@@ -13,7 +13,10 @@ Please:
 2. Open My leagues
 3. Open "PT Test BVB 2's" (public Beach Volleyball 2's sample)
 4. Also available: "PT Test Gin Stats" and "PT Test Chess Stats" (unlisted)
-5. Check Standings, year filter, Games, and Share
+5. Check Standings, year filter, Games, player profiles, and Share
+6. Account deletion: on Home, use Delete account in the footer (two-step confirm).
+   Do not use the demo account for a live delete test if you still need it;
+   create a throwaway account to verify the flow if needed.
 
 App Store Connect fields
 ------------------------
@@ -29,6 +32,9 @@ Notes for review
 - No ads
 - Account creation is required to create leagues and log games
 - Email/password, Sign in with Apple, and Google Sign-In are all available
+- Account deletion is available in-app (Home footer: Delete account)
 - Shared league links open a public web view at playtracker.org
+- Privacy: https://playtracker.org/privacy
+- Terms: https://playtracker.org/terms
 
 Contact: hello@playtracker.org

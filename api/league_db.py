@@ -219,6 +219,13 @@ def delete_league(league_id):
 
     with db_manager.get_connection() as conn:
         cursor = conn.cursor()
+        cursor.execute(
+            """
+            DELETE FROM sport_player_profiles
+            WHERE sport_id IN (SELECT id FROM sports WHERE league_id = ?)
+            """,
+            (league_id,),
+        )
         cursor.execute("DELETE FROM league_games WHERE league_id = ?", (league_id,))
         cursor.execute("DELETE FROM sports WHERE league_id = ?", (league_id,))
         cursor.execute("DELETE FROM league_members WHERE league_id = ?", (league_id,))

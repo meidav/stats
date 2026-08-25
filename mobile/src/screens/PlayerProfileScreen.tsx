@@ -14,6 +14,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 
 import { ErrorBanner } from '../components/ErrorBanner';
+import { CollapsibleSection } from '../components/CollapsibleSection';
+import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
 import { LeagueIcon } from '../components/LeagueIcon';
 import { ScreenScaffold } from '../components/ScreenScaffold';
@@ -245,18 +247,69 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
             </View>
           ) : null}
 
-          <PairTable
-            title={`Stats with partners (${profile.partners.length})`}
-            tone="win"
-            rows={profile.partners}
-            onPress={openPlayer}
-          />
-          <PairTable
-            title={`Stats vs opponents (${profile.opponents.length})`}
-            tone="loss"
-            rows={profile.opponents}
-            onPress={openPlayer}
-          />
+          <CollapsibleSection
+            title="Stats with partners"
+            count={profile.partners.length}
+          >
+            {profile.min_games && profile.min_games > 1 ? (
+              <Text style={styles.sectionHint}>
+                {profile.min_games}+ games together (5% of this player's games)
+              </Text>
+            ) : null}
+            <PairTable rows={profile.partners} onPress={openPlayer} />
+          </CollapsibleSection>
+
+          {(profile.occasional_partners?.length ?? 0) > 0 ? (
+            <CollapsibleSection
+              title="Occasional partners"
+              count={profile.occasional_partners!.length}
+              defaultOpen={false}
+            >
+              <Text style={styles.sectionHint}>
+                Under {profile.min_games ?? 1} games together
+              </Text>
+              <PairTable rows={profile.occasional_partners!} onPress={openPlayer} />
+            </CollapsibleSection>
+          ) : null}
+
+          <CollapsibleSection
+            title="Stats vs opponents"
+            count={profile.opponents.length}
+          >
+            {profile.min_games && profile.min_games > 1 ? (
+              <Text style={styles.sectionHint}>
+                {profile.min_games}+ games against (5% of this player's games)
+              </Text>
+            ) : null}
+            <PairTable rows={profile.opponents} onPress={openPlayer} />
+          </CollapsibleSection>
+
+          {(profile.occasional_opponents?.length ?? 0) > 0 ? (
+            <CollapsibleSection
+              title="Occasional opponents"
+              count={profile.occasional_opponents!.length}
+              defaultOpen={false}
+            >
+              <Text style={styles.sectionHint}>
+                Under {profile.min_games ?? 1} games against
+              </Text>
+              <PairTable rows={profile.occasional_opponents!} onPress={openPlayer} />
+            </CollapsibleSection>
+          ) : null}
+
+          <CollapsibleSection
+            title="Games"
+            count={profile.player_games?.length ?? 0}
+            defaultOpen={false}
+          >
+            <GameList
+              games={profile.player_games ?? []}
+              canEdit={false}
+              winLoss={profile.sport?.score_mode === 'win_loss'}
+              onEdit={() => undefined}
+              onDelete={() => undefined}
+            />
+          </CollapsibleSection>
         </ScrollView>
       ) : null}
     </ScreenScaffold>
@@ -273,13 +326,9 @@ function Kpi({ value, label, color }: { value: string; label: string; color: str
 }
 
 function PairTable({
-  title,
-  tone,
   rows,
   onPress,
 }: {
-  title: string;
-  tone: 'win' | 'loss';
   rows: PlayerStat[];
   onPress: (name: string) => void;
 }) {
@@ -289,39 +338,36 @@ function PairTable({
   const headerSize = compact ? 10 : 12;
   const statWidth = compact ? 28 : 36;
   const rowPadH = compact ? 10 : 16;
-  if (rows.length === 0) return null;
+  if (rows.length === 0) {
+    return <Text style={styles.emptyTable}>No rows yet.</Text>;
+  }
   return (
-    <View style={styles.pairWrap}>
-      <Text style={[styles.sectionTitle, { color: tone === 'win' ? colors.win : colors.loss }]}>
-        {title}
-      </Text>
-      <GlassCard style={styles.pairCard}>
-        <View style={[styles.pairHeader, { paddingHorizontal: rowPadH }]}>
-          <Text style={[styles.pairTh, styles.pairPlayer, { fontSize: headerSize }]}>Player</Text>
-          <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>%</Text>
-          <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.win }]}>W</Text>
-          <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.loss }]}>L</Text>
-          <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>G</Text>
-        </View>
-        {rows.map((row, index) => (
-          <TouchableOpacity
-            key={row.player}
-            style={[styles.pairRow, { paddingHorizontal: rowPadH }, index % 2 === 1 && styles.pairAlt]}
-            onPress={() => onPress(row.player)}
-          >
-            <Text style={[styles.pairPlayer, styles.pairName, { fontSize: cellSize }]}>
-              {row.player}
-            </Text>
-            <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: winPctColor(row.win_pct, colors) }]}>
-              {(row.win_pct * 100).toFixed(0)}
-            </Text>
-            <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.win }]}>{row.wins}</Text>
-            <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.loss }]}>{row.losses}</Text>
-            <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.neutral }]}>{row.games}</Text>
-          </TouchableOpacity>
-        ))}
-      </GlassCard>
-    </View>
+    <GlassCard style={styles.pairCard}>
+      <View style={[styles.pairHeader, { paddingHorizontal: rowPadH }]}>
+        <Text style={[styles.pairTh, styles.pairPlayer, { fontSize: headerSize }]}>Player</Text>
+        <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>%</Text>
+        <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.win }]}>W</Text>
+        <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.loss }]}>L</Text>
+        <Text style={[styles.pairTh, { width: statWidth, fontSize: headerSize, color: colors.neutral }]}>G</Text>
+      </View>
+      {rows.map((row, index) => (
+        <TouchableOpacity
+          key={row.player}
+          style={[styles.pairRow, { paddingHorizontal: rowPadH }, index % 2 === 1 && styles.pairAlt]}
+          onPress={() => onPress(row.player)}
+        >
+          <Text style={[styles.pairPlayer, styles.pairName, { fontSize: cellSize }]}>
+            {row.player}
+          </Text>
+          <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: winPctColor(row.win_pct, colors) }]}>
+            {(row.win_pct * 100).toFixed(0)}
+          </Text>
+          <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.win }]}>{row.wins}</Text>
+          <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.loss }]}>{row.losses}</Text>
+          <Text style={[styles.pairTd, { width: statWidth, fontSize: cellSize, color: colors.neutral }]}>{row.games}</Text>
+        </TouchableOpacity>
+      ))}
+    </GlassCard>
   );
 }
 
@@ -455,6 +501,18 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginBottom: spacing.sm,
   },
+  sectionHint: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
+    paddingHorizontal: 4,
+  },
+  emptyTable: {
+    color: colors.textMuted,
+    textAlign: 'center',
+    paddingVertical: spacing.md,
+  },
   dots: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -471,9 +529,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '800',
     fontSize: 12,
-  },
-  pairWrap: {
-    marginBottom: spacing.lg,
   },
   pairCard: {
     overflow: 'hidden',

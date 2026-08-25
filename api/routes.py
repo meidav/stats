@@ -12,6 +12,7 @@ from flask_jwt_extended import (
 from auth import get_user_by_email, get_user_by_id, get_user_by_username, verify_password
 from api.auth_service import (
     authenticate_with_email,
+    delete_account,
     register_with_email,
     request_password_reset,
     reset_password_with_token,
@@ -201,6 +202,18 @@ def register_routes(api):
         except Exception:
             pass
         return jsonify({"access_token": access_token, "user": user_payload(user)})
+
+    @api.route("/auth/account", methods=["DELETE"])
+    @jwt_required()
+    def api_delete_account():
+        user_id = int(get_jwt_identity())
+        try:
+            delete_account(user_id)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+        except Exception as exc:
+            return jsonify({"error": f"Could not delete account: {exc}"}), 500
+        return jsonify({"success": True, "message": "Account deleted"})
 
     @api.route("/auth/google", methods=["POST"])
     def api_google_login():

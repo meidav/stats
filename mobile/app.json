@@ -2,7 +2,7 @@
   "expo": {
     "name": "PlayTracker",
     "slug": "playtracker",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "org.playtracker.app",
-      "buildNumber": "12",
+      "buildNumber": "13",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
@@ -31,8 +31,8 @@
     "newArchEnabled": true,
     "android": {
       "package": "org.playtracker.app",
-      "versionCode": 12,
-      "versionName": "1.1.2",
+      "versionCode": 13,
+      "versionName": "1.1.3",
       "icon": "./assets/PlayTracker-iOS-App-Icon-1024.png",
       "adaptiveIcon": {
         "backgroundColor": "#3B0764",

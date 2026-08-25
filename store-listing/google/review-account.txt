@@ -14,3 +14,13 @@ Sample leagues on this account
 
 Keep a few sample games on the BVB league before submitting so
 reviewers see standings immediately.
+
+Sign-in options
+---------------
+Email/password, Google Sign-In (when configured on the device build),
+and the same demo credentials above.
+
+Account deletion
+----------------
+In the app: Home footer -> Delete account (two-step confirm).
+Also documented at https://playtracker.org/privacy and /terms.

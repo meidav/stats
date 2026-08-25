@@ -1,1 +1,1 @@
-Tighter empty-home layout on iPhone, refreshed gradient app icon and splash, and polish for league badges, sorting, and iPad layout.
+Account deletion in-app, clearer player profiles (occasional partners/opponents, collapsible sections, full games list), and polish for Apple and Google sign-in.

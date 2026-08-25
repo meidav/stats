@@ -85,14 +85,36 @@
     {% if player.partners %}
     <section class="mkt-pair-block">
         <h2 class="mkt-win">Stats with partners ({{ player.partners|length }})</h2>
+        {% if player.min_games and player.min_games > 1 %}
+        <p class="mkt-section-hint">{{ player.min_games }}+ games together (5% of this player's games)</p>
+        {% endif %}
         {{ pair_table(player.partners) }}
+    </section>
+    {% endif %}
+
+    {% if player.occasional_partners %}
+    <section class="mkt-pair-block">
+        <h2 class="mkt-win">Occasional partners ({{ player.occasional_partners|length }})</h2>
+        <p class="mkt-section-hint">Under {{ player.min_games }} games together</p>
+        {{ pair_table(player.occasional_partners) }}
     </section>
     {% endif %}
 
     {% if player.opponents %}
     <section class="mkt-pair-block">
         <h2 class="mkt-loss">Stats vs opponents ({{ player.opponents|length }})</h2>
+        {% if player.min_games and player.min_games > 1 %}
+        <p class="mkt-section-hint">{{ player.min_games }}+ games against (5% of this player's games)</p>
+        {% endif %}
         {{ pair_table(player.opponents) }}
+    </section>
+    {% endif %}
+
+    {% if player.occasional_opponents %}
+    <section class="mkt-pair-block">
+        <h2 class="mkt-loss">Occasional opponents ({{ player.occasional_opponents|length }})</h2>
+        <p class="mkt-section-hint">Under {{ player.min_games }} games against</p>
+        {{ pair_table(player.occasional_opponents) }}
     </section>
     {% endif %}
 

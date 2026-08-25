@@ -235,3 +235,42 @@ def reset_password_with_token(token, password):
             self.is_admin = bool(data["is_admin"])
 
     return SimpleUser(user)
+
+
+def delete_account(user_id):
+    """Remove the signed-in user's account and data they solely own.
+
+    Owned leagues (and their games / profiles) are deleted. Memberships in
+    other leagues are removed. Personal auth rows are cleared. Callers should
+    drop the client session after success.
+    """
+    from api.admin_data import would_lock_out
+    from api.league_db import delete_league, get_leagues_for_user
+
+    user_id = int(user_id)
+    user = db_manager.execute_query(
+        "SELECT id, is_admin FROM users WHERE id = ?",
+        (user_id,),
+        fetch_one=True,
+    )
+    if not user:
+        raise ValueError("Account not found")
+    if would_lock_out(user_id):
+        raise ValueError("Cannot delete the last admin account. Contact support.")
+
+    for league in get_leagues_for_user(user_id) or []:
+        if int(league.get("owner_id") or 0) == user_id or league.get("role") == "owner":
+            delete_league(league["id"])
+
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE league_games SET entered_by = NULL WHERE entered_by = ?",
+            (user_id,),
+        )
+        cursor.execute("DELETE FROM league_members WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM password_reset_tokens WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        if cursor.rowcount == 0:
+            raise ValueError("Account not found")
+    return True

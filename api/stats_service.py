@@ -91,6 +91,15 @@ def compute_sport_stats(sport_id, year=None, min_games=None, today=None):
     }
 
 
+def _split_pair_rows(rows, min_games):
+    """Main list is min_games+; occasional is below that (empty when threshold is 1)."""
+    if min_games <= 1:
+        return rows, []
+    main = [row for row in rows if row["games"] >= min_games]
+    occasional = [row for row in rows if row["games"] < min_games]
+    return main, occasional
+
+
 def compute_player_stats(sport_id, player_name, year=None):
     sport = get_sport_by_id(sport_id)
     if not sport:
@@ -100,7 +109,8 @@ def compute_player_stats(sport_id, player_name, year=None):
     games = get_games_for_sport(sport_id, year=year, limit=10000)
 
     wins, losses, plus_minus = 0, 0, 0
-    game_history = []
+    player_games = []
+    results = []
     partners = defaultdict(lambda: {"wins": 0, "losses": 0})
     opponents = defaultdict(lambda: {"wins": 0, "losses": 0})
 
@@ -118,6 +128,7 @@ def compute_player_stats(sport_id, player_name, year=None):
                     partners[name]["wins"] += 1
             for name in game["losers"]:
                 opponents[name]["wins"] += 1
+            results.append("win")
         else:
             losses += 1
             plus_minus -= diff
@@ -126,29 +137,20 @@ def compute_player_stats(sport_id, player_name, year=None):
                     partners[name]["losses"] += 1
             for name in game["winners"]:
                 opponents[name]["losses"] += 1
-        game_history.append(
-            {
-                "id": game["id"],
-                "game_date": game["game_date"],
-                "result": "win" if in_winners else "loss",
-                "winners": game["winners"],
-                "losers": game["losers"],
-                "winner_score": game["winner_score"],
-                "loser_score": game["loser_score"],
-            }
-        )
+            results.append("loss")
+        player_games.append(game)
 
     total = wins + losses
     last_results = []
-    for game in reversed(game_history[:10]):
-        last_results.append("W" if game["result"] == "win" else "L")
+    for result in reversed(results[:10]):
+        last_results.append("W" if result == "win" else "L")
 
     streak = "0"
-    if game_history:
-        kind = game_history[0]["result"]
+    if results:
+        kind = results[0]
         count = 0
-        for game in game_history:
-            if game["result"] != kind:
+        for result in results:
+            if result != kind:
                 break
             count += 1
         streak = f"{count}{'W' if kind == 'win' else 'L'}"
@@ -179,6 +181,13 @@ def compute_player_stats(sport_id, player_name, year=None):
         rows.sort(key=lambda s: (s["win_pct"], s["games"]), reverse=True)
         return rows
 
+    # Same 5% rule as league standings, based on this player's game count.
+    min_games = min_games_for_standings(total)
+    partner_rows = _pair_rows(partners)
+    opponent_rows = _pair_rows(opponents)
+    main_partners, occasional_partners = _split_pair_rows(partner_rows, min_games)
+    main_opponents, occasional_opponents = _split_pair_rows(opponent_rows, min_games)
+
     return {
         "sport_id": sport_id,
         "sport_name": sport.get("name"),
@@ -193,9 +202,14 @@ def compute_player_stats(sport_id, player_name, year=None):
         "rank": rank,
         "field_size": len(standings),
         "last_results": last_results,
-        "partners": _pair_rows(partners),
-        "opponents": _pair_rows(opponents),
-        "recent_games": game_history[:20],
+        "min_games": min_games,
+        "min_games_pct": STANDINGS_MIN_GAMES_PCT,
+        "partners": main_partners,
+        "occasional_partners": occasional_partners,
+        "opponents": main_opponents,
+        "occasional_opponents": occasional_opponents,
+        "player_games": player_games,
+        "recent_games": player_games[:20],
     }
 
 

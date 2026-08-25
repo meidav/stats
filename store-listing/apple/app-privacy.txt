@@ -46,8 +46,9 @@ Notes:
 - Account "username" is User ID, not Name (Apple's Name = first/last).
 - No Sentry/Firebase Analytics/ads, so skip Product Interaction and
   Crash Data unless you add those SDKs later.
-- When Apple/Google Sign-In ships, still Email Address + User ID
-  (and Name only if you store given name from the provider).
+- When you use Sign in with Apple or Google, Email Address + User ID
+  (and Name only if we store a display name from the provider).
+- Account deletion is available in-app (Home footer).
 
 
 3) For EACH selected type, answer the follow-ups the same way
