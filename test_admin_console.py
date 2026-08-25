@@ -12,9 +12,12 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 def _extract_csrf(html):
     match = re.search(r'name="csrf_token" value="([^"]+)"', html)
-    if not match:
-        raise AssertionError("csrf_token missing from page")
-    return match.group(1)
+    if match:
+        return match.group(1)
+    match = re.search(r'data-csrf="([^"]+)"', html)
+    if match:
+        return match.group(1)
+    raise AssertionError("csrf_token missing from page")
 
 
 class AdminConsoleTests(unittest.TestCase):
@@ -183,6 +186,59 @@ class AdminConsoleTests(unittest.TestCase):
         self.assertIn("Android parity", html)
         self.assertIn("Subscriptions", html)
         self.assertIn("Recently shipped", html)
+        self.assertIn("data-move=", html)
+
+    def test_roadmap_create_move_and_delete(self):
+        self._login_console()
+        page = self.client.get("/admin-console/roadmap")
+        csrf = _extract_csrf(page.get_data(as_text=True))
+        headers = {
+            "X-CSRF-Token": csrf,
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        created = self.client.post(
+            "/admin-console/roadmap/items",
+            headers=headers,
+            json={
+                "title": "Interactive board test",
+                "status": "idea",
+                "category": "platform",
+                "effort": "S",
+                "summary": "Created by test",
+                "details": ["one", "two"],
+            },
+        )
+        self.assertEqual(created.status_code, 200)
+        item = created.get_json()
+        self.assertEqual(item["title"], "Interactive board test")
+        self.assertEqual(item["status"], "idea")
+        item_id = item["id"]
+
+        moved = self.client.post(
+            f"/admin-console/roadmap/items/{item_id}/move",
+            headers=headers,
+            json={"direction": "left"},
+        )
+        self.assertEqual(moved.status_code, 200)
+        self.assertEqual(moved.get_json()["status"], "later")
+
+        updated = self.client.post(
+            f"/admin-console/roadmap/items/{item_id}",
+            headers=headers,
+            json={"title": "Interactive board test updated", "premium": True},
+        )
+        self.assertEqual(updated.status_code, 200)
+        self.assertTrue(updated.get_json()["premium"])
+        self.assertEqual(updated.get_json()["title"], "Interactive board test updated")
+
+        deleted = self.client.post(
+            f"/admin-console/roadmap/items/{item_id}/delete",
+            headers=headers,
+        )
+        self.assertEqual(deleted.status_code, 200)
+        self.assertTrue(deleted.get_json()["ok"])
 
     def test_admin_can_open_private_league(self):
         self._login_console()

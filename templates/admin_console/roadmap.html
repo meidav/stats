@@ -4,14 +4,24 @@
 {% block body_class %}ac-roadmap-page{% endblock %}
 
 {% block content %}
-<section class="ac-page ac-roadmap">
+<section
+    class="ac-page ac-roadmap"
+    id="roadmap-root"
+    data-csrf="{{ admin_csrf_token }}"
+    data-create-url="{{ url_for('admin_console.roadmap_create_item') }}"
+>
     <header class="ac-page-head">
         <div>
             <p class="ac-kicker">Product</p>
             <h1>Roadmap</h1>
-            <p class="ac-roadmap-living">Living doc · updated {{ board.updated }}</p>
+            <p class="ac-roadmap-living">Living board · updated <span data-roadmap-updated>{{ board.updated }}</span></p>
         </div>
-        <p class="ac-page-meta">Internal only. Same shape as StackTracker: Now → Done.</p>
+        <div class="ac-roadmap-head-actions">
+            <p class="ac-page-meta">Drag lanes with arrows. Edit anytime.</p>
+            <button type="button" class="ac-btn-primary ac-roadmap-add" data-roadmap-new data-status="idea">
+                + New item
+            </button>
+        </div>
     </header>
 
     <div class="ac-roadmap-principle">
@@ -31,20 +41,29 @@
         </span>
     </div>
 
-    <div class="ac-roadmap-board">
+    <div class="ac-roadmap-board" data-roadmap-board>
         {% for column in board.columns %}
-        <section class="ac-roadmap-col ac-roadmap-col--{{ column.id }}">
+        <section class="ac-roadmap-col ac-roadmap-col--{{ column.id }}" data-column="{{ column.id }}">
             <header class="ac-roadmap-col-head">
                 <div class="ac-roadmap-col-title">
                     <span class="ac-roadmap-col-dot" aria-hidden="true"></span>
                     <h2>{{ column.label }}</h2>
-                    <span class="ac-roadmap-col-count">{{ column.count }}</span>
+                    <span class="ac-roadmap-col-count" data-col-count>{{ column.count }}</span>
                 </div>
-                <p>{{ column.blurb }}</p>
+                <div class="ac-roadmap-col-meta">
+                    <p>{{ column.blurb }}</p>
+                    <button type="button" class="ac-roadmap-col-add" data-roadmap-new data-status="{{ column.id }}" title="Add to {{ column.label }}">+</button>
+                </div>
             </header>
-            <div class="ac-roadmap-col-body">
+            <div class="ac-roadmap-col-body" data-col-body>
                 {% for item in column.entries %}
-                <article class="ac-roadmap-card{% if item.status == 'done' %} is-done{% endif %}{% if item.premium %} is-premium{% endif %}" style="--card-accent: {{ item.category_meta.color }}">
+                <article
+                    class="ac-roadmap-card{% if item.status == 'done' %} is-done{% endif %}{% if item.premium %} is-premium{% endif %}"
+                    style="--card-accent: {{ item.category_meta.color }}"
+                    data-item-id="{{ item.id }}"
+                    data-status="{{ item.status }}"
+                    data-item="{{ item | tojson | forceescape }}"
+                >
                     <div class="ac-roadmap-card-top">
                         <h3>{{ item.title }}</h3>
                         {% if item.premium %}
@@ -68,9 +87,21 @@
                         {% endfor %}
                     </ul>
                     {% endif %}
+                    <div class="ac-roadmap-card-actions">
+                        <div class="ac-roadmap-move">
+                            <button type="button" data-move="left" title="Move left" aria-label="Move left">←</button>
+                            <button type="button" data-move="up" title="Move up" aria-label="Move up">↑</button>
+                            <button type="button" data-move="down" title="Move down" aria-label="Move down">↓</button>
+                            <button type="button" data-move="right" title="Move right" aria-label="Move right">→</button>
+                        </div>
+                        <div class="ac-roadmap-edit-actions">
+                            <button type="button" data-edit title="Edit" aria-label="Edit">Edit</button>
+                            <button type="button" data-delete title="Delete" aria-label="Delete">Delete</button>
+                        </div>
+                    </div>
                 </article>
                 {% else %}
-                <p class="ac-roadmap-empty">Nothing here yet.</p>
+                <p class="ac-roadmap-empty" data-col-empty>Nothing here yet.</p>
                 {% endfor %}
             </div>
         </section>
@@ -78,7 +109,7 @@
     </div>
 
     {% if board.shipped %}
-    <section class="ac-roadmap-shipped">
+    <section class="ac-roadmap-shipped" data-shipped>
         <h2>Recently shipped</h2>
         <div class="ac-roadmap-shipped-row">
             {% for item in board.shipped %}
@@ -92,4 +123,203 @@
     </section>
     {% endif %}
 </section>
+
+<dialog class="ac-roadmap-dialog" id="roadmap-dialog">
+    <form method="dialog" class="ac-roadmap-dialog-card" id="roadmap-form">
+        <header class="ac-roadmap-dialog-head">
+            <h2 data-dialog-title>New item</h2>
+            <button type="button" class="ac-roadmap-dialog-close" data-dialog-close aria-label="Close">×</button>
+        </header>
+        <div class="ac-roadmap-dialog-body">
+            <label class="ac-field">
+                <span>Title</span>
+                <input type="text" name="title" maxlength="200" required>
+            </label>
+            <div class="ac-roadmap-dialog-row">
+                <label class="ac-field">
+                    <span>Status</span>
+                    <select name="status">
+                        {% for col in board.statuses %}
+                        <option value="{{ col.id }}">{{ col.label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="ac-field">
+                    <span>Category</span>
+                    <select name="category">
+                        {% for key, cat in board.categories.items() %}
+                        <option value="{{ key }}">{{ cat.label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="ac-roadmap-dialog-row">
+                <fieldset class="ac-roadmap-effort">
+                    <legend>Effort</legend>
+                    <label><input type="radio" name="effort" value=""> —</label>
+                    <label><input type="radio" name="effort" value="S"> S</label>
+                    <label><input type="radio" name="effort" value="M"> M</label>
+                    <label><input type="radio" name="effort" value="L"> L</label>
+                </fieldset>
+                <label class="ac-field">
+                    <span>Target version</span>
+                    <input type="text" name="target" maxlength="20" placeholder="e.g. 1.2.0">
+                </label>
+            </div>
+            <label class="ac-check">
+                <input type="checkbox" name="premium" value="1">
+                <span>Premium subscription candidate</span>
+            </label>
+            <label class="ac-field">
+                <span>Summary</span>
+                <textarea name="summary" rows="3" maxlength="2000"></textarea>
+            </label>
+            <label class="ac-field">
+                <span>Notes (one bullet per line)</span>
+                <textarea name="details" rows="4" placeholder="Bullet one&#10;Bullet two"></textarea>
+            </label>
+            <p class="ac-roadmap-dialog-error" data-dialog-error hidden></p>
+        </div>
+        <footer class="ac-roadmap-dialog-foot">
+            <button type="button" class="ac-signout" data-dialog-close>Cancel</button>
+            <button type="submit" class="ac-btn-primary" data-dialog-save>Save</button>
+        </footer>
+    </form>
+</dialog>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var root = document.getElementById('roadmap-root');
+  if (!root) return;
+  var csrf = root.getAttribute('data-csrf') || '';
+  var createUrl = root.getAttribute('data-create-url') || '';
+  var dialog = document.getElementById('roadmap-dialog');
+  var form = document.getElementById('roadmap-form');
+  var editingId = null;
+
+  function itemUrl(id, suffix) {
+    return '/admin-console/roadmap/items/' + encodeURIComponent(id) + (suffix || '');
+  }
+
+  async function api(url, method, body) {
+    var res = await fetch(url, {
+      method: method || 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': csrf,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      credentials: 'same-origin',
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!res.ok) {
+      var err = await res.json().catch(function () { return {}; });
+      throw new Error(err.error || ('Request failed (' + res.status + ')'));
+    }
+    return res.json();
+  }
+
+  function openDialog(item, defaultStatus) {
+    editingId = item ? item.id : null;
+    form.querySelector('[data-dialog-title]').textContent = item ? 'Edit item' : 'New item';
+    form.title.value = item ? (item.title || '') : '';
+    form.status.value = item ? item.status : (defaultStatus || 'idea');
+    form.category.value = item ? item.category : 'platform';
+    form.target.value = item ? (item.target || '') : '';
+    form.summary.value = item ? (item.summary || '') : '';
+    form.details.value = item && item.details ? item.details.join('\\n') : '';
+    form.premium.checked = !!(item && item.premium);
+    var effort = item ? (item.effort || '') : '';
+    Array.prototype.forEach.call(form.querySelectorAll('input[name="effort"]'), function (radio) {
+      radio.checked = radio.value === effort;
+    });
+    form.querySelector('[data-dialog-error]').hidden = true;
+    if (typeof dialog.showModal === 'function') dialog.showModal();
+    else dialog.setAttribute('open', 'open');
+    form.title.focus();
+  }
+
+  function closeDialog() {
+    if (typeof dialog.close === 'function') dialog.close();
+    else dialog.removeAttribute('open');
+    editingId = null;
+  }
+
+  root.addEventListener('click', function (event) {
+    var newBtn = event.target.closest('[data-roadmap-new]');
+    if (newBtn) {
+      openDialog(null, newBtn.getAttribute('data-status') || 'idea');
+      return;
+    }
+    var card = event.target.closest('[data-item-id]');
+    if (!card) return;
+    var item;
+    try { item = JSON.parse(card.getAttribute('data-item') || '{}'); } catch (e) { item = { id: card.getAttribute('data-item-id') }; }
+    var move = event.target.closest('[data-move]');
+    if (move) {
+      event.preventDefault();
+      api(itemUrl(item.id, '/move'), 'POST', { direction: move.getAttribute('data-move') })
+        .then(function () { window.location.reload(); })
+        .catch(function (err) { alert(err.message); });
+      return;
+    }
+    if (event.target.closest('[data-edit]')) {
+      openDialog(item);
+      return;
+    }
+    if (event.target.closest('[data-delete]')) {
+      if (!window.confirm('Delete "' + (item.title || 'this item') + '"?')) return;
+      api(itemUrl(item.id, '/delete'), 'POST')
+        .then(function () { window.location.reload(); })
+        .catch(function (err) { alert(err.message); });
+    }
+  });
+
+  form.addEventListener('click', function (event) {
+    if (event.target.closest('[data-dialog-close]')) {
+      event.preventDefault();
+      closeDialog();
+    }
+  });
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var errorEl = form.querySelector('[data-dialog-error]');
+    errorEl.hidden = true;
+    var effortEl = form.querySelector('input[name="effort"]:checked');
+    var payload = {
+      title: form.title.value.trim(),
+      status: form.status.value,
+      category: form.category.value,
+      effort: effortEl ? effortEl.value : '',
+      premium: form.premium.checked,
+      summary: form.summary.value.trim(),
+      details: form.details.value.split('\\n').map(function (line) { return line.trim(); }).filter(Boolean),
+      target: form.target.value.trim()
+    };
+    if (!payload.title) {
+      errorEl.textContent = 'Title is required.';
+      errorEl.hidden = false;
+      return;
+    }
+    var saveBtn = form.querySelector('[data-dialog-save]');
+    saveBtn.disabled = true;
+    var req = editingId
+      ? api(itemUrl(editingId), 'POST', payload)
+      : api(createUrl, 'POST', payload);
+    req.then(function () {
+      closeDialog();
+      window.location.reload();
+    }).catch(function (err) {
+      errorEl.textContent = err.message;
+      errorEl.hidden = false;
+    }).finally(function () {
+      saveBtn.disabled = false;
+    });
+  });
+})();
+</script>
 {% endblock %}

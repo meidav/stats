@@ -17,6 +17,7 @@ from flask import (
     abort,
     current_app,
     g,
+    jsonify,
     make_response,
     redirect,
     render_template,
@@ -43,7 +44,15 @@ from api.admin_data import (
 from api.auth_service import authenticate_with_email
 from api.brand import APP_NAME
 from api.league_db import get_league_by_id, get_sports_for_league, league_to_dict, list_leagues_for_admin
-from api.roadmap_data import roadmap_board
+from api.roadmap_data import (
+    create_roadmap_item,
+    delete_roadmap_item,
+    ensure_roadmap_schema,
+    get_roadmap_item,
+    move_roadmap_item,
+    roadmap_board,
+    update_roadmap_item,
+)
 from api.sport_templates import VISIBILITY_OPTIONS
 from auth import get_user_by_email, get_user_by_id, verify_password
 
@@ -289,6 +298,7 @@ def _admin_template_globals():
 
 def init_admin_console(app):
     ensure_admin_schema()
+    ensure_roadmap_schema()
     with app.app_context():
         ensure_bootstrap_admin()
     if "admin_console" not in app.blueprints:
@@ -519,6 +529,122 @@ def roadmap():
         "admin_console/roadmap.html",
         board=roadmap_board(),
     )
+
+
+def _roadmap_json_payload():
+    if request.is_json:
+        return request.get_json(silent=True) or {}
+    return request.form.to_dict(flat=True)
+
+
+def _roadmap_wants_json():
+    return (
+        request.is_json
+        or "application/json" in (request.accept_mimetypes.best or "")
+        or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
+
+
+@admin_bp.route("/roadmap/items", methods=["POST"])
+@admin_login_required
+def roadmap_create_item():
+    payload = _roadmap_json_payload()
+    if "details" in payload and isinstance(payload.get("details"), str):
+        payload["details"] = [
+            line.strip() for line in payload["details"].split("\n") if line.strip()
+        ]
+    if payload.get("premium") in ("1", "true", "on", True):
+        payload["premium"] = True
+    else:
+        payload["premium"] = False
+    try:
+        item = create_roadmap_item(payload)
+    except ValueError as err:
+        if _roadmap_wants_json():
+            return jsonify({"error": str(err)}), 400
+        abort(400)
+    write_audit(
+        g.admin_user.id,
+        "admin.roadmap.create",
+        target_type="roadmap",
+        target_id=item["id"],
+        detail=item["title"],
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    if _roadmap_wants_json():
+        return jsonify(item)
+    return redirect(url_for("admin_console.roadmap"))
+
+
+@admin_bp.route("/roadmap/items/<item_id>", methods=["POST", "PATCH"])
+@admin_login_required
+def roadmap_update_item(item_id):
+    if not get_roadmap_item(item_id):
+        abort(404)
+    payload = _roadmap_json_payload()
+    if "details" in payload and isinstance(payload.get("details"), str):
+        payload["details"] = [
+            line.strip() for line in payload["details"].split("\n") if line.strip()
+        ]
+    if "premium" in payload:
+        payload["premium"] = payload.get("premium") in ("1", "true", "on", True)
+    item = update_roadmap_item(item_id, payload)
+    write_audit(
+        g.admin_user.id,
+        "admin.roadmap.update",
+        target_type="roadmap",
+        target_id=item_id,
+        detail=item["title"] if item else None,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    if _roadmap_wants_json():
+        return jsonify(item)
+    return redirect(url_for("admin_console.roadmap"))
+
+
+@admin_bp.route("/roadmap/items/<item_id>/delete", methods=["POST", "DELETE"])
+@admin_login_required
+def roadmap_delete_item(item_id):
+    ok = delete_roadmap_item(item_id)
+    if not ok:
+        abort(404)
+    write_audit(
+        g.admin_user.id,
+        "admin.roadmap.delete",
+        target_type="roadmap",
+        target_id=item_id,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    if _roadmap_wants_json():
+        return jsonify({"ok": True})
+    return redirect(url_for("admin_console.roadmap"))
+
+
+@admin_bp.route("/roadmap/items/<item_id>/move", methods=["POST"])
+@admin_login_required
+def roadmap_move_item(item_id):
+    payload = _roadmap_json_payload()
+    direction = (payload.get("direction") or "").strip().lower()
+    if direction not in ("left", "right", "up", "down"):
+        abort(400)
+    item = move_roadmap_item(item_id, direction)
+    if not item:
+        abort(404)
+    write_audit(
+        g.admin_user.id,
+        "admin.roadmap.move",
+        target_type="roadmap",
+        target_id=item_id,
+        detail=direction,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    if _roadmap_wants_json():
+        return jsonify(item)
+    return redirect(url_for("admin_console.roadmap"))
 
 
 @admin_bp.route("/leagues/<int:league_id>")
