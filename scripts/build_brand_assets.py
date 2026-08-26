@@ -125,20 +125,20 @@ def write_mobile_logo_xml():
     print(f"  {out.relative_to(ROOT)}")
 
 
-def _mark_inset_box(content=676, vb_w=400, vb_h=550):
+def _mark_inset_box(content=676, vb_w=420, vb_h=600):
     """Place the icon mark on the 1024 canvas.
 
-    vb_* match MARK_VIEWBOX (tight crop of the pawn stack). content is the
-    desired height of that crop on the canvas.
+    vb_* match MARK_VIEWBOX (crop of the pawn stack). content is the desired
+    height of that crop on the canvas.
     """
     w = content * vb_w / vb_h
     h = content
     return (1024 - w) / 2, (1024 - h) / 2, w, h
 
 
-# Tight crop around the ball / dice / chip stack (was 310 115 430 630 with
-# empty top padding that made store icons look tiny).
-MARK_VIEWBOX = "323 184 400 550"
+# Crop around the ball / dice / chip with room for the ball crown and chip rim
+# (tighter 323 184 400 550 clipped the volleyball top at store scale).
+MARK_VIEWBOX = "305 140 420 600"
 
 
 def write_app_icon_svgs(tmpdir: Path):
@@ -152,9 +152,9 @@ def write_app_icon_svgs(tmpdir: Path):
     icon = ET.parse(BRAND / "playtracker-icon.svg").getroot()
     icon.attrib.pop("xmlns", None)
     children = "\n".join(ET.tostring(c, encoding="unicode") for c in icon)
-    # Store icon: almost fill the square (most App Store icons do).
+    # Store icon: large but leave a clear margin so the ball and chip are not cut.
     # Adaptive foreground stays in the ~66% safe zone so launchers do not clip.
-    x, y, w, h = _mark_inset_box(980)
+    x, y, w, h = _mark_inset_box(900)
     ax, ay, aw, ah = _mark_inset_box(676)
 
     def mark_doc(path, ox, oy, ow, oh, with_bg=False):
