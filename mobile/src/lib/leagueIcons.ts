@@ -6,7 +6,7 @@ export const LEAGUE_ICONS = [
   { id: 'beach_volleyball', kind: 'beach', glyph: '🏐', family: 'sports' },
   { id: 'volleyball', kind: 'emoji', glyph: '🏐', family: 'sports' },
   { id: 'tennis', kind: 'emoji', glyph: '🎾', family: 'sports' },
-  { id: 'pickleball', kind: 'emoji', glyph: '🏓', family: 'sports' },
+  { id: 'pickleball', kind: 'whiffle', glyph: '🎾', family: 'sports' },
   { id: 'ping_pong', kind: 'emoji', glyph: '🏓', family: 'sports' },
   { id: 'badminton', kind: 'emoji', glyph: '🏸', family: 'sports' },
   { id: 'softball', kind: 'emoji', glyph: '🥎', family: 'sports' },
@@ -19,6 +19,9 @@ export const LEAGUE_ICONS = [
   { id: 'checkers', kind: 'checker', glyph: '●', family: 'games' },
   { id: 'monopoly', kind: 'emoji', glyph: '🎩', family: 'games' },
   { id: 'scrabble', kind: 'scrabble', glyph: 'A', family: 'games' },
+  { id: 'connect_four', kind: 'connect_four', glyph: '🔴', family: 'games' },
+  { id: 'rummikub', kind: 'rummikub', glyph: '13', family: 'games' },
+  { id: 'ticket_to_ride', kind: 'train', glyph: '🚂', family: 'games' },
   { id: 'catan', kind: 'emoji', glyph: '🏕️', family: 'games' },
   { id: 'mahjong', kind: 'emoji', glyph: '🀄', family: 'games' },
   { id: 'game', kind: 'emoji', glyph: '🎮', family: 'games' },
@@ -78,8 +81,10 @@ export function iconIdForSport(sport?: { template_id: string; category?: string 
   if (id === 'scrabble') return 'scrabble';
   if (id === 'catan') return 'catan';
   if (id === 'mahjong') return 'mahjong';
+  if (id === 'connect_four') return 'connect_four';
+  if (id === 'rummikub') return 'rummikub';
+  if (id === 'ticket_to_ride') return 'ticket_to_ride';
   if (id === 'backgammon' || id === 'yahtzee' || id === 'dominoes' || id === 'mancala') return 'dice';
-  if (id === 'connect_four' || id === 'ticket_to_ride' || id === 'rummikub') return 'puzzle';
   if (sport.category === 'cards' || id === 'uno') return 'cards';
   if (sport.category === 'sports') return 'medal';
   if (sport.category === 'board') return 'puzzle';

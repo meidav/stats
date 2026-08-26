@@ -1,0 +1,36 @@
+PlayTracker 1.1.4 - App Store Connect
+====================================
+Version: 1.1.4
+Build: 14
+Status: Prepare for Submission (after archive + TestFlight)
+
+Paste into ASC
+--------------
+whats-new.txt          -> What's New in This Version
+../promotional-text.txt -> Promotional Text (optional refresh)
+../urls-and-metadata.txt -> confirm Version shows 1.1.4
+
+What's New (customer-facing)
+----------------------------
+More sports and game night
+• Pickleball, badminton, ping pong, and softball
+• Dominoes, Mahjong, Rummikub, Ticket to Ride, Connect Four, and Mancala
+• Optional scores when you only need a win or loss
+• Updated app icon
+
+Do not lead with
+----------------
+Internal copy tweaks, grid sorting, secondary button shade, lockup padding,
+or other polish that does not change what people can track.
+
+Build steps
+-----------
+From mobile/:
+  npm run prebuild:ios
+  # Archive in Xcode, upload via Organizer, select build 14 on version 1.1.4
+
+Review notes
+------------
+Reuse ../review-notes.txt (playtest@playtracker.org). No new entitlements.
+New templates are server-driven; demo by creating a league and picking
+Pickleball or Dominoes.

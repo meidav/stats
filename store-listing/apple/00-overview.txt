@@ -20,6 +20,7 @@ description.txt        - Description (4000)
 keywords.txt           - Keywords (100)
 urls-and-metadata.txt  - Support URL, Marketing URL, Copyright, Version
 whats-new.txt          - What's New (for version 1.1.4)
+1.1.4/                 - Version-specific ASC paste pack for 1.1.4
 review-notes.txt       - App Review Information notes (optional but helpful)
 
 Assets

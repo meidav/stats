@@ -67,7 +67,7 @@ export function copyForFocus(focus: LeagueFocus) {
       firstGameLabel: 'Sport',
       itemWord: 'sport',
       itemWordPlural: 'sports',
-      addGameTitle: 'Add match',
+      addGameTitle: 'Add game',
       newAction: 'New league',
     };
   }
@@ -81,6 +81,11 @@ export function copyForFocus(focus: LeagueFocus) {
     addGameTitle: 'Add game',
     newAction: 'New league',
   };
+}
+
+/** Tennis keeps "match"; everything else is a game. */
+export function addGameTitleForTemplate(templateId?: string | null) {
+  return templateId?.startsWith('tennis') ? 'Add match' : 'Add game';
 }
 
 const TEMPLATE_ALIASES: Record<string, string[]> = {

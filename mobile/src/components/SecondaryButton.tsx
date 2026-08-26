@@ -58,13 +58,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     borderRadius: 12,
-    backgroundColor: 'rgba(91, 33, 182, 0.22)',
+    backgroundColor: 'rgba(91, 33, 182, 0.42)',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     minHeight: 52,
   },
   disabled: {
-    backgroundColor: 'rgba(49, 16, 101, 0.18)',
+    backgroundColor: 'rgba(49, 16, 101, 0.3)',
   },
   label: {
     color: colors.onGlass,

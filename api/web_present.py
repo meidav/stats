@@ -69,7 +69,9 @@ def sport_glyph(sport):
         mark = "🎾"
     elif template_id.startswith("basketball"):
         mark = "🏀"
-    elif template_id.startswith("pickleball") or template_id == "ping_pong":
+    elif template_id.startswith("pickleball"):
+        mark = "🎾"
+    elif template_id == "ping_pong":
         mark = "🏓"
     elif template_id.startswith("badminton"):
         mark = "🏸"
@@ -85,6 +87,12 @@ def sport_glyph(sport):
         mark = "🎲"
     elif template_id == "mahjong":
         mark = "🀄"
+    elif template_id == "connect_four":
+        mark = "🔴"
+    elif template_id == "rummikub":
+        mark = "13"
+    elif template_id == "ticket_to_ride":
+        mark = "🚂"
     elif template_id == "scrabble":
         return {"glyph_src": "img/games/scrabble-tile.svg", "glyph": ""}
     elif template_id == "catan":
@@ -113,7 +121,7 @@ LEAGUE_ICON_MARKS = {
     "volleyball": {"glyph_src": None, "glyph": "🏐"},
     "tennis": {"glyph_src": None, "glyph": "🎾"},
     "basketball": {"glyph_src": None, "glyph": "🏀"},
-    "pickleball": {"glyph_src": None, "glyph": "🏓"},
+    "pickleball": {"glyph_src": None, "glyph": "🎾"},
     "ping_pong": {"glyph_src": None, "glyph": "🏓"},
     "badminton": {"glyph_src": None, "glyph": "🏸"},
     "softball": {"glyph_src": None, "glyph": "🥎"},
@@ -125,6 +133,9 @@ LEAGUE_ICON_MARKS = {
     "checkers": {"glyph_src": None, "glyph": "●"},
     "monopoly": {"glyph_src": None, "glyph": "🎩"},
     "scrabble": {"glyph_src": "img/games/scrabble-tile.svg", "glyph": ""},
+    "connect_four": {"glyph_src": None, "glyph": "🔴"},
+    "rummikub": {"glyph_src": None, "glyph": "13"},
+    "ticket_to_ride": {"glyph_src": None, "glyph": "🚂"},
     "catan": {"glyph_src": None, "glyph": "🏕️"},
     "mahjong": {"glyph_src": None, "glyph": "🀄"},
     "game": {"glyph_src": None, "glyph": "🎮"},

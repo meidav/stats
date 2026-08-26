@@ -24,7 +24,7 @@ import { SportTypePill } from '../components/SportTypePill';
 import { StatsTable } from '../components/StatsTable';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { colors, gradients, spacing } from '../constants/theme';
-import { copyForFocus } from '../lib/focus';
+import { addGameTitleForTemplate } from '../lib/focus';
 import { localToday } from '../lib/datetime';
 import { useAuth } from '../lib/auth';
 import { ApiError, api } from '../lib/api';
@@ -248,7 +248,6 @@ export function LeagueScreen({ route, navigation }: Props) {
   }
 
   const leagueName = league?.name || name || '';
-  const copy = copyForFocus(league?.focus || 'mixed');
   const canEdit =
     league?.role === 'owner' ||
     league?.role === 'admin' ||
@@ -469,7 +468,9 @@ export function LeagueScreen({ route, navigation }: Props) {
                     end={{ x: 1, y: 0.5 }}
                     style={styles.emptyButton}
                   >
-                    <Text style={styles.emptyButtonText}>{copy.addGameTitle}</Text>
+                    <Text style={styles.emptyButtonText}>
+                      {addGameTitleForTemplate(selectedSport?.template_id)}
+                    </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               ) : null}

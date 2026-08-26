@@ -135,7 +135,7 @@ export function HomeScreen({ navigation }: Props) {
   return (
     <ScreenScaffold footer={<AccountFooter />}>
       <View style={[styles.hero, compactEmpty && styles.heroCompact]}>
-        <BrandLockup size={compactEmpty ? 72 : 96} />
+        <BrandLockup size={compactEmpty ? 108 : 132} />
         <Text style={[styles.tagline, compactEmpty && styles.taglineCompact]}>{APP_TAGLINE}</Text>
       </View>
 
@@ -169,9 +169,7 @@ export function HomeScreen({ navigation }: Props) {
                   label="Browse public leagues"
                   onPress={() => navigation.navigate('DiscoverLeagues')}
                   style={styles.ctaHalf}
-                >
-                  <Ionicons name="earth" size={18} color={colors.onGlass} />
-                </SecondaryButton>
+                />
                 <TouchableOpacity
                   onPress={() => navigation.navigate('CreateLeague')}
                   activeOpacity={0.85}
@@ -396,14 +394,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   tagline: {
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
     fontSize: 15,
     color: colors.text,
     fontWeight: '600',
     textAlign: 'center',
   },
   taglineCompact: {
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
     fontSize: 14,
   },
   sectionTitle: {

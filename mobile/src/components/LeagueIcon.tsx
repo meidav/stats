@@ -6,8 +6,12 @@ import {
   BeachVolleyballMark,
   CheckerGlyph,
   ChessKnightGlyph,
+  ConnectFourGlyph,
   FanHand,
+  RummikubTileGlyph,
   ScrabbleTileGlyph,
+  TrainGlyph,
+  WhiffleBallGlyph,
 } from './TemplateGlyph';
 
 export function LeagueIcon({ id, size = 26 }: { id?: string | null; size?: number }) {
@@ -17,6 +21,18 @@ export function LeagueIcon({ id, size = 26 }: { id?: string | null; size?: numbe
   }
   if (kind === 'beach') {
     return <BeachVolleyballMark size={size + 6} />;
+  }
+  if (kind === 'whiffle') {
+    return <WhiffleBallGlyph size={size} />;
+  }
+  if (kind === 'connect_four') {
+    return <ConnectFourGlyph size={size} />;
+  }
+  if (kind === 'rummikub') {
+    return <RummikubTileGlyph size={size} />;
+  }
+  if (kind === 'train') {
+    return <TrainGlyph size={size} />;
   }
   if (kind === 'checker') {
     return <CheckerGlyph size={size} />;

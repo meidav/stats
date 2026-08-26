@@ -378,9 +378,15 @@ def default_icon_for_template(template_id):
         return "scrabble"
     if tid == "catan":
         return "catan"
+    if tid == "connect_four":
+        return "connect_four"
+    if tid == "rummikub":
+        return "rummikub"
+    if tid == "ticket_to_ride":
+        return "ticket_to_ride"
     if tid in ("backgammon", "yahtzee", "dominoes", "mancala"):
         return "dice"
-    if tid in ("connect_four", "ticket_to_ride", "rummikub", "mahjong"):
+    if tid == "mahjong":
         return "puzzle"
     if category == "cards" or tid == "uno":
         return "cards"

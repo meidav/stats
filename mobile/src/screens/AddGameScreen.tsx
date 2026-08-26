@@ -17,6 +17,7 @@ import { ScreenScaffold } from '../components/ScreenScaffold';
 import { SportTypePill } from '../components/SportTypePill';
 import { colors, spacing } from '../constants/theme';
 import { formatLocalDateTime, parseLocalDateTime } from '../lib/datetime';
+import { addGameTitleForTemplate } from '../lib/focus';
 import { autoCapWords } from '../lib/names';
 import {
   TENNIS_FORMATS,
@@ -390,7 +391,13 @@ export function AddGameScreen({ route, navigation }: Props) {
       }
     >
       <ScreenHeader
-        title={editing ? 'Edit game' : 'Add game'}
+        title={
+          editing
+            ? templateId?.startsWith('tennis')
+              ? 'Edit match'
+              : 'Edit game'
+            : addGameTitleForTemplate(templateId)
+        }
         onBack={() => navigation.goBack()}
       />
       <ScrollView

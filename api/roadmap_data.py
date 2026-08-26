@@ -149,16 +149,16 @@ SEED_ITEMS = [
     {
         "id": "more-templates",
         "title": "More built-in templates",
-        "status": "later",
+        "status": "done",
         "category": "sports",
         "effort": "M",
         "premium": False,
-        "summary": "Add popular sports and table games before opening a full custom builder.",
+        "summary": "Shipped in 1.1.4: pickleball, badminton, ping pong, softball, Dominoes, Mahjong, Rummikub, Ticket to Ride, Connect Four, Mancala, plus optional scoring.",
         "details": [
             "Keep pick-a-sport as the default create flow",
             "Custom types stay advanced / later",
         ],
-        "target": "",
+        "target": "1.1.4",
         "sort_order": 4,
     },
     {

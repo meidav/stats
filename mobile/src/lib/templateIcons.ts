@@ -6,7 +6,8 @@ export function iconForTemplate(template: Pick<SportTemplate, 'id' | 'category'>
   if (id.startsWith('beach_volleyball')) return '🏐';
   if (id === 'indoor_volleyball' || id === 'vollis') return '🏐';
   if (id.startsWith('tennis')) return '🎾';
-  if (id.startsWith('pickleball')) return '🏓';
+  // Pickleball uses WhiffleBallGlyph in TemplateGlyph; fallback if emoji path hits.
+  if (id.startsWith('pickleball')) return '🎾';
   if (id === 'ping_pong') return '🏓';
   if (id.startsWith('badminton')) return '🏸';
   if (id === 'softball') return '🥎';
@@ -19,7 +20,9 @@ export function iconForTemplate(template: Pick<SportTemplate, 'id' | 'category'>
   if (id === 'scrabble') return 'A';
   if (id === 'catan') return '🏕️';
   if (id === 'mahjong') return '🀄';
-  if (id === 'rummikub' || id === 'connect_four' || id === 'ticket_to_ride') return '🧩';
+  if (id === 'connect_four') return '🔴';
+  if (id === 'rummikub') return '13';
+  if (id === 'ticket_to_ride') return '🚂';
   if (id === 'custom') return '+';
 
   if (template.category === 'cards' || id === 'uno') return '🃏';
