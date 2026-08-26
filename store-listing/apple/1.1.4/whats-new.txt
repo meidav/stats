@@ -1,5 +1,2 @@
-More sports and game night
-• Pickleball, badminton, ping pong, and softball
-• Dominoes, Mahjong, Rummikub, Ticket to Ride, Connect Four, and Mancala
-• Optional scores when you only need a win or loss
-• Updated app icon
+PlayTracker is here.
+Keep score for sports and game night with friends: pickleball, volleyball, tennis, badminton, Dominoes, Mahjong, and more. Log wins in a few taps, use optional scores when you only need the result, and watch standings update.

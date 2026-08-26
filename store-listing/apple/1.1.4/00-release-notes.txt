@@ -10,22 +10,32 @@ whats-new.txt          -> What's New in This Version
 ../promotional-text.txt -> Promotional Text (optional refresh)
 ../urls-and-metadata.txt -> confirm Version shows 1.1.4
 
-What's New (customer-facing)
-----------------------------
-More sports and game night
-• Pickleball, badminton, ping pong, and softball
-• Dominoes, Mahjong, Rummikub, Ticket to Ride, Connect Four, and Mancala
-• Optional scores when you only need a win or loss
-• Updated app icon
+First public submission
+-----------------------
+No prior version has been reviewed/released, so treat this as the launch
+listing: fold new templates into Description, and use What's New as a
+short product intro (not a "what's changed" changelog).
 
-Shipped for support (optional to mention)
-----------------------------------------
-Account modal shows Version X.Y.Z (build).
+What's New (customer-facing) -> whats-new.txt
+---------------------------------------------
+PlayTracker is here.
+Keep score for sports and game night with friends: pickleball, volleyball,
+tennis, badminton, Dominoes, Mahjong, and more. Log wins in a few taps,
+use optional scores when you only need the result, and watch standings update.
+
+Description -> ../description.txt (updated for 1.1.4)
+-----------------------------------------------------
+Includes expanded sports / game night templates and optional scores.
+
+Also paste
+----------
+../promotional-text.txt
+../keywords.txt
 
 Do not lead with
 ----------------
 Internal copy tweaks, grid sorting, secondary button shade, lockup padding,
-or other polish that does not change what people can track.
+account version footer, or other polish that does not change what people track.
 
 Build steps
 -----------

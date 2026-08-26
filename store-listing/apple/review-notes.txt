@@ -14,7 +14,9 @@ Please:
 3. Open "PT Test BVB 2's" (public Beach Volleyball 2's sample)
 4. Also available: "PT Test Gin Stats" and "PT Test Chess Stats" (unlisted)
 5. Check Standings, year filter, Games, player profiles, and Share
-6. Account deletion: on Home, tap the settings icon next to your email, open Account, then Delete account (two-step confirm).
+6. Optional: create a new Sports or Game night league and pick Pickleball or Dominoes to see templates
+7. Optional scores: when adding a game, leave score fields empty and save a win/loss only
+8. Account deletion: on Home, tap the settings icon next to your email, open Account, then Delete account (two-step confirm).
    Do not use the demo account for a live delete test if you still need it;
    create a throwaway account to verify the flow if needed.
 

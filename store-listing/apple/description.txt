@@ -1,10 +1,12 @@
 PlayTracker is the simple way to keep score for the people you actually play with.
 
-Create a league, invite friends, log a game in a few taps, and watch standings build themselves. Use it for beach volleyball, tennis, indoor volleyball, chess, checkers, cards, board games, or anything custom you want to track.
+Create a league, invite friends, log a game in a few taps, and watch standings build themselves. Track beach volleyball, pickleball, tennis, badminton, ping pong, softball, chess, checkers, cards, board games, or anything custom you invent.
 
 WHAT YOU CAN DO
 • Create a sports league or a game night league
-• Log wins, losses, and scores with clear, fast entry
+• Start from templates: pickleball, badminton, ping pong, softball, volleyball, tennis, and more
+• Game night covered too: Dominoes, Mahjong, Rummikub, Ticket to Ride, Connect Four, Mancala, cards, and custom
+• Log wins and losses with optional scores when you only need the result
 • See standings with year filters so seasons stay easy to read
 • Separate main leaderboards from occasional players automatically
 • Keep leagues public, unlisted, or private
@@ -12,11 +14,11 @@ WHAT YOU CAN DO
 • Browse recent games and player profiles
 
 BUILT FOR REAL GROUPS
-Whether you play Tuesday night volleyball, weekend tennis, or Sunday game night, PlayTracker keeps the history in one place. No spreadsheets. No group-chat archaeology. Just the league, the games, and the standings.
+Whether you play Tuesday night volleyball, weekend pickleball, or Sunday game night, PlayTracker keeps the history in one place. No spreadsheets. No group-chat archaeology. Just the league, the games, and the standings.
 
 GET STARTED
 1. Create a league and choose Sports or Game night
-2. Add your first game
+2. Pick a template (or Custom) and add your first game
 3. Share the league and keep logging
 
 Track everything you play.
