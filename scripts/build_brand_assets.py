@@ -125,12 +125,20 @@ def write_mobile_logo_xml():
     print(f"  {out.relative_to(ROOT)}")
 
 
-def _mark_inset_box(content=676):
-    """Place the icon mark in the Android adaptive-icon safe zone (~66%)."""
-    # Icon viewBox is 310 115 430 630.
-    w = content * 430 / 630
+def _mark_inset_box(content=676, vb_w=400, vb_h=550):
+    """Place the icon mark on the 1024 canvas.
+
+    vb_* match MARK_VIEWBOX (tight crop of the pawn stack). content is the
+    desired height of that crop on the canvas.
+    """
+    w = content * vb_w / vb_h
     h = content
     return (1024 - w) / 2, (1024 - h) / 2, w, h
+
+
+# Tight crop around the ball / dice / chip stack (was 310 115 430 630 with
+# empty top padding that made store icons look tiny).
+MARK_VIEWBOX = "323 184 400 550"
 
 
 def write_app_icon_svgs(tmpdir: Path):
@@ -144,7 +152,9 @@ def write_app_icon_svgs(tmpdir: Path):
     icon = ET.parse(BRAND / "playtracker-icon.svg").getroot()
     icon.attrib.pop("xmlns", None)
     children = "\n".join(ET.tostring(c, encoding="unicode") for c in icon)
-    x, y, w, h = _mark_inset_box(700)
+    # Store icon: almost fill the square (most App Store icons do).
+    # Adaptive foreground stays in the ~66% safe zone so launchers do not clip.
+    x, y, w, h = _mark_inset_box(980)
     ax, ay, aw, ah = _mark_inset_box(676)
 
     def mark_doc(path, ox, oy, ow, oh, with_bg=False):
@@ -154,7 +164,7 @@ def write_app_icon_svgs(tmpdir: Path):
             f'<svg xmlns="{SVG_NS}" width="1024" height="1024" viewBox="0 0 1024 1024" '
             f'role="img" aria-label="PlayTracker">\n{bg}'
             f'<svg x="{ox:.1f}" y="{oy:.1f}" width="{ow:.1f}" height="{oh:.1f}" '
-            f'viewBox="310 115 430 630">\n{children}\n</svg>\n</svg>\n'
+            f'viewBox="{MARK_VIEWBOX}">\n{children}\n</svg>\n</svg>\n'
         )
 
     store = tmpdir / "store-icon.svg"

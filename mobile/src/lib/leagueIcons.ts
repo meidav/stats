@@ -6,6 +6,10 @@ export const LEAGUE_ICONS = [
   { id: 'beach_volleyball', kind: 'beach', glyph: '🏐', family: 'sports' },
   { id: 'volleyball', kind: 'emoji', glyph: '🏐', family: 'sports' },
   { id: 'tennis', kind: 'emoji', glyph: '🎾', family: 'sports' },
+  { id: 'pickleball', kind: 'emoji', glyph: '🏓', family: 'sports' },
+  { id: 'ping_pong', kind: 'emoji', glyph: '🏓', family: 'sports' },
+  { id: 'badminton', kind: 'emoji', glyph: '🏸', family: 'sports' },
+  { id: 'softball', kind: 'emoji', glyph: '🥎', family: 'sports' },
   { id: 'basketball', kind: 'emoji', glyph: '🏀', family: 'sports' },
   { id: 'soccer', kind: 'emoji', glyph: '⚽', family: 'sports' },
   { id: 'target', kind: 'emoji', glyph: '🎯', family: 'sports' },
@@ -16,6 +20,7 @@ export const LEAGUE_ICONS = [
   { id: 'monopoly', kind: 'emoji', glyph: '🎩', family: 'games' },
   { id: 'scrabble', kind: 'scrabble', glyph: 'A', family: 'games' },
   { id: 'catan', kind: 'emoji', glyph: '🏕️', family: 'games' },
+  { id: 'mahjong', kind: 'emoji', glyph: '🀄', family: 'games' },
   { id: 'game', kind: 'emoji', glyph: '🎮', family: 'games' },
   { id: 'puzzle', kind: 'emoji', glyph: '🧩', family: 'games' },
   { id: 'trophy', kind: 'emoji', glyph: '🏆', family: 'general' },
@@ -62,13 +67,19 @@ export function iconIdForSport(sport?: { template_id: string; category?: string 
   if (id.startsWith('beach_volleyball') || id === 'vollis') return 'beach_volleyball';
   if (id === 'indoor_volleyball') return 'volleyball';
   if (id.startsWith('tennis')) return 'tennis';
+  if (id.startsWith('pickleball')) return 'pickleball';
+  if (id === 'ping_pong') return 'ping_pong';
+  if (id.startsWith('badminton')) return 'badminton';
+  if (id === 'softball') return 'softball';
   if (id.startsWith('basketball')) return 'basketball';
   if (id === 'chess') return 'chess';
   if (id === 'checkers') return 'checkers';
   if (id === 'monopoly') return 'monopoly';
   if (id === 'scrabble') return 'scrabble';
   if (id === 'catan') return 'catan';
-  if (id === 'backgammon' || id === 'yahtzee') return 'dice';
+  if (id === 'mahjong') return 'mahjong';
+  if (id === 'backgammon' || id === 'yahtzee' || id === 'dominoes' || id === 'mancala') return 'dice';
+  if (id === 'connect_four' || id === 'ticket_to_ride' || id === 'rummikub') return 'puzzle';
   if (sport.category === 'cards' || id === 'uno') return 'cards';
   if (sport.category === 'sports') return 'medal';
   if (sport.category === 'board') return 'puzzle';

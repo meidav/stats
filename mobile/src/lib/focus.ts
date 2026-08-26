@@ -9,14 +9,20 @@ export const FOCUS_OPTIONS: Array<{ id: Exclude<LeagueFocus, 'mixed'>; label: st
 ];
 
 export function templatesForFocus(templates: SportTemplate[], focus: LeagueFocus) {
+  let visible: SportTemplate[];
   if (focus === 'sports') {
-    return templates.filter((t) => t.category === 'sports' || t.category === 'custom');
+    visible = templates.filter((t) => t.category === 'sports' || t.category === 'custom');
+  } else if (focus === 'table') {
+    visible = templates.filter((t) => t.category === 'cards' || t.category === 'board' || t.category === 'custom');
+  } else {
+    // Legacy mixed leagues: show everything when editing/viewing helpers need a list.
+    visible = [...templates];
   }
-  if (focus === 'table') {
-    return templates.filter((t) => t.category === 'cards' || t.category === 'board' || t.category === 'custom');
-  }
-  // Legacy mixed leagues: show everything when editing/viewing helpers need a list.
-  return templates;
+  return [...visible].sort((a, b) => {
+    if (a.id === 'custom') return 1;
+    if (b.id === 'custom') return -1;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  });
 }
 
 export function defaultTemplateId(templates: SportTemplate[], focus: LeagueFocus) {
@@ -46,7 +52,7 @@ export function copyForFocus(focus: LeagueFocus) {
       homeTitle: 'My leagues',
       homeEmpty: 'Create your first league',
       createTitle: 'New league',
-      firstGameLabel: 'First game',
+      firstGameLabel: 'Game',
       itemWord: 'game',
       itemWordPlural: 'games',
       addGameTitle: 'Add game',
@@ -58,7 +64,7 @@ export function copyForFocus(focus: LeagueFocus) {
       homeTitle: 'My leagues',
       homeEmpty: 'Create your first league',
       createTitle: 'New league',
-      firstGameLabel: 'First sport',
+      firstGameLabel: 'Sport',
       itemWord: 'sport',
       itemWordPlural: 'sports',
       addGameTitle: 'Add match',
@@ -69,7 +75,7 @@ export function copyForFocus(focus: LeagueFocus) {
     homeTitle: 'My leagues',
     homeEmpty: 'Create your first league',
     createTitle: 'New league',
-    firstGameLabel: 'First game',
+    firstGameLabel: 'Game',
     itemWord: 'game',
     itemWordPlural: 'games',
     addGameTitle: 'Add game',
@@ -85,6 +91,12 @@ const TEMPLATE_ALIASES: Record<string, string[]> = {
   tennis_singles: ['tennis singles', 'singles tennis'],
   tennis_doubles: ['tennis doubles', 'doubles tennis'],
   basketball_3v3: ['basketball', '3v3', '3 on 3'],
+  pickleball_singles: ['pickleball singles', 'pickle ball singles'],
+  pickleball_doubles: ['pickleball doubles', 'pickle ball doubles'],
+  ping_pong: ['ping pong', 'table tennis', 'pingpong'],
+  badminton_singles: ['badminton singles'],
+  badminton_doubles: ['badminton doubles'],
+  softball: ['softball'],
   gin: ['gin rummy', 'gin'],
   pusoy_dos: ['pusoy dos', 'pusoy'],
   cribbage: ['crib', 'cribbage'],
@@ -98,6 +110,12 @@ const TEMPLATE_ALIASES: Record<string, string[]> = {
   scrabble: ['scrabble'],
   catan: ['catan', 'settlers'],
   monopoly: ['monopoly'],
+  dominoes: ['dominoes', 'domino', 'mexican train'],
+  mahjong: ['mahjong', 'mah jong'],
+  rummikub: ['rummikub', 'rummi kub'],
+  ticket_to_ride: ['ticket to ride', 'ttr'],
+  connect_four: ['connect four', 'connect 4'],
+  mancala: ['mancala'],
 };
 
 function templateNeedles(template: SportTemplate) {
@@ -109,7 +127,15 @@ export function detectTemplateFromName(name: string, templates: SportTemplate[])
   const hay = name.toLowerCase();
   if (!hay.trim()) return null;
 
-  if (hay.includes('tennis')) {
+  if (hay.includes('pickleball') || hay.includes('pickle ball')) {
+    if (hay.includes('double')) return 'pickleball_doubles';
+    if (templates.some((t) => t.id === 'pickleball_singles')) return 'pickleball_singles';
+  }
+  if (hay.includes('badminton')) {
+    if (hay.includes('double')) return 'badminton_doubles';
+    if (templates.some((t) => t.id === 'badminton_singles')) return 'badminton_singles';
+  }
+  if (hay.includes('tennis') && !hay.includes('table')) {
     if (hay.includes('double')) return 'tennis_doubles';
     if (templates.some((t) => t.id === 'tennis_singles')) return 'tennis_singles';
   }

@@ -296,7 +296,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   template: {
-    width: '47%',
+    // Share the row evenly with gap so the grid matches Name / Visibility width.
+    flexGrow: 1,
+    flexBasis: '46%',
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderRadius: 14,

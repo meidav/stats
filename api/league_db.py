@@ -528,6 +528,7 @@ def sport_to_dict(sport):
         "players_per_side": sport.get("players_per_side") or 1,
         "score_direction": sport.get("score_direction") or "higher_wins",
         "score_mode": template.get("score_mode", "points"),
+        "scores_optional": template.get("score_mode", "points") in ("win_loss", "optional_points"),
         "score_shape": template.get("score_shape", "points"),
         "side_kind": template.get("side_kind", "player"),
         "typical_win_score": typical_win_score_for(template_id),

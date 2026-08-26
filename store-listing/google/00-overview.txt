@@ -24,6 +24,6 @@ Phone screenshots:   drop into static/img/promo/ when ready
 
 Version (align with mobile/app.json)
 ------------------------------------
-1.1.3 (versionCode 13)
+1.1.4 (versionCode 14)
 
 Data safety form is a separate Play Console step (not in these text files).

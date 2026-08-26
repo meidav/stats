@@ -69,14 +69,22 @@ def sport_glyph(sport):
         mark = "🎾"
     elif template_id.startswith("basketball"):
         mark = "🏀"
+    elif template_id.startswith("pickleball") or template_id == "ping_pong":
+        mark = "🏓"
+    elif template_id.startswith("badminton"):
+        mark = "🏸"
+    elif template_id == "softball":
+        mark = "🥎"
     elif template_id == "chess":
         mark = "♞"
     elif template_id == "checkers":
         mark = "●"
     elif template_id == "monopoly":
         mark = "🎩"
-    elif template_id in ("backgammon", "yahtzee"):
+    elif template_id in ("backgammon", "yahtzee", "dominoes", "mancala"):
         mark = "🎲"
+    elif template_id == "mahjong":
+        mark = "🀄"
     elif template_id == "scrabble":
         return {"glyph_src": "img/games/scrabble-tile.svg", "glyph": ""}
     elif template_id == "catan":
@@ -105,6 +113,10 @@ LEAGUE_ICON_MARKS = {
     "volleyball": {"glyph_src": None, "glyph": "🏐"},
     "tennis": {"glyph_src": None, "glyph": "🎾"},
     "basketball": {"glyph_src": None, "glyph": "🏀"},
+    "pickleball": {"glyph_src": None, "glyph": "🏓"},
+    "ping_pong": {"glyph_src": None, "glyph": "🏓"},
+    "badminton": {"glyph_src": None, "glyph": "🏸"},
+    "softball": {"glyph_src": None, "glyph": "🥎"},
     "soccer": {"glyph_src": None, "glyph": "⚽"},
     "target": {"glyph_src": None, "glyph": "🎯"},
     "cards": {"glyph_src": None, "glyph": "🃏"},
@@ -114,6 +126,7 @@ LEAGUE_ICON_MARKS = {
     "monopoly": {"glyph_src": None, "glyph": "🎩"},
     "scrabble": {"glyph_src": "img/games/scrabble-tile.svg", "glyph": ""},
     "catan": {"glyph_src": None, "glyph": "🏕️"},
+    "mahjong": {"glyph_src": None, "glyph": "🀄"},
     "game": {"glyph_src": None, "glyph": "🎮"},
     "puzzle": {"glyph_src": None, "glyph": "🧩"},
     "trophy": {"glyph_src": None, "glyph": "🏆"},
@@ -201,13 +214,15 @@ def present_games(games, win_loss=False):
     presented = []
     for game in games or []:
         set_line = format_set_line(game.get("metadata"))
-        if win_loss:
+        raw_w = game.get("winner_score")
+        raw_l = game.get("loser_score")
+        if win_loss or (raw_w is None and raw_l is None and not set_line):
             winner_score, loser_score = "W", "L"
         elif set_line:
             winner_score, loser_score = "", ""
         else:
-            winner_score = game.get("winner_score")
-            loser_score = game.get("loser_score")
+            winner_score = raw_w
+            loser_score = raw_l
         presented.append(
             {
                 "when": format_game_stamp(game.get("game_date")),

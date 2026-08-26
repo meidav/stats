@@ -1,1 +1,1 @@
-Account deletion in-app, clearer player profiles (occasional partners/opponents, collapsible sections, full games list), and polish for Apple and Google sign-in.
+More sports and game-night templates (pickleball, badminton, ping pong, softball, Dominoes, Mahjong, and more), alphabetical create grids, and optional scoring where it fits. Larger app icon mark.

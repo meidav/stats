@@ -75,6 +75,7 @@ export function AddGameScreen({ route, navigation }: Props) {
     templateId,
     playersPerSide,
     scoreMode = 'points',
+    scoresOptional,
     sideKind = 'player',
     sportCategory,
     gameId,
@@ -88,6 +89,7 @@ export function AddGameScreen({ route, navigation }: Props) {
   const { token } = useAuth();
   const editing = Boolean(gameId);
   const winLoss = scoreMode === 'win_loss';
+  const optionalScores = scoreMode === 'optional_points' || Boolean(scoresOptional && !winLoss);
   const tennis = isTennisTemplate(templateId);
   const teamSides = sideKind === 'team' || templateId === 'indoor_volleyball';
   const oneOnOne = playersPerSide === 1 && !teamSides;
@@ -266,8 +268,8 @@ export function AddGameScreen({ route, navigation }: Props) {
       const payload: {
         winners: string[];
         losers: string[];
-        winner_score?: number;
-        loser_score?: number;
+        winner_score?: number | null;
+        loser_score?: number | null;
         game_date?: string;
         metadata?: Record<string, unknown>;
       } = {
@@ -281,8 +283,17 @@ export function AddGameScreen({ route, navigation }: Props) {
         payload.loser_score = tennisScore.loser_score;
         payload.metadata = tennisScore.metadata;
       } else if (!winLoss) {
-        payload.winner_score = Number(winnerScore);
-        payload.loser_score = Number(loserScore);
+        const w = winnerScore.trim();
+        const l = loserScore.trim();
+        if (optionalScores && !w && !l) {
+          payload.winner_score = null;
+          payload.loser_score = null;
+        } else if (optionalScores && (!w || !l)) {
+          throw new Error('Enter both scores, or leave both blank');
+        } else {
+          payload.winner_score = Number(w);
+          payload.loser_score = Number(l);
+        }
       }
       if (editing && gameId) {
         await api.updateGame(token, gameId, payload);
@@ -407,7 +418,7 @@ export function AddGameScreen({ route, navigation }: Props) {
         {renderNameFields('loser', loserLabels, loserNames)}
 
         {winLoss ? (
-          <Text style={styles.hint}>Just who won.</Text>
+          <Text style={styles.hint}>Just who won. Scores are not tracked for this game.</Text>
         ) : tennis ? (
           <View style={styles.tennisBlock}>
             <Text style={styles.section}>Set scores</Text>
@@ -450,7 +461,10 @@ export function AddGameScreen({ route, navigation }: Props) {
         ) : (
           <View style={styles.scoreRow}>
             <View style={styles.scoreField}>
-              <Text style={styles.label}>{teamSides ? 'Winning score' : 'Winner score'}</Text>
+              <Text style={styles.label}>
+                {teamSides ? 'Winning score' : 'Winner score'}
+                {optionalScores ? ' (optional)' : ''}
+              </Text>
               <TextInput
                 ref={winnerScoreRef}
                 style={styles.input}
@@ -458,6 +472,8 @@ export function AddGameScreen({ route, navigation }: Props) {
                 value={winnerScore}
                 onFocus={() => setFocusField('winnerScore')}
                 onChangeText={setWinnerScore}
+                placeholder={optionalScores ? 'Optional' : undefined}
+                placeholderTextColor={colors.textMuted}
               />
               {winnerHint != null ? (
                 <View style={styles.chipRow}>
@@ -468,13 +484,18 @@ export function AddGameScreen({ route, navigation }: Props) {
               ) : null}
             </View>
             <View style={styles.scoreField}>
-              <Text style={styles.label}>{teamSides ? 'Losing score' : 'Loser score'}</Text>
+              <Text style={styles.label}>
+                {teamSides ? 'Losing score' : 'Loser score'}
+                {optionalScores ? ' (optional)' : ''}
+              </Text>
               <TextInput
                 style={styles.input}
                 keyboardType="number-pad"
                 value={loserScore}
                 onFocus={() => setFocusField('loserScore')}
                 onChangeText={setLoserScore}
+                placeholder={optionalScores ? 'Optional' : undefined}
+                placeholderTextColor={colors.textMuted}
               />
               {loserHints.length ? (
                 <View style={styles.chipRow}>
@@ -492,6 +513,9 @@ export function AddGameScreen({ route, navigation }: Props) {
             </View>
           </View>
         )}
+        {optionalScores && !winLoss && !tennis ? (
+          <Text style={styles.hint}>Scores optional. Leave both blank to log win/loss only.</Text>
+        ) : null}
 
         <View style={styles.playedWrap}>
           <DateTimeField value={playedAt} onChange={setPlayedAt} />

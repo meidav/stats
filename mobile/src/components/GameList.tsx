@@ -48,7 +48,11 @@ export function GameList({ games, canEdit, winLoss, onEdit, onDelete }: Props) {
               ))}
             </View>
             <Text style={[styles.score, styles.winnerScore]}>
-              {winLoss ? 'W' : setLine ? '' : game.winner_score}
+              {winLoss || (game.winner_score == null && game.loser_score == null)
+                ? 'W'
+                : setLine
+                  ? ''
+                  : game.winner_score}
             </Text>
           </View>
 
@@ -61,7 +65,11 @@ export function GameList({ games, canEdit, winLoss, onEdit, onDelete }: Props) {
               ))}
             </View>
             <Text style={[styles.score, styles.loserScore]}>
-              {winLoss ? 'L' : setLine ? '' : game.loser_score}
+              {winLoss || (game.winner_score == null && game.loser_score == null)
+                ? 'L'
+                : setLine
+                  ? ''
+                  : game.loser_score}
             </Text>
           </View>
           {setLine ? <Text style={styles.sets}>{setLine}</Text> : null}

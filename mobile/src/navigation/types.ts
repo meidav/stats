@@ -22,7 +22,8 @@ export type RootStackParamList = {
     sportName: string;
     templateId?: string;
     playersPerSide: number;
-    scoreMode?: 'points' | 'win_loss';
+    scoreMode?: 'points' | 'win_loss' | 'optional_points';
+    scoresOptional?: boolean;
     sideKind?: 'player' | 'team';
     focus?: 'sports' | 'table' | 'mixed';
     leagueName?: string;

@@ -14,7 +14,9 @@ export type SportTemplate = {
   category: 'sports' | 'cards' | 'board' | 'custom';
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
-  score_mode: 'points' | 'win_loss';
+  score_mode: 'points' | 'win_loss' | 'optional_points';
+  scores_optional?: boolean;
+  score_shape?: 'points' | 'sets';
   side_kind?: 'player' | 'team';
   typical_win_score?: number | null;
   default_name: string;
@@ -29,7 +31,8 @@ export type Sport = {
   category?: SportTemplate['category'];
   players_per_side: number;
   score_direction: 'higher_wins' | 'lower_wins';
-  score_mode?: 'points' | 'win_loss';
+  score_mode?: 'points' | 'win_loss' | 'optional_points';
+  scores_optional?: boolean;
   score_shape?: 'points' | 'sets';
   side_kind?: 'player' | 'team';
   typical_win_score?: number | null;
@@ -61,8 +64,8 @@ export type Game = {
   game_date: string;
   winners: string[];
   losers: string[];
-  winner_score: number;
-  loser_score: number;
+  winner_score: number | null;
+  loser_score: number | null;
   metadata: Record<string, unknown>;
 };
 

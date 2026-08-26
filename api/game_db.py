@@ -78,6 +78,23 @@ def _normalize_game_date(value):
     return text[:19]
 
 
+def _empty_score(value):
+    return value is None or value == ""
+
+
+def _resolve_scores(template, winner_score, loser_score, score_direction):
+    """Apply score_mode rules. optional_points may leave scores null."""
+    mode = (template or {}).get("score_mode", "points")
+    both_empty = _empty_score(winner_score) and _empty_score(loser_score)
+    if mode == "win_loss" and both_empty:
+        return 1, 0
+    if mode == "optional_points" and both_empty:
+        return None, None
+    if mode == "optional_points" and (_empty_score(winner_score) or _empty_score(loser_score)):
+        raise ValueError("enter both scores, or leave both blank")
+    return _validate_scores(winner_score, loser_score, score_direction)
+
+
 def add_game(sport_id, winners, losers, winner_score, loser_score, game_date=None, metadata=None, entered_by=None):
     sport = get_sport_by_id(sport_id)
     if not sport:
@@ -86,10 +103,8 @@ def add_game(sport_id, winners, losers, winner_score, loser_score, game_date=Non
     winners = _validate_players(winners, sport["players_per_side"], "winners")
     losers = _validate_players(losers, sport["players_per_side"], "losers")
     template = get_template(sport["template_id"]) or {}
-    if template.get("score_mode") == "win_loss" and winner_score in (None, "") and loser_score in (None, ""):
-        winner_score, loser_score = 1, 0
-    winner_score, loser_score = _validate_scores(
-        winner_score, loser_score, sport["score_direction"]
+    winner_score, loser_score = _resolve_scores(
+        template, winner_score, loser_score, sport["score_direction"]
     )
 
     if game_date is None:
@@ -97,6 +112,7 @@ def add_game(sport_id, winners, losers, winner_score, loser_score, game_date=Non
     else:
         game_date = _normalize_game_date(game_date) or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     metadata_json = json.dumps(metadata or {})
+
 
     with db_manager.get_connection() as conn:
         cursor = conn.cursor()
@@ -214,8 +230,9 @@ def update_game(game_id, **fields):
 
     winners = _validate_players(winners, sport["players_per_side"], "winners")
     losers = _validate_players(losers, sport["players_per_side"], "losers")
-    winner_score, loser_score = _validate_scores(
-        winner_score, loser_score, sport["score_direction"]
+    template = get_template(sport["template_id"]) or {}
+    winner_score, loser_score = _resolve_scores(
+        template, winner_score, loser_score, sport["score_direction"]
     )
 
     game_date = _normalize_game_date(fields.get("game_date", game["game_date"])) or game["game_date"]
