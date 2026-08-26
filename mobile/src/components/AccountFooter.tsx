@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SecondaryButton } from './SecondaryButton';
 import { colors, gradients, spacing } from '../constants/theme';
 import { ApiError } from '../lib/api';
+import { appVersionLabel } from '../lib/appVersion';
 import { useAuth } from '../lib/auth';
 
 /** Soft dark lilac used for discover / public-league accents (not primary blue). */
@@ -130,6 +131,7 @@ export function AccountFooter() {
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
+              <Text style={styles.versionLabel}>{appVersionLabel()}</Text>
             </LinearGradient>
           </Pressable>
         </Pressable>
@@ -312,6 +314,13 @@ const styles = StyleSheet.create({
     color: '#1E40AF',
     textAlign: 'center',
     marginBottom: spacing.lg,
+  },
+  versionLabel: {
+    marginTop: spacing.md,
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(30, 58, 138, 0.55)',
+    textAlign: 'center',
   },
   signOutBody: {
     fontSize: 15,

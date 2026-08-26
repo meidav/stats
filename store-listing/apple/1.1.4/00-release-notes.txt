@@ -18,6 +18,10 @@ More sports and game night
 • Optional scores when you only need a win or loss
 • Updated app icon
 
+Shipped for support (optional to mention)
+----------------------------------------
+Account modal shows Version X.Y.Z (build).
+
 Do not lead with
 ----------------
 Internal copy tweaks, grid sorting, secondary button shade, lockup padding,

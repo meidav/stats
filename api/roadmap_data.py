@@ -71,13 +71,13 @@ SEED_ITEMS = [
     {
         "id": "account-version-footer",
         "title": "Version / build in Account",
-        "status": "next",
+        "status": "done",
         "category": "account",
         "effort": "S",
         "premium": False,
         "summary": "Show app version and build at the bottom of Account for support and debugging.",
         "details": [],
-        "target": "",
+        "target": "1.1.4",
         "sort_order": 1,
     },
     {
