@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Linking,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { SecondaryButton } from './SecondaryButton';
+import { APP_DOMAIN, APP_URL, SUPPORT_EMAIL, SUPPORT_MAILTO } from '../constants/brand';
 import { colors, gradients, spacing } from '../constants/theme';
 import { ApiError } from '../lib/api';
 import { appVersionLabel } from '../lib/appVersion';
@@ -129,6 +139,25 @@ export function AccountFooter() {
                   >
                     <Text style={styles.signOutText}>Sign out</Text>
                   </LinearGradient>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.metaBlock}>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(SUPPORT_MAILTO)}
+                  accessibilityRole="link"
+                  accessibilityLabel={`Email support at ${SUPPORT_EMAIL}`}
+                  hitSlop={8}
+                >
+                  <Text style={styles.metaLink}>{SUPPORT_EMAIL}</Text>
+                </TouchableOpacity>
+                <Text style={styles.metaDot}>·</Text>
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(APP_URL)}
+                  accessibilityRole="link"
+                  accessibilityLabel={`Open ${APP_DOMAIN}`}
+                  hitSlop={8}
+                >
+                  <Text style={styles.metaLink}>{APP_DOMAIN}</Text>
                 </TouchableOpacity>
               </View>
               <Text style={styles.versionLabel}>{appVersionLabel()}</Text>
@@ -316,11 +345,29 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   versionLabel: {
-    marginTop: spacing.md,
+    marginTop: spacing.xs,
     fontSize: 12,
     fontWeight: '600',
-    color: 'rgba(30, 58, 138, 0.55)',
+    color: 'rgba(30, 58, 138, 0.45)',
     textAlign: 'center',
+  },
+  metaBlock: {
+    marginTop: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  metaLink: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(30, 64, 175, 0.72)',
+  },
+  metaDot: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(30, 58, 138, 0.35)',
   },
   signOutBody: {
     fontSize: 15,
