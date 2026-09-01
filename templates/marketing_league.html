@@ -1,5 +1,6 @@
 {% extends "marketing_base.html" %}
 {% from "marketing_league_macros.html" import fold, standings_table, game_list, sport_mark, year_picker %}
+{% from "marketing_store_macros.html" import open_in_app_button, store_badges with context %}
 {% block title %}{{ league.name }} | PlayTracker{% endblock %}
 {% block nav_leagues %}is-active{% endblock %}
 {% block body_class %}mkt-app-page{% endblock %}
@@ -92,13 +93,10 @@
     {% endif %}
 
     <div class="mkt-cta-row">
-        <button type="button" class="mkt-btn mkt-btn-primary" disabled>Open in PlayTracker</button>
+        {{ open_in_app_button(app_scheme_url) }}
     </div>
-    <p class="mkt-soon">Have the app? Open in PlayTracker is coming soon, along with App Store and Google Play listings.</p>
-    <div class="mkt-stores" aria-label="App store listings coming soon">
-        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/app-store.svg') }}" alt="Download on the App Store" width="148" height="44">
-        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/google-play.svg') }}" alt="Get it on Google Play" width="155" height="44">
-    </div>
+    <p class="mkt-soon">Have the app? Tap Open in PlayTracker. New here? Download free on the App Store. Google Play is coming soon.</p>
+    {{ store_badges() }}
 </section>
 {% endblock %}
 

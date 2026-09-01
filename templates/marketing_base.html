@@ -7,6 +7,9 @@
     <meta name="description" content="PlayTracker: track everything you play. Leagues, standings, and game night in one app.">
     <meta name="theme-color" content="#3b0764">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    {% if app_store_app_id %}
+    <meta name="apple-itunes-app" content="app-id={{ app_store_app_id }}">
+    {% endif %}
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/playtracker-logo.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,5 +57,6 @@
         </p>
     </footer>
     {% block extra_js %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/marketing-store.js') }}" defer></script>
 </body>
 </html>

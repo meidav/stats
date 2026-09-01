@@ -88,7 +88,14 @@ setup_logging()
 
 @app.context_processor
 def _template_globals():
-    return {"current_year": date.today().year}
+    from api.brand import APP_STORE_APP_ID, APP_STORE_ITMS_URL, APP_STORE_URL
+
+    return {
+        "current_year": date.today().year,
+        "app_store_app_id": APP_STORE_APP_ID,
+        "app_store_url": APP_STORE_URL,
+        "app_store_itms_url": APP_STORE_ITMS_URL,
+    }
 
 @app.before_request
 def _redirect_legacy_stats():

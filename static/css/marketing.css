@@ -302,21 +302,56 @@ main {
   filter: grayscale(0.2);
 }
 
+a.mkt-btn {
+  text-decoration: none;
+}
+
 .mkt-stores {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.mkt-stores:not(.is-live) {
   pointer-events: none;
+}
+
+.mkt-store-link {
+  display: inline-flex;
+  line-height: 0;
+  border-radius: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mkt-store-link:hover,
+.mkt-store-link:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(59, 7, 100, 0.18);
+}
+
+.mkt-store-link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 3px;
 }
 
 .mkt-store-badge {
   display: block;
   height: 44px;
   width: auto;
+}
+
+.mkt-stores:not(.is-live) .mkt-store-badge,
+.mkt-store-badge.is-soon {
   filter: grayscale(0.85) contrast(0.92);
   opacity: 0.42;
+}
+
+.mkt-store-soon {
+  display: inline-flex;
+  line-height: 0;
+  pointer-events: none;
 }
 
 .mkt-soon,
@@ -1931,7 +1966,6 @@ a.mkt-profile-pill:hover {
 
 .mkt-standings .mkt-stores {
   margin-top: 18px;
-  pointer-events: none;
 }
 
 .mkt-pair-table .mkt-col-stat {

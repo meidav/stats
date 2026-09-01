@@ -1,18 +1,16 @@
 {% extends "marketing_base.html" %}
+{% from "marketing_store_macros.html" import store_badges with context %}
 {% block title %}PlayTracker{% endblock %}
 
 {% block content %}
 <section class="mkt-hero">
-    <p class="mkt-kicker">Coming soon to your phone</p>
+    <p class="mkt-kicker">Now on the App Store</p>
     <h1 class="mkt-sr-only">PlayTracker</h1>
     <span class="mkt-logo-plate mkt-logo-plate-hero">
         <img class="mkt-hero-logo" src="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}" alt="">
     </span>
     <p class="mkt-lead">Track everything you play. Leagues, standings, and game night in one place, from beach volleyball to chess.</p>
-    <div class="mkt-stores" aria-label="App store listings coming soon">
-        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/app-store.svg') }}" alt="Download on the App Store" width="148" height="44">
-        <img class="mkt-store-badge" src="{{ url_for('static', filename='img/store/google-play.svg') }}" alt="Get it on Google Play" width="155" height="44">
-    </div>
+    {{ store_badges() }}
 </section>
 
 <section class="mkt-shots-wrap" data-shots aria-roledescription="carousel" aria-label="PlayTracker app screenshots">
