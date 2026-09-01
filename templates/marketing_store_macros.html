@@ -7,7 +7,7 @@
     target="_blank"
 >
     <img
-        class="mkt-store-badge"
+        class="mkt-store-badge is-active"
         src="{{ url_for('static', filename='img/store/app-store.svg') }}"
         alt="Download on the App Store"
         width="148"
@@ -32,6 +32,12 @@
 <div class="mkt-stores is-live" aria-label="Download PlayTracker">
     {{ app_store_badge() }}
     {{ google_play_badge_soon() }}
+</div>
+{% endmacro %}
+
+{% macro footer_store_badges() %}
+<div class="mkt-stores is-live mkt-footer-stores" aria-label="Download PlayTracker on the App Store">
+    {{ app_store_badge() }}
 </div>
 {% endmacro %}
 

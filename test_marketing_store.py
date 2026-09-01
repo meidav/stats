@@ -63,8 +63,15 @@ class MarketingStoreTests(unittest.TestCase):
     def test_homepage_google_play_stays_coming_soon(self):
         response = self.client.get("/")
         html = response.get_data(as_text=True)
-        self.assertIn("coming soon", html.lower())
         self.assertIn("is-soon", html)
+        self.assertIn("coming soon", html.lower())
+
+    def test_footer_shows_active_app_store_badge(self):
+        response = self.client.get("/")
+        html = response.get_data(as_text=True)
+        self.assertIn("mkt-footer-stores", html)
+        self.assertIn("is-active", html)
+        self.assertEqual(html.count(self.app_store_url), 2)
 
 
 if __name__ == "__main__":

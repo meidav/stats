@@ -323,6 +323,13 @@ a.mkt-btn {
   line-height: 0;
   border-radius: 8px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  pointer-events: auto;
+}
+
+.mkt-store-link .mkt-store-badge,
+.mkt-store-badge.is-active {
+  opacity: 1;
+  filter: none;
 }
 
 .mkt-store-link:hover,
@@ -344,8 +351,8 @@ a.mkt-btn {
 
 .mkt-stores:not(.is-live) .mkt-store-badge,
 .mkt-store-badge.is-soon {
-  filter: grayscale(0.85) contrast(0.92);
-  opacity: 0.42;
+  filter: grayscale(1);
+  opacity: 0.34;
 }
 
 .mkt-store-soon {
@@ -770,6 +777,10 @@ a.mkt-btn {
   padding: 22px 24px max(40px, env(safe-area-inset-bottom));
   background: var(--mkt-peach);
   border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.mkt-footer-stores {
+  margin: 0 auto 16px;
 }
 
 .mkt-copy {
