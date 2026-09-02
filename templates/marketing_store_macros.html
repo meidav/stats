@@ -1,16 +1,16 @@
 {% macro app_store_badge() %}
 <a
-    class="mkt-store-link"
+    class="mkt-store-link mkt-store-link--apple"
     href="{{ app_store_url }}"
     data-itms-url="{{ app_store_itms_url }}"
     rel="noopener"
     target="_blank"
 >
     <img
-        class="mkt-store-badge is-active"
+        class="mkt-store-badge is-active is-official"
         src="{{ url_for('static', filename='img/store/app-store.svg') }}"
         alt="Download on the App Store"
-        width="160"
+        width="144"
         height="48"
     >
 </a>
