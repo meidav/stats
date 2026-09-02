@@ -309,19 +309,31 @@ a.mkt-btn {
 .mkt-stores {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 12px;
+  align-items: stretch;
+  gap: 10px;
   flex-wrap: wrap;
+  margin-top: 4px;
 }
 
 .mkt-stores:not(.is-live) {
   pointer-events: none;
 }
 
-.mkt-store-link {
+.mkt-store-link,
+.mkt-store-soon {
   display: inline-flex;
+  flex: 0 0 auto;
   line-height: 0;
-  border-radius: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(17, 24, 39, 0.12);
+}
+
+.mkt-store-link {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   pointer-events: auto;
 }
@@ -335,29 +347,30 @@ a.mkt-btn {
 .mkt-store-link:hover,
 .mkt-store-link:focus-visible {
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(59, 7, 100, 0.18);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 8px 18px rgba(17, 24, 39, 0.18);
 }
 
 .mkt-store-link:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline: 2px solid rgba(255, 255, 255, 0.92);
   outline-offset: 3px;
 }
 
 .mkt-store-badge {
   display: block;
-  height: 44px;
-  width: auto;
+  width: 160px;
+  height: 48px;
 }
 
 .mkt-stores:not(.is-live) .mkt-store-badge,
 .mkt-store-badge.is-soon {
-  filter: grayscale(1);
-  opacity: 0.34;
+  filter: grayscale(1) saturate(0.2);
+  opacity: 0.38;
 }
 
 .mkt-store-soon {
-  display: inline-flex;
-  line-height: 0;
   pointer-events: none;
 }
 
@@ -781,6 +794,19 @@ a.mkt-btn {
 
 .mkt-footer-stores {
   margin: 0 auto 16px;
+}
+
+.mkt-footer-stores .mkt-store-link {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(17, 24, 39, 0.1);
+}
+
+.mkt-footer-stores .mkt-store-link:hover,
+.mkt-footer-stores .mkt-store-link:focus-visible {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.14),
+    0 8px 18px rgba(17, 24, 39, 0.16);
 }
 
 .mkt-copy {
