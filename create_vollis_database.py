@@ -34,6 +34,7 @@ def create_vollis_game(conn, game):
     cur = conn.cursor()
     cur.execute(sql, game)
     conn.commit()
+    return cur.lastrowid
 
 """def database_update_vollis_game(conn, game):
     sql = ''' UPDATE vollis_games

@@ -35,6 +35,7 @@ def create_tennis_match(conn, match):
     cur = conn.cursor()
     cur.execute(sql, match)
     conn.commit()
+    return cur.lastrowid
 
 def database_update_tennis_match(conn, match):
     sql = ''' UPDATE tennis_matches

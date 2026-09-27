@@ -116,7 +116,7 @@ def add_tennis_stats(match):
     # match array: [date, winner, loser, winner_score, loser_score, updated_at, set_scores]
     # Rearrange to match new_tennis_match signature: (date, winner, winner_score, loser, loser_score, updated_at, set_scores)
     set_scores = match[6] if len(match) > 6 else None
-    new_tennis_match(match[0], match[1], match[3], match[2], match[4], match[5], set_scores)
+    return new_tennis_match(match[0], match[1], match[3], match[2], match[4], match[5], set_scores)
 
 def enter_data_into_database(matches_data):
     for x in matches_data:
@@ -127,7 +127,7 @@ def new_tennis_match(match_date, winner, winner_score, loser, loser_score, updat
     with conn:
         ensure_tennis_schema(conn)
         match = (match_date, winner, winner_score, loser, loser_score, updated_at, set_scores)
-        create_tennis_match(conn, match)
+        return create_tennis_match(conn, match)
 
 def find_tennis_match(match_id):
     cur = set_cur()

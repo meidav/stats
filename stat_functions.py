@@ -14,7 +14,7 @@ def add_game_stats(game):
 	full_game.append(game[6])
 	full_game.append(game[7])
 	all_games.append(full_game)
-	enter_data_into_database(all_games)
+	return new_game(full_game[0], full_game[1], full_game[2], full_game[5], full_game[3], full_game[4], full_game[6], full_game[7])
 
 def update_game(game_id, game_date, winner1, winner2, winner_score, loser1, loser2, loser_score, updated_at, game_id2):
 	database = r'stats.db'

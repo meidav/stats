@@ -117,6 +117,19 @@ def create_leagues_tables():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_sports_league_id ON sports(league_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_league_games_sport_id ON league_games(sport_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_league_games_league_id ON league_games(league_id)")
+        try:
+            cursor.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_league_games_legacy_link
+                ON league_games (
+                    sport_id,
+                    json_extract(metadata, '$.legacy_source'),
+                    json_extract(metadata, '$.legacy_id')
+                )
+                """
+            )
+        except Exception:
+            pass
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS sport_player_profiles (

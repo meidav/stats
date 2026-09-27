@@ -76,7 +76,7 @@ def set_cur():
     return cur  
 
 def add_vollis_stats(game):
-    new_vollis_game(game[0], game[1], game[3], game[2], game[4], game[5])
+    return new_vollis_game(game[0], game[1], game[3], game[2], game[4], game[5])
 
 def enter_data_into_database(games_data):
     for x in games_data:
@@ -87,7 +87,7 @@ def new_vollis_game(game_date, winner, winner_score, loser, loser_score, updated
     conn = create_connection(database)
     with conn: 
         game = (game_date, winner, winner_score, loser, loser_score, updated_at);
-        create_vollis_game(conn, game)
+        return create_vollis_game(conn, game)
 
 def find_vollis_game(game_id):
     cur = set_cur()

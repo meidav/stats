@@ -448,3 +448,180 @@ def sync_arbel_leagues():
     if summary:
         logger.info("Arbel legacy mirror: %s", summary)
     return summary
+
+
+def _spec_for_source(source):
+    for spec in MIRRORS:
+        if spec["source"] == source:
+            return spec
+    return None
+
+
+def _league_sport(spec):
+    from api.league_db import get_league_by_slug, get_sports_for_league
+
+    league = get_league_by_slug(spec["slug"])
+    if not league:
+        return None
+    sports = [
+        sport
+        for sport in (get_sports_for_league(league["id"]) or [])
+        if sport.get("template_id") == spec["template_id"]
+    ]
+    if not sports:
+        return None
+    return league, sports[0]
+
+
+def _linked_game_id(sport_id, source, legacy_id):
+    row = db_manager.execute_query(
+        """
+        SELECT id FROM league_games
+        WHERE sport_id = ?
+          AND json_extract(metadata, '$.legacy_source') = ?
+          AND json_extract(metadata, '$.legacy_id') = ?
+        LIMIT 1
+        """,
+        (sport_id, source, int(legacy_id)),
+        fetch_one=True,
+    )
+    if not row:
+        return None
+    return row["id"]
+
+
+def _payload_from_legacy_row(spec, row):
+    kind = spec["kind"]
+    if kind == "doubles":
+        return {
+            "winners": [row["winner1"], row["winner2"]],
+            "losers": [row["loser1"], row["loser2"]],
+            "winner_score": row["winner_score"],
+            "loser_score": row["loser_score"],
+            "game_date": row["game_date"],
+            "extra_meta": {},
+        }
+    date_key = "match_date" if kind == "tennis" else "game_date"
+    extra = {}
+    if kind == "tennis":
+        text = row["set_scores"] if "set_scores" in row.keys() else None
+        from api.legacy_league_import import parse_tennis_set_scores
+
+        pairs = parse_tennis_set_scores(text)
+        if pairs:
+            extra = {
+                "format": 1 if len(pairs) <= 1 else 3 if len(pairs) <= 3 else 5,
+                "sets": pairs,
+                "set_scores": text,
+            }
+    return {
+        "winners": [row["winner"]],
+        "losers": [row["loser"]],
+        "winner_score": row["winner_score"],
+        "loser_score": row["loser_score"],
+        "game_date": row[date_key],
+        "extra_meta": extra,
+    }
+
+
+def publish_legacy_game(source, legacy_id):
+    """Copy one /arbel row into the matching PlayTracker league."""
+    spec = _spec_for_source(source)
+    if not spec or legacy_id is None:
+        return None
+    target = _league_sport(spec)
+    if not target:
+        return None
+    league, sport = target
+    try:
+        with db_manager.get_connection() as conn:
+            if not _table_exists(conn, spec["table"]):
+                return None
+            row = conn.execute(
+                f"SELECT * FROM {spec['table']} WHERE id = ?",
+                (int(legacy_id),),
+            ).fetchone()
+            if not row:
+                return None
+            payload = _payload_from_legacy_row(spec, row)
+        meta = {"legacy_id": int(legacy_id), "legacy_source": source}
+        meta.update(payload.get("extra_meta") or {})
+        from api.game_db import add_game, update_game
+
+        existing = _linked_game_id(sport["id"], source, legacy_id)
+        fields = dict(
+            winners=payload["winners"],
+            losers=payload["losers"],
+            winner_score=payload["winner_score"],
+            loser_score=payload["loser_score"],
+            game_date=str(payload["game_date"]),
+            metadata=meta,
+        )
+        if existing:
+            return update_game(existing, **fields)
+        return add_game(sport_id=sport["id"], entered_by=league.get("owner_id"), **fields)
+    except Exception:
+        logger.exception("Could not publish %s %s to PlayTracker", source, legacy_id)
+        return None
+
+
+def unpublish_legacy_game(source, legacy_id):
+    """Remove the PlayTracker game linked to an /arbel row."""
+    spec = _spec_for_source(source)
+    if not spec or legacy_id is None:
+        return False
+    target = _league_sport(spec)
+    if not target:
+        return False
+    _, sport = target
+    try:
+        existing = _linked_game_id(sport["id"], source, legacy_id)
+        if not existing:
+            return False
+        from api.game_db import delete_game
+
+        return delete_game(existing)
+    except Exception:
+        logger.exception("Could not remove PlayTracker game for %s %s", source, legacy_id)
+        return False
+
+
+def sync_legacy_into_leagues():
+    """Copy /arbel rows that are not yet linked into the three PlayTracker leagues."""
+    summary = []
+    for spec in MIRRORS:
+        target = _league_sport(spec)
+        if not target:
+            continue
+        _, sport = target
+        with db_manager.get_connection() as conn:
+            if not _table_exists(conn, spec["table"]):
+                continue
+            legacy_ids = [
+                int(row[0])
+                for row in conn.execute(f"SELECT id FROM {spec['table']} ORDER BY id").fetchall()
+            ]
+        linked_rows = db_manager.execute_query(
+            """
+            SELECT json_extract(metadata, '$.legacy_id') AS legacy_id
+            FROM league_games
+            WHERE sport_id = ?
+              AND json_extract(metadata, '$.legacy_source') = ?
+            """,
+            (sport["id"], spec["source"]),
+        ) or []
+        linked = set()
+        for row in linked_rows:
+            value = row["legacy_id"]
+            if value is not None:
+                linked.add(int(value))
+        copied = 0
+        for legacy_id in legacy_ids:
+            if legacy_id in linked:
+                continue
+            if publish_legacy_game(spec["source"], legacy_id):
+                copied += 1
+        summary.append({"slug": spec["slug"], "copied": copied, "rows": len(legacy_ids)})
+    if summary:
+        logger.info("Arbel legacy publish: %s", summary)
+    return summary

@@ -78,8 +78,9 @@ except Exception as exc:
     logging.getLogger(__name__).error("Admin console skipped: %s", exc)
 
 try:
-    from api.legacy_mirror import sync_arbel_leagues
+    from api.legacy_mirror import sync_arbel_leagues, sync_legacy_into_leagues
     sync_arbel_leagues()
+    sync_legacy_into_leagues()
 except Exception as exc:
     logging.getLogger(__name__).error("Arbel legacy mirror skipped: %s", exc)
 
@@ -120,6 +121,28 @@ def get_local_time():
     utc_now = datetime.now()
     local_time = utc_now + timedelta(hours=TIME_OFFSET)
     return local_time
+
+
+def _publish_legacy(source, legacy_id):
+    if not legacy_id:
+        return
+    try:
+        from api.legacy_mirror import publish_legacy_game
+        publish_legacy_game(source, legacy_id)
+    except Exception as exc:
+        logging.getLogger(__name__).error(
+            "Could not publish %s %s to PlayTracker: %s", source, legacy_id, exc
+        )
+
+
+def _unpublish_legacy(source, legacy_id):
+    try:
+        from api.legacy_mirror import unpublish_legacy_game
+        unpublish_legacy_game(source, legacy_id)
+    except Exception as exc:
+        logging.getLogger(__name__).error(
+            "Could not remove PlayTracker game for %s %s: %s", source, legacy_id, exc
+        )
 
 def get_min_delta():
     # this delta function represents the number of games which will be divided by to determine the min games for rare games calculations
@@ -861,7 +884,8 @@ def add_game():
                 date_time_played = my_time
             
             # Save the game stats only if validation passed
-            add_game_stats([date_time_played, winner1, winner2, loser1, loser2, winner_score, loser_score, my_time])
+            legacy_id = add_game_stats([date_time_played, winner1, winner2, loser1, loser2, winner_score, loser_score, my_time])
+            _publish_legacy("games", legacy_id)
 
             #flash(f'Game added! date/time in db: "{my_time}"', 'success')  # Flash success message with custom category
             flash(f'Game added!', 'success')
@@ -972,6 +996,7 @@ def update(id):
 
             try:
                 update_game(game_id, date_time_played, winner1, winner2, winner_score, loser1, loser2, loser_score, my_time, game_id)
+                _publish_legacy("games", game_id)
             except Exception as e:
                 flash(f'Error updating game: {str(e)}')
                 return redirect(url_for('edit_games'))
@@ -988,6 +1013,7 @@ def delete_game(id):
     game_id = id
     if request.method == 'POST':
         remove_game(game_id)
+        _unpublish_legacy("games", game_id)
         flash(f'Game deleted!', 'danger')
         return redirect(url_for('edit_games'))
 
@@ -1087,7 +1113,8 @@ def add_vollis_game():
             # Use current date/time for both
             date_time_played = my_time
         
-        add_vollis_stats([date_time_played, winner, loser, winner_score, loser_score, my_time])
+        legacy_id = add_vollis_stats([date_time_played, winner, loser, winner_score, loser_score, my_time])
+        _publish_legacy("vollis_games", legacy_id)
         flash(f'Game added!', 'success')
         return redirect(url_for('add_vollis_game'))
 
@@ -1159,6 +1186,7 @@ def update_vollis_game(id):
                 
             my_time = get_local_time()
             edit_vollis_game(game_id, date_time_played, winner, winner_score, loser, loser_score, my_time, game_id)
+            _publish_legacy("vollis_games", game_id)
             flash(f'Game updated!', 'success')
             return redirect(url_for('edit_vollis_games'))
 
@@ -1173,6 +1201,7 @@ def delete_vollis_game(id):
     game_id = id
     if request.method == 'POST':
         remove_vollis_game(game_id)
+        _unpublish_legacy("vollis_games", game_id)
         flash(f'Game deleted!', 'danger')
         return redirect(url_for('edit_vollis_games'))
 
@@ -1344,7 +1373,8 @@ def add_tennis_match():
         print(f"DEBUG: Sets = {sets}")
         
         try:
-            add_tennis_stats([date_time_played, winner, loser, total_winner_games, total_loser_games, my_time, set_scores_text])
+            legacy_id = add_tennis_stats([date_time_played, winner, loser, total_winner_games, total_loser_games, my_time, set_scores_text])
+            _publish_legacy("tennis_matches", legacy_id)
         except Exception as exc:
             flash(f'Could not save match: {exc}', 'danger')
             return render_template('add_tennis_match.html', year=year, players=players, todays_stats=t_stats,
@@ -1478,6 +1508,7 @@ def update_tennis_match(id):
         # Update the match with set scores
         try:
             edit_tennis_match(match_id, date_time_played, winner, total_winner_games, loser, total_loser_games, my_time, set_scores_text, match_id)
+            _publish_legacy("tennis_matches", match_id)
             flash(f'Match updated: {set_scores_text}', 'success')
             return redirect(url_for('edit_tennis_matches'))
         except Exception as e:
@@ -1496,6 +1527,7 @@ def delete_tennis_match(id):
     match = find_tennis_match(match_id)
     if request.method == 'POST':
         remove_tennis_match(match_id)
+        _unpublish_legacy("tennis_matches", match_id)
         return redirect(url_for('edit_tennis_matches'))
  
     return render_template('delete_tennis_match.html', match=match)

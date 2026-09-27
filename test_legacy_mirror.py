@@ -223,6 +223,39 @@ class LegacyMirrorTests(unittest.TestCase):
         self.assertEqual(tennis_row[2], "Kevin Gregan")
         self.assertEqual(vollis_row, (7, 2))
 
+    def test_legacy_add_edit_delete_updates_playtracker(self):
+        from api.legacy_mirror import publish_legacy_game, unpublish_legacy_game
+
+        conn = sqlite3.connect(self.db_path)
+        conn.execute(
+            """
+            INSERT INTO games (
+                game_date, winner1, winner2, winner_score, loser1, loser2, loser_score, updated_at
+            ) VALUES ('2026-09-24 08:48:00', 'Bojan Nisavic', 'Luis Sandoval', 21, 'Arbel Meidav', 'Craig Mattison', 15, '2026-09-24 08:48:00')
+            """
+        )
+        legacy_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+        conn.commit()
+        conn.close()
+
+        game = publish_legacy_game("games", legacy_id)
+        self.assertEqual(game["winners"], ["Bojan Nisavic", "Luis Sandoval"])
+        self.assertEqual(game["loser_score"], 15)
+        self.assertEqual(game["metadata"]["legacy_id"], legacy_id)
+        self.assertEqual(self._count("league_games"), 1)
+
+        conn = sqlite3.connect(self.db_path)
+        conn.execute("UPDATE games SET loser_score = 17 WHERE id = ?", (legacy_id,))
+        conn.commit()
+        conn.close()
+        updated = publish_legacy_game("games", legacy_id)
+        self.assertEqual(updated["id"], game["id"])
+        self.assertEqual(updated["loser_score"], 17)
+        self.assertEqual(self._count("league_games"), 1)
+
+        self.assertTrue(unpublish_legacy_game("games", legacy_id))
+        self.assertEqual(self._count("league_games"), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
