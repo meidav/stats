@@ -142,6 +142,10 @@ def add_game(sport_id, winners, losers, winner_score, loser_score, game_date=Non
             (sport["league_id"],),
         )
 
+    game = get_game_by_id(game_id)
+    from api.legacy_mirror import mirror_game
+
+    mirror_game(game)
     return get_game_by_id(game_id)
 
 
@@ -208,6 +212,25 @@ def get_sport_years(sport_id):
     return [{"year": row["year"], "games": row["games"]} for row in rows or []]
 
 
+def scores_for_template(template_id):
+    """Winner/loser scores for every game of this league type, newest first."""
+    if not template_id:
+        return []
+    rows = db_manager.execute_query(
+        """
+        SELECT g.winner_score AS winner_score, g.loser_score AS loser_score
+        FROM league_games g
+        INNER JOIN sports s ON s.id = g.sport_id
+        WHERE s.template_id = ?
+          AND g.winner_score IS NOT NULL
+          AND g.loser_score IS NOT NULL
+        ORDER BY g.game_date DESC
+        """,
+        (template_id,),
+    ) or []
+    return [dict(row) for row in rows]
+
+
 def get_games_for_sport(sport_id, year=None, limit=100, offset=0):
     where_sql, params = _sport_games_where(sport_id, year=year)
     sql = f"SELECT * {where_sql} ORDER BY game_date DESC LIMIT ? OFFSET ?"
@@ -237,6 +260,13 @@ def update_game(game_id, **fields):
 
     game_date = _normalize_game_date(fields.get("game_date", game["game_date"])) or game["game_date"]
     metadata = fields.get("metadata", game["metadata"])
+    if isinstance(metadata, dict):
+        existing = game.get("metadata") or {}
+        if existing.get("legacy_id") is not None and "legacy_id" not in metadata:
+            metadata = dict(metadata)
+            metadata["legacy_id"] = existing["legacy_id"]
+            if existing.get("legacy_source") and "legacy_source" not in metadata:
+                metadata["legacy_source"] = existing["legacy_source"]
     metadata_json = json.dumps(metadata or {})
 
     with db_manager.get_connection() as conn:
@@ -260,6 +290,10 @@ def update_game(game_id, **fields):
             ),
         )
 
+    game = get_game_by_id(game_id)
+    from api.legacy_mirror import mirror_game
+
+    mirror_game(game)
     return get_game_by_id(game_id)
 
 
@@ -268,6 +302,9 @@ def delete_game(game_id):
     if not game:
         return False
 
+    from api.legacy_mirror import mirror_delete
+
+    mirror_delete(game)
     db_manager.execute_query(
         "DELETE FROM league_games WHERE id = ?",
         (game_id,),

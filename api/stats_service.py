@@ -1,7 +1,7 @@
 from collections import Counter, defaultdict
 from datetime import date
 
-from api.game_db import get_games_for_sport, get_sport_years
+from api.game_db import get_games_for_sport, get_sport_years, scores_for_template
 from api.league_db import get_sport_by_id
 from api.rank_utils import pair_rank_key, player_rank_in_rows, with_ranks
 from api.sport_templates import get_template, typical_win_score_for
@@ -211,27 +211,47 @@ def compute_player_stats(sport_id, player_name, year=None):
     }
 
 
+SCORE_HINT_LIMIT = 8
+
+
+def _ranked_scores(values, limit=SCORE_HINT_LIMIT):
+    """Most common scores first. Equal counts keep the more recent score (earlier in values)."""
+    counts = Counter()
+    first_seen = {}
+    for index, value in enumerate(values):
+        if value is None:
+            continue
+        try:
+            score = int(value)
+        except (TypeError, ValueError):
+            continue
+        counts[score] += 1
+        if score not in first_seen:
+            first_seen[score] = index
+    ordered = sorted(counts, key=lambda score: (-counts[score], first_seen[score]))
+    return ordered[:limit]
+
+
 def compute_score_hints(sport_id):
     sport = get_sport_by_id(sport_id)
     if not sport:
         raise ValueError("sport not found")
 
-    template = get_template(sport.get("template_id")) or {}
-    games = get_games_for_sport(sport_id, limit=10000)
-    win_scores = [game["winner_score"] for game in games if game.get("winner_score") is not None]
-    lose_scores = [game["loser_score"] for game in games if game.get("loser_score") is not None]
-    typical = typical_win_score_for(sport.get("template_id"))
-    winner_score = Counter(win_scores).most_common(1)[0][0] if win_scores else typical
-
-    loser_scores = []
-    if lose_scores:
-        avg = int(round(sum(lose_scores) / len(lose_scores)))
-        left = avg + 1
-        right = max(avg - 1, 0)
-        loser_scores = [left] if left == right else [left, right]
+    template_id = sport.get("template_id")
+    template = get_template(template_id) or {}
+    rows = scores_for_template(template_id)
+    if not rows:
+        rows = get_games_for_sport(sport_id, limit=10000)
+    winner_scores = _ranked_scores(row.get("winner_score") for row in rows)
+    loser_scores = _ranked_scores(row.get("loser_score") for row in rows)
+    if not winner_scores:
+        typical = typical_win_score_for(template_id)
+        if typical is not None:
+            winner_scores = [typical]
 
     return {
-        "winner_score": winner_score,
+        "winner_score": winner_scores[0] if winner_scores else None,
+        "winner_scores": winner_scores,
         "loser_scores": loser_scores,
         "score_mode": template.get("score_mode", "points"),
     }

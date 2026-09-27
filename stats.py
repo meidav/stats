@@ -77,6 +77,12 @@ try:
 except Exception as exc:
     logging.getLogger(__name__).error("Admin console skipped: %s", exc)
 
+try:
+    from api.legacy_mirror import sync_arbel_leagues
+    sync_arbel_leagues()
+except Exception as exc:
+    logging.getLogger(__name__).error("Arbel legacy mirror skipped: %s", exc)
+
 # Set up Flask logging to console
 def setup_logging():
     handler = logging.StreamHandler()  # This will log to the console

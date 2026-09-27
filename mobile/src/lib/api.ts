@@ -202,7 +202,12 @@ export const api = {
     request<{ players: string[] }>('/players', { token }),
 
   getScoreHints: (sportId: number, token?: string | null) =>
-    request<{ winner_score: number | null; loser_scores: number[]; score_mode: string }>(
+    request<{
+      winner_score: number | null;
+      winner_scores?: number[];
+      loser_scores: number[];
+      score_mode: string;
+    }>(
       `/sports/${sportId}/score-hints`,
       { token },
     ),
@@ -235,8 +240,8 @@ export const api = {
     payload: {
       winners: string[];
       losers: string[];
-      winner_score?: number;
-      loser_score?: number;
+      winner_score?: number | null;
+      loser_score?: number | null;
       game_date?: string;
       metadata?: Record<string, unknown>;
     },
@@ -253,8 +258,8 @@ export const api = {
     payload: {
       winners: string[];
       losers: string[];
-      winner_score?: number;
-      loser_score?: number;
+      winner_score?: number | null;
+      loser_score?: number | null;
       game_date?: string;
       metadata?: Record<string, unknown>;
     },

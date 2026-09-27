@@ -94,7 +94,11 @@ export function EditPlayerScreen({ route, navigation }: Props) {
             params: { ...previous.params, ...params },
           };
         } else {
-          routes.push({ name: 'PlayerProfile', params });
+          routes.push({
+            key: `PlayerProfile-${params.sportId}-${params.playerName}`,
+            name: 'PlayerProfile',
+            params,
+          });
         }
         return CommonActions.reset({
           ...state,

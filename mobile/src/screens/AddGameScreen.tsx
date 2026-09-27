@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Keyboard,
   ScrollView,
   StyleSheet,
   Text,
@@ -31,6 +32,7 @@ import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { loadCachedLeagues } from '../lib/leagueCache';
 import { loadCachedPlayers, rememberPlayers } from '../lib/playerCache';
+import { chipCapacity, loserScoreChips, rankedScores, winnerScoreChips } from '../lib/scoreChips';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddGame'>;
@@ -108,14 +110,18 @@ export function AddGameScreen({ route, navigation }: Props) {
   const [playedAt, setPlayedAt] = useState(() => parseLocalDateTime(gameDate));
   const [players, setPlayers] = useState<string[]>([]);
   const [recentPlayers, setRecentPlayers] = useState<string[]>([]);
-  const [winnerHint, setWinnerHint] = useState<number | null>(null);
+  const [winnerHints, setWinnerHints] = useState<number[]>([]);
   const [loserHints, setLoserHints] = useState<number[]>([]);
-  const [focusField, setFocusField] = useState<FocusField>(null);
+  const [chipLimit, setChipLimit] = useState(5);
+  const [playedOpen, setPlayedOpen] = useState(false);
+  const [focusField, setFocusField] = useState<FocusField>(
+    editing ? null : { side: 'winner', index: 0 },
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const nameRefs = useRef<Record<string, TextInput | null>>({});
   const winnerScoreRef = useRef<TextInput>(null);
-  const loserScoreRef = useRef<TextInput>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
   function nameKey(side: 'winner' | 'loser', index: number) {
     return `${side}-${index}`;
@@ -156,7 +162,14 @@ export function AddGameScreen({ route, navigation }: Props) {
       const leagues = await loadCachedLeagues();
       const [remote, sportGames, ...sportStats] = await Promise.all([
         api.getMyPlayers(token).catch(() => ({ players: [] as string[] })),
-        api.getSportGames(sportId, token).catch(() => ({ games: [] as Array<{ winners: string[]; losers: string[] }> })),
+        api.getSportGames(sportId, token, { limit: 200 }).catch(() => ({
+          games: [] as Array<{
+            winners: string[];
+            losers: string[];
+            winner_score?: number | null;
+            loser_score?: number | null;
+          }>,
+        })),
         ...leagues.flatMap((league) =>
           (league.sports || []).map((sport) =>
             api.getSportStats(sport.id, token, { minGames: 1 }).catch(() => ({ stats: [] as Array<{ player: string }> })),
@@ -177,13 +190,28 @@ export function AddGameScreen({ route, navigation }: Props) {
       setPlayers(merged);
 
       if (!winLoss) {
+        const localWinners = rankedScores((sportGames.games || []).map((game) => game.winner_score));
+        const localLosers = rankedScores((sportGames.games || []).map((game) => game.loser_score));
         try {
           const hints = await api.getScoreHints(sportId, token);
           if (!active) return;
-          setWinnerHint(hints.winner_score);
-          setLoserHints(hints.loser_scores ?? []);
+          if (hints.winner_scores?.length) {
+            setWinnerHints(hints.winner_scores);
+            setLoserHints(hints.loser_scores?.length ? hints.loser_scores : localLosers);
+          } else {
+            setWinnerHints(
+              localWinners.length
+                ? localWinners
+                : hints.winner_score != null
+                  ? [hints.winner_score]
+                  : [],
+            );
+            setLoserHints(localLosers.length ? localLosers : hints.loser_scores ?? []);
+          }
         } catch {
-          // Score chips are optional.
+          if (!active) return;
+          setWinnerHints(localWinners);
+          setLoserHints(localLosers);
         }
       }
     }
@@ -192,6 +220,35 @@ export function AddGameScreen({ route, navigation }: Props) {
       active = false;
     };
   }, [token, sportId, winLoss]);
+
+  useEffect(() => {
+    if (editing) return;
+    const timer = setTimeout(() => {
+      nameRefs.current[nameKey('winner', 0)]?.focus();
+    }, 280);
+    return () => clearTimeout(timer);
+  }, [editing]);
+
+  useEffect(() => {
+    if (!playedOpen) return;
+    scrollRef.current?.scrollToEnd({ animated: true });
+    const timer = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 320);
+    return () => clearTimeout(timer);
+  }, [playedOpen]);
+
+  const winnerChips = useMemo(
+    () => winnerScoreChips(winnerHints, templateId, chipLimit),
+    [winnerHints, templateId, chipLimit],
+  );
+  const loserChips = useMemo(
+    () => loserScoreChips(loserHints, templateId, winnerScore, chipLimit),
+    [loserHints, templateId, winnerScore, chipLimit],
+  );
+
+  function onChipRowLayout(width: number) {
+    const next = chipCapacity(width);
+    setChipLimit((prev) => (prev === next ? prev : next));
+  }
 
   const winnerLabels = useMemo(
     () =>
@@ -337,6 +394,7 @@ export function AddGameScreen({ route, navigation }: Props) {
           placeholderTextColor={colors.textMuted}
           autoCapitalize="words"
           autoCorrect={false}
+          autoFocus={!editing && side === 'winner' && index === 0}
           value={value}
           onFocus={() => setFocusField({ side, index })}
           onChangeText={(next) => updateName(side, index, next)}
@@ -401,11 +459,13 @@ export function AddGameScreen({ route, navigation }: Props) {
         onBack={() => navigation.goBack()}
       />
       <ScrollView
+        ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, playedOpen && styles.contentPlayedOpen]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
         automaticallyAdjustKeyboardInsets
+        scrollEnabled={!playedOpen}
       >
         <SportTypePill
           name={sportName}
@@ -482,11 +542,22 @@ export function AddGameScreen({ route, navigation }: Props) {
                 placeholder={optionalScores ? 'Optional' : undefined}
                 placeholderTextColor={colors.textMuted}
               />
-              {winnerHint != null ? (
-                <View style={styles.chipRow}>
-                  <TouchableOpacity style={styles.scoreChip} onPress={() => setWinnerScore(String(winnerHint))}>
-                    <Text style={styles.scoreChipText}>{winnerHint}</Text>
-                  </TouchableOpacity>
+              {winnerChips.length ? (
+                <View
+                  style={styles.chipRow}
+                  onLayout={(event) => onChipRowLayout(event.nativeEvent.layout.width)}
+                >
+                  {winnerChips.map((score) => (
+                    <TouchableOpacity
+                      key={score}
+                      style={[styles.scoreChip, winnerChips.length >= 4 && styles.scoreChipFill]}
+                      onPress={() => setWinnerScore(String(score))}
+                    >
+                      <Text style={styles.scoreChipText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
+                        {score}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               ) : null}
             </View>
@@ -504,15 +575,20 @@ export function AddGameScreen({ route, navigation }: Props) {
                 placeholder={optionalScores ? 'Optional' : undefined}
                 placeholderTextColor={colors.textMuted}
               />
-              {loserHints.length ? (
-                <View style={styles.chipRow}>
-                  {loserHints.map((score) => (
+              {loserChips.length ? (
+                <View
+                  style={styles.chipRow}
+                  onLayout={(event) => onChipRowLayout(event.nativeEvent.layout.width)}
+                >
+                  {loserChips.map((score) => (
                     <TouchableOpacity
                       key={score}
-                      style={styles.scoreChip}
+                      style={[styles.scoreChip, loserChips.length >= 4 && styles.scoreChipFill]}
                       onPress={() => setLoserScore(String(score))}
                     >
-                      <Text style={styles.scoreChipText}>{score}</Text>
+                      <Text style={styles.scoreChipText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
+                        {score}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -525,7 +601,16 @@ export function AddGameScreen({ route, navigation }: Props) {
         ) : null}
 
         <View style={styles.playedWrap}>
-          <DateTimeField value={playedAt} onChange={setPlayedAt} />
+          <DateTimeField
+            value={playedAt}
+            onChange={setPlayedAt}
+            onOpenChange={(open) => {
+              setPlayedOpen(open);
+              if (!open) return;
+              Keyboard.dismiss();
+              setFocusField(null);
+            }}
+          />
         </View>
       </ScrollView>
     </ScreenScaffold>
@@ -539,6 +624,9 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xl,
+  },
+  contentPlayedOpen: {
+    paddingBottom: spacing.xl + spacing.md,
   },
   footer: {
     paddingHorizontal: spacing.lg,
@@ -648,19 +736,27 @@ const styles = StyleSheet.create({
   },
   chipRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: 4,
     marginTop: spacing.sm,
   },
   scoreChip: {
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'rgba(37, 99, 235, 0.12)',
     borderWidth: 1,
     borderColor: 'rgba(37, 99, 235, 0.28)',
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     paddingVertical: 6,
+  },
+  scoreChipFill: {
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 2,
   },
   scoreChipText: {
     color: colors.primary,
     fontWeight: '700',
+    fontSize: 13,
   },
 });

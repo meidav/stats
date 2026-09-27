@@ -36,7 +36,7 @@ normally upload a separate icon file in ASC for the listing icon.
 Screenshots: drop into static/img/promo/ when ready, then upload
 to ASC for the 6.7" (and optional second size) slots.
 
-Builds (1.1.4, build 14)
+Builds (1.2.0, build 15)
 ------------------------
 From mobile/:
 

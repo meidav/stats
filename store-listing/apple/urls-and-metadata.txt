@@ -20,7 +20,7 @@ Copyright
 
 Version
 -------
-1.1.4 (build 14)
+1.2.0 (build 15)
 
 Contact email (App Review / support)
 ------------------------------------

@@ -35,8 +35,26 @@ ROADMAP_CATEGORIES = {
 VALID_CATEGORIES = set(ROADMAP_CATEGORIES)
 VALID_EFFORTS = {"S", "M", "L"}
 
-# Seeded once into SQLite on first visit.
+# Seeded into SQLite. Existing boards only receive cards that are not already there.
 SEED_ITEMS = [
+    {
+        "id": "fast-add-game",
+        "title": "Faster add game",
+        "status": "now",
+        "category": "sports",
+        "effort": "M",
+        "premium": False,
+        "summary": "Make logging a game as quick as possible: focus the first winner, recent players with the keyboard up, and score chips filled with the most common scores for that league type.",
+        "details": [
+            "Winner 1 (or Winner) focused on open, with recent people and the keyboard",
+            "Score chips fill the row (about 4-5); most common scores left to right",
+            "Doubles volleyball: winner chip always starts at 21",
+            "If the winner score is over 21, the left loser chip becomes that score minus 2",
+            "Date and time picker scrolls into view",
+        ],
+        "target": "1.2.0",
+        "sort_order": 0,
+    },
     {
         "id": "android-parity",
         "title": "Android parity",
@@ -317,30 +335,53 @@ def seed_roadmap_if_empty():
     if count and int(dict(count)["n"]) > 0:
         return
     for item in SEED_ITEMS:
-        db_manager.execute_query(
-            """
-            INSERT INTO roadmap_items (
-                id, title, status, category, effort, premium, summary, details_json, target, sort_order
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                item["id"],
-                item["title"],
-                item["status"],
-                item["category"],
-                item.get("effort") or None,
-                1 if item.get("premium") else 0,
-                item.get("summary") or None,
-                json.dumps(item.get("details") or []),
-                item.get("target") or None,
-                int(item.get("sort_order") or 0),
-            ),
-            fetch_all=False,
-        )
+        _insert_seed_item(item, int(item.get("sort_order") or 0))
+
+
+def ensure_missing_seed_items():
+    """Insert seed cards that are not on the board yet, without moving existing cards."""
+    ensure_roadmap_schema()
+    for item in SEED_ITEMS:
+        if get_roadmap_item(item["id"]):
+            continue
+        sort_order = int(item.get("sort_order") or 0)
+        if item["id"] == "fast-add-game":
+            row = db_manager.execute_query(
+                "SELECT COALESCE(MIN(sort_order), 0) AS m FROM roadmap_items WHERE status = ?",
+                (item["status"],),
+                fetch_one=True,
+            )
+            current_min = int(dict(row)["m"]) if row else 0
+            sort_order = current_min - 1
+        _insert_seed_item(item, sort_order)
+
+
+def _insert_seed_item(item, sort_order):
+    db_manager.execute_query(
+        """
+        INSERT INTO roadmap_items (
+            id, title, status, category, effort, premium, summary, details_json, target, sort_order
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            item["id"],
+            item["title"],
+            item["status"],
+            item["category"],
+            item.get("effort") or None,
+            1 if item.get("premium") else 0,
+            item.get("summary") or None,
+            json.dumps(item.get("details") or []),
+            item.get("target") or None,
+            int(sort_order),
+        ),
+        fetch_all=False,
+    )
 
 
 def list_roadmap_items():
     seed_roadmap_if_empty()
+    ensure_missing_seed_items()
     rows = db_manager.execute_query(
         "SELECT * FROM roadmap_items ORDER BY status ASC, sort_order ASC, created_at ASC",
         fetch_all=True,

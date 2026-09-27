@@ -34,7 +34,7 @@ export function appBuild(): string {
   return String(bundled?.ios?.buildNumber || Constants.expoConfig?.ios?.buildNumber || '');
 }
 
-/** e.g. "Version 1.1.4 (14)" for Account / support. */
+/** e.g. "Version 1.2.0 (15)" for Account / support. */
 export function appVersionLabel(): string {
   const version = appVersion();
   const build = appBuild();

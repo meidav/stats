@@ -10,16 +10,20 @@ import { formatPlayedLabel } from '../lib/datetime';
 type Props = {
   value: Date;
   onChange: (next: Date) => void;
+  onOpenChange?: (open: boolean) => void;
 };
 
-export function DateTimeField({ value, onChange }: Props) {
+export function DateTimeField({ value, onChange, onOpenChange }: Props) {
   const [iosOpen, setIosOpen] = useState(false);
   const [androidMode, setAndroidMode] = useState<'date' | 'time' | null>(null);
 
   function apply(event: DateTimePickerEvent, next?: Date) {
     if (Platform.OS === 'android') {
       setAndroidMode(null);
-      if (event.type !== 'set' || !next) return;
+      if (event.type !== 'set' || !next) {
+        onOpenChange?.(false);
+        return;
+      }
       if (androidMode === 'date') {
         const merged = new Date(value);
         merged.setFullYear(next.getFullYear(), next.getMonth(), next.getDate());
@@ -30,6 +34,7 @@ export function DateTimeField({ value, onChange }: Props) {
       const merged = new Date(value);
       merged.setHours(next.getHours(), next.getMinutes(), 0, 0);
       onChange(merged);
+      onOpenChange?.(false);
       return;
     }
     if (next) onChange(next);
@@ -38,9 +43,14 @@ export function DateTimeField({ value, onChange }: Props) {
   function openPicker() {
     if (Platform.OS === 'android') {
       setAndroidMode('date');
+      onOpenChange?.(true);
       return;
     }
-    setIosOpen((open) => !open);
+    setIosOpen((open) => {
+      const next = !open;
+      onOpenChange?.(next);
+      return next;
+    });
   }
 
   return (

@@ -14,7 +14,7 @@ type Props = {
 export function SportTypePill({ name, templateId, category = 'custom', style }: Props) {
   return (
     <View style={[styles.pill, style]}>
-      <TemplateGlyph template={{ id: templateId, category }} size={18} />
+      <TemplateGlyph template={{ id: templateId || 'custom', category }} size={18} />
       <Text style={styles.text} numberOfLines={1}>
         {name}
       </Text>
