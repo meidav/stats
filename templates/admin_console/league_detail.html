@@ -8,11 +8,16 @@
 
     <header class="ac-page-head">
         <div>
-            <p class="ac-kicker">Read-only standings</p>
+            <p class="ac-kicker">Admin league view</p>
             <h1>{{ league.name }}</h1>
+            {% if league.description %}
+            <p class="ac-page-meta">{{ league.description }}</p>
+            {% endif %}
         </div>
         <span class="ac-vis ac-vis-{{ league.visibility }}">{{ league.visibility }}</span>
     </header>
+
+    <p class="ac-notice">Secured admin view. Private and unlisted leagues stay inside this console and are not opened by the public marketing pages.</p>
 
     <dl class="ac-facts">
         <div>
@@ -40,6 +45,12 @@
             <dd><code>{{ league.invite_code }}</code></dd>
         </div>
         {% endif %}
+        {% if block %}
+        <div>
+            <dt>Games shown</dt>
+            <dd>{{ block.games_total }}</dd>
+        </div>
+        {% endif %}
     </dl>
 
     {% if sport_tabs|length > 1 %}
@@ -64,7 +75,41 @@
     {% if not block %}
     <p class="ac-empty">This league has no sports yet.</p>
     {% else %}
+
+    {% if block.today_stats %}
+    <h2 class="ac-section-title">Today</h2>
+    <div class="ac-table-wrap">
+        <table class="ac-table">
+            <thead>
+                <tr>
+                    <th class="ac-num">#</th>
+                    <th>Player</th>
+                    <th class="ac-num">W</th>
+                    <th class="ac-num">L</th>
+                    <th class="ac-num">%</th>
+                    <th class="ac-num">G</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in block.today_stats %}
+                <tr>
+                    <td class="ac-num">{{ row.rank or loop.index }}</td>
+                    <td>{{ row.player }}</td>
+                    <td class="ac-num ac-win">{{ row.wins }}</td>
+                    <td class="ac-num ac-loss">{{ row.losses }}</td>
+                    <td class="ac-num">{{ row.pct_label }}</td>
+                    <td class="ac-num">{{ row.games }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
     <h2 class="ac-section-title">Standings{% if block.year %} {{ block.year }}{% endif %}</h2>
+    {% if block.min_games > 1 and block.total_games > 0 %}
+    <p class="ac-hint">{{ block.min_games }}+ games to rank ({{ block.total_games }} games{% if block.year %} in {{ block.year }}{% endif %}).</p>
+    {% endif %}
     {% if block.stats %}
     <div class="ac-table-wrap">
         <table class="ac-table">
@@ -81,7 +126,7 @@
             <tbody>
                 {% for row in block.stats %}
                 <tr>
-                    <td class="ac-num">{{ loop.index }}</td>
+                    <td class="ac-num">{{ row.rank or loop.index }}</td>
                     <td>{{ row.player }}</td>
                     <td class="ac-num ac-win">{{ row.wins }}</td>
                     <td class="ac-num ac-loss">{{ row.losses }}</td>
@@ -120,6 +165,45 @@
             </tbody>
         </table>
     </div>
+    {% endif %}
+
+    <h2 class="ac-section-title">Games{% if block.games_total %} ({{ block.games_total }}){% endif %}</h2>
+    {% if block.games %}
+    <div class="ac-game-list">
+        {% for game in block.games %}
+        <article class="ac-game">
+            <p class="ac-game-when">{{ game.when }}</p>
+            <div class="ac-game-side ac-game-win">
+                <div class="ac-game-players">
+                    {% for name in game.winners %}
+                    <span>{{ name }}</span>
+                    {% endfor %}
+                </div>
+                {% if game.winner_score not in [None, ''] %}
+                <span class="ac-game-score">{{ game.winner_score }}</span>
+                {% endif %}
+            </div>
+            <div class="ac-game-side ac-game-loss">
+                <div class="ac-game-players">
+                    {% for name in game.losers %}
+                    <span>{{ name }}</span>
+                    {% endfor %}
+                </div>
+                {% if game.loser_score not in [None, ''] %}
+                <span class="ac-game-score">{{ game.loser_score }}</span>
+                {% endif %}
+            </div>
+            {% if game.set_line %}
+            <p class="ac-muted">{{ game.set_line }}</p>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    {% if block.has_more %}
+    <p class="ac-hint">Showing the latest {{ block.games|length }} of {{ block.games_total }} games.</p>
+    {% endif %}
+    {% else %}
+    <p class="ac-empty">No games logged yet{% if block.year %} in {{ block.year }}{% endif %}.</p>
     {% endif %}
     {% endif %}
 </section>

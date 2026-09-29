@@ -35,6 +35,7 @@ class AdminConsoleTests(unittest.TestCase):
         from auth import create_user, create_users_table, get_user_by_email
         from api.league_db import add_sport_to_league, create_league, create_leagues_tables
         from api.admin_data import ensure_admin_schema
+        from api.game_db import add_game
 
         create_users_table()
         create_leagues_tables()
@@ -46,8 +47,27 @@ class AdminConsoleTests(unittest.TestCase):
         cls.private = create_league(cls.member.id, "Secret Club", visibility="private")
         cls.public = create_league(cls.member.id, "Open Play", visibility="public")
         cls.unlisted = create_league(cls.member.id, "Quiet League", visibility="unlisted")
-        add_sport_to_league(cls.private["id"], "beach_volleyball_2s")
+        private_sport = add_sport_to_league(cls.private["id"], "beach_volleyball_2s")
         add_sport_to_league(cls.public["id"], "tennis_singles")
+        add_game(
+            private_sport["id"],
+            winners=["Ada", "Bea"],
+            losers=["Cal", "Dot"],
+            winner_score=21,
+            loser_score=18,
+            game_date="2026-09-27 12:00:00",
+            entered_by=cls.member.id,
+        )
+        for _ in range(4):
+            add_game(
+                private_sport["id"],
+                winners=["Ada", "Bea"],
+                losers=["Cal", "Dot"],
+                winner_score=21,
+                loser_score=19,
+                game_date="2026-09-20 12:00:00",
+                entered_by=cls.member.id,
+            )
 
         from flask import Flask, render_template
         from api import init_api
@@ -247,7 +267,42 @@ class AdminConsoleTests(unittest.TestCase):
         html = response.get_data(as_text=True)
         self.assertIn("Secret Club", html)
         self.assertIn("private", html)
-        self.assertIn("Read-only standings", html)
+        self.assertIn("Admin league view", html)
+        self.assertIn("Standings", html)
+        self.assertIn("Games", html)
+        self.assertIn("Ada", html)
+        self.assertIn("21", html)
+
+    def test_league_sort_and_game_filters(self):
+        self._login_console()
+        by_games = self.client.get("/admin-console/leagues?sort=games&dir=desc")
+        self.assertEqual(by_games.status_code, 200)
+        html = by_games.get_data(as_text=True)
+        secret_at = html.find("Secret Club")
+        open_at = html.find("Open Play")
+        self.assertGreater(secret_at, 0)
+        self.assertGreater(open_at, 0)
+        self.assertLess(secret_at, open_at)
+
+        filtered = self.client.get("/admin-console/leagues?games=5")
+        filtered_html = filtered.get_data(as_text=True)
+        self.assertIn("Secret Club", filtered_html)
+        self.assertNotIn("Open Play", filtered_html)
+        self.assertNotIn("Quiet League", filtered_html)
+
+        recent = self.client.get("/admin-console/leagues?recency=7d")
+        recent_html = recent.get_data(as_text=True)
+        self.assertIn("Secret Club", recent_html)
+        self.assertNotIn("Quiet League", recent_html)
+
+        solo = self.client.get("/admin-console/leagues?members=1")
+        self.assertEqual(solo.status_code, 200)
+        self.assertIn("Secret Club", solo.get_data(as_text=True))
+
+    def test_league_detail_requires_admin_session(self):
+        response = self.client.get(f"/admin-console/leagues/{self.private['id']}")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/admin-console/login", response.headers["Location"])
 
     def test_public_api_does_not_leak_private_league(self):
         response = self.client.get(f"/api/v1/leagues/{self.private['slug']}")

@@ -346,16 +346,71 @@ def get_sport_by_id(sport_id):
     return _row_to_dict(row)
 
 
+ADMIN_LEAGUE_SORTS = {
+    "name": "l.name COLLATE NOCASE",
+    "visibility": "l.visibility COLLATE NOCASE",
+    "owner": "COALESCE(u.username, u.email, '') COLLATE NOCASE",
+    "sport": "COALESCE(sport_name, '') COLLATE NOCASE",
+    "members": "member_count",
+    "games": "game_count",
+    "last_game": "last_game_at",
+    "created": "l.created_at",
+    "updated": "l.updated_at",
+}
+
+ADMIN_GAME_MIN_OPTIONS = (1, 5, 20, 50, 100)
+ADMIN_RECENCY_OPTIONS = {
+    "3d": 3,
+    "7d": 7,
+    "30d": 30,
+    "365d": 365,
+}
+ADMIN_MEMBER_OPTIONS = ("1", "2+")
+ADMIN_FOCUS_OPTIONS = ("sports", "table", "mixed")
+
+
 def search_public_leagues(query=None, limit=20):
     return _search_leagues(query=query, limit=limit, visibility="public", admin=False)
 
 
-def list_leagues_for_admin(query=None, visibility=None, limit=500):
+def list_leagues_for_admin(
+    query=None,
+    visibility=None,
+    min_games=None,
+    recency_days=None,
+    focus=None,
+    members=None,
+    sort="games",
+    direction="desc",
+    limit=500,
+):
     """Every league, including private and unlisted. Admin console only."""
-    return _search_leagues(query=query, limit=limit, visibility=visibility, admin=True)
+    return _search_leagues(
+        query=query,
+        limit=limit,
+        visibility=visibility,
+        admin=True,
+        min_games=min_games,
+        recency_days=recency_days,
+        focus=focus,
+        members=members,
+        sort=sort,
+        direction=direction,
+    )
 
 
-def _search_leagues(query=None, limit=20, visibility=None, admin=False):
+def _search_leagues(
+    query=None,
+    limit=20,
+    visibility=None,
+    admin=False,
+    min_games=None,
+    recency_days=None,
+    focus=None,
+    members=None,
+    sort=None,
+    direction=None,
+):
     params = []
     extra_cols = "l.owner_id, l.invite_code," if admin else ""
     sql = f"""
@@ -367,6 +422,7 @@ def _search_leagues(query=None, limit=20, visibility=None, admin=False):
                COUNT(DISTINCT s.id) AS sport_count,
                COUNT(DISTINCT g.id) AS game_count,
                COUNT(DISTINCT lm.user_id) AS member_count,
+               MAX(g.game_date) AS last_game_at,
                (
                  SELECT s2.name FROM sports s2
                  WHERE s2.league_id = l.id
@@ -387,6 +443,9 @@ def _search_leagues(query=None, limit=20, visibility=None, admin=False):
     if visibility:
         sql += " AND l.visibility = ?"
         params.append(visibility)
+    if admin and focus in ADMIN_FOCUS_OPTIONS:
+        sql += " AND COALESCE(l.focus, 'mixed') = ?"
+        params.append(focus)
     if query:
         if admin:
             sql += " AND (l.name LIKE ? OR l.description LIKE ? OR l.slug LIKE ? OR u.email LIKE ? OR u.username LIKE ?)"
@@ -396,7 +455,48 @@ def _search_leagues(query=None, limit=20, visibility=None, admin=False):
             sql += " AND (l.name LIKE ? OR l.description LIKE ?)"
             pattern = f"%{query.strip()}%"
             params.extend([pattern, pattern])
-    sql += " GROUP BY l.id ORDER BY l.updated_at DESC LIMIT ?"
+    sql += " GROUP BY l.id"
+
+    having = []
+    if admin and min_games is not None:
+        try:
+            min_games = int(min_games)
+        except (TypeError, ValueError):
+            min_games = None
+        if min_games is not None and min_games > 0:
+            having.append("COUNT(DISTINCT g.id) >= ?")
+            params.append(min_games)
+    if admin and recency_days is not None:
+        try:
+            recency_days = int(recency_days)
+        except (TypeError, ValueError):
+            recency_days = None
+        if recency_days and recency_days > 0:
+            having.append(
+                "MAX(g.game_date) IS NOT NULL AND datetime(MAX(g.game_date)) >= datetime('now', ?)"
+            )
+            params.append(f"-{recency_days} days")
+    if admin and members == "1":
+        having.append("COUNT(DISTINCT lm.user_id) = 1")
+    elif admin and members == "2+":
+        having.append("COUNT(DISTINCT lm.user_id) >= 2")
+    if having:
+        sql += " HAVING " + " AND ".join(having)
+
+    if admin:
+        sort_key = (sort or "games").strip().lower()
+        order_expr = ADMIN_LEAGUE_SORTS.get(sort_key, ADMIN_LEAGUE_SORTS["games"])
+        dir_sql = "ASC" if str(direction or "").lower() == "asc" else "DESC"
+        nulls = "NULLS LAST" if sort_key == "last_game" else ""
+        # SQLite ignores NULLS LAST on older builds; emulate with ISNULL.
+        if sort_key == "last_game":
+            sql += f" ORDER BY (last_game_at IS NULL) ASC, last_game_at {dir_sql}, l.name COLLATE NOCASE ASC"
+        else:
+            sql += f" ORDER BY {order_expr} {dir_sql}, l.name COLLATE NOCASE ASC"
+            _ = nulls
+    else:
+        sql += " ORDER BY l.updated_at DESC"
+    sql += " LIMIT ?"
     params.append(limit)
 
     rows = db_manager.execute_query(sql, tuple(params))

@@ -2,6 +2,13 @@
 {% block title %}Leagues | PlayTracker admin{% endblock %}
 {% block nav_leagues %}is-active{% endblock %}
 
+{% macro sort_link(column, label, numeric=false) -%}
+{%- set next_dir = 'asc' if (sort == column and direction == 'desc') else ('desc' if (sort == column and direction == 'asc') else ('desc' if numeric else 'asc')) -%}
+{%- set marker = (' ↓' if direction == 'desc' else ' ↑') if sort == column else '' -%}
+<a class="ac-sort{% if sort == column %} is-active{% endif %}"
+   href="{{ url_for('admin_console.leagues', q=query, visibility=visibility, games=games, recency=recency, focus=focus, members=members, sort=column, dir=next_dir) }}">{{ label }}{{ marker }}</a>
+{%- endmacro %}
+
 {% block content %}
 <section class="ac-page">
     <header class="ac-page-head">
@@ -35,7 +42,9 @@
         </div>
     </div>
 
-    <form class="ac-filters" method="GET" action="{{ url_for('admin_console.leagues') }}">
+    <form class="ac-filters ac-filters-wrap" method="GET" action="{{ url_for('admin_console.leagues') }}">
+        <input type="hidden" name="sort" value="{{ sort }}">
+        <input type="hidden" name="dir" value="{{ direction }}">
         <label class="ac-search">
             <span class="ac-sr">Search</span>
             <input type="search" name="q" value="{{ query }}" placeholder="Search name, slug, or owner">
@@ -49,9 +58,45 @@
                 {% endfor %}
             </select>
         </label>
+        <label>
+            <span class="ac-sr">Games logged</span>
+            <select name="games">
+                <option value="">Any games</option>
+                {% for n in game_mins %}
+                <option value="{{ n }}" {% if games == n|string %}selected{% endif %}>{{ n }}+ games</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <span class="ac-sr">Game recency</span>
+            <select name="recency">
+                <option value="">Any time</option>
+                {% for key, label in recency_options %}
+                <option value="{{ key }}" {% if recency == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <span class="ac-sr">Focus</span>
+            <select name="focus">
+                <option value="">Any focus</option>
+                {% for item in focus_options %}
+                <option value="{{ item }}" {% if focus == item %}selected{% endif %}>{{ item|capitalize }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>
+            <span class="ac-sr">Members</span>
+            <select name="members">
+                <option value="">Any size</option>
+                {% for key, label in member_options %}
+                <option value="{{ key }}" {% if members == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
         <button type="submit" class="ac-btn-secondary">Filter</button>
-        {% if query or visibility %}
-        <a class="ac-text-link" href="{{ url_for('admin_console.leagues') }}">Clear</a>
+        {% if query or visibility or games or recency or focus or members %}
+        <a class="ac-text-link" href="{{ url_for('admin_console.leagues', sort=sort, dir=direction) }}">Clear</a>
         {% endif %}
     </form>
 
@@ -64,12 +109,13 @@
         <table class="ac-table">
             <thead>
                 <tr>
-                    <th>League</th>
-                    <th>Visibility</th>
-                    <th>Owner</th>
-                    <th>Sport</th>
-                    <th class="ac-num">Members</th>
-                    <th class="ac-num">Games</th>
+                    <th>{{ sort_link('name', 'League') }}</th>
+                    <th>{{ sort_link('visibility', 'Visibility') }}</th>
+                    <th>{{ sort_link('owner', 'Owner') }}</th>
+                    <th>{{ sort_link('sport', 'Sport') }}</th>
+                    <th class="ac-num">{{ sort_link('members', 'Members', numeric=true) }}</th>
+                    <th class="ac-num">{{ sort_link('games', 'Games', numeric=true) }}</th>
+                    <th>{{ sort_link('last_game', 'Last game', numeric=true) }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -98,6 +144,9 @@
                     </td>
                     <td class="ac-num">{{ league.member_count or 0 }}</td>
                     <td class="ac-num">{{ league.game_count or 0 }}</td>
+                    <td>
+                        <span {% if not league.last_game_at %}class="ac-muted"{% endif %}>{{ league.last_game_label }}</span>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

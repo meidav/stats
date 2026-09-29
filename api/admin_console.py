@@ -35,6 +35,7 @@ from api.admin_data import (
     list_users_for_admin,
     overview_counts,
     password_is_forbidden,
+    relative_time,
     set_user_password,
     touch_last_seen,
     user_requires_password_change,
@@ -43,7 +44,17 @@ from api.admin_data import (
 )
 from api.auth_service import authenticate_with_email
 from api.brand import APP_NAME
-from api.league_db import get_league_by_id, get_sports_for_league, league_to_dict, list_leagues_for_admin
+from api.league_db import (
+    ADMIN_FOCUS_OPTIONS,
+    ADMIN_GAME_MIN_OPTIONS,
+    ADMIN_LEAGUE_SORTS,
+    ADMIN_MEMBER_OPTIONS,
+    ADMIN_RECENCY_OPTIONS,
+    get_league_by_id,
+    get_sports_for_league,
+    league_to_dict,
+    list_leagues_for_admin,
+)
 from api.roadmap_data import (
     create_roadmap_item,
     delete_roadmap_item,
@@ -507,18 +518,82 @@ def leagues():
     visibility = (request.args.get("visibility") or "").strip().lower()
     if visibility not in VISIBILITY_OPTIONS:
         visibility = ""
+
+    games_raw = (request.args.get("games") or "").strip()
+    min_games = None
+    if games_raw.isdigit() and int(games_raw) in ADMIN_GAME_MIN_OPTIONS:
+        min_games = int(games_raw)
+
+    recency_key = (request.args.get("recency") or "").strip().lower()
+    recency_days = ADMIN_RECENCY_OPTIONS.get(recency_key)
+
+    focus = (request.args.get("focus") or "").strip().lower()
+    if focus not in ADMIN_FOCUS_OPTIONS:
+        focus = ""
+
+    members = (request.args.get("members") or "").strip()
+    if members not in ADMIN_MEMBER_OPTIONS:
+        members = ""
+
+    sort = (request.args.get("sort") or "games").strip().lower()
+    if sort not in ADMIN_LEAGUE_SORTS:
+        sort = "games"
+    direction = (request.args.get("dir") or "desc").strip().lower()
+    if direction not in ("asc", "desc"):
+        direction = "desc"
+
     rows = list_leagues_for_admin(
         query=query or None,
         visibility=visibility or None,
+        min_games=min_games,
+        recency_days=recency_days,
+        focus=focus or None,
+        members=members or None,
+        sort=sort,
+        direction=direction,
     )
+    for row in rows:
+        row["last_game_label"] = relative_time(row.get("last_game_at"))
+        if not row.get("last_game_at"):
+            row["last_game_label"] = "No games"
+
     counts = overview_counts()
+    filter_args = {
+        "q": query,
+        "visibility": visibility,
+        "games": games_raw if min_games else "",
+        "recency": recency_key if recency_days else "",
+        "focus": focus,
+        "members": members,
+        "sort": sort,
+        "dir": direction,
+    }
     return render_template(
         "admin_console/leagues.html",
         leagues=rows,
         counts=counts,
         query=query,
         visibility=visibility,
+        games=str(min_games) if min_games else "",
+        recency=recency_key if recency_days else "",
+        focus=focus,
+        members=members,
+        sort=sort,
+        direction=direction,
+        filter_args=filter_args,
         visibilities=VISIBILITY_OPTIONS,
+        game_mins=ADMIN_GAME_MIN_OPTIONS,
+        recency_options=[
+            ("3d", "Last 3 days"),
+            ("7d", "Last week"),
+            ("30d", "Last month"),
+            ("365d", "Last year"),
+        ],
+        focus_options=ADMIN_FOCUS_OPTIONS,
+        member_options=[
+            ("1", "Solo (1 member)"),
+            ("2+", "Shared (2+)"),
+        ],
     )
 
 
