@@ -1,0 +1,3 @@
+Logging a game is faster.
+
+Add game opens on the first winner, with recent players and the keyboard ready. Common scores show up as taps under the score fields. For beach volleyball doubles, 21 stays first, and a winner over 21 fills the matching loser score.

@@ -1,5 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import { MagnifyingGlass } from '../components/icons';
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { AccountFooter } from '../components/AccountFooter';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GlassCard } from '../components/GlassCard';
 import { GamesCountBadge, gamesBadgeRoom, gamesBadgeRoomTablet } from '../components/GamesCountBadge';
@@ -21,14 +20,15 @@ import { LeagueIcon } from '../components/LeagueIcon';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
-import { colors, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
+import { useThemeTokens } from '../lib/theme';
 import { ApiError, api } from '../lib/api';
 import { selectedIconForLeague } from '../lib/leagueIcons';
 import { useIsTablet } from '../lib/layout';
 import type { Sport } from '../types';
-import type { RootStackParamList } from '../navigation/types';
+import type { DiscoverStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'DiscoverLeagues'>;
+type Props = NativeStackScreenProps<DiscoverStackParamList, 'DiscoverLeagues'>;
 
 type PublicLeague = {
   id: number;
@@ -54,6 +54,9 @@ function iconForPublicLeague(item: PublicLeague) {
 }
 
 export function DiscoverLeaguesScreen({ navigation }: Props) {
+  const theme = useThemeTokens();
+  const { colors } = theme;
+  const styles = React.useMemo(() => makeStyles(theme), [theme]);
   const isTablet = useIsTablet();
   const [leagues, setLeagues] = useState<PublicLeague[]>([]);
   const [query, setQuery] = useState('');
@@ -86,8 +89,8 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
   }
 
   return (
-    <ScreenScaffold footer={<AccountFooter />}>
-      <ScreenHeader title="Public leagues" onBack={() => navigation.goBack()} />
+    <ScreenScaffold edgeHeader>
+      <ScreenHeader title="Public leagues" />
 
       <View style={[styles.body, isTablet && styles.bodyTablet]}>
         <Text style={styles.subtitle}>
@@ -106,7 +109,7 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
             onSubmitEditing={submitSearch}
           />
           <TouchableOpacity style={styles.searchButton} onPress={submitSearch}>
-            <Ionicons name="search" size={18} color="#fff" />
+            <MagnifyingGlass size={18} color="#fff" weight="bold" />
           </TouchableOpacity>
         </View>
 
@@ -193,7 +196,12 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+  tabPad: {
+    paddingBottom: 120,
+  },
   body: {
     flex: 1,
     width: '100%',
@@ -220,12 +228,12 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.45)',
+    borderColor: colors.fieldBorder,
     borderRadius: 12,
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
     fontSize: 16,
-    backgroundColor: 'rgba(255, 252, 248, 0.72)',
+    backgroundColor: colors.fieldBg,
     color: colors.text,
   },
   searchButton: {
@@ -287,3 +295,4 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
 });
+}

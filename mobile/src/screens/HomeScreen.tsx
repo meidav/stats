@@ -1,6 +1,5 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -23,12 +22,11 @@ import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { LeagueIcon } from '../components/LeagueIcon';
 import { IconActionRow } from '../components/IconActionRow';
-import { BrandLockup } from '../components/BrandLockup';
-import { AccountFooter, accentLilac } from '../components/AccountFooter';
-import { GradientButton } from '../components/GradientButton';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { Warning } from '../components/icons';
 import { SecondaryButton } from '../components/SecondaryButton';
-import { APP_TAGLINE } from '../constants/brand';
-import { colors, gradients, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
+import { useThemeTokens } from '../lib/theme';
 import { copyForFocus, focusFromLeagues } from '../lib/focus';
 import { selectedIconForLeague } from '../lib/leagueIcons';
 import { useAuth } from '../lib/auth';
@@ -36,11 +34,14 @@ import { ApiError, api } from '../lib/api';
 import { useIsTablet } from '../lib/layout';
 import { loadCachedLeagues, removeCachedLeague, saveCachedLeagues } from '../lib/leagueCache';
 import type { League } from '../types';
-import type { RootStackParamList } from '../navigation/types';
+import type { HomeStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
+  const theme = useThemeTokens();
+  const { colors, gradients } = theme;
+  const styles = React.useMemo(() => makeStyles(theme), [theme]);
   const { token } = useAuth();
   const { height: windowHeight } = useWindowDimensions();
   const isTablet = useIsTablet();
@@ -133,15 +134,8 @@ export function HomeScreen({ navigation }: Props) {
   }
 
   return (
-    <ScreenScaffold footer={<AccountFooter />}>
-      <View style={[styles.hero, compactEmpty && styles.heroCompact]}>
-        <BrandLockup size={compactEmpty ? 108 : 132} />
-        <Text style={[styles.tagline, compactEmpty && styles.taglineCompact]}>{APP_TAGLINE}</Text>
-      </View>
-
-      {hasLeagues ? (
-        <Text style={styles.sectionTitle}>{copy.homeTitle}</Text>
-      ) : null}
+    <ScreenScaffold edgeHeader>
+      <ScreenHeader title={copy.homeTitle} />
 
       <ErrorBanner message={error} />
 
@@ -162,33 +156,7 @@ export function HomeScreen({ navigation }: Props) {
                 tintColor={colors.primary}
               />
             }
-            contentContainerStyle={styles.list}
-            ListFooterComponent={
-              <View style={styles.footerActions}>
-                <SecondaryButton
-                  label="Browse public leagues"
-                  onPress={() => navigation.navigate('DiscoverLeagues')}
-                  style={styles.ctaHalf}
-                />
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('CreateLeague')}
-                  activeOpacity={0.85}
-                  style={styles.ctaHalf}
-                >
-                  <LinearGradient
-                    colors={[...gradients.button]}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={styles.newLeagueButton}
-                  >
-                    <Ionicons name="add" size={18} color="#fff" />
-                    <Text style={styles.newLeagueText} numberOfLines={1}>
-                      {copy.newAction}
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            }
+            contentContainerStyle={[styles.list, styles.tabPad]}
             renderItem={({ item }) => {
               const sport = item.sports?.[0];
               const canEdit = item.role === 'owner' || item.role === 'admin';
@@ -273,64 +241,14 @@ export function HomeScreen({ navigation }: Props) {
           {error ? (
             <Text style={styles.retryHint}>Pull down to try again.</Text>
           ) : (
-            <View
-              style={[
-                styles.emptyStack,
-                isTablet && styles.emptyStackTablet,
-                compactEmpty && styles.emptyStackCompact,
-              ]}
-            >
-              <GlassCard style={[styles.emptyCard, compactEmpty && styles.emptyCardCompact]}>
-                <View style={styles.emptyCardTop}>
-                  <Text style={[styles.emptyEmoji, compactEmpty && styles.emptyEmojiCompact]}>
-                    🏆
-                  </Text>
-                  <Text
-                    style={[styles.emptyTitle, compactEmpty && styles.emptyTitleCompact]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.8}
-                  >
-                    {copy.homeEmpty}
-                  </Text>
-                  <Text style={[styles.emptyBody, compactEmpty && styles.emptyBodyCompact]}>
-                    A league is one sport or one game night. Standings live here after you add games.
-                  </Text>
-                </View>
-                <GradientButton
-                  label="Create a league"
-                  onPress={() => navigation.navigate('CreateLeague')}
-                  style={styles.emptyCta}
-                />
-              </GlassCard>
-
-              <GlassCard style={[styles.emptyCard, compactEmpty && styles.emptyCardCompact]}>
-                <View style={styles.emptyCardTop}>
-                  <Ionicons
-                    name="earth"
-                    size={compactEmpty ? 36 : 48}
-                    color={accentLilac}
-                    style={[styles.emptyGlyph, compactEmpty && styles.emptyGlyphCompact]}
-                  />
-                  <Text
-                    style={[styles.emptyTitle, compactEmpty && styles.emptyTitleCompact]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.8}
-                  >
-                    View public leagues
-                  </Text>
-                  <Text style={[styles.emptyBody, compactEmpty && styles.emptyBodyCompact]}>
-                    Browse open leagues on PlayTracker and check standings before you create your own.
-                  </Text>
-                </View>
-                <SecondaryButton
-                  label="Browse public leagues"
-                  onPress={() => navigation.navigate('DiscoverLeagues')}
-                  style={styles.emptyCta}
-                />
-              </GlassCard>
-            </View>
+            <GlassCard style={[styles.emptyCard, compactEmpty && styles.emptyCardCompact]}>
+              <Text style={[styles.emptyTitle, compactEmpty && styles.emptyTitleCompact]}>
+                {copy.homeEmpty}
+              </Text>
+              <Text style={[styles.emptyBody, compactEmpty && styles.emptyBodyCompact]}>
+                A league is one sport or one game night. Use New league or Public in the bar below to get started.
+              </Text>
+            </GlassCard>
           )}
         </ScrollView>
       )}
@@ -349,7 +267,7 @@ export function HomeScreen({ navigation }: Props) {
             style={styles.modalCard}
           >
             <View style={styles.modalHeader}>
-              <Ionicons name="warning" size={28} color="#9F1239" />
+              <Warning size={28} color="#9F1239" weight="fill" />
               <Text style={styles.modalTitle}>
                 {deleteStep === 1 ? 'Delete this league?' : 'Remove all history?'}
               </Text>
@@ -384,7 +302,12 @@ export function HomeScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+  tabPad: {
+    paddingBottom: 120,
+  },
   hero: {
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
@@ -646,3 +569,4 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
 });
+}

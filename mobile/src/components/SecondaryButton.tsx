@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   StyleProp,
   StyleSheet,
@@ -7,7 +7,8 @@ import {
   ViewStyle,
 } from 'react-native';
 
-import { colors, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
+import { useThemeTokens } from '../lib/theme';
 
 type Props = {
   label: string;
@@ -29,6 +30,9 @@ export function SecondaryButton({
   accessibilityLabel,
   children,
 }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -51,28 +55,35 @@ export function SecondaryButton({
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderRadius: 12,
-    backgroundColor: 'rgba(91, 33, 182, 0.42)',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    minHeight: 52,
-  },
-  disabled: {
-    backgroundColor: 'rgba(49, 16, 101, 0.3)',
-  },
-  label: {
-    color: colors.onGlass,
-    fontSize: 16,
-    fontWeight: '700',
-    flexShrink: 1,
-  },
-  labelDisabled: {
-    color: colors.onGlassMuted,
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+    button: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      borderRadius: 12,
+      backgroundColor: theme.isDark
+        ? 'rgba(255,255,255,0.1)'
+        : 'rgba(91, 33, 182, 0.42)',
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.md,
+      minHeight: 52,
+    },
+    disabled: {
+      backgroundColor: theme.isDark
+        ? 'rgba(255,255,255,0.05)'
+        : 'rgba(49, 16, 101, 0.3)',
+    },
+    label: {
+      color: theme.isDark ? colors.text : colors.onGlass,
+      fontSize: 16,
+      fontWeight: '700',
+      flexShrink: 1,
+    },
+    labelDisabled: {
+      color: colors.textMuted,
+    },
+  });
+}

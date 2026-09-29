@@ -1,9 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 
 import { authInputStyle } from './AuthCard';
-import { icons } from './icons';
+import { AppIcon, icons } from './icons';
 import { colors, spacing } from '../constants/theme';
 
 type Props = Omit<TextInputProps, 'secureTextEntry'> & {
@@ -30,7 +29,7 @@ export function PasswordField({ style, ...props }: Props) {
         accessibilityRole="button"
         accessibilityLabel={visible ? 'Hide password' : 'Show password'}
       >
-        <Ionicons
+        <AppIcon
           name={visible ? icons.eyeOff : icons.eye}
           size={20}
           color={colors.onGlassMuted}

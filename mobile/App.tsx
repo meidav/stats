@@ -1,7 +1,6 @@
 import { NavigationContainer, DefaultTheme, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Linking, LogBox, StyleSheet, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,6 +11,8 @@ import { GradientBackground } from './src/components/GradientBackground';
 import { AuthProvider, useAuth } from './src/lib/auth';
 import { parseLeagueSlugFromUrl } from './src/lib/leagueLinks';
 import { hasSeenIntroRecently } from './src/lib/onboarding';
+import { ThemeProvider } from './src/lib/theme';
+import { MainTabs } from './src/navigation/MainTabs';
 import type { RootStackParamList } from './src/navigation/types';
 
 // Harmless Fabric / native-stack transition noise:
@@ -53,7 +54,10 @@ function consumePendingLeague(canOpen: boolean) {
   if (!canOpen || !pendingLeagueSlug || !navigationRef.isReady()) return;
   const slug = pendingLeagueSlug;
   pendingLeagueSlug = null;
-  navigationRef.navigate('League', { slug, name: '' });
+  navigationRef.navigate('MainTabs', {
+    screen: 'Home',
+    params: { screen: 'League', params: { slug, name: '' } },
+  });
 }
 
 function BootScreen({ status }: { status: string }) {
@@ -100,45 +104,16 @@ function AuthStack({ showIntro }: { showIntro: boolean }) {
 function MainStack() {
   ensureScreensEnabled();
   return (
-    <Stack.Navigator initialRouteName="Home" screenOptions={screenOptions}>
-      <Stack.Screen
-        name="Home"
-        getComponent={() => require('./src/screens/HomeScreen').HomeScreen}
-      />
-      <Stack.Screen
-        name="DiscoverLeagues"
-        getComponent={() => require('./src/screens/DiscoverLeaguesScreen').DiscoverLeaguesScreen}
-      />
-      <Stack.Screen
-        name="CreateLeague"
-        getComponent={() => require('./src/screens/CreateLeagueScreen').CreateLeagueScreen}
-      />
-      <Stack.Screen
-        name="EditLeague"
-        getComponent={() => require('./src/screens/EditLeagueScreen').EditLeagueScreen}
-      />
-      <Stack.Screen
-        name="EditPlayer"
-        getComponent={() => require('./src/screens/EditPlayerScreen').EditPlayerScreen}
-      />
-      <Stack.Screen
-        name="League"
-        getComponent={() => require('./src/screens/LeagueScreen').LeagueScreen}
-      />
-      <Stack.Screen
-        name="AddGame"
-        getComponent={() => require('./src/screens/AddGameScreen').AddGameScreen}
-      />
-      <Stack.Screen
-        name="PlayerProfile"
-        getComponent={() => require('./src/screens/PlayerProfileScreen').PlayerProfileScreen}
-      />
+    <Stack.Navigator initialRouteName="MainTabs" screenOptions={screenOptions}>
+      <Stack.Screen name="MainTabs" component={MainTabs} />
     </Stack.Navigator>
   );
 }
 
 function AppNavigator() {
   const { token, loading: authLoading } = useAuth();
+  const wasSignedIn = useRef(false);
+  if (token) wasSignedIn.current = true;
   const [gateReady, setGateReady] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [status, setStatus] = useState('Restoring session...');
@@ -204,7 +179,7 @@ function AppNavigator() {
     return <MainStack />;
   }
 
-  return <AuthStack showIntro={showIntro} />;
+  return <AuthStack showIntro={showIntro && !wasSignedIn.current} />;
 }
 
 export default function App() {
@@ -212,9 +187,11 @@ export default function App() {
     <ErrorBoundary>
       <SafeAreaProvider>
         <GestureHandlerRootView style={styles.root}>
-          <AuthProvider>
-            <AppRoot />
-          </AuthProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <AppRoot />
+            </AuthProvider>
+          </ThemeProvider>
         </GestureHandlerRootView>
       </SafeAreaProvider>
     </ErrorBoundary>
@@ -227,7 +204,6 @@ function AppRoot() {
       <View style={styles.root}>
         <AppNavigator />
       </View>
-      <StatusBar style="dark" />
     </NavigationContainer>
   );
 }

@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Export, PencilSimple, Plus, Warning } from '../components/icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -19,11 +19,12 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { SportTypePill } from '../components/SportTypePill';
 import { StatsTable } from '../components/StatsTable';
 import { TemplateGlyph } from '../components/TemplateGlyph';
-import { colors, gradients, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
 import { addGameTitleForTemplate } from '../lib/focus';
 import { localToday } from '../lib/datetime';
 import { useAuth } from '../lib/auth';
@@ -31,14 +32,18 @@ import { ApiError, api } from '../lib/api';
 import { upsertCachedLeague } from '../lib/leagueCache';
 import { shareLeague } from '../lib/leagueLinks';
 import { firstResultCopy } from '../lib/names';
+import { useThemeTokens } from '../lib/theme';
 import type { Game, League, PlayerStat, Sport } from '../types';
-import type { RootStackParamList } from '../navigation/types';
+import type { LeagueStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'League'>;
+type Props = NativeStackScreenProps<LeagueStackParamList, 'League'>;
 
 const GAMES_PAGE_SIZE = 50;
 
 export function LeagueScreen({ route, navigation }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const { colors, gradients } = theme;
   const { slug, name, role: routeRole } = route.params;
   const { token } = useAuth();
   const [league, setLeague] = useState<League | null>(null);
@@ -63,6 +68,7 @@ export function LeagueScreen({ route, navigation }: Props) {
   const [deleting, setDeleting] = useState(false);
   const selectedIdRef = useRef<number | null>(null);
   const selectedYearRef = useRef<string | null>(selectedYear);
+  const hasContentRef = useRef(false);
   selectedYearRef.current = selectedYear;
 
   const loadStats = useCallback(async (sport: Sport, year: string | null) => {
@@ -134,11 +140,54 @@ export function LeagueScreen({ route, navigation }: Props) {
     }
   }, [selectedSport, loadingMoreGames, hasMoreGames, token, selectedYear, games.length]);
 
+  const refreshLeague = useCallback(
+    async (options?: { showSpinner?: boolean; pull?: boolean }) => {
+      const showSpinner = Boolean(options?.showSpinner);
+      if (showSpinner) setLoading(true);
+      if (options?.pull) setRefreshing(true);
+      try {
+        const leagueData = await api.getLeague(slug, token);
+        setLeague(leagueData);
+        if (leagueData.role) {
+          await upsertCachedLeague(leagueData);
+        }
+        const sport =
+          leagueData.sports.find((item) => item.id === selectedIdRef.current) ??
+          leagueData.sports[0] ??
+          null;
+        selectedIdRef.current = sport?.id ?? null;
+        setSelectedSport(sport);
+        if (sport) {
+          await loadStats(sport, selectedYearRef.current);
+        } else {
+          setStats([]);
+          setOccasionalStats([]);
+          setTodayStats([]);
+          setGames([]);
+          setGamesTotal(0);
+          setHasMoreGames(false);
+          setYears([]);
+          setTotalGames(0);
+        }
+        hasContentRef.current = true;
+        setError('');
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'Could not load league');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [slug, token, loadStats],
+  );
+
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      async function refresh() {
-        setLoading(true);
+      async function boot() {
+        // Keep existing league UI on screen; only spin on cold open.
+        const showSpinner = !hasContentRef.current;
+        if (showSpinner) setLoading(true);
         try {
           const leagueData = await api.getLeague(slug, token);
           if (!active) return;
@@ -146,6 +195,7 @@ export function LeagueScreen({ route, navigation }: Props) {
           if (leagueData.role) {
             await upsertCachedLeague(leagueData);
           }
+          if (!active) return;
           const sport =
             leagueData.sports.find((item) => item.id === selectedIdRef.current) ??
             leagueData.sports[0] ??
@@ -164,6 +214,8 @@ export function LeagueScreen({ route, navigation }: Props) {
             setYears([]);
             setTotalGames(0);
           }
+          if (!active) return;
+          hasContentRef.current = true;
           setError('');
         } catch (err) {
           if (active) {
@@ -176,7 +228,7 @@ export function LeagueScreen({ route, navigation }: Props) {
           }
         }
       }
-      refresh();
+      boot();
       return () => {
         active = false;
       };
@@ -214,37 +266,7 @@ export function LeagueScreen({ route, navigation }: Props) {
   }
 
   async function handleRefresh() {
-    setRefreshing(true);
-    try {
-      const leagueData = await api.getLeague(slug, token);
-      setLeague(leagueData);
-      if (leagueData.role) {
-        await upsertCachedLeague(leagueData);
-      }
-      const sport =
-        leagueData.sports.find((item) => item.id === selectedIdRef.current) ??
-        leagueData.sports[0] ??
-        null;
-      selectedIdRef.current = sport?.id ?? null;
-      setSelectedSport(sport);
-      if (sport) {
-        await loadStats(sport, selectedYear);
-      } else {
-        setStats([]);
-        setOccasionalStats([]);
-        setTodayStats([]);
-        setGames([]);
-        setGamesTotal(0);
-        setHasMoreGames(false);
-        setYears([]);
-        setTotalGames(0);
-      }
-      setError('');
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not load league');
-    } finally {
-      setRefreshing(false);
-    }
+    await refreshLeague({ pull: true });
   }
 
   const leagueName = league?.name || name || '';
@@ -343,69 +365,53 @@ export function LeagueScreen({ route, navigation }: Props) {
       : undefined;
 
   return (
-    <ScreenScaffold>
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back} accessibilityLabel="Back">
-          <Ionicons name="chevron-back" size={24} color={colors.primary} />
-        </TouchableOpacity>
-        <View style={styles.topBarSpacer} />
-        <View style={styles.topActions}>
-          {canEdit ? (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('EditLeague', {
-                  slug,
-                  name: leagueName,
-                  icon: league?.icon ?? null,
-                  visibility: league?.visibility,
-                  sportTemplateId: league?.sports?.[0]?.template_id,
-                })
-              }
-              style={styles.blueAction}
-              accessibilityLabel="Edit league"
-            >
-              <Ionicons name="pencil" size={20} color={colors.primary} />
-            </TouchableOpacity>
-          ) : null}
-          {canShare ? (
-            <TouchableOpacity
-              onPress={handleShare}
-              style={styles.blueAction}
-              accessibilityLabel="Share league"
-            >
-              <Ionicons name="share-outline" size={20} color={colors.primary} />
-            </TouchableOpacity>
-          ) : null}
-          {selectedSport && isMember ? (
-            <TouchableOpacity onPress={openAddGame} activeOpacity={0.85}>
-              <LinearGradient
-                colors={[...gradients.button]}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={styles.addButton}
+    <ScreenScaffold edgeHeader>
+      <ScreenHeader
+        title={leagueName}
+        onBack={() => navigation.goBack()}
+        right={
+          <View style={styles.topActions}>
+            {canEdit ? (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('EditLeague', {
+                    slug,
+                    name: leagueName,
+                    icon: league?.icon ?? null,
+                    visibility: league?.visibility,
+                    sportTemplateId: league?.sports?.[0]?.template_id,
+                  })
+                }
+                style={styles.headerIconBtn}
+                accessibilityLabel="Edit league"
               >
-                <Ionicons name="add" size={18} color="#fff" />
-                <Text style={styles.addButtonText}>Game</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          ) : null}
-        </View>
-      </View>
+                <PencilSimple size={20} color={styles.headerIconColor.color} weight="bold" />
+              </TouchableOpacity>
+            ) : null}
+            {canShare ? (
+              <TouchableOpacity
+                onPress={handleShare}
+                style={styles.headerIconBtn}
+                accessibilityLabel="Share league"
+              >
+                <Export size={20} color={styles.headerIconColor.color} weight="bold" />
+              </TouchableOpacity>
+            ) : null}
+            {selectedSport && isMember ? (
+              <TouchableOpacity onPress={openAddGame} activeOpacity={0.85} style={styles.headerIconBtn}>
+                <Plus size={18} color={styles.headerIconColor.color} weight="bold" />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        }
+      />
 
-      <Text
-        style={styles.leagueName}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.62}
-      >
-        {leagueName}
-      </Text>
       {selectedSport ? (
         <SportTypePill
           name={selectedSport.name}
           templateId={selectedSport.template_id}
           category={selectedSport.category || 'custom'}
-          style={{ marginTop: 8, marginBottom: spacing.md }}
+          style={{ marginTop: spacing.sm, marginBottom: spacing.md, marginHorizontal: spacing.lg }}
         />
       ) : null}
 
@@ -560,13 +566,13 @@ export function LeagueScreen({ route, navigation }: Props) {
       >
         <View style={styles.modalScrim}>
           <LinearGradient
-            colors={['#FECACA', '#FDBA74', '#FB7185']}
+            colors={[...theme.gradients.modalDanger]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.modalCard}
           >
             <View style={styles.modalHeader}>
-              <Ionicons name="warning" size={26} color="#9F1239" />
+              <Warning size={26} color={colors.danger} weight="fill" />
               <Text style={styles.modalTitle}>Delete this game?</Text>
             </View>
             <Text style={styles.modalBody}>
@@ -597,213 +603,186 @@ export function LeagueScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  topBarSpacer: {
-    flex: 1,
-  },
-  topActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  back: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-  },
-  blueAction: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-  },
-  leagueName: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.text,
-    textAlign: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  addButton: {
-    height: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingHorizontal: spacing.md,
-    borderRadius: 12,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  sportTabs: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  tab: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 6,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.45)',
-  },
-  tabActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  tabText: {
-    color: colors.text,
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  tabTextActive: {
-    color: '#fff',
-  },
-  loader: {
-    marginTop: spacing.xl,
-  },
-  list: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-  },
-  emptyList: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: spacing.lg,
-  },
-  emptyCard: {
-    padding: spacing.xl,
-    alignItems: 'center',
-  },
-  emptyTitle: {
-    marginTop: spacing.md,
-    fontSize: 20,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  emptyBody: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.lg,
-    fontSize: 15,
-    lineHeight: 22,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
-  emptyButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.xl,
-  },
-  emptyButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  sectionHint: {
-    fontSize: 13,
-    color: colors.textMuted,
-    marginBottom: spacing.sm,
-    paddingHorizontal: 4,
-  },
-  sectionEmpty: {
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
-    paddingVertical: spacing.md,
-  },
-  loadMore: {
-    marginTop: spacing.sm,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.22)',
-  },
-  loadMoreText: {
-    color: colors.primaryDark,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  modalScrim: {
-    flex: 1,
-    backgroundColor: 'rgba(127, 29, 29, 0.48)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  modalCard: {
-    width: '100%',
-    maxWidth: 400,
-    borderRadius: 20,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 18, 60, 0.35)',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    marginBottom: spacing.sm,
-  },
-  modalTitle: {
-    flexShrink: 1,
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#7F1D1D',
-  },
-  modalBody: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#9F1239',
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  modalKeep: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.55)',
-  },
-  modalKeepText: {
-    fontWeight: '700',
-    color: '#7F1D1D',
-  },
-  modalDelete: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-    backgroundColor: '#9F1239',
-  },
-  modalDeleteText: {
-    fontWeight: '700',
-    color: '#fff',
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  const activeChipText = theme.id === 'classic' ? '#121820' : '#fff';
+  return StyleSheet.create({
+    topActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    headerIconBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.1)',
+    },
+    headerIconColor: {
+      color: theme.isDark ? '#F8FAFC' : colors.text,
+    },
+    sportTabs: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+      paddingHorizontal: spacing.lg,
+      marginBottom: spacing.md,
+    },
+    tab: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      gap: 6,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: 20,
+      backgroundColor: colors.fieldBg,
+      borderWidth: 1,
+      borderColor: colors.fieldBorder,
+    },
+    tabActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    tabText: {
+      color: colors.text,
+      fontWeight: '600',
+      fontSize: 13,
+    },
+    tabTextActive: {
+      color: activeChipText,
+    },
+    loader: {
+      marginTop: spacing.xl,
+    },
+    list: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: 120,
+    },
+    emptyList: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      padding: spacing.lg,
+      paddingBottom: 120,
+    },
+    emptyCard: {
+      padding: spacing.xl,
+      alignItems: 'center',
+    },
+    emptyTitle: {
+      marginTop: spacing.md,
+      fontSize: 20,
+      fontWeight: '800',
+      color: colors.text,
+    },
+    emptyBody: {
+      marginTop: spacing.sm,
+      marginBottom: spacing.lg,
+      fontSize: 15,
+      lineHeight: 22,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+    emptyButton: {
+      borderRadius: 12,
+      paddingVertical: 14,
+      paddingHorizontal: spacing.xl,
+    },
+    emptyButtonText: {
+      color: activeChipText,
+      fontWeight: '700',
+      fontSize: 16,
+    },
+    sectionHint: {
+      fontSize: 13,
+      lineHeight: 18,
+      color: colors.textMuted,
+      textAlign: 'center',
+      marginTop: 0,
+      marginBottom: 12,
+      paddingHorizontal: spacing.sm,
+    },
+    sectionEmpty: {
+      fontSize: 14,
+      color: colors.textMuted,
+      textAlign: 'center',
+      paddingVertical: spacing.md,
+    },
+    loadMore: {
+      marginTop: spacing.sm,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: 'center',
+      backgroundColor: theme.isDark ? 'rgba(255,255,255,0.08)' : `${colors.primary}1A`,
+      borderWidth: 1,
+      borderColor: colors.fieldBorder,
+    },
+    loadMoreText: {
+      color: theme.isDark ? colors.primary : colors.primaryDark,
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    modalScrim: {
+      flex: 1,
+      backgroundColor: 'rgba(127, 29, 29, 0.48)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.lg,
+    },
+    modalCard: {
+      width: '100%',
+      maxWidth: 400,
+      borderRadius: 20,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: theme.isDark ? 'rgba(248, 113, 113, 0.35)' : 'rgba(190, 18, 60, 0.35)',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      marginBottom: spacing.sm,
+    },
+    modalTitle: {
+      flexShrink: 1,
+      fontSize: 20,
+      fontWeight: '800',
+      color: theme.isDark ? '#FECACA' : '#7F1D1D',
+    },
+    modalBody: {
+      fontSize: 15,
+      lineHeight: 22,
+      color: theme.isDark ? '#FECACA' : '#9F1239',
+      textAlign: 'center',
+      marginBottom: spacing.lg,
+    },
+    modalActions: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    modalKeep: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 12,
+      alignItems: 'center',
+      backgroundColor: theme.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255, 255, 255, 0.55)',
+    },
+    modalKeepText: {
+      fontWeight: '700',
+      color: theme.isDark ? '#F8FAFC' : '#7F1D1D',
+    },
+    modalDelete: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 12,
+      alignItems: 'center',
+      backgroundColor: '#9F1239',
+    },
+    modalDeleteText: {
+      fontWeight: '700',
+      color: '#fff',
+    },
+  });
+}

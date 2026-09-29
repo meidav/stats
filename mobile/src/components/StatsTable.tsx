@@ -1,17 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 
 import { GlassCard } from './GlassCard';
-import { colors, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
 import { formatPlusMinus, winPctColor } from '../lib/names';
 import { competitionRanks } from '../lib/ranks';
+import { useThemeTokens } from '../lib/theme';
 import type { PlayerStat } from '../types';
 
 type Props = {
   title?: string;
   stats: PlayerStat[];
   showPlusMinus?: boolean;
-  onPlayerPress: (player: string) => void;
+  onPlayerPress?: (player: string) => void;
 };
 
 function useTableLayout() {
@@ -30,7 +31,10 @@ function useTableLayout() {
 }
 
 export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const layout = useTableLayout();
+  const { colors } = theme;
   if (stats.length === 0) return null;
 
   const ranks = competitionRanks(stats, 'standings');
@@ -49,7 +53,9 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
       <GlassCard style={styles.card}>
         <View style={[styles.headerRow, headerPad]}>
           <Text style={[styles.th, rankStyle, { fontSize: layout.headerSize }]}>#</Text>
-          <Text style={[styles.th, styles.player, { fontSize: layout.headerSize }]}>Player</Text>
+          <Text style={[styles.th, styles.player, styles.playerHeader, { fontSize: layout.headerSize }]}>
+            Player
+          </Text>
           <Text style={[styles.th, statStyle, { fontSize: layout.headerSize, color: colors.win }]}>W</Text>
           <Text style={[styles.th, statStyle, { fontSize: layout.headerSize, color: colors.loss }]}>L</Text>
           <Text style={[styles.th, pctStyle, { fontSize: layout.headerSize, color: colors.neutral }]}>%</Text>
@@ -62,9 +68,22 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
             <Text style={[styles.td, rankStyle, { fontSize: layout.cellSize }]}>
               {displayRanks[index]}
             </Text>
-            <TouchableOpacity style={styles.player} onPress={() => onPlayerPress(row.player)}>
-              <Text style={[styles.playerName, { fontSize: layout.cellSize }]}>{row.player}</Text>
-            </TouchableOpacity>
+            {onPlayerPress ? (
+              <TouchableOpacity style={styles.player} onPress={() => onPlayerPress(row.player)}>
+                <Text style={[styles.playerName, { fontSize: layout.cellSize }]}>{row.player}</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.player}>
+                <Text
+                  style={[
+                    styles.playerName,
+                    { fontSize: layout.cellSize, textDecorationLine: 'none' },
+                  ]}
+                >
+                  {row.player}
+                </Text>
+              </View>
+            )}
             <Text style={[styles.td, statStyle, { fontSize: layout.cellSize, color: colors.win }]}>
               {row.wins}
             </Text>
@@ -112,64 +131,72 @@ export function StatsTable({ title, stats, showPlusMinus = true, onPlayerPress }
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: 0,
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    color: colors.text,
-    marginBottom: spacing.sm,
-    paddingHorizontal: 4,
-  },
-  card: {
-    paddingVertical: spacing.sm,
-    overflow: 'hidden',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingBottom: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(15, 23, 42, 0.12)',
-  },
-  dataRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  altRow: {
-    backgroundColor: 'rgba(37, 99, 235, 0.06)',
-  },
-  th: {
-    fontWeight: '800',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
-  },
-  td: {
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-  rank: {
-    flexShrink: 0,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
-  player: {
-    flex: 1,
-    minWidth: 0,
-    paddingRight: 6,
-  },
-  playerName: {
-    fontWeight: '700',
-    color: colors.primary,
-    textDecorationLine: 'underline',
-    textDecorationColor: 'rgba(37, 99, 235, 0.35)',
-  },
-  stat: {
-    flexShrink: 0,
-    textAlign: 'center',
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+    wrap: {
+      marginBottom: 0,
+    },
+    title: {
+      fontSize: 13,
+      fontWeight: '800',
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+      color: colors.text,
+      marginBottom: spacing.sm,
+      paddingHorizontal: 4,
+    },
+    card: {
+      paddingVertical: spacing.sm,
+      overflow: 'hidden',
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingBottom: spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.fieldBorder,
+    },
+    dataRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    altRow: {
+      backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(37, 99, 235, 0.06)',
+    },
+    th: {
+      fontWeight: '800',
+      letterSpacing: 0.3,
+      textTransform: 'uppercase',
+      color: colors.textMuted,
+    },
+    td: {
+      fontWeight: '700',
+      fontVariant: ['tabular-nums'],
+      color: colors.text,
+    },
+    rank: {
+      flexShrink: 0,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+    player: {
+      flex: 1,
+      minWidth: 0,
+      paddingRight: 6,
+    },
+    playerHeader: {
+      color: colors.textMuted,
+    },
+    playerName: {
+      fontWeight: '700',
+      color: colors.primary,
+      textDecorationLine: 'underline',
+      textDecorationColor: theme.isDark ? `${colors.primary}66` : 'rgba(37, 99, 235, 0.35)',
+    },
+    stat: {
+      flexShrink: 0,
+      textAlign: 'center',
+    },
+  });
+}

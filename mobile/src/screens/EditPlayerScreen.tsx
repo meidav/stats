@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CommonActions } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -16,15 +16,20 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
-import { colors, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { formChrome } from '../lib/formTheme';
 import { autoCapWords, initials } from '../lib/names';
-import type { RootStackParamList } from '../navigation/types';
+import { useThemeTokens } from '../lib/theme';
+import type { LeagueStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'EditPlayer'>;
+type Props = NativeStackScreenProps<LeagueStackParamList, 'EditPlayer'>;
 
 export function EditPlayerScreen({ route, navigation }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const chrome = useMemo(() => formChrome(theme), [theme]);
   const { sportId, playerName: initialName, avatarUrl: initialAvatar } = route.params;
   const { token } = useAuth();
   const [name, setName] = useState(initialName);
@@ -114,8 +119,9 @@ export function EditPlayerScreen({ route, navigation }: Props) {
   }
 
   return (
-    <ScreenScaffold
+    <ScreenScaffold edgeHeader
       keyboard
+      aboveTabBar
       footer={
         <View style={styles.footer}>
           <ErrorBanner message={error} />
@@ -162,6 +168,7 @@ export function EditPlayerScreen({ route, navigation }: Props) {
           value={name}
           autoCapitalize="words"
           onChangeText={(value) => setName(autoCapWords(value))}
+          placeholderTextColor={chrome.placeholder}
         />
         <Text style={styles.hint}>This updates the name on every game in this activity.</Text>
       </ScrollView>
@@ -169,78 +176,82 @@ export function EditPlayerScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-  },
-  footer: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  label: {
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.4,
-    textTransform: 'uppercase',
-    color: colors.textMuted,
-  },
-  hint: {
-    color: colors.textMuted,
-    fontSize: 13,
-    marginTop: spacing.sm,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-    fontSize: 16,
-    color: colors.text,
-  },
-  photoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: 88,
-    height: 88,
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 28,
-    fontWeight: '800',
-  },
-  photoActions: {
-    flex: 1,
-    gap: spacing.sm,
-  },
-  photoButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-  },
-  photoButtonText: {
-    color: colors.primary,
-    fontWeight: '700',
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  const chrome = formChrome(theme);
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: 120,
+    },
+    footer: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.md,
+      gap: spacing.sm,
+    },
+    label: {
+      marginTop: spacing.md,
+      marginBottom: spacing.sm,
+      fontSize: 13,
+      fontWeight: '800',
+      letterSpacing: 0.4,
+      textTransform: 'uppercase',
+      color: chrome.muted,
+    },
+    hint: {
+      color: chrome.muted,
+      fontSize: 13,
+      marginTop: spacing.sm,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: chrome.fieldBorder,
+      borderRadius: 10,
+      padding: spacing.md,
+      backgroundColor: chrome.fieldBg,
+      fontSize: 16,
+      color: chrome.inputText,
+    },
+    photoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    avatar: {
+      width: 88,
+      height: 88,
+      borderRadius: 44,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    avatarImage: {
+      width: 88,
+      height: 88,
+    },
+    avatarText: {
+      color: theme.id === 'classic' ? '#121820' : '#fff',
+      fontSize: 28,
+      fontWeight: '800',
+    },
+    photoActions: {
+      flex: 1,
+      gap: spacing.sm,
+    },
+    photoButton: {
+      alignSelf: 'flex-start',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 10,
+      backgroundColor: chrome.scoreChipBg,
+    },
+    photoButtonText: {
+      color: chrome.scoreChipText,
+      fontWeight: '700',
+    },
+  });
+}

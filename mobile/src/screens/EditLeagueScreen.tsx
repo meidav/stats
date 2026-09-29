@@ -7,18 +7,20 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
-import { colors, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { formChrome } from '../lib/formTheme';
 import { iconIdForSport, LEAGUE_ICONS, selectedIconForLeague, sortLeagueIcons, type LeagueIconUsage } from '../lib/leagueIcons';
 import { LeagueIcon } from '../components/LeagueIcon';
 import { upsertCachedLeague } from '../lib/leagueCache';
+import { useThemeTokens } from '../lib/theme';
 import { hintForVisibility, VISIBILITY_OPTIONS, type LeagueVisibility } from '../lib/visibility';
-import type { RootStackParamList } from '../navigation/types';
+import type { LeagueStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'EditLeague'>;
+type Props = NativeStackScreenProps<LeagueStackParamList, 'EditLeague'>;
 
-function iconFromParams(params: RootStackParamList['EditLeague']) {
+function iconFromParams(params: LeagueStackParamList['EditLeague']) {
   if (params.icon && LEAGUE_ICONS.some((item) => item.id === params.icon)) {
     return params.icon;
   }
@@ -29,6 +31,9 @@ function iconFromParams(params: RootStackParamList['EditLeague']) {
 }
 
 export function EditLeagueScreen({ route, navigation }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const chrome = useMemo(() => formChrome(theme), [theme]);
   const { slug, name: initialName, visibility: initialVisibility, icon: paramIcon, sportTemplateId } =
     route.params;
   const { token } = useAuth();
@@ -99,8 +104,9 @@ export function EditLeagueScreen({ route, navigation }: Props) {
   }
 
   return (
-    <ScreenScaffold
+    <ScreenScaffold edgeHeader
       keyboard
+      aboveTabBar
       footer={
         <View style={styles.footer}>
           <ErrorBanner message={error} />
@@ -120,6 +126,7 @@ export function EditLeagueScreen({ route, navigation }: Props) {
           value={name}
           autoCapitalize="words"
           onChangeText={setName}
+          placeholderTextColor={chrome.placeholder}
         />
 
         <Text style={styles.label}>Visibility</Text>
@@ -159,82 +166,86 @@ export function EditLeagueScreen({ route, navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-  },
-  footer: {
-    paddingHorizontal: spacing.lg,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: spacing.sm,
-    marginTop: spacing.md,
-  },
-  hint: {
-    color: colors.textMuted,
-    fontSize: 13,
-    marginBottom: spacing.md,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-    fontSize: 16,
-    color: colors.text,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  chip: {
-    flex: 1,
-    padding: spacing.sm,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-    alignItems: 'center',
-  },
-  chipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  chipText: {
-    color: colors.text,
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  chipTextActive: {
-    color: '#fff',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  iconCell: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.28)',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.45)',
-  },
-  iconCellActive: {
-    borderColor: colors.primary,
-    borderWidth: 3,
-    backgroundColor: 'rgba(37, 99, 235, 0.28)',
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  const chrome = formChrome(theme);
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: 120,
+    },
+    footer: {
+      paddingHorizontal: spacing.lg,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: chrome.label,
+      marginBottom: spacing.sm,
+      marginTop: spacing.md,
+    },
+    hint: {
+      color: chrome.muted,
+      fontSize: 13,
+      marginBottom: spacing.md,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: chrome.fieldBorder,
+      borderRadius: 10,
+      padding: spacing.md,
+      backgroundColor: chrome.fieldBg,
+      fontSize: 16,
+      color: chrome.inputText,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginBottom: spacing.xs,
+    },
+    chip: {
+      flex: 1,
+      padding: spacing.sm,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: chrome.chipIdleBorder,
+      backgroundColor: chrome.chipIdleBg,
+      alignItems: 'center',
+    },
+    chipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    chipText: {
+      color: chrome.label,
+      fontWeight: '600',
+      fontSize: 13,
+    },
+    chipTextActive: {
+      color: chrome.chipActiveText,
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    iconCell: {
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: chrome.fieldBg,
+      borderWidth: 2,
+      borderColor: chrome.fieldBorder,
+    },
+    iconCellActive: {
+      borderColor: colors.primary,
+      borderWidth: 3,
+      backgroundColor: chrome.selectedBg,
+    },
+  });
+}

@@ -1,6 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Export, PencilSimple } from '../components/icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -18,19 +18,24 @@ import { CollapsibleSection } from '../components/CollapsibleSection';
 import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
 import { LeagueIcon } from '../components/LeagueIcon';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
-import { colors, spacing } from '../constants/theme';
+import { spacing, type AppTheme } from '../constants/theme';
 import { formatPlusMinus, initials, winPctColor } from '../lib/names';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { sharePlayerProfile } from '../lib/leagueLinks';
+import { useThemeTokens } from '../lib/theme';
 import type { PlayerProfile, PlayerStat } from '../types';
-import type { RootStackParamList } from '../navigation/types';
+import type { LeagueStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'PlayerProfile'>;
+type Props = NativeStackScreenProps<LeagueStackParamList, 'PlayerProfile'>;
 
 export function PlayerProfileScreen({ route, navigation }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const { colors } = theme;
   const {
     sportId,
     playerName,
@@ -117,41 +122,45 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
   }
 
   return (
-    <ScreenScaffold>
-      <View style={styles.topBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back} accessibilityLabel="Back">
-          <Ionicons name="chevron-back" size={24} color={colors.primary} />
-        </TouchableOpacity>
-        <View style={styles.topBarSpacer} />
-        <View style={styles.topActions}>
-          {canEdit ? (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('EditPlayer', {
-                  sportId,
-                  playerName: displayName,
-                  avatarUrl: profile?.avatar_url ?? null,
-                  sportName: displaySport,
-                  leagueName: displayLeague,
-                  leagueSlug: slug,
-                  sportTemplateId: templateId,
-                  sportCategory: category,
-                  leagueIcon: icon,
-                })
-              }
-              style={styles.blueAction}
-              accessibilityLabel="Edit player"
-            >
-              <Ionicons name="pencil" size={20} color={colors.primary} />
-            </TouchableOpacity>
-          ) : null}
-          {canShare ? (
-            <TouchableOpacity onPress={handleShare} style={styles.blueAction} accessibilityLabel="Share player">
-              <Ionicons name="share-outline" size={20} color={colors.primary} />
-            </TouchableOpacity>
-          ) : null}
-        </View>
-      </View>
+    <ScreenScaffold edgeHeader>
+      <ScreenHeader
+        title={displayName}
+        onBack={() => navigation.goBack()}
+        right={
+          <View style={styles.topActions}>
+            {canEdit ? (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('EditPlayer', {
+                    sportId,
+                    playerName: displayName,
+                    avatarUrl: profile?.avatar_url ?? null,
+                    sportName: displaySport,
+                    leagueName: displayLeague,
+                    leagueSlug: slug,
+                    sportTemplateId: templateId,
+                    sportCategory: category,
+                    leagueIcon: icon,
+                  })
+                }
+                style={styles.headerIconBtn}
+                accessibilityLabel="Edit player"
+              >
+                <PencilSimple size={20} color={styles.headerIconColor.color} weight="bold" />
+              </TouchableOpacity>
+            ) : null}
+            {canShare ? (
+              <TouchableOpacity
+                onPress={handleShare}
+                style={styles.headerIconBtn}
+                accessibilityLabel="Share player"
+              >
+                <Export size={20} color={styles.headerIconColor.color} weight="bold" />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        }
+      />
       <ErrorBanner message={error} />
       {loading ? (
         <ActivityIndicator style={styles.loader} color={colors.primary} />
@@ -203,15 +212,17 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
           </View>
 
           <View style={styles.kpiGrid}>
-            <Kpi value={String(profile.wins)} label="Wins" color={colors.win} />
-            <Kpi value={String(profile.losses)} label="Losses" color={colors.loss} />
+            <Kpi styles={styles} value={String(profile.wins)} label="Wins" color={colors.win} />
+            <Kpi styles={styles} value={String(profile.losses)} label="Losses" color={colors.loss} />
             <Kpi
+              styles={styles}
               value={`${(profile.win_pct * 100).toFixed(0)}%`}
               label={profile.rank ? `Win % · #${profile.rank} of ${profile.field_size}` : 'Win %'}
               color={winPctColor(profile.win_pct, colors)}
             />
-            <Kpi value={String(profile.games)} label="Games" color={colors.neutral} />
+            <Kpi styles={styles} value={String(profile.games)} label="Games" color={colors.neutral} />
             <Kpi
+              styles={styles}
               value={formatPlusMinus(profile.plus_minus)}
               label="+/-"
               color={
@@ -222,11 +233,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
                     : colors.neutral
               }
             />
-            <Kpi
-              value={profile.streak}
-              label="Streak"
-              color={streakColor}
-            />
+            <Kpi styles={styles} value={profile.streak} label="Streak" color={streakColor} />
           </View>
 
           {profile.last_results.length ? (
@@ -258,7 +265,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
                   {profile.min_games}+ games together (5% of this player's games)
                 </Text>
               ) : null}
-              <PairTable rows={profile.partners} onPress={openPlayer} />
+              <PairTable theme={theme} rows={profile.partners} onPress={openPlayer} />
             </CollapsibleSection>
           ) : null}
 
@@ -271,7 +278,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
               <Text style={styles.sectionHint}>
                 Under {profile.min_games ?? 1} games together
               </Text>
-              <PairTable rows={profile.occasional_partners!} onPress={openPlayer} />
+              <PairTable theme={theme} rows={profile.occasional_partners!} onPress={openPlayer} />
             </CollapsibleSection>
           ) : null}
 
@@ -284,7 +291,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
                 {profile.min_games}+ games against (5% of this player's games)
               </Text>
             ) : null}
-            <PairTable rows={profile.opponents} onPress={openPlayer} />
+            <PairTable theme={theme} rows={profile.opponents} onPress={openPlayer} />
           </CollapsibleSection>
 
           {(profile.occasional_opponents?.length ?? 0) > 0 ? (
@@ -296,7 +303,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
               <Text style={styles.sectionHint}>
                 Under {profile.min_games ?? 1} games against
               </Text>
-              <PairTable rows={profile.occasional_opponents!} onPress={openPlayer} />
+              <PairTable theme={theme} rows={profile.occasional_opponents!} onPress={openPlayer} />
             </CollapsibleSection>
           ) : null}
 
@@ -319,7 +326,17 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
   );
 }
 
-function Kpi({ value, label, color }: { value: string; label: string; color: string }) {
+function Kpi({
+  styles,
+  value,
+  label,
+  color,
+}: {
+  styles: ReturnType<typeof makeStyles>;
+  value: string;
+  label: string;
+  color: string;
+}) {
   return (
     <GlassCard style={styles.kpi}>
       <Text style={[styles.kpiValue, { color }]}>{value}</Text>
@@ -329,12 +346,16 @@ function Kpi({ value, label, color }: { value: string; label: string; color: str
 }
 
 function PairTable({
+  theme,
   rows,
   onPress,
 }: {
+  theme: AppTheme;
   rows: PlayerStat[];
   onPress: (name: string) => void;
 }) {
+  const styles = useMemo(() => makePairStyles(theme), [theme]);
+  const { colors } = theme;
   const { width } = useWindowDimensions();
   const compact = width < 640;
   const cellSize = compact ? 13 : 15;
@@ -374,205 +395,204 @@ function PairTable({
   );
 }
 
-const styles = StyleSheet.create({
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  topBarSpacer: {
-    flex: 1,
-  },
-  topActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  back: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-  },
-  blueAction: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-  },
-  loader: {
-    marginTop: spacing.xl,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  hero: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: 72,
-    height: 72,
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '800',
-  },
-  heroText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  name: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  pills: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 10,
-  },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    maxWidth: '100%',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: 'rgba(219, 234, 254, 0.62)',
-    borderWidth: 1,
-    borderColor: 'rgba(147, 197, 253, 0.95)',
-  },
-  pillText: {
-    color: '#1E3A8A',
-    fontWeight: '700',
-    fontSize: 13,
-    flexShrink: 1,
-  },
-  kpiGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  kpi: {
-    width: '31%',
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  kpiValue: {
-    fontSize: 22,
-    fontWeight: '800',
-  },
-  kpiLabel: {
-    marginTop: 4,
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-  },
-  streakBlock: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    color: colors.textMuted,
-    marginBottom: spacing.sm,
-  },
-  sectionHint: {
-    fontSize: 13,
-    lineHeight: 18,
-    color: colors.textMuted,
-    marginBottom: spacing.sm,
-    paddingHorizontal: 4,
-  },
-  emptyTable: {
-    color: colors.textMuted,
-    textAlign: 'center',
-    paddingVertical: spacing.md,
-  },
-  dots: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  dot: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dotText: {
-    color: '#fff',
-    fontWeight: '800',
-    fontSize: 12,
-  },
-  pairCard: {
-    overflow: 'hidden',
-    paddingVertical: spacing.sm,
-  },
-  pairHeader: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  pairRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-  },
-  pairAlt: {
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
-  },
-  pairTh: {
-    textAlign: 'center',
-    fontWeight: '800',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
-  },
-  pairTd: {
-    textAlign: 'center',
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-    flexShrink: 0,
-  },
-  pairPlayer: {
-    flex: 1,
-    minWidth: 0,
-    paddingRight: 6,
-    textAlign: 'left',
-  },
-  pairName: {
-    color: colors.primary,
-    fontWeight: '700',
-    textDecorationLine: 'underline',
-    textDecorationColor: 'rgba(37, 99, 235, 0.35)',
-  },
-});
+function makeStyles(theme: AppTheme) {
+  const { colors } = theme;
+  return StyleSheet.create({
+    topActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    headerIconBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.1)',
+    },
+    headerIconColor: {
+      color: theme.isDark ? '#F8FAFC' : colors.text,
+    },
+    loader: {
+      marginTop: spacing.xl,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: 120,
+    },
+    hero: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      marginBottom: spacing.lg,
+    },
+    avatar: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    avatarImage: {
+      width: 72,
+      height: 72,
+    },
+    avatarText: {
+      color: theme.id === 'classic' ? '#121820' : '#fff',
+      fontSize: 24,
+      fontWeight: '800',
+    },
+    heroText: {
+      flex: 1,
+      minWidth: 0,
+    },
+    name: {
+      fontSize: 26,
+      fontWeight: '800',
+      color: colors.text,
+    },
+    pills: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginTop: 10,
+    },
+    pill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      maxWidth: '100%',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 999,
+      backgroundColor: colors.fieldBg,
+      borderWidth: 1,
+      borderColor: colors.fieldBorder,
+    },
+    pillText: {
+      color: colors.text,
+      fontWeight: '700',
+      fontSize: 13,
+      flexShrink: 1,
+    },
+    kpiGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+      marginBottom: spacing.lg,
+    },
+    kpi: {
+      width: '31%',
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+    },
+    kpiValue: {
+      fontSize: 22,
+      fontWeight: '800',
+    },
+    kpiLabel: {
+      marginTop: 4,
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      textAlign: 'center',
+    },
+    streakBlock: {
+      marginBottom: spacing.lg,
+    },
+    sectionTitle: {
+      fontSize: 13,
+      fontWeight: '800',
+      letterSpacing: 0.5,
+      textTransform: 'uppercase',
+      color: colors.text,
+      marginBottom: spacing.sm,
+    },
+    sectionHint: {
+      fontSize: 13,
+      lineHeight: 18,
+      color: colors.textMuted,
+      textAlign: 'center',
+      marginTop: 0,
+      marginBottom: 12,
+      paddingHorizontal: spacing.sm,
+    },
+    dots: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 6,
+    },
+    dot: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    dotText: {
+      color: '#fff',
+      fontWeight: '800',
+      fontSize: 12,
+    },
+  });
+}
+
+function makePairStyles(theme: AppTheme) {
+  const { colors } = theme;
+  return StyleSheet.create({
+    emptyTable: {
+      color: colors.textMuted,
+      textAlign: 'center',
+      paddingVertical: spacing.md,
+    },
+    pairCard: {
+      overflow: 'hidden',
+      paddingVertical: spacing.sm,
+    },
+    pairHeader: {
+      flexDirection: 'row',
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.fieldBorder,
+    },
+    pairRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: 10,
+    },
+    pairAlt: {
+      backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255, 255, 255, 0.22)',
+    },
+    pairTh: {
+      textAlign: 'center',
+      fontWeight: '800',
+      letterSpacing: 0.3,
+      textTransform: 'uppercase',
+      color: colors.textMuted,
+    },
+    pairTd: {
+      textAlign: 'center',
+      fontWeight: '700',
+      fontVariant: ['tabular-nums'],
+      flexShrink: 0,
+    },
+    pairPlayer: {
+      flex: 1,
+      minWidth: 0,
+      paddingRight: 6,
+      textAlign: 'left',
+    },
+    pairName: {
+      color: colors.primary,
+      fontWeight: '700',
+      textDecorationLine: 'underline',
+      textDecorationColor: theme.isDark ? `${colors.primary}66` : 'rgba(37, 99, 235, 0.35)',
+    },
+  });
+}

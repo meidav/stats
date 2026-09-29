@@ -10,13 +10,15 @@ account (not a super-admin). It cannot access /admin-console.
 
 Please:
 1. Sign in with the account above (email login), or use Sign in with Apple / Google
-2. Open My leagues
+2. Open My leagues (bottom tab)
 3. Open "PT Test BVB 2's" (public Beach Volleyball 2's sample)
 4. Also available: "PT Test Gin Stats" and "PT Test Chess Stats" (unlisted)
 5. Check Standings, year filter, Games, player profiles, and Share
-6. Optional: create a new Sports or Game night league and pick Pickleball or Dominoes to see templates
+6. Optional: New league tab -> create a Sports or Game night league
 7. Optional scores: when adding a game, leave score fields empty and save a win/loss only
-8. Account deletion: on Home, tap the settings icon next to your email, open Account, then Delete account (two-step confirm).
+8. Faster add game: open PT Test BVB 2's, tap +, confirm first winner is focused with suggestions and score chips
+9. Appearance: Settings tab -> pick a theme (try Classic or a dark look), then reopen a league
+10. Account deletion: Settings tab -> Account -> Delete account (two-step confirm).
    Do not use the demo account for a live delete test if you still need it;
    create a throwaway account to verify the flow if needed.
 
@@ -34,9 +36,12 @@ Notes for review
 - No ads
 - Account creation is required to create leagues and log games
 - Email/password, Sign in with Apple, and Google Sign-In are all available
-- Account deletion is available in-app (Home: settings icon next to email -> Account -> Delete account)
+- Account and Appearance live under the Settings tab
+- Account deletion is available in-app (Settings -> Account -> Delete account)
 - Shared league links open a public web view at playtracker.org
 - Privacy: https://playtracker.org/privacy
 - Terms: https://playtracker.org/terms
+- 1.2.0 was rejected for a launch crash on iPadOS 27 (missing UIScene lifecycle).
+  1.3.x builds adopt UIScene via Expo enableSceneSupport / UIApplicationSceneManifest.
 
 Contact: hello@playtracker.org

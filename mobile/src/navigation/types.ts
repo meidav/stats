@@ -1,14 +1,7 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { Sport } from '../types';
 
-export type RootStackParamList = {
-  Welcome: undefined;
-  Login: undefined;
-  SignUp: undefined;
-  ForgotPassword: undefined;
-  ResetPassword: { email?: string } | undefined;
-  Home: undefined;
-  DiscoverLeagues: undefined;
-  CreateLeague: undefined;
+export type LeagueFlowParams = {
   League: { slug: string; name?: string; role?: string };
   EditLeague: {
     slug: string;
@@ -58,3 +51,35 @@ export type RootStackParamList = {
     leagueIcon?: string | null;
   };
 };
+
+export type HomeStackParamList = {
+  Home: undefined;
+} & LeagueFlowParams;
+
+export type DiscoverStackParamList = {
+  DiscoverLeagues: undefined;
+} & LeagueFlowParams;
+
+/** Screens that live inside either Home or Discover nested stacks. */
+export type LeagueStackParamList = HomeStackParamList & DiscoverStackParamList;
+
+export type MainTabParamList = {
+  Home: NavigatorScreenParams<HomeStackParamList> | undefined;
+  DiscoverLeagues: NavigatorScreenParams<DiscoverStackParamList> | undefined;
+  CreateLeague: undefined;
+  Settings: undefined;
+};
+
+export type RootStackParamList = {
+  Welcome: undefined;
+  Login: undefined;
+  SignUp: undefined;
+  ForgotPassword: undefined;
+  ResetPassword: { email?: string } | undefined;
+  MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
+  /** Flat aliases kept for auth-era typing and deep-link helpers. */
+  Home: undefined;
+  DiscoverLeagues: undefined;
+  CreateLeague: undefined;
+  Settings: undefined;
+} & LeagueFlowParams;

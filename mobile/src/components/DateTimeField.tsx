@@ -1,11 +1,13 @@
 import DateTimePicker, {
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { colors, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
 import { formatPlayedLabel } from '../lib/datetime';
+import { formChrome } from '../lib/formTheme';
+import { useThemeTokens } from '../lib/theme';
 
 type Props = {
   value: Date;
@@ -14,6 +16,8 @@ type Props = {
 };
 
 export function DateTimeField({ value, onChange, onOpenChange }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [iosOpen, setIosOpen] = useState(false);
   const [androidMode, setAndroidMode] = useState<'date' | 'time' | null>(null);
 
@@ -67,7 +71,7 @@ export function DateTimeField({ value, onChange, onOpenChange }: Props) {
             mode="datetime"
             display="spinner"
             onChange={apply}
-            themeVariant="light"
+            themeVariant={theme.isDark ? 'dark' : 'light'}
           />
         </View>
       ) : null}
@@ -83,36 +87,39 @@ export function DateTimeField({ value, onChange, onOpenChange }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: spacing.md,
-  },
-  label: {
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  field: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-  },
-  value: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  hint: {
-    marginTop: 4,
-    fontSize: 13,
-    color: colors.textMuted,
-  },
-  iosPicker: {
-    marginTop: spacing.sm,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const chrome = formChrome(theme);
+  return StyleSheet.create({
+    wrap: {
+      marginBottom: spacing.md,
+    },
+    label: {
+      fontWeight: '600',
+      color: chrome.label,
+      marginBottom: spacing.xs,
+    },
+    field: {
+      borderWidth: 1,
+      borderColor: chrome.fieldBorder,
+      borderRadius: 10,
+      padding: spacing.md,
+      backgroundColor: chrome.fieldBg,
+    },
+    value: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: chrome.inputText,
+    },
+    hint: {
+      marginTop: 4,
+      fontSize: 13,
+      color: chrome.muted,
+    },
+    iosPicker: {
+      marginTop: spacing.sm,
+      borderRadius: 12,
+      overflow: 'hidden',
+      backgroundColor: theme.isDark ? theme.colors.surface : 'rgba(255, 255, 255, 0.45)',
+    },
+  });
+}

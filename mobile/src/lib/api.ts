@@ -15,6 +15,13 @@ export class ApiError extends Error {
   }
 }
 
+/** Called when a signed-in request is rejected so the app can return to login. */
+let onUnauthorized: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  onUnauthorized = handler;
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -43,6 +50,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     let message = raw || `Request failed (${response.status})`;
     if (response.status === 401 && options.token) {
       message = 'Your session expired. Sign out and sign in again.';
+      onUnauthorized?.();
     } else if (response.status === 401) {
       message = 'Could not sign in. Check your email and password.';
     }

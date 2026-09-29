@@ -1,4 +1,28 @@
-import { Ionicons } from '@expo/vector-icons';
+import {
+  AppleLogo as PhosphorAppleLogo,
+  CaretDown,
+  CaretLeft,
+  CaretRight,
+  CaretUp,
+  DiceFive,
+  Export,
+  Eye,
+  EyeSlash,
+  Gear,
+  Globe,
+  MagnifyingGlass,
+  Medal,
+  PencilSimple,
+  Plus,
+  SignOut,
+  SkipForward,
+  Trash,
+  Trophy,
+  Users,
+  Warning,
+  X,
+  type IconProps,
+} from 'phosphor-react-native';
 import React from 'react';
 import { SvgXml } from 'react-native-svg';
 
@@ -20,31 +44,94 @@ export function GoogleLogo({ size = 20 }: { size?: number }) {
 }
 
 export function AppleLogo({ size = 20, color = '#fff' }: { size?: number; color?: string }) {
-  return <Ionicons name="logo-apple" size={size} color={color} />;
+  return <PhosphorAppleLogo size={size} color={color} weight="fill" />;
 }
 
 export const icons = {
-  eye: 'eye-outline',
-  eyeOff: 'eye-off-outline',
-  apple: 'logo-apple',
-  skip: 'play-skip-forward-outline',
-  back: 'chevron-back',
-  next: 'chevron-forward',
-  trophy: 'trophy-outline',
-  dice: 'dice-outline',
-  people: 'people-outline',
+  eye: 'eye',
+  eyeOff: 'eyeOff',
+  apple: 'apple',
+  skip: 'skip',
+  back: 'back',
+  next: 'next',
+  down: 'down',
+  trophy: 'trophy',
+  medal: 'medal',
+  dice: 'dice',
+  people: 'people',
+  gear: 'gear',
+  globe: 'globe',
+  plus: 'plus',
+  search: 'search',
+  pencil: 'pencil',
+  share: 'share',
+  trash: 'trash',
+  warning: 'warning',
+  signOut: 'signOut',
+  close: 'close',
 } as const;
 
-export type AppIcon = (typeof icons)[keyof typeof icons];
+export const iconMap = {
+  eye: Eye,
+  eyeOff: EyeSlash,
+  apple: PhosphorAppleLogo,
+  skip: SkipForward,
+  back: CaretLeft,
+  next: CaretRight,
+  down: CaretDown,
+  trophy: Trophy,
+  medal: Medal,
+  dice: DiceFive,
+  people: Users,
+  gear: Gear,
+  globe: Globe,
+  plus: Plus,
+  search: MagnifyingGlass,
+  pencil: PencilSimple,
+  share: Export,
+  trash: Trash,
+  warning: Warning,
+  signOut: SignOut,
+  close: X,
+} as const;
+
+export type AppIconName = keyof typeof iconMap;
 
 export function AppIcon({
   name,
   size = 20,
   color = colors.textMuted,
+  weight = 'regular',
 }: {
-  name: AppIcon;
+  name: AppIconName | (typeof icons)[keyof typeof icons];
   size?: number;
   color?: string;
+  weight?: IconProps['weight'];
 }) {
-  return <Ionicons name={name} size={size} color={color} />;
+  const Icon = iconMap[name as AppIconName];
+  return <Icon size={size} color={color} weight={weight} />;
 }
+
+export {
+  CaretDown,
+  CaretLeft,
+  CaretRight,
+  CaretUp,
+  DiceFive,
+  Export,
+  Eye,
+  EyeSlash,
+  Gear,
+  Globe,
+  MagnifyingGlass,
+  Medal,
+  PencilSimple,
+  Plus,
+  SignOut,
+  SkipForward,
+  Trash,
+  Trophy,
+  Users,
+  Warning,
+  X,
+};

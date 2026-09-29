@@ -1,0 +1,5 @@
+First Android release of PlayTracker.
+
+Create leagues for sports or game night, log games fast, and see standings update automatically. Browse public leagues, manage players and profiles, filter by year, and share a link to the web.
+
+Themes (including dark and Classic), bottom tabs, and after you save a game stay ready to log the next one with a quick summary of the result and today's stats.

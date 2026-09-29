@@ -1,6 +1,5 @@
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -10,7 +9,9 @@ import {
   View,
 } from 'react-native';
 
-import { colors, spacing } from '../constants/theme';
+import { CaretDown } from './icons';
+import { spacing } from '../constants/theme';
+import { useThemeTokens } from '../lib/theme';
 
 export type YearOption = {
   year: string;
@@ -25,6 +26,8 @@ type Props = {
 };
 
 export function YearFilterRow({ years, selectedYear, totalGames, onSelect }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [open, setOpen] = useState(false);
 
   if (years.length <= 1) {
@@ -34,6 +37,7 @@ export function YearFilterRow({ years, selectedYear, totalGames, onSelect }: Pro
   const selected = years.find((item) => item.year === selectedYear);
   const label = selected ? selected.year : 'All time';
   const count = selected ? selected.games : totalGames;
+  const activeLabel = theme.id === 'classic' ? '#121820' : '#fff';
 
   function choose(year: string | null) {
     setOpen(false);
@@ -50,14 +54,14 @@ export function YearFilterRow({ years, selectedYear, totalGames, onSelect }: Pro
       >
         <Text style={styles.triggerLabel}>{label}</Text>
         <Text style={styles.triggerCount}>{count}</Text>
-        <Ionicons name="chevron-down" size={16} color={colors.primaryDark} />
+        <CaretDown size={16} color={theme.colors.primary} weight="bold" />
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={styles.scrim} onPress={() => setOpen(false)}>
           <Pressable onPress={() => {}}>
             <LinearGradient
-              colors={['#BFDBFE', '#DDD6FE', '#FDBA74']}
+              colors={[...theme.gradients.modal]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.sheet}
@@ -71,10 +75,20 @@ export function YearFilterRow({ years, selectedYear, totalGames, onSelect }: Pro
                   style={[styles.option, active && styles.optionActive]}
                   onPress={() => choose(item.year)}
                 >
-                  <Text style={[styles.optionLabel, active && styles.optionLabelActive]}>
+                  <Text
+                    style={[
+                      styles.optionLabel,
+                      active && { color: activeLabel },
+                    ]}
+                  >
                     {item.year}
                   </Text>
-                  <Text style={[styles.optionCount, active && styles.optionCountActive]}>
+                  <Text
+                    style={[
+                      styles.optionCount,
+                      active && { color: activeLabel },
+                    ]}
+                  >
                     {item.games}
                   </Text>
                 </TouchableOpacity>
@@ -85,10 +99,20 @@ export function YearFilterRow({ years, selectedYear, totalGames, onSelect }: Pro
               style={[styles.option, selectedYear === null && styles.optionActive]}
               onPress={() => choose(null)}
             >
-              <Text style={[styles.optionLabel, selectedYear === null && styles.optionLabelActive]}>
+              <Text
+                style={[
+                  styles.optionLabel,
+                  selectedYear === null && { color: activeLabel },
+                ]}
+              >
                 All time
               </Text>
-              <Text style={[styles.optionCount, selectedYear === null && styles.optionCountActive]}>
+              <Text
+                style={[
+                  styles.optionCount,
+                  selectedYear === null && { color: activeLabel },
+                ]}
+              >
                 {totalGames}
               </Text>
             </TouchableOpacity>
@@ -100,91 +124,88 @@ export function YearFilterRow({ years, selectedYear, totalGames, onSelect }: Pro
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: spacing.md,
-    alignItems: 'center',
-  },
-  trigger: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.55)',
-    borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.28)',
-  },
-  triggerLabel: {
-    fontWeight: '800',
-    fontSize: 15,
-    color: colors.text,
-  },
-  triggerCount: {
-    fontWeight: '800',
-    fontSize: 12,
-    color: colors.primaryDark,
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  scrim: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.42)',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  sheet: {
-    borderRadius: 18,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.18)',
-    overflow: 'hidden',
-  },
-  sheetTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    color: colors.textMuted,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  optionActive: {
-    backgroundColor: colors.primary,
-  },
-  optionLabel: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  optionLabelActive: {
-    color: '#fff',
-  },
-  optionCount: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: colors.primaryDark,
-  },
-  optionCountActive: {
-    color: '#fff',
-  },
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(15, 23, 42, 0.14)',
-    marginVertical: spacing.xs,
-    marginHorizontal: spacing.sm,
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+    wrap: {
+      marginBottom: spacing.md,
+      alignItems: 'center',
+    },
+    trigger: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 999,
+      backgroundColor: colors.fieldBg,
+      borderWidth: 1,
+      borderColor: colors.fieldBorder,
+    },
+    triggerLabel: {
+      fontWeight: '800',
+      fontSize: 15,
+      color: colors.text,
+    },
+    triggerCount: {
+      fontWeight: '800',
+      fontSize: 12,
+      color: theme.isDark ? colors.primary : colors.primaryDark,
+      backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : `${colors.primary}22`,
+      paddingHorizontal: 7,
+      paddingVertical: 2,
+      borderRadius: 999,
+      overflow: 'hidden',
+    },
+    scrim: {
+      flex: 1,
+      backgroundColor: colors.scrim,
+      justifyContent: 'center',
+      paddingHorizontal: spacing.lg,
+    },
+    sheet: {
+      borderRadius: 18,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      borderWidth: 1,
+      borderColor: colors.fieldBorder,
+      overflow: 'hidden',
+    },
+    sheetTitle: {
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+      color: colors.textMuted,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.sm,
+    },
+    option: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderRadius: 12,
+    },
+    optionActive: {
+      backgroundColor: colors.primary,
+    },
+    optionLabel: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    optionCount: {
+      fontSize: 14,
+      fontWeight: '800',
+      color: theme.isDark ? colors.primary : colors.primaryDark,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.fieldBorder,
+      marginVertical: spacing.xs,
+      marginHorizontal: spacing.sm,
+    },
+  });
+}

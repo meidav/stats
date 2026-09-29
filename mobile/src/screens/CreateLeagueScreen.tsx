@@ -1,4 +1,4 @@
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ScrollView,
@@ -14,23 +14,25 @@ import { GradientButton } from '../components/GradientButton';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
-import { colors, spacing } from '../constants/theme';
+import { spacing } from '../constants/theme';
 import { copyForFocus, defaultTemplateId, detectTemplateFromName, FOCUS_OPTIONS, templatesForFocus } from '../lib/focus';
 import { upsertCachedLeague } from '../lib/leagueCache';
 import { ApiError, api } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import type { LeagueFocus } from '../lib/focus';
 import { suggestLeagueName } from '../lib/names';
+import { formChrome } from '../lib/formTheme';
+import { useThemeTokens } from '../lib/theme';
 import { hintForVisibility, VISIBILITY_OPTIONS, type LeagueVisibility } from '../lib/visibility';
 import type { SportTemplate } from '../types';
-import type { RootStackParamList } from '../navigation/types';
+import type { MainTabParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CreateLeague'>;
-
-const PLACEHOLDER_COLOR = 'rgba(51, 65, 85, 0.42)';
-const PLACEHOLDER_ERROR_COLOR = 'rgba(220, 38, 38, 0.55)';
+type Props = BottomTabScreenProps<MainTabParamList, 'CreateLeague'>;
 
 export function CreateLeagueScreen({ navigation }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const chrome = useMemo(() => formChrome(theme), [theme]);
   const { token, user } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
   const nameY = useRef(0);
@@ -62,6 +64,8 @@ export function CreateLeagueScreen({ navigation }: Props) {
     () => suggestLeagueName(user, selectedTemplateMeta?.name || selectedTemplateMeta?.default_name),
     [user, selectedTemplateMeta],
   );
+  const placeholderColor = chrome.placeholder;
+  const placeholderError = theme.isDark ? 'rgba(248,113,113,0.7)' : 'rgba(220, 38, 38, 0.55)';
 
   function handleFocusChange(next: Exclude<LeagueFocus, 'mixed'>) {
     setFocus(next);
@@ -117,7 +121,10 @@ export function CreateLeagueScreen({ navigation }: Props) {
         sport_template_id: selectedTemplate,
       });
       await upsertCachedLeague(league);
-      navigation.replace('League', { slug: league.slug, name: league.name });
+      navigation.navigate('Home', {
+        screen: 'League',
+        params: { slug: league.slug, name: league.name },
+      });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not create league');
     } finally {
@@ -127,7 +134,9 @@ export function CreateLeagueScreen({ navigation }: Props) {
 
   return (
     <ScreenScaffold
+      edgeHeader
       keyboard
+      aboveTabBar
       footer={
         <View style={styles.footer}>
           <ErrorBanner message={!nameError ? error : ''} />
@@ -135,7 +144,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
         </View>
       }
     >
-      <ScreenHeader title={copy.createTitle} onBack={() => navigation.goBack()} />
+      <ScreenHeader title={copy.createTitle} />
       <ScrollView
         ref={scrollRef}
         style={styles.container}
@@ -169,7 +178,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
           <TextInput
             style={[styles.input, nameError && styles.inputError]}
             placeholder={namePlaceholder}
-            placeholderTextColor={nameError ? PLACEHOLDER_ERROR_COLOR : PLACEHOLDER_COLOR}
+            placeholderTextColor={nameError ? placeholderError : placeholderColor}
             autoCapitalize="words"
             value={name}
             onChangeText={applyName}
@@ -210,7 +219,10 @@ export function CreateLeagueScreen({ navigation }: Props) {
                   <View style={styles.templateIcon}>
                     <TemplateGlyph template={template} size={28} />
                   </View>
-                  <Text style={styles.templateName} numberOfLines={2}>
+                  <Text
+                    style={[styles.templateName, selected && styles.templateNameActive]}
+                    numberOfLines={2}
+                  >
                     {template.name}
                   </Text>
                 </View>
@@ -223,111 +235,118 @@ export function CreateLeagueScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-  },
-  footer: {
-    paddingHorizontal: spacing.lg,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: spacing.sm,
-    marginTop: spacing.md,
-  },
-  hint: {
-    color: colors.textMuted,
-    fontSize: 13,
-    marginTop: spacing.xs,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    padding: spacing.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-    fontSize: 16,
-    color: colors.text,
-  },
-  inputError: {
-    borderColor: colors.danger,
-    backgroundColor: 'rgba(220, 38, 38, 0.08)',
-  },
-  fieldError: {
-    color: colors.danger,
-    marginTop: spacing.xs,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  chip: {
-    flex: 1,
-    padding: spacing.sm,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-    alignItems: 'center',
-  },
-  chipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  chipText: {
-    color: colors.text,
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  chipTextActive: {
-    color: '#fff',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  template: {
-    // Share the row evenly with gap so the grid matches Name / Visibility width.
-    flexGrow: 1,
-    flexBasis: '46%',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: 'rgba(255, 255, 255, 0.28)',
-    minHeight: 64,
-    justifyContent: 'center',
-  },
-  templateActive: {
-    borderColor: colors.primary,
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-  },
-  templateInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  templateIcon: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  templateName: {
-    flex: 1,
-    fontWeight: '700',
-    color: colors.text,
-    fontSize: 13,
-    lineHeight: 16,
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  const chrome = formChrome(theme);
+
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.lg + 100,
+    },
+    footer: {
+      paddingHorizontal: spacing.lg,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: chrome.label,
+      marginBottom: spacing.sm,
+      marginTop: spacing.md,
+    },
+    hint: {
+      color: chrome.muted,
+      fontSize: 13,
+      marginTop: spacing.xs,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: chrome.fieldBorder,
+      borderRadius: 10,
+      padding: spacing.md,
+      backgroundColor: chrome.fieldBg,
+      fontSize: 16,
+      color: chrome.inputText,
+    },
+    inputError: {
+      borderColor: colors.danger,
+      backgroundColor: theme.isDark ? 'rgba(220, 38, 38, 0.16)' : 'rgba(220, 38, 38, 0.08)',
+    },
+    fieldError: {
+      color: colors.danger,
+      marginTop: spacing.xs,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    row: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    chip: {
+      flex: 1,
+      padding: spacing.sm,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: chrome.chipIdleBorder,
+      backgroundColor: chrome.chipIdleBg,
+      alignItems: 'center',
+    },
+    chipActive: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    chipText: {
+      color: chrome.label,
+      fontWeight: '600',
+      fontSize: 13,
+    },
+    chipTextActive: {
+      color: chrome.chipActiveText,
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    template: {
+      flexGrow: 1,
+      flexBasis: '46%',
+      paddingVertical: 12,
+      paddingHorizontal: 10,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: chrome.fieldBorder,
+      backgroundColor: chrome.fieldBg,
+      minHeight: 64,
+      justifyContent: 'center',
+    },
+    templateActive: {
+      borderColor: colors.primary,
+      backgroundColor: chrome.selectedBg,
+    },
+    templateInner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    templateIcon: {
+      width: 32,
+      height: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    templateName: {
+      flex: 1,
+      fontWeight: '700',
+      color: chrome.label,
+      fontSize: 13,
+      lineHeight: 16,
+    },
+    templateNameActive: {
+      color: chrome.label,
+    },
+  });
+}

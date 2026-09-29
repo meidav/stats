@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { api } from './api';
+import { api, setUnauthorizedHandler } from './api';
 import { clearCachedLeagues } from './leagueCache';
 import { clearCachedPlayers } from './playerCache';
 import type { AppleFullName } from './socialAuth';
@@ -95,6 +95,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await clearCachedLeagues();
     await clearCachedPlayers();
   }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      void logout();
+    });
+    return () => setUnauthorizedHandler(null);
+  }, [logout]);
 
   const deleteAccount = useCallback(async () => {
     if (!token) {

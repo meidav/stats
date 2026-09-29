@@ -1,0 +1,20 @@
+PlayTracker 1.3.1 (build 18)
+============================
+Ship notes for App Store Connect / Play Console.
+
+What's New (paste): see whats-new.txt / store-listing/google/release-notes.txt
+
+Includes
+--------
+- Themes (PlayTracker, Classic, Night Court, Broadcast, Harbor) + Settings
+- Glass bottom tabs: My leagues, Public, New league, Settings
+- My leagues restores the last open league when switching tabs
+- Soft league refresh (no spinner flash when returning; spinner on cold open)
+- After add game: stay on form; modal with saved game + today's stats (~7s)
+- UIScene lifecycle (fixes 1.2.0 iPadOS 27 launch crash)
+- Re-encoded beach-volleyball.png for Android AAPT
+
+Version
+-------
+app.json: 1.3.1 / iOS buildNumber 18 / Android versionCode 18
+Xcode (after prebuild:ios): MARKETING_VERSION 1.3.1, CURRENT_PROJECT_VERSION 18

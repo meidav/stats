@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 
-import { glassLight } from '../constants/theme';
+import { useThemeTokens } from '../lib/theme';
 
 type Props = {
   children: React.ReactNode;
@@ -10,6 +10,9 @@ type Props = {
 };
 
 export function GlassCard({ children, style, onPress }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+
   if (onPress) {
     return (
       <TouchableOpacity activeOpacity={0.85} onPress={onPress} style={[styles.card, style]}>
@@ -21,16 +24,19 @@ export function GlassCard({ children, style, onPress }: Props) {
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: glassLight.backgroundColor,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: glassLight.borderColor,
-    shadowColor: glassLight.shadowColor,
-    shadowOpacity: glassLight.shadowOpacity,
-    shadowRadius: glassLight.shadowRadius,
-    shadowOffset: glassLight.shadowOffset,
-    elevation: glassLight.elevation,
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const g = theme.glassLight;
+  return StyleSheet.create({
+    card: {
+      backgroundColor: g.backgroundColor,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: g.borderColor,
+      shadowColor: g.shadowColor,
+      shadowOpacity: g.shadowOpacity,
+      shadowRadius: g.shadowRadius,
+      shadowOffset: g.shadowOffset,
+      elevation: g.elevation,
+    },
+  });
+}

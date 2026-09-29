@@ -1,5 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -10,7 +9,9 @@ import {
   View,
 } from 'react-native';
 
-import { colors, spacing } from '../constants/theme';
+import { CaretDown, CaretUp } from './icons';
+import { spacing } from '../constants/theme';
+import { useThemeTokens } from '../lib/theme';
 
 type Props = {
   title: string;
@@ -25,6 +26,8 @@ export function CollapsibleSection({
   defaultOpen = true,
   children,
 }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
   const [open, setOpen] = useState(defaultOpen);
   const progress = useRef(new Animated.Value(defaultOpen ? 1 : 0)).current;
   const activeAnim = useRef<Animated.CompositeAnimation | null>(null);
@@ -99,11 +102,11 @@ export function CollapsibleSection({
               </Text>
             </View>
           ) : null}
-          <Ionicons
-            name={open ? 'chevron-up' : 'chevron-down'}
-            size={open ? 16 : 20}
-            color={open ? colors.textMuted : colors.primaryDark}
-          />
+          {open ? (
+            <CaretUp size={16} color={theme.colors.textMuted} weight="bold" />
+          ) : (
+            <CaretDown size={20} color={theme.colors.primary} weight="bold" />
+          )}
         </Animated.View>
       </TouchableOpacity>
       <Animated.View
@@ -124,67 +127,70 @@ export function CollapsibleSection({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    marginBottom: spacing.lg,
-  },
-  wrapCollapsed: {
-    marginBottom: spacing.sm,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    marginBottom: spacing.sm,
-    zIndex: 2,
-  },
-  headerCollapsed: {
-    backgroundColor: 'rgba(255, 252, 248, 0.72)',
-    borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.28)',
-    shadowColor: '#1E3A8A',
-    shadowOpacity: 0.16,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
-  },
-  title: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-    color: colors.text,
-  },
-  titleCollapsed: {
-    fontSize: 15,
-    letterSpacing: 0.4,
-  },
-  badge: {
-    minWidth: 24,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    alignItems: 'center',
-  },
-  badgeCollapsed: {
-    backgroundColor: colors.primary,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-  },
-  badgeText: {
-    color: colors.primaryDark,
-    fontWeight: '800',
-    fontSize: 12,
-  },
-  badgeTextCollapsed: {
-    color: '#fff',
-    fontSize: 13,
-  },
-  body: {
-    overflow: 'hidden',
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+    wrap: {
+      marginBottom: spacing.lg,
+    },
+    wrapCollapsed: {
+      marginBottom: spacing.sm,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingHorizontal: 12,
+      borderRadius: 14,
+      marginBottom: spacing.xs,
+      zIndex: 2,
+    },
+    headerCollapsed: {
+      backgroundColor: colors.fieldBg,
+      borderWidth: 1,
+      borderColor: colors.fieldBorder,
+      shadowColor: theme.glass.shadowColor,
+      shadowOpacity: theme.isDark ? 0.35 : 0.16,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 4,
+    },
+    title: {
+      flex: 1,
+      fontSize: 13,
+      fontWeight: '800',
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+      color: colors.text,
+    },
+    titleCollapsed: {
+      fontSize: 15,
+      letterSpacing: 0.4,
+    },
+    badge: {
+      minWidth: 24,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 999,
+      backgroundColor: theme.isDark ? 'rgba(255,255,255,0.1)' : `${colors.primary}22`,
+      alignItems: 'center',
+    },
+    badgeCollapsed: {
+      backgroundColor: colors.primary,
+      paddingVertical: 4,
+      paddingHorizontal: 10,
+    },
+    badgeText: {
+      color: theme.isDark ? colors.primary : colors.primaryDark,
+      fontWeight: '800',
+      fontSize: 12,
+    },
+    badgeTextCollapsed: {
+      color: theme.id === 'classic' ? '#121820' : '#fff',
+      fontSize: 13,
+    },
+    body: {
+      overflow: 'hidden',
+    },
+  });
+}

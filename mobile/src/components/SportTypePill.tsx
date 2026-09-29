@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { TemplateGlyph } from './TemplateGlyph';
+import { useThemeTokens } from '../lib/theme';
 import type { Sport } from '../types';
 
 type Props = {
@@ -12,6 +13,9 @@ type Props = {
 };
 
 export function SportTypePill({ name, templateId, category = 'custom', style }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+
   return (
     <View style={[styles.pill, style]}>
       <TemplateGlyph template={{ id: templateId || 'custom', category }} size={18} />
@@ -22,24 +26,27 @@ export function SportTypePill({ name, templateId, category = 'custom', style }: 
   );
 }
 
-const styles = StyleSheet.create({
-  pill: {
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: 'rgba(219, 234, 254, 0.62)',
-    borderWidth: 1,
-    borderColor: 'rgba(147, 197, 253, 0.95)',
-    maxWidth: '100%',
-  },
-  text: {
-    color: '#1E3A8A',
-    fontWeight: '700',
-    fontSize: 13,
-    flexShrink: 1,
-  },
-});
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+    pill: {
+      alignSelf: 'center',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 999,
+      backgroundColor: colors.fieldBg,
+      borderWidth: 1,
+      borderColor: colors.fieldBorder,
+      maxWidth: '100%',
+    },
+    text: {
+      color: colors.text,
+      fontWeight: '700',
+      fontSize: 13,
+      flexShrink: 1,
+    },
+  });
+}
