@@ -22,6 +22,7 @@ import { APP_TAGLINE } from '../constants/brand';
 import { colors, glassPeach, spacing } from '../constants/theme';
 import { useContentMaxWidth } from '../lib/layout';
 import { markIntroSeen } from '../lib/onboarding';
+import { useThemeTokens } from '../lib/theme';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
@@ -45,6 +46,7 @@ const SLIDES = [
 ] as const;
 
 export function WelcomeScreen({ navigation }: Props) {
+  const theme = useThemeTokens();
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const contentMaxWidth = useContentMaxWidth();
@@ -121,8 +123,11 @@ export function WelcomeScreen({ navigation }: Props) {
         <View style={[styles.header, { paddingTop: insets.top + spacing.lg }]}>
           <View style={styles.hero}>
             <BrandLockup size={148} />
-            <Text style={styles.tagline}>{APP_TAGLINE}</Text>
           </View>
+        </View>
+
+        <View style={styles.taglineSlot}>
+          <Text style={[styles.tagline, { color: theme.colors.text }]}>{APP_TAGLINE}</Text>
         </View>
 
         <ScrollView
@@ -139,7 +144,13 @@ export function WelcomeScreen({ navigation }: Props) {
         >
           {SLIDES.map((item) => (
             <View key={item.title} style={[styles.slidePage, { width: slideWidth }]}>
-              <View style={[styles.slide, cardWidthStyle]}>
+              <View
+                style={[
+                  styles.slide,
+                  cardWidthStyle,
+                  theme.isDark && styles.slideOnDark,
+                ]}
+              >
                 {'graphic' in item ? (
                   <View style={styles.graphicWrap}>
                     <BeachVolleyballMark size={96} />
@@ -155,12 +166,21 @@ export function WelcomeScreen({ navigation }: Props) {
           <View style={[styles.slidePage, { width: slideWidth }]} />
         </ScrollView>
 
+        <View style={styles.taglineSlot} />
+
         <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.lg }]}>
           <View style={styles.dots}>
             {SLIDES.map((item, dotIndex) => (
               <View
                 key={item.title}
-                style={[styles.dot, dotIndex === index && styles.dotActive]}
+                style={[
+                  styles.dot,
+                  { backgroundColor: `${theme.colors.primary}40` },
+                  dotIndex === index && [
+                    styles.dotActive,
+                    { backgroundColor: theme.colors.primary },
+                  ],
+                ]}
               />
             ))}
           </View>
@@ -181,7 +201,7 @@ export function WelcomeScreen({ navigation }: Props) {
           </View>
 
           <TouchableOpacity style={styles.skipButton} onPress={finish}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={[styles.skipText, { color: theme.colors.text }]}>Skip</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -209,21 +229,25 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     marginTop: spacing.sm,
-    marginBottom: spacing.md,
     paddingHorizontal: spacing.sm,
   },
+  taglineSlot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+  },
   tagline: {
-    marginTop: spacing.sm,
     fontSize: 17,
+    fontStyle: 'italic',
     color: colors.text,
     textAlign: 'center',
   },
   carousel: {
-    flex: 1,
+    flexGrow: 0,
   },
   carouselContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
+    flexGrow: 0,
   },
   slidePage: {
     paddingHorizontal: spacing.lg,
@@ -242,6 +266,10 @@ const styles = StyleSheet.create({
     shadowRadius: glassPeach.shadowRadius,
     shadowOffset: glassPeach.shadowOffset,
     elevation: glassPeach.elevation,
+  },
+  slideOnDark: {
+    backgroundColor: 'rgba(255, 214, 176, 0.94)',
+    borderColor: 'rgba(255, 237, 213, 0.9)',
   },
   graphicWrap: {
     alignItems: 'center',

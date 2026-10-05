@@ -14,10 +14,10 @@ type Props = {
 const logoPng = require('../../assets/playtracker-logo.png');
 
 /**
- * Logo SVG includes empty canvas margin. Scale art a bit above the tile so the
- * pawn + wordmark read larger, while still leaving a little edge padding.
+ * Logo SVG includes some empty canvas. Keep the art inside the tile so the
+ * pawn and wordmark are not clipped against the card edges.
  */
-const ART_SCALE = 1.18;
+const ART_SCALE = 0.9;
 
 export function BrandLockup({ size = 148, style, mode = 'svg' }: Props) {
   const art = Math.round(size * ART_SCALE);

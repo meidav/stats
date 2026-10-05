@@ -1,6 +1,7 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AppState,
   Keyboard,
   ScrollView,
   StyleSheet,
@@ -119,7 +120,7 @@ export function AddGameScreen({ route, navigation }: Props) {
   const [recentPlayers, setRecentPlayers] = useState<string[]>([]);
   const [winnerHints, setWinnerHints] = useState<number[]>([]);
   const [loserHints, setLoserHints] = useState<number[]>([]);
-  const [chipLimit, setChipLimit] = useState(5);
+  const [chipLimit, setChipLimit] = useState(4);
   const [playedOpen, setPlayedOpen] = useState(false);
   const [focusField, setFocusField] = useState<FocusField>(
     editing ? null : { side: 'winner', index: 0 },
@@ -137,6 +138,8 @@ export function AddGameScreen({ route, navigation }: Props) {
   const scrollOffset = useRef(0);
   const keyboardHold = useRef(!editing);
   const focusTarget = useRef<TextInput | null>(null);
+  const playedPinned = useRef(editing);
+  const playedOpenRef = useRef(false);
   const focusTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
 
   function nameKey(side: 'winner' | 'loser', index: number) {
@@ -330,6 +333,21 @@ export function AddGameScreen({ route, navigation }: Props) {
     scrollRef.current?.scrollToEnd({ animated: false });
   }, [playedOpen]);
 
+  useEffect(() => {
+    function refreshPlayedAt() {
+      if (playedPinned.current || playedOpenRef.current) return;
+      setPlayedAt(new Date());
+    }
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') refreshPlayedAt();
+    });
+    const timer = setInterval(refreshPlayedAt, 30000);
+    return () => {
+      sub.remove();
+      clearInterval(timer);
+    };
+  }, []);
+
   const winnerChips = useMemo(
     () => winnerScoreChips(winnerHints, templateId, chipLimit),
     [winnerHints, templateId, chipLimit],
@@ -416,6 +434,8 @@ export function AddGameScreen({ route, navigation }: Props) {
     setTennisSets(
       Array.from({ length: tennisFormat }, () => ({ winner: '', loser: '' })),
     );
+    playedPinned.current = false;
+    playedOpenRef.current = false;
     setPlayedAt(new Date());
     setPlayedOpen(false);
     setError('');
@@ -726,10 +746,11 @@ export function AddGameScreen({ route, navigation }: Props) {
                   {winnerChips.map((score, index) => (
                     <View
                       key={`winner-${score}-${index}`}
-                      style={winnerChips.length >= 4 ? styles.scoreChipSlot : undefined}
+                      style={styles.scoreChipSlot}
                     >
                       <TouchableOpacity
                         style={styles.scoreChip}
+                        hitSlop={{ top: 6, bottom: 6 }}
                         onPressIn={() => {
                           setWinnerScore(String(score));
                           forceKeyboard(winnerScoreRef.current);
@@ -773,10 +794,11 @@ export function AddGameScreen({ route, navigation }: Props) {
                   {loserChips.map((score, index) => (
                     <View
                       key={`loser-${score}-${index}`}
-                      style={loserChips.length >= 4 ? styles.scoreChipSlot : undefined}
+                      style={styles.scoreChipSlot}
                     >
                       <TouchableOpacity
                         style={styles.scoreChip}
+                        hitSlop={{ top: 6, bottom: 6 }}
                         onPressIn={() => {
                           setLoserScore(String(score));
                           forceKeyboard(loserScoreRef.current);
@@ -800,8 +822,12 @@ export function AddGameScreen({ route, navigation }: Props) {
         <View style={styles.playedWrap}>
           <DateTimeField
             value={playedAt}
-            onChange={setPlayedAt}
+            onChange={(next) => {
+              playedPinned.current = true;
+              setPlayedAt(next);
+            }}
             onOpenChange={(open) => {
+              playedOpenRef.current = open;
               setPlayedOpen(open);
               if (!open) return;
               keyboardHold.current = false;
@@ -958,32 +984,30 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
     },
     chipRow: {
       flexDirection: 'row',
+      flexWrap: 'nowrap',
       gap: 4,
       marginTop: spacing.sm,
     },
     scoreChipSlot: {
-      flexGrow: 1,
-      flexShrink: 1,
-      width: 0,
+      flex: 1,
       minWidth: 0,
     },
     scoreChip: {
+      width: '100%',
       alignItems: 'center',
       justifyContent: 'center',
-      alignSelf: 'stretch',
       backgroundColor: chrome.scoreChipBg,
       borderWidth: 1,
       borderColor: chrome.scoreChipBorder,
       borderRadius: 8,
-      paddingHorizontal: 0,
-      paddingVertical: 6,
+      paddingHorizontal: 2,
+      paddingVertical: 5,
     },
     scoreChipText: {
       color: chrome.scoreChipText,
       fontWeight: '700',
       fontSize: 13,
       textAlign: 'center',
-      width: '100%',
     },
   });
 }

@@ -1,6 +1,5 @@
 /** How many quick-score chips fit under one score field. */
-export const SCORE_CHIP_MAX = 5;
-export const SCORE_CHIP_MIN_WIDTH = 28;
+export const SCORE_CHIP_MAX = 4;
 export const SCORE_CHIP_GAP = 4;
 
 const DOUBLES_VOLLEYBALL = new Set(['beach_volleyball_2s', 'vollis']);
@@ -9,10 +8,9 @@ export function isDoublesVolleyball(templateId?: string | null): boolean {
   return Boolean(templateId && DOUBLES_VOLLEYBALL.has(templateId));
 }
 
-export function chipCapacity(rowWidth: number): number {
-  if (rowWidth <= 0) return 4;
-  const fit = Math.floor((rowWidth + SCORE_CHIP_GAP) / (SCORE_CHIP_MIN_WIDTH + SCORE_CHIP_GAP));
-  return Math.max(1, Math.min(SCORE_CHIP_MAX, fit));
+/** Always four shortcuts; the row flexes so they fit under the field. */
+export function chipCapacity(_rowWidth: number): number {
+  return SCORE_CHIP_MAX;
 }
 
 /** Most common first. Ties keep the earlier value (pass newest games first). */

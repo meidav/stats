@@ -10,11 +10,13 @@ import { SocialSignIn } from '../components/SocialSignIn';
 import { colors, spacing } from '../constants/theme';
 import { ApiError } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { useThemeTokens } from '../lib/theme';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 export function LoginScreen({ navigation }: Props) {
+  const theme = useThemeTokens();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -136,7 +138,7 @@ export function LoginScreen({ navigation }: Props) {
     <AuthCard
       footer={
         <TouchableOpacity onPress={() => navigation.navigate('Welcome')}>
-          <Text style={styles.viewIntro}>View intro</Text>
+          <Text style={[styles.viewIntro, { color: theme.colors.text }]}>View intro</Text>
         </TouchableOpacity>
       }
     >

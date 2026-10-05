@@ -1,0 +1,10 @@
+PlayTracker 1.3.2 (build 19)
+============================
+Patch on 1.3.1.
+
+- Larger add-game score shortcut pills (max 4 per side) with a taller tap target.
+
+Version
+-------
+app.json: 1.3.2 / iOS buildNumber 19 / Android versionCode 19
+Xcode (after prebuild:ios): MARKETING_VERSION 1.3.2, CURRENT_PROJECT_VERSION 19
