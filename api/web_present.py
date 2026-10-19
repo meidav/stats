@@ -236,6 +236,7 @@ def present_games(games, win_loss=False):
             loser_score = raw_l
         presented.append(
             {
+                "id": game.get("id"),
                 "when": format_game_stamp(game.get("game_date")),
                 "winners": game.get("winners") or [],
                 "losers": game.get("losers") or [],

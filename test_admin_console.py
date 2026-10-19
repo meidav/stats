@@ -6,6 +6,7 @@ import re
 import sqlite3
 import tempfile
 import unittest
+from datetime import datetime, timedelta
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -49,13 +50,15 @@ class AdminConsoleTests(unittest.TestCase):
         cls.unlisted = create_league(cls.member.id, "Quiet League", visibility="unlisted")
         private_sport = add_sport_to_league(cls.private["id"], "beach_volleyball_2s")
         add_sport_to_league(cls.public["id"], "tennis_singles")
+        recent_game_date = (datetime.utcnow() - timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+        older_game_date = (datetime.utcnow() - timedelta(days=14)).strftime("%Y-%m-%d %H:%M:%S")
         add_game(
             private_sport["id"],
             winners=["Ada", "Bea"],
             losers=["Cal", "Dot"],
             winner_score=21,
             loser_score=18,
-            game_date="2026-09-27 12:00:00",
+            game_date=recent_game_date,
             entered_by=cls.member.id,
         )
         for _ in range(4):
@@ -65,7 +68,7 @@ class AdminConsoleTests(unittest.TestCase):
                 losers=["Cal", "Dot"],
                 winner_score=21,
                 loser_score=19,
-                game_date="2026-09-20 12:00:00",
+                game_date=older_game_date,
                 entered_by=cls.member.id,
             )
 
@@ -116,6 +119,16 @@ class AdminConsoleTests(unittest.TestCase):
             data={"email": email, "password": password, "csrf_token": csrf},
             follow_redirects=False,
         )
+
+    def _json_headers(self):
+        page = self.client.get("/admin-console/users")
+        csrf = _extract_csrf(page.get_data(as_text=True))
+        return {
+            "X-CSRF-Token": csrf,
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
 
     def test_console_requires_login(self):
         response = self.client.get("/admin-console/users")
@@ -267,9 +280,11 @@ class AdminConsoleTests(unittest.TestCase):
         html = response.get_data(as_text=True)
         self.assertIn("Secret Club", html)
         self.assertIn("private", html)
-        self.assertIn("Admin league view", html)
+        self.assertIn("Admin league manager", html)
         self.assertIn("Standings", html)
         self.assertIn("Games", html)
+        self.assertIn("Members", html)
+        self.assertIn("Danger zone", html)
         self.assertIn("Ada", html)
         self.assertIn("21", html)
 
@@ -426,6 +441,112 @@ class AdminConsoleTests(unittest.TestCase):
         full = get_user_by_email(user.email)
         self.assertTrue(verify_password(full, "freshpass99"))
         self.assertFalse(user_requires_password_change(user.id))
+
+    def test_admin_league_manage_visibility_members_owner_soft_delete(self):
+        from auth import create_user, get_user_by_email
+        from api.league_db import create_league, get_league_by_id, get_league_by_slug
+        from api.admin_league_service import list_league_members, PREVIOUS_OWNER_ROLE
+
+        create_user("helper", "helper@example.com", "password12", is_admin=False)
+        helper = get_user_by_email("helper@example.com")
+        managed = create_league(self.member.id, "Managed Club", visibility="private")
+        self._login_console()
+        headers = self._json_headers()
+        league_id = managed["id"]
+
+        blocked = self.client.post(
+            f"/admin-console/leagues/{league_id}/visibility",
+            headers=headers,
+            json={"visibility": "public"},
+        )
+        self.assertEqual(blocked.status_code, 400)
+
+        opened = self.client.post(
+            f"/admin-console/leagues/{league_id}/visibility",
+            headers=headers,
+            json={"visibility": "public", "confirm": True},
+        )
+        self.assertEqual(opened.status_code, 200)
+        self.assertEqual(opened.get_json()["league"]["visibility"], "public")
+
+        added = self.client.post(
+            f"/admin-console/leagues/{league_id}/members",
+            headers=headers,
+            json={"identifier": "helper@example.com", "role": "member"},
+        )
+        self.assertEqual(added.status_code, 200)
+        member_ids = {m["user_id"] for m in added.get_json()["members"]}
+        self.assertIn(helper.id, member_ids)
+
+        removed_owner = self.client.post(
+            f"/admin-console/leagues/{league_id}/members/{self.member.id}/remove",
+            headers=headers,
+            json={},
+        )
+        self.assertEqual(removed_owner.status_code, 400)
+
+        transferred = self.client.post(
+            f"/admin-console/leagues/{league_id}/owner",
+            headers=headers,
+            json={"owner_id": helper.id},
+        )
+        self.assertEqual(transferred.status_code, 200)
+        league = get_league_by_id(league_id)
+        self.assertEqual(league["owner_id"], helper.id)
+        roles = {m["user_id"]: m["role"] for m in list_league_members(league_id)}
+        self.assertEqual(roles[helper.id], "owner")
+        self.assertEqual(roles[self.member.id], PREVIOUS_OWNER_ROLE)
+
+        flagged = self.client.post(
+            f"/admin-console/leagues/{league_id}/flag",
+            headers=headers,
+            json={"flag": "test"},
+        )
+        self.assertEqual(flagged.status_code, 200)
+        self.assertEqual(flagged.get_json()["league"]["admin_flag"], "test")
+
+        soft = self.client.post(
+            f"/admin-console/leagues/{league_id}/soft-delete",
+            headers=headers,
+            json={},
+        )
+        self.assertEqual(soft.status_code, 200)
+        self.assertIsNotNone(get_league_by_id(league_id)["deleted_at"])
+        self.assertIsNone(get_league_by_slug(managed["slug"]))
+
+        public_gone = self.client.get(f"/api/v1/leagues/{managed['slug']}")
+        self.assertIn(public_gone.status_code, (403, 404))
+
+        restored = self.client.post(
+            f"/admin-console/leagues/{league_id}/restore",
+            headers=headers,
+            json={},
+        )
+        self.assertEqual(restored.status_code, 200)
+        self.assertIsNone(get_league_by_id(league_id)["deleted_at"])
+
+    def test_admin_league_hard_delete_requires_confirm(self):
+        from api.league_db import create_league, get_league_by_id
+
+        disposable = create_league(self.member.id, "Disposable League", visibility="unlisted")
+        self._login_console()
+        headers = self._json_headers()
+        bad = self.client.post(
+            f"/admin-console/leagues/{disposable['id']}/hard-delete",
+            headers=headers,
+            json={"confirm": "wrong"},
+        )
+        self.assertEqual(bad.status_code, 400)
+        self.assertIsNotNone(get_league_by_id(disposable["id"]))
+
+        ok = self.client.post(
+            f"/admin-console/leagues/{disposable['id']}/hard-delete",
+            headers=headers,
+            json={"confirm": disposable["slug"]},
+        )
+        self.assertEqual(ok.status_code, 200)
+        self.assertTrue(ok.get_json()["deleted"])
+        self.assertIsNone(get_league_by_id(disposable["id"]))
 
 
 if __name__ == "__main__":

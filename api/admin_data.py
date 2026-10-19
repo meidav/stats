@@ -92,11 +92,11 @@ def overview_counts():
         SELECT
           (SELECT COUNT(*) FROM users) AS users,
           (SELECT COUNT(*) FROM users WHERE is_admin = 1) AS admins,
-          (SELECT COUNT(*) FROM leagues) AS leagues,
-          (SELECT COUNT(*) FROM leagues WHERE visibility = 'public') AS public_leagues,
-          (SELECT COUNT(*) FROM leagues WHERE visibility = 'unlisted') AS unlisted_leagues,
-          (SELECT COUNT(*) FROM leagues WHERE visibility = 'private') AS private_leagues,
-          (SELECT COUNT(*) FROM league_games) AS games
+          (SELECT COUNT(*) FROM leagues WHERE deleted_at IS NULL) AS leagues,
+          (SELECT COUNT(*) FROM leagues WHERE deleted_at IS NULL AND visibility = 'public') AS public_leagues,
+          (SELECT COUNT(*) FROM leagues WHERE deleted_at IS NULL AND visibility = 'unlisted') AS unlisted_leagues,
+          (SELECT COUNT(*) FROM leagues WHERE deleted_at IS NULL AND visibility = 'private') AS private_leagues,
+          (SELECT COUNT(*) FROM league_games g JOIN leagues l ON l.id = g.league_id WHERE l.deleted_at IS NULL) AS games
         """,
         fetch_one=True,
     )

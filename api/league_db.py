@@ -62,6 +62,9 @@ def create_leagues_tables():
             )
             """
         )
+        _ensure_column(cursor, "leagues", "deleted_at", "DATETIME")
+        _ensure_column(cursor, "leagues", "admin_flag", "TEXT NOT NULL DEFAULT ''")
+        _ensure_column(cursor, "leagues", "invite_disabled", "INTEGER NOT NULL DEFAULT 0")
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS league_members (
@@ -288,12 +291,19 @@ def get_league_by_id(league_id):
     return _row_to_dict(row)
 
 
-def get_league_by_slug(slug):
-    row = db_manager.execute_query(
-        "SELECT * FROM leagues WHERE slug = ?",
-        (slug,),
-        fetch_one=True,
-    )
+def get_league_by_slug(slug, include_deleted=False):
+    if include_deleted:
+        row = db_manager.execute_query(
+            "SELECT * FROM leagues WHERE slug = ?",
+            (slug,),
+            fetch_one=True,
+        )
+    else:
+        row = db_manager.execute_query(
+            "SELECT * FROM leagues WHERE slug = ? AND deleted_at IS NULL",
+            (slug,),
+            fetch_one=True,
+        )
     return _row_to_dict(row)
 
 
@@ -316,7 +326,8 @@ def get_leagues_for_user(user_id):
         FROM leagues l
         LEFT JOIN league_members lm
           ON lm.league_id = l.id AND lm.user_id = ?
-        WHERE l.owner_id = ? OR lm.user_id = ?
+        WHERE (l.owner_id = ? OR lm.user_id = ?)
+          AND l.deleted_at IS NULL
         GROUP BY l.id
         ORDER BY COALESCE(
           (SELECT MAX(game_date) FROM league_games WHERE league_id = l.id),
@@ -380,6 +391,8 @@ def list_leagues_for_admin(
     recency_days=None,
     focus=None,
     members=None,
+    flag=None,
+    deleted=None,
     sort="games",
     direction="desc",
     limit=500,
@@ -394,6 +407,8 @@ def list_leagues_for_admin(
         recency_days=recency_days,
         focus=focus,
         members=members,
+        flag=flag,
+        deleted=deleted,
         sort=sort,
         direction=direction,
     )
@@ -408,11 +423,13 @@ def _search_leagues(
     recency_days=None,
     focus=None,
     members=None,
+    flag=None,
+    deleted=None,
     sort=None,
     direction=None,
 ):
     params = []
-    extra_cols = "l.owner_id, l.invite_code," if admin else ""
+    extra_cols = "l.owner_id, l.invite_code, l.admin_flag, l.deleted_at, l.invite_disabled," if admin else ""
     sql = f"""
         SELECT l.id, l.name, l.slug, l.description, l.visibility, l.icon, l.focus,
                {extra_cols}
@@ -440,12 +457,20 @@ def _search_leagues(
         LEFT JOIN league_members lm ON lm.league_id = l.id
         WHERE 1 = 1
     """
+    if not admin or deleted != "all":
+        if admin and deleted == "only":
+            sql += " AND l.deleted_at IS NOT NULL"
+        else:
+            sql += " AND l.deleted_at IS NULL"
     if visibility:
         sql += " AND l.visibility = ?"
         params.append(visibility)
     if admin and focus in ADMIN_FOCUS_OPTIONS:
         sql += " AND COALESCE(l.focus, 'mixed') = ?"
         params.append(focus)
+    if admin and flag:
+        sql += " AND COALESCE(l.admin_flag, '') = ?"
+        params.append(flag)
     if query:
         if admin:
             sql += " AND (l.name LIKE ? OR l.description LIKE ? OR l.slug LIKE ? OR u.email LIKE ? OR u.username LIKE ?)"

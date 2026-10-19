@@ -3,208 +3,486 @@
 {% block nav_leagues %}is-active{% endblock %}
 
 {% block content %}
-<section class="ac-page">
+<section class="ac-page" id="ac-league-admin"
+         data-league-id="{{ league.id }}"
+         data-csrf="{{ admin_csrf_token }}"
+         data-previous-owner-role="{{ previous_owner_role }}">
     <p class="ac-crumb"><a href="{{ url_for('admin_console.leagues') }}">Leagues</a> / {{ league.name }}</p>
 
     <header class="ac-page-head">
         <div>
-            <p class="ac-kicker">Admin league view</p>
-            <h1>{{ league.name }}</h1>
+            <p class="ac-kicker">Admin league manager</p>
+            <h1 id="ac-league-title">{{ league.name }}</h1>
             {% if league.description %}
-            <p class="ac-page-meta">{{ league.description }}</p>
+            <p class="ac-page-meta" id="ac-league-description">{{ league.description }}</p>
             {% endif %}
         </div>
-        <span class="ac-vis ac-vis-{{ league.visibility }}">{{ league.visibility }}</span>
+        <div class="ac-head-badges">
+            <span class="ac-vis ac-vis-{{ league.visibility }}" id="ac-league-visibility">{{ league.visibility }}</span>
+            {% if league.admin_flag %}
+            <span class="ac-pill ac-pill-warn" id="ac-league-flag">{{ league.admin_flag }}</span>
+            {% endif %}
+            {% if league.deleted_at %}
+            <span class="ac-pill ac-pill-warn">Soft-deleted</span>
+            {% endif %}
+        </div>
     </header>
 
-    <p class="ac-notice">Secured admin view. Private and unlisted leagues stay inside this console and are not opened by the public marketing pages.</p>
+    <p class="ac-notice">Secured admin tools. Private and unlisted leagues stay inside this console. Owner transfers demote the previous owner to <strong>{{ previous_owner_role }}</strong> (keeps edit access).</p>
+    <p class="ac-alert" id="ac-league-flash" hidden></p>
 
-    <dl class="ac-facts">
-        <div>
-            <dt>Slug</dt>
-            <dd>{{ league.slug }}</dd>
-        </div>
-        <div>
-            <dt>Owner</dt>
-            <dd>
-                {% if owner %}
-                <a href="{{ url_for('admin_console.user_detail', user_id=owner.id) }}">{{ owner.username }}</a>
-                <span class="ac-muted">{{ owner.email }}</span>
-                {% else %}
-                Unknown
-                {% endif %}
-            </dd>
-        </div>
-        <div>
-            <dt>Focus</dt>
-            <dd>{{ league.focus }}</dd>
-        </div>
-        {% if league.invite_code %}
-        <div>
-            <dt>Invite code</dt>
-            <dd><code>{{ league.invite_code }}</code></dd>
-        </div>
-        {% endif %}
-        {% if block %}
-        <div>
-            <dt>Games shown</dt>
-            <dd>{{ block.games_total }}</dd>
-        </div>
-        {% endif %}
-    </dl>
-
-    {% if sport_tabs|length > 1 %}
-    <nav class="ac-tabs" aria-label="Sports">
-        {% for sport in sport_tabs %}
-        <a class="ac-tab{% if block and sport.id == block.sport.id %} is-active{% endif %}" href="{{ sport.href }}">{{ sport.name }}</a>
-        {% endfor %}
+    <nav class="ac-tabs ac-section-nav" aria-label="League sections">
+        <a class="ac-tab is-active" href="#overview">Overview</a>
+        <a class="ac-tab" href="#members">Members</a>
+        <a class="ac-tab" href="#sport">Sport</a>
+        <a class="ac-tab" href="#games">Games</a>
+        <a class="ac-tab" href="#activity">Activity</a>
+        <a class="ac-tab" href="#danger">Danger zone</a>
     </nav>
-    {% elif block %}
-    <p class="ac-sport-label">{{ block.sport.name }}</p>
-    {% endif %}
 
-    {% if block and block.years|length > 1 %}
-    <p class="ac-year-links">
-        {% for item in block.years %}
-        <a class="{% if block.year == item.year %}is-active{% endif %}" href="{{ url_for('admin_console.league_detail', league_id=league.id, sport=block.sport.id, year=item.year) }}">{{ item.year }}</a>
-        {% endfor %}
-        <a class="{% if block.year is none %}is-active{% endif %}" href="{{ url_for('admin_console.league_detail', league_id=league.id, sport=block.sport.id, year='all') }}">All time</a>
-    </p>
-    {% endif %}
-
-    {% if not block %}
-    <p class="ac-empty">This league has no sports yet.</p>
-    {% else %}
-
-    {% if block.today_stats %}
-    <h2 class="ac-section-title">Today</h2>
-    <div class="ac-table-wrap">
-        <table class="ac-table">
-            <thead>
-                <tr>
-                    <th class="ac-num">#</th>
-                    <th>Player</th>
-                    <th class="ac-num">W</th>
-                    <th class="ac-num">L</th>
-                    <th class="ac-num">%</th>
-                    <th class="ac-num">G</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in block.today_stats %}
-                <tr>
-                    <td class="ac-num">{{ row.rank or loop.index }}</td>
-                    <td>{{ row.player }}</td>
-                    <td class="ac-num ac-win">{{ row.wins }}</td>
-                    <td class="ac-num ac-loss">{{ row.losses }}</td>
-                    <td class="ac-num">{{ row.pct_label }}</td>
-                    <td class="ac-num">{{ row.games }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
-
-    <h2 class="ac-section-title">Standings{% if block.year %} {{ block.year }}{% endif %}</h2>
-    {% if block.min_games > 1 and block.total_games > 0 %}
-    <p class="ac-hint">{{ block.min_games }}+ games to rank ({{ block.total_games }} games{% if block.year %} in {{ block.year }}{% endif %}).</p>
-    {% endif %}
-    {% if block.stats %}
-    <div class="ac-table-wrap">
-        <table class="ac-table">
-            <thead>
-                <tr>
-                    <th class="ac-num">#</th>
-                    <th>Player</th>
-                    <th class="ac-num">W</th>
-                    <th class="ac-num">L</th>
-                    <th class="ac-num">%</th>
-                    <th class="ac-num">G</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in block.stats %}
-                <tr>
-                    <td class="ac-num">{{ row.rank or loop.index }}</td>
-                    <td>{{ row.player }}</td>
-                    <td class="ac-num ac-win">{{ row.wins }}</td>
-                    <td class="ac-num ac-loss">{{ row.losses }}</td>
-                    <td class="ac-num">{{ row.pct_label }}</td>
-                    <td class="ac-num">{{ row.games }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p class="ac-empty">No ranked players yet{% if block.year %} in {{ block.year }}{% endif %}.</p>
-    {% endif %}
-
-    {% if block.occasional_stats %}
-    <h2 class="ac-section-title">Occasional</h2>
-    <div class="ac-table-wrap">
-        <table class="ac-table">
-            <thead>
-                <tr>
-                    <th>Player</th>
-                    <th class="ac-num">W</th>
-                    <th class="ac-num">L</th>
-                    <th class="ac-num">G</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in block.occasional_stats %}
-                <tr>
-                    <td>{{ row.player }}</td>
-                    <td class="ac-num ac-win">{{ row.wins }}</td>
-                    <td class="ac-num ac-loss">{{ row.losses }}</td>
-                    <td class="ac-num">{{ row.games }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
-
-    <h2 class="ac-section-title">Games{% if block.games_total %} ({{ block.games_total }}){% endif %}</h2>
-    {% if block.games %}
-    <div class="ac-game-list">
-        {% for game in block.games %}
-        <article class="ac-game">
-            <p class="ac-game-when">{{ game.when }}</p>
-            <div class="ac-game-side ac-game-win">
-                <div class="ac-game-players">
-                    {% for name in game.winners %}
-                    <span>{{ name }}</span>
+    <section id="overview" class="ac-panel">
+        <h2 class="ac-section-title">Overview</h2>
+        <form class="ac-manage-form" data-action="{{ url_for('admin_console.league_admin_update', league_id=league.id) }}">
+            <label class="ac-field">
+                <span>Name</span>
+                <input type="text" name="name" value="{{ league.name }}" required>
+            </label>
+            <label class="ac-field">
+                <span>Slug (changing breaks old public links)</span>
+                <input type="text" name="slug" value="{{ league.slug }}" required>
+            </label>
+            <label class="ac-field">
+                <span>Description</span>
+                <textarea name="description" rows="3">{{ league.description or '' }}</textarea>
+            </label>
+            <label class="ac-field">
+                <span>Icon</span>
+                <select name="icon">
+                    <option value="">None</option>
+                    {% for icon in icon_options %}
+                    <option value="{{ icon }}" {% if league.icon == icon %}selected{% endif %}>{{ icon }}</option>
                     {% endfor %}
-                </div>
-                {% if game.winner_score not in [None, ''] %}
-                <span class="ac-game-score">{{ game.winner_score }}</span>
+                </select>
+            </label>
+            <label class="ac-field">
+                <span>Visibility</span>
+                <select name="visibility" id="ac-visibility-select">
+                    {% for item in visibilities %}
+                    <option value="{{ item }}" {% if league.visibility == item %}selected{% endif %}>{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="ac-field">
+                <span>Flag</span>
+                <select name="flag" id="ac-flag-select">
+                    {% for key, label in flag_options %}
+                    <option value="{{ key }}" {% if (league.admin_flag or '') == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <div class="ac-form-actions">
+                <button type="submit" class="ac-btn-primary">Save overview</button>
+                <button type="button" class="ac-btn-secondary" id="ac-save-flag">Save flag</button>
+            </div>
+        </form>
+
+        <div class="ac-manage-card">
+            <h3>Invite code</h3>
+            <p class="ac-hint">Shown only in this console. Disable blocks joining by code.</p>
+            <p><code id="ac-invite-code">{{ league.invite_code or 'None' }}</code>
+               {% if league.invite_disabled %}<span class="ac-pill ac-pill-warn">Disabled</span>{% endif %}
+            </p>
+            <div class="ac-form-actions">
+                <button type="button" class="ac-btn-secondary" data-post="{{ url_for('admin_console.league_admin_invite_rotate', league_id=league.id) }}">Rotate</button>
+                {% if league.invite_disabled %}
+                <button type="button" class="ac-btn-secondary" data-post="{{ url_for('admin_console.league_admin_invite_disable', league_id=league.id) }}" data-body='{"disabled":false}'>Enable</button>
+                {% else %}
+                <button type="button" class="ac-btn-secondary" data-post="{{ url_for('admin_console.league_admin_invite_disable', league_id=league.id) }}" data-body='{"disabled":true}' data-confirm="Disable invite code joins for this league?">Disable</button>
                 {% endif %}
             </div>
-            <div class="ac-game-side ac-game-loss">
-                <div class="ac-game-players">
-                    {% for name in game.losers %}
-                    <span>{{ name }}</span>
+        </div>
+    </section>
+
+    <section id="members" class="ac-panel">
+        <h2 class="ac-section-title">Members</h2>
+        <form class="ac-manage-form ac-inline-form" data-action="{{ url_for('admin_console.league_admin_add_member', league_id=league.id) }}">
+            <label class="ac-field">
+                <span>Add by email or username</span>
+                <input type="text" name="identifier" required placeholder="member@example.com">
+            </label>
+            <label class="ac-field">
+                <span>Role</span>
+                <select name="role">
+                    <option value="member">member</option>
+                    <option value="admin">admin</option>
+                </select>
+            </label>
+            <button type="submit" class="ac-btn-secondary">Add member</button>
+        </form>
+
+        <div class="ac-table-wrap">
+            <table class="ac-table" id="ac-members-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr data-user-id="{{ member.user_id }}">
+                        <td>
+                            <a href="{{ url_for('admin_console.user_detail', user_id=member.user_id) }}">{{ member.username }}</a>
+                            <div class="ac-muted">{{ member.email }}</div>
+                        </td>
+                        <td>
+                            {% if member.user_id == league.owner_id or member.role == 'owner' %}
+                            <span class="ac-pill ac-pill-admin">owner</span>
+                            {% else %}
+                            <select class="ac-role-select" data-user-id="{{ member.user_id }}">
+                                <option value="admin" {% if member.role == 'admin' %}selected{% endif %}>admin</option>
+                                <option value="member" {% if member.role == 'member' %}selected{% endif %}>member</option>
+                            </select>
+                            {% endif %}
+                        </td>
+                        <td class="ac-muted">{{ (member.joined_at or '')[:10] }}</td>
+                        <td class="ac-num ac-member-actions">
+                            {% if member.user_id != league.owner_id and member.role != 'owner' %}
+                            <button type="button" class="ac-btn-secondary ac-transfer-owner" data-user-id="{{ member.user_id }}" data-label="{{ member.email }}">Make owner</button>
+                            <button type="button" class="ac-text-link ac-danger-link"
+                                    data-post="{{ url_for('admin_console.league_admin_member_remove', league_id=league.id, user_id=member.user_id) }}"
+                                    data-confirm="Remove {{ member.username }} from this league?">Remove</button>
+                            {% else %}
+                            <span class="ac-muted">Current owner</span>
+                            {% endif %}
+                        </td>
+                    </tr>
                     {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="ac-hint">Cannot remove the sole owner. Transfer ownership first. Previous owner becomes <strong>{{ previous_owner_role }}</strong>.</p>
+    </section>
+
+    <section id="sport" class="ac-panel">
+        <h2 class="ac-section-title">Sport</h2>
+        <p class="ac-hint">Changing template keeps historical games. Standings rules (players per side, score mode) may change.</p>
+        {% if sport_tabs|length > 1 %}
+        <nav class="ac-tabs" aria-label="Sports">
+            {% for sport in sport_tabs %}
+            <a class="ac-tab{% if block and sport.id == block.sport.id %} is-active{% endif %}" href="{{ sport.href }}#sport">{{ sport.name }}</a>
+            {% endfor %}
+        </nav>
+        {% endif %}
+        {% if selected_sport %}
+        <form class="ac-manage-form" data-action="{{ url_for('admin_console.league_admin_sport', league_id=league.id) }}"
+              data-confirm="Change sport template? Historical games stay; standings rules may change.">
+            <input type="hidden" name="sport_id" value="{{ selected_sport.id }}">
+            <label class="ac-field">
+                <span>Template for {{ selected_sport.name }}</span>
+                <select name="template_id" required>
+                    {% for t in templates %}
+                    <option value="{{ t.id }}" {% if selected_sport.template_id == t.id %}selected{% endif %}>{{ t.name }} ({{ t.category }})</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button type="submit" class="ac-btn-secondary">Update sport template</button>
+        </form>
+
+        <div class="ac-manage-card">
+            <h3>Merge player names</h3>
+            <p class="ac-hint">Rewrites game history so both names become one player.</p>
+            <form class="ac-manage-form ac-inline-form" data-action="{{ url_for('admin_console.league_admin_merge_players', league_id=league.id) }}"
+                  data-confirm="Merge these player names in all games for this sport?">
+                <input type="hidden" name="sport_id" value="{{ selected_sport.id }}">
+                <label class="ac-field">
+                    <span>From</span>
+                    <select name="from_name" required>
+                        <option value="">Choose player</option>
+                        {% for name in player_names %}
+                        <option value="{{ name }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="ac-field">
+                    <span>Into</span>
+                    <select name="into_name" required>
+                        <option value="">Choose player</option>
+                        {% for name in player_names %}
+                        <option value="{{ name }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit" class="ac-btn-secondary">Merge</button>
+            </form>
+        </div>
+        {% else %}
+        <p class="ac-empty">This league has no sports yet.</p>
+        {% endif %}
+    </section>
+
+    <section id="games" class="ac-panel">
+        <h2 class="ac-section-title">Standings and games</h2>
+        {% if block and block.years|length > 1 %}
+        <p class="ac-year-links">
+            {% for item in block.years %}
+            <a class="{% if block.year == item.year %}is-active{% endif %}" href="{{ url_for('admin_console.league_detail', league_id=league.id, sport=block.sport.id, year=item.year) }}#games">{{ item.year }}</a>
+            {% endfor %}
+            <a class="{% if block.year is none %}is-active{% endif %}" href="{{ url_for('admin_console.league_detail', league_id=league.id, sport=block.sport.id, year='all') }}#games">All time</a>
+        </p>
+        {% endif %}
+
+        {% if not block %}
+        <p class="ac-empty">No sports yet.</p>
+        {% else %}
+        <h3 class="ac-section-title">Standings{% if block.year %} {{ block.year }}{% endif %}</h3>
+        {% if block.stats %}
+        <div class="ac-table-wrap">
+            <table class="ac-table">
+                <thead>
+                    <tr>
+                        <th class="ac-num">#</th>
+                        <th>Player</th>
+                        <th class="ac-num">W</th>
+                        <th class="ac-num">L</th>
+                        <th class="ac-num">%</th>
+                        <th class="ac-num">G</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in block.stats %}
+                    <tr>
+                        <td class="ac-num">{{ row.rank or loop.index }}</td>
+                        <td>{{ row.player }}</td>
+                        <td class="ac-num ac-win">{{ row.wins }}</td>
+                        <td class="ac-num ac-loss">{{ row.losses }}</td>
+                        <td class="ac-num">{{ row.pct_label }}</td>
+                        <td class="ac-num">{{ row.games }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="ac-empty">No ranked players yet.</p>
+        {% endif %}
+
+        <h3 class="ac-section-title">Recent games{% if block.games_total %} ({{ block.games_total }}){% endif %}</h3>
+        {% if block.games %}
+        <div class="ac-game-list">
+            {% for game in block.games %}
+            <article class="ac-game" data-game-id="{{ game.id }}">
+                <div class="ac-game-head">
+                    <p class="ac-game-when">{{ game.when }}</p>
+                    {% if game.id %}
+                    <button type="button" class="ac-text-link ac-danger-link"
+                            data-post="{{ url_for('admin_console.league_admin_delete_game', league_id=league.id, game_id=game.id) }}"
+                            data-confirm="Delete this game permanently?">Delete</button>
+                    {% endif %}
                 </div>
-                {% if game.loser_score not in [None, ''] %}
-                <span class="ac-game-score">{{ game.loser_score }}</span>
-                {% endif %}
-            </div>
-            {% if game.set_line %}
-            <p class="ac-muted">{{ game.set_line }}</p>
-            {% endif %}
-        </article>
-        {% endfor %}
-    </div>
-    {% if block.has_more %}
-    <p class="ac-hint">Showing the latest {{ block.games|length }} of {{ block.games_total }} games.</p>
-    {% endif %}
-    {% else %}
-    <p class="ac-empty">No games logged yet{% if block.year %} in {{ block.year }}{% endif %}.</p>
-    {% endif %}
-    {% endif %}
+                <div class="ac-game-side ac-game-win">
+                    <div class="ac-game-players">
+                        {% for name in game.winners %}<span>{{ name }}</span>{% endfor %}
+                    </div>
+                    {% if game.winner_score not in [None, ''] %}<span class="ac-game-score">{{ game.winner_score }}</span>{% endif %}
+                </div>
+                <div class="ac-game-side ac-game-loss">
+                    <div class="ac-game-players">
+                        {% for name in game.losers %}<span>{{ name }}</span>{% endfor %}
+                    </div>
+                    {% if game.loser_score not in [None, ''] %}<span class="ac-game-score">{{ game.loser_score }}</span>{% endif %}
+                </div>
+                {% if game.set_line %}<p class="ac-muted">{{ game.set_line }}</p>{% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="ac-empty">No games logged yet.</p>
+        {% endif %}
+        {% endif %}
+    </section>
+
+    <section id="activity" class="ac-panel">
+        <h2 class="ac-section-title">Activity log</h2>
+        <p class="ac-hint">Admin actions on this league, plus member join timestamps above.</p>
+        {% if activity %}
+        <div class="ac-table-wrap">
+            <table class="ac-table">
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>Action</th>
+                        <th>By</th>
+                        <th>Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in activity %}
+                    <tr>
+                        <td class="ac-muted">{{ item.created_at }}</td>
+                        <td>{{ item.action }}</td>
+                        <td>{{ item.admin_email or item.admin_username or 'system' }}</td>
+                        <td>{{ item.detail or '' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="ac-empty">No admin activity recorded yet.</p>
+        {% endif %}
+    </section>
+
+    <section id="danger" class="ac-panel ac-danger-panel">
+        <h2 class="ac-section-title">Danger zone</h2>
+        {% if league.deleted_at %}
+        <p class="ac-safety">This league is soft-deleted and hidden from members and public pages.</p>
+        <button type="button" class="ac-btn-secondary" data-post="{{ url_for('admin_console.league_admin_restore', league_id=league.id) }}">Restore league</button>
+        {% else %}
+        <button type="button" class="ac-btn-secondary"
+                data-post="{{ url_for('admin_console.league_admin_soft_delete', league_id=league.id) }}"
+                data-confirm="Soft-delete this league? Members and public pages will no longer see it. You can restore later.">Soft-delete league</button>
+        {% endif %}
+        <form class="ac-manage-form" data-action="{{ url_for('admin_console.league_admin_hard_delete', league_id=league.id) }}"
+              data-confirm="HARD DELETE cannot be undone. Type the name or slug to confirm."
+              data-redirect="{{ url_for('admin_console.leagues') }}">
+            <label class="ac-field">
+                <span>Type <strong>{{ league.name }}</strong> or <strong>{{ league.slug }}</strong> to hard-delete</span>
+                <input type="text" name="confirm" required autocomplete="off">
+            </label>
+            <button type="submit" class="ac-btn-danger">Hard-delete forever</button>
+        </form>
+    </section>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var root = document.getElementById('ac-league-admin');
+  if (!root) return;
+  var csrf = root.getAttribute('data-csrf');
+  var flash = document.getElementById('ac-league-flash');
+  var previousOwnerRole = root.getAttribute('data-previous-owner-role') || 'admin';
+
+  function showFlash(message, isError) {
+    if (!flash) return;
+    flash.hidden = !message;
+    flash.textContent = message || '';
+    flash.classList.toggle('ac-alert-ok', !isError && !!message);
+  }
+
+  async function postJson(url, body, confirmMsg) {
+    if (confirmMsg && !window.confirm(confirmMsg)) return null;
+    showFlash('');
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': csrf,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(body || {})
+    });
+    var data = {};
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok) {
+      showFlash(data.error || 'Request failed', true);
+      return null;
+    }
+    return data;
+  }
+
+  function formToObject(form) {
+    var data = {};
+    new FormData(form).forEach(function (value, key) {
+      data[key] = value;
+    });
+    return data;
+  }
+
+  root.addEventListener('submit', async function (event) {
+    var form = event.target.closest('form[data-action]');
+    if (!form) return;
+    event.preventDefault();
+    var data = await postJson(form.getAttribute('data-action'), formToObject(form), form.getAttribute('data-confirm'));
+    if (!data) return;
+    if (form.getAttribute('data-redirect')) {
+      window.location.href = form.getAttribute('data-redirect');
+      return;
+    }
+    showFlash('Saved.');
+    window.location.reload();
+  });
+
+  root.addEventListener('click', async function (event) {
+    var button = event.target.closest('[data-post]');
+    if (!button) return;
+    event.preventDefault();
+    var body = {};
+    if (button.getAttribute('data-body')) {
+      try { body = JSON.parse(button.getAttribute('data-body')); } catch (e) {}
+    }
+    var data = await postJson(button.getAttribute('data-post'), body, button.getAttribute('data-confirm'));
+    if (!data) return;
+    showFlash('Saved.');
+    window.location.reload();
+  });
+
+  root.addEventListener('change', async function (event) {
+    var select = event.target.closest('.ac-role-select');
+    if (!select) return;
+    var userId = select.getAttribute('data-user-id');
+    var url = '/admin-console/leagues/' + root.getAttribute('data-league-id') + '/members/' + userId + '/role';
+    var data = await postJson(url, { role: select.value });
+    if (!data) {
+      window.location.reload();
+      return;
+    }
+    showFlash('Role updated.');
+  });
+
+  root.addEventListener('click', async function (event) {
+    var button = event.target.closest('.ac-transfer-owner');
+    if (!button) return;
+    event.preventDefault();
+    var label = button.getAttribute('data-label') || 'this user';
+    var msg = 'Transfer ownership to ' + label + '? Previous owner becomes ' + previousOwnerRole + '.';
+    var url = '/admin-console/leagues/' + root.getAttribute('data-league-id') + '/owner';
+    var data = await postJson(url, { owner_id: button.getAttribute('data-user-id') }, msg);
+    if (!data) return;
+    window.location.reload();
+  });
+
+  var flagBtn = document.getElementById('ac-save-flag');
+  if (flagBtn) {
+    flagBtn.addEventListener('click', async function () {
+      var select = document.getElementById('ac-flag-select');
+      var url = '/admin-console/leagues/' + root.getAttribute('data-league-id') + '/flag';
+      var data = await postJson(url, { flag: select ? select.value : '' });
+      if (!data) return;
+      showFlash('Flag saved.');
+      window.location.reload();
+    });
+  }
+
+  // Intercept overview save to confirm private -> public
+  var overviewForm = root.querySelector('#overview form[data-action]');
+  if (overviewForm) {
+    overviewForm.addEventListener('submit', function (event) {
+      var visibility = overviewForm.querySelector('[name="visibility"]');
+      var current = root.querySelector('#ac-league-visibility');
+      if (visibility && current && current.textContent.trim() === 'private' && visibility.value === 'public') {
+        if (!window.confirm('Make this private league public? Anyone will be able to find and open it.')) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }
+    }, true);
+  }
+})();
+</script>
 {% endblock %}

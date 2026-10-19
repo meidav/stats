@@ -44,6 +44,28 @@ from api.admin_data import (
 )
 from api.auth_service import authenticate_with_email
 from api.brand import APP_NAME
+from api.admin_league_service import (
+    ADMIN_FLAGS,
+    PREVIOUS_OWNER_ROLE,
+    add_league_member,
+    admin_update_league_fields,
+    change_primary_sport_template,
+    ensure_admin_league_schema,
+    hard_delete_league,
+    list_league_activity,
+    list_league_members,
+    merge_player_names_in_sport,
+    player_names_for_sport,
+    remove_league_member,
+    restore_league,
+    rotate_invite_code,
+    serialize_league_admin,
+    set_admin_flag,
+    set_invite_disabled,
+    set_member_role,
+    soft_delete_league,
+    transfer_league_owner,
+)
 from api.league_db import (
     ADMIN_FOCUS_OPTIONS,
     ADMIN_GAME_MIN_OPTIONS,
@@ -52,7 +74,6 @@ from api.league_db import (
     ADMIN_RECENCY_OPTIONS,
     get_league_by_id,
     get_sports_for_league,
-    league_to_dict,
     list_leagues_for_admin,
 )
 from api.roadmap_data import (
@@ -64,7 +85,8 @@ from api.roadmap_data import (
     roadmap_board,
     update_roadmap_item,
 )
-from api.sport_templates import VISIBILITY_OPTIONS
+from api.sport_templates import VISIBILITY_OPTIONS, list_templates
+from api.web_present import LEAGUE_ICON_MARKS
 from auth import get_user_by_email, get_user_by_id, verify_password
 
 try:
@@ -309,6 +331,7 @@ def _admin_template_globals():
 
 def init_admin_console(app):
     ensure_admin_schema()
+    ensure_admin_league_schema()
     ensure_roadmap_schema()
     with app.app_context():
         ensure_bootstrap_admin()
@@ -535,6 +558,14 @@ def leagues():
     if members not in ADMIN_MEMBER_OPTIONS:
         members = ""
 
+    flag = (request.args.get("flag") or "").strip().lower()
+    if flag not in ADMIN_FLAGS or not flag:
+        flag = ""
+
+    deleted = (request.args.get("deleted") or "").strip().lower()
+    if deleted not in ("", "only", "all"):
+        deleted = ""
+
     sort = (request.args.get("sort") or "games").strip().lower()
     if sort not in ADMIN_LEAGUE_SORTS:
         sort = "games"
@@ -549,6 +580,8 @@ def leagues():
         recency_days=recency_days,
         focus=focus or None,
         members=members or None,
+        flag=flag or None,
+        deleted=deleted or None,
         sort=sort,
         direction=direction,
     )
@@ -565,6 +598,8 @@ def leagues():
         "recency": recency_key if recency_days else "",
         "focus": focus,
         "members": members,
+        "flag": flag,
+        "deleted": deleted,
         "sort": sort,
         "dir": direction,
     }
@@ -578,6 +613,8 @@ def leagues():
         recency=recency_key if recency_days else "",
         focus=focus,
         members=members,
+        flag=flag,
+        deleted=deleted,
         sort=sort,
         direction=direction,
         filter_args=filter_args,
@@ -593,6 +630,11 @@ def leagues():
         member_options=[
             ("1", "Solo (1 member)"),
             ("2+", "Shared (2+)"),
+        ],
+        flag_options=[
+            ("review", "Needs review"),
+            ("spam", "Spam"),
+            ("test", "Test"),
         ],
     )
 
@@ -722,9 +764,49 @@ def roadmap_move_item(item_id):
     return redirect(url_for("admin_console.roadmap"))
 
 
+def _admin_json_payload():
+    if request.is_json:
+        return request.get_json(silent=True) or {}
+    return request.form.to_dict(flat=True)
+
+
+def _admin_wants_json():
+    return (
+        request.is_json
+        or "application/json" in (request.accept_mimetypes.best or "")
+        or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
+
+
+def _audit_league(action, league_id, detail=None):
+    write_audit(
+        g.admin_user.id,
+        action,
+        target_type="league",
+        target_id=league_id,
+        detail=detail,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+
+
+def _league_mutation_response(league_id, error=None, status=200, redirect_after=True):
+    if error:
+        if _admin_wants_json():
+            return jsonify({"error": error}), status
+        abort(status)
+    payload = serialize_league_admin(get_league_by_id(league_id))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "league": payload})
+    if redirect_after:
+        return redirect(url_for("admin_console.league_detail", league_id=league_id))
+    return payload
+
+
 @admin_bp.route("/leagues/<int:league_id>")
 @admin_login_required
 def league_detail(league_id):
+    ensure_admin_league_schema()
     league = get_league_by_id(league_id)
     if not league:
         abort(404)
@@ -745,20 +827,280 @@ def league_detail(league_id):
             year=selected_year or "all",
         )
     owner = get_user_by_id(league.get("owner_id")) if league.get("owner_id") else None
-    write_audit(
-        g.admin_user.id,
-        "admin.view.league",
-        target_type="league",
-        target_id=league_id,
-        detail=league.get("visibility"),
-        ip=_client_ip(),
-        user_agent=request.headers.get("User-Agent"),
-    )
+    members = list_league_members(league_id)
+    activity = list_league_activity(league_id)
+    player_names = player_names_for_sport(selected["id"]) if selected else []
+    templates = [
+        {"id": t["id"], "name": t["name"], "category": t.get("category")}
+        for t in list_templates()
+    ]
+    _audit_league("admin.view.league", league_id, league.get("visibility"))
     return render_template(
         "admin_console/league_detail.html",
-        league=league_to_dict(league, include_invite_code=True),
+        league=serialize_league_admin(league),
         league_row=league,
         owner=owner,
+        members=members,
+        activity=activity,
         sport_tabs=tabs,
         block=block,
+        selected_sport=selected,
+        player_names=player_names,
+        templates=templates,
+        icon_options=sorted(LEAGUE_ICON_MARKS.keys()),
+        visibilities=VISIBILITY_OPTIONS,
+        flag_options=[
+            ("", "No flag"),
+            ("review", "Needs review"),
+            ("spam", "Spam"),
+            ("test", "Test"),
+        ],
+        previous_owner_role=PREVIOUS_OWNER_ROLE,
     )
+
+
+@admin_bp.route("/leagues/<int:league_id>/update", methods=["POST"])
+@admin_login_required
+def league_admin_update(league_id):
+    data = _admin_json_payload()
+    kwargs = {"admin_user_id": g.admin_user.id}
+    if "name" in data:
+        kwargs["name"] = data.get("name")
+    if "slug" in data:
+        kwargs["slug"] = data.get("slug")
+    if "description" in data:
+        kwargs["description"] = data.get("description")
+    if "icon" in data:
+        kwargs["icon"] = data.get("icon") or None
+    if "visibility" in data:
+        kwargs["visibility"] = data.get("visibility")
+    try:
+        updated = admin_update_league_fields(league_id, **kwargs)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.update", league_id, updated.get("name"))
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/visibility", methods=["POST"])
+@admin_login_required
+def league_admin_visibility(league_id):
+    data = _admin_json_payload()
+    visibility = (data.get("visibility") or "").strip()
+    confirm = data.get("confirm") in (True, "1", "true", "on", "yes")
+    league = get_league_by_id(league_id)
+    if not league:
+        abort(404)
+    if league.get("visibility") == "private" and visibility == "public" and not confirm:
+        return _league_mutation_response(
+            league_id,
+            error="Confirm moving a private league to public.",
+            status=400,
+        )
+    try:
+        admin_update_league_fields(
+            league_id,
+            visibility=visibility,
+            admin_user_id=g.admin_user.id,
+        )
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.visibility", league_id, visibility)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/members", methods=["POST"])
+@admin_login_required
+def league_admin_add_member(league_id):
+    data = _admin_json_payload()
+    try:
+        members = add_league_member(
+            league_id,
+            data.get("identifier") or data.get("email") or data.get("username"),
+            role=data.get("role") or "member",
+            admin_user_id=g.admin_user.id,
+        )
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.member.add", league_id, data.get("identifier"))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "members": members, "league": serialize_league_admin(get_league_by_id(league_id))})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/members/<int:user_id>/role", methods=["POST"])
+@admin_login_required
+def league_admin_member_role(league_id, user_id):
+    data = _admin_json_payload()
+    try:
+        members = set_member_role(
+            league_id,
+            user_id,
+            data.get("role"),
+            admin_user_id=g.admin_user.id,
+        )
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.member.role", league_id, f"{user_id}:{data.get('role')}")
+    if _admin_wants_json():
+        return jsonify({"ok": True, "members": members})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/members/<int:user_id>/remove", methods=["POST"])
+@admin_login_required
+def league_admin_member_remove(league_id, user_id):
+    try:
+        members = remove_league_member(league_id, user_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.member.remove", league_id, str(user_id))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "members": members})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/owner", methods=["POST"])
+@admin_login_required
+def league_admin_transfer_owner(league_id):
+    data = _admin_json_payload()
+    new_owner_id = data.get("owner_id") or data.get("user_id")
+    try:
+        transfer_league_owner(league_id, new_owner_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.owner", league_id, str(new_owner_id))
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/sport", methods=["POST"])
+@admin_login_required
+def league_admin_sport(league_id):
+    data = _admin_json_payload()
+    try:
+        sport = change_primary_sport_template(
+            league_id,
+            data.get("template_id"),
+            sport_id=data.get("sport_id"),
+            admin_user_id=g.admin_user.id,
+        )
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.sport", league_id, data.get("template_id"))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "sport": sport, "league": serialize_league_admin(get_league_by_id(league_id))})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/invite/rotate", methods=["POST"])
+@admin_login_required
+def league_admin_invite_rotate(league_id):
+    try:
+        rotate_invite_code(league_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.invite.rotate", league_id)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/invite/disable", methods=["POST"])
+@admin_login_required
+def league_admin_invite_disable(league_id):
+    data = _admin_json_payload()
+    disabled = data.get("disabled") in (True, "1", "true", "on", "yes", 1, "disable")
+    try:
+        set_invite_disabled(league_id, disabled, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.invite.disable" if disabled else "admin.league.invite.enable", league_id)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/flag", methods=["POST"])
+@admin_login_required
+def league_admin_flag(league_id):
+    data = _admin_json_payload()
+    try:
+        set_admin_flag(league_id, data.get("flag") or "", admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.flag", league_id, data.get("flag") or "cleared")
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/soft-delete", methods=["POST"])
+@admin_login_required
+def league_admin_soft_delete(league_id):
+    try:
+        soft_delete_league(league_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.soft_delete", league_id)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/restore", methods=["POST"])
+@admin_login_required
+def league_admin_restore(league_id):
+    try:
+        restore_league(league_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.restore", league_id)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/hard-delete", methods=["POST"])
+@admin_login_required
+def league_admin_hard_delete(league_id):
+    data = _admin_json_payload()
+    try:
+        hard_delete_league(league_id, data.get("confirm"), admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.hard_delete", league_id, data.get("confirm"))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "deleted": True})
+    return redirect(url_for("admin_console.leagues"))
+
+
+@admin_bp.route("/leagues/<int:league_id>/games/<int:game_id>/delete", methods=["POST"])
+@admin_login_required
+def league_admin_delete_game(league_id, game_id):
+    from api.game_db import delete_game, get_game_by_id
+
+    game = get_game_by_id(game_id)
+    if not game or game.get("league_id") != league_id:
+        return _league_mutation_response(league_id, error="game not found", status=404)
+    delete_game(game_id)
+    from api.admin_league_service import log_league_activity
+
+    log_league_activity(league_id, "game.delete", admin_user_id=g.admin_user.id, detail=str(game_id))
+    _audit_league("admin.league.game.delete", league_id, str(game_id))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "game_id": game_id})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/players/merge", methods=["POST"])
+@admin_login_required
+def league_admin_merge_players(league_id):
+    data = _admin_json_payload()
+    sport_id = data.get("sport_id")
+    try:
+        result = merge_player_names_in_sport(
+            int(sport_id),
+            data.get("from_name") or data.get("from"),
+            data.get("into_name") or data.get("into"),
+            admin_user_id=g.admin_user.id,
+        )
+    except (TypeError, ValueError) as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league(
+        "admin.league.player.merge",
+        league_id,
+        f"{result['from']}->{result['into']}",
+    )
+    if _admin_wants_json():
+        return jsonify({"ok": True, "merge": result})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id, sport=sport_id))
