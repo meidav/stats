@@ -66,7 +66,7 @@ export function SettingsScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.section}>Appearance</Text>
+        <Text style={[styles.section, styles.sectionFirst]}>Appearance</Text>
         <Text style={styles.hint}>Pick a look. Saved on this device.</Text>
         <View style={styles.themeGrid}>
           {themes.map((item) => {
@@ -248,6 +248,7 @@ function makeStyles(theme: ReturnType<typeof useTheme>['theme']) {
     container: { flex: 1 },
     content: {
       paddingHorizontal: spacing.lg,
+      paddingTop: 2,
       paddingBottom: 120,
       gap: spacing.sm,
     },
@@ -256,6 +257,9 @@ function makeStyles(theme: ReturnType<typeof useTheme>['theme']) {
       fontSize: 18,
       fontWeight: '800',
       color: colors.text,
+    },
+    sectionFirst: {
+      marginTop: 2,
     },
     hint: {
       color: colors.textMuted,

@@ -58,18 +58,60 @@ SEED_ITEMS = [
     {
         "id": "android-parity",
         "title": "Android parity",
-        "status": "now",
+        "status": "done",
         "category": "platform",
         "effort": "M",
         "premium": False,
-        "summary": "Google Sign-In, border styling, then Play Store submit after Apple.",
+        "summary": "Play Store listing, review account, and production AAB for 1.3.x. Google Sign-In on Android can still be tightened.",
         "details": [
-            "Google Sign-In on Android builds",
-            "Fix thick borders on intro / login / tables",
             "Play Console listing + review account",
+            "EAS production AAB shipping",
+            "Google Sign-In on Android builds still incomplete in places",
+        ],
+        "target": "1.3.1",
+        "sort_order": 0,
+    },
+    {
+        "id": "ui-polish-132",
+        "title": "1.3.2 UI polish",
+        "status": "now",
+        "category": "platform",
+        "effort": "S",
+        "premium": False,
+        "summary": "Public list clearance under the glass tab bar, quieter games-badge glow, and a squishier active tab bubble.",
+        "details": [
+            "Public leagues list clears the floating tab bar",
+            "Games count badge no longer leaves a right-edge glow",
+            "Glass tab active bubble stretches then springs",
+            "Add-game played time refreshes when returning to the app",
+        ],
+        "target": "1.3.2",
+        "sort_order": 0,
+    },
+    {
+        "id": "multi-scorer-league",
+        "title": "Multi-user game logging",
+        "status": "next",
+        "category": "account",
+        "effort": "L",
+        "premium": False,
+        "summary": "Owners pick who can log games. Scorers get add access; owner is notified (push + optional daily email digest).",
+        "details": [
+            "Today: only owner/admin can POST/PUT/DELETE games (user_can_edit_league). Plain members view only. API already stores entered_by.",
+            "Gap: league UI can show Add game to any member, but API returns 403. No in-app members/scorers screen for owners (admin console only).",
+            "Roles: keep owner + admin; add scorer (or league setting: owner-only vs selected scorers vs all members).",
+            "Owner controls (Edit league or Members): list scorers; add by email/username/invite; remove scorer; optional promote/demote admin.",
+            "Permissions v1: scorers can add games; edit/delete own recent games or owner/admin only for others. Owner/admin keep full edit/delete.",
+            "Align mobile Add game with API (hide + for non-scorers; show clear empty state).",
+            "Private/unlisted: invite code still joins as member; owner must grant scorer before they can log.",
+            "Notify owner when another user logs a game: push notification with league + scoreline + who entered it.",
+            "Optional daily email digest to owner: all games added that day, by whom, with deep links into the league.",
+            "Prefs: owner toggle for push / daily email per league (or account-level defaults).",
+            "Surface entered_by on game cards (or long-press) so history shows who logged it.",
+            "No push/email infra yet: needs device tokens + mailer job; start with in-app activity if push is later.",
         ],
         "target": "",
-        "sort_order": 0,
+        "sort_order": 1,
     },
     {
         "id": "account-theme",
@@ -372,6 +414,31 @@ def ensure_missing_seed_items():
             current_min = int(dict(row)["m"]) if row else 0
             sort_order = current_min - 1
         _insert_seed_item(item, sort_order)
+    _refresh_seed_copy("multi-scorer-league")
+
+
+def _refresh_seed_copy(item_id: str):
+    """Refresh summary/details from SEED_ITEMS for a known card without moving its column."""
+    seed = next((item for item in SEED_ITEMS if item["id"] == item_id), None)
+    if not seed or not get_roadmap_item(item_id):
+        return
+    db_manager.execute_query(
+        """
+        UPDATE roadmap_items SET
+            title = ?,
+            summary = ?,
+            details_json = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (
+            seed["title"],
+            seed.get("summary") or None,
+            json.dumps(seed.get("details") or []),
+            item_id,
+        ),
+        fetch_all=False,
+    )
 
 
 def _insert_seed_item(item, sort_order):

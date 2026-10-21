@@ -146,6 +146,7 @@ export function HomeScreen({ navigation }: Props) {
           <FlatList
             data={leagues}
             keyExtractor={(item) => String(item.id)}
+            showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -349,7 +350,7 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
   },
   list: {
     paddingHorizontal: spacing.lg,
-    paddingTop: 8,
+    paddingTop: 2,
     paddingBottom: spacing.lg,
   },
   emptyScroll: {
@@ -476,6 +477,10 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
   leagueCard: {
     paddingVertical: 12,
     paddingHorizontal: 12,
+    // List rows: border only. Card shadows stack into a vertical band on the right.
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   leagueRow: {
     flexDirection: 'row',

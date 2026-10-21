@@ -103,8 +103,8 @@ export function ScreenHeader({ title, onBack, actionLabel, onAction, right }: Pr
 const styles = StyleSheet.create({
   bar: {
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md,
-    marginBottom: spacing.md,
+    paddingBottom: 10,
+    marginBottom: 2,
   },
   topRow: {
     flexDirection: 'row',

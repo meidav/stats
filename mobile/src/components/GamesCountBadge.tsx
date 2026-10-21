@@ -9,15 +9,13 @@ type Props = {
   style?: ViewStyle;
 };
 
-/** Padding for the badge parent so FlatList / overflow does not clip the corner chip. */
+/** Padding for the badge parent so FlatList / overflow does not clip the top of the chip. */
 export const gamesBadgeRoom = {
-  paddingTop: 10,
-  paddingRight: 8,
+  paddingTop: 8,
 } as const;
 
 export const gamesBadgeRoomTablet = {
-  paddingTop: 12,
-  paddingRight: 10,
+  paddingTop: 10,
 } as const;
 
 /**
@@ -49,7 +47,7 @@ const styles = StyleSheet.create({
   badge: {
     position: 'absolute',
     top: 0,
-    right: 0,
+    right: 10,
     zIndex: 2,
     minWidth: 22,
     height: 22,
@@ -59,11 +57,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: 'rgba(255, 252, 248, 0.95)',
-    shadowColor: '#5B21B6',
-    shadowOpacity: 0.22,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
   },
   badgeTablet: {
     minWidth: 30,

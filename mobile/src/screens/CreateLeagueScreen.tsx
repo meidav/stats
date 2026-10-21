@@ -153,7 +153,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
         keyboardDismissMode="interactive"
         automaticallyAdjustKeyboardInsets
       >
-        <Text style={styles.label}>What do you play?</Text>
+        <Text style={[styles.label, styles.labelFirst]}>What do you play?</Text>
         <View style={styles.row}>
           {FOCUS_OPTIONS.map((option) => (
             <TouchableOpacity
@@ -245,6 +245,7 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
     },
     content: {
       paddingHorizontal: spacing.lg,
+      paddingTop: 2,
       paddingBottom: spacing.lg + 100,
     },
     footer: {
@@ -256,6 +257,9 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
       color: chrome.label,
       marginBottom: spacing.sm,
       marginTop: spacing.md,
+    },
+    labelFirst: {
+      marginTop: 2,
     },
     hint: {
       color: chrome.muted,

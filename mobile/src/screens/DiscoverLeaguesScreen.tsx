@@ -121,6 +121,7 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
           <FlatList
             data={leagues}
             keyExtractor={(item) => String(item.id)}
+            showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -131,7 +132,11 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
                 tintColor={colors.primary}
               />
             }
-            contentContainerStyle={[styles.list, leagues.length === 0 ? styles.emptyList : null]}
+            contentContainerStyle={[
+              styles.list,
+              styles.tabPad,
+              leagues.length === 0 ? styles.emptyList : null,
+            ]}
             ListEmptyComponent={
               <Text style={styles.emptyText}>
                 {error ? 'Pull down to try again.' : 'No public leagues match that search yet.'}
@@ -217,13 +222,14 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
     fontSize: 15,
     lineHeight: 22,
     color: colors.textMuted,
-    marginBottom: spacing.md,
+    marginTop: 2,
+    marginBottom: spacing.sm,
   },
   searchRow: {
     flexDirection: 'row',
     gap: spacing.sm,
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   searchInput: {
     flex: 1,
@@ -249,7 +255,7 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
   },
   list: {
     paddingBottom: spacing.lg,
-    paddingTop: 4,
+    paddingTop: 2,
   },
   emptyList: {
     flexGrow: 1,
@@ -267,6 +273,10 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
   },
   card: {
     padding: spacing.md,
+    // List rows: border only. Card shadows stack into a vertical band on the right.
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
   cardRow: {
     flexDirection: 'row',
