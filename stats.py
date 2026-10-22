@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, flash, redirect, session, jsonify, send_from_directory
+from flask import Flask, abort, render_template, request, url_for, flash, redirect, session, jsonify, send_from_directory
 from database_functions import *
 from stat_functions import *
 from datetime import datetime, date, timedelta, timezone
@@ -95,13 +95,21 @@ setup_logging()
 
 @app.context_processor
 def _template_globals():
-    from api.brand import APP_STORE_APP_ID, APP_STORE_ITMS_URL, APP_STORE_URL
+    from api.brand import (
+        APP_STORE_APP_ID,
+        APP_STORE_ITMS_URL,
+        APP_STORE_URL,
+        APP_URL,
+        CONTACT_EMAIL,
+    )
 
     return {
         "current_year": date.today().year,
         "app_store_app_id": APP_STORE_APP_ID,
         "app_store_url": APP_STORE_URL,
         "app_store_itms_url": APP_STORE_ITMS_URL,
+        "app_url": APP_URL,
+        "contact_email": CONTACT_EMAIL,
     }
 
 @app.before_request
@@ -343,10 +351,17 @@ def games_by_year(year):
     return render_template('games.html', games=games, year=year, all_years=all_years)
 
 # Authentication routes
+@app.route('/app')
+def marketing_get_app():
+    if is_arbel_request():
+        abort(404)
+    return redirect("/", code=302)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if not is_arbel_request():
-        return render_template('marketing_login.html')
+        return redirect("/", code=302)
 
     # Ensure users table exists and admin user is created
     create_users_table()

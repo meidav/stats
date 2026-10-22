@@ -34,6 +34,8 @@ class MarketingStoreTests(unittest.TestCase):
                 "app_store_app_id": APP_STORE_APP_ID,
                 "app_store_url": APP_STORE_URL,
                 "app_store_itms_url": APP_STORE_ITMS_URL,
+                "app_url": "https://playtracker.org",
+                "contact_email": "hello@playtracker.org",
             }
 
         @app.route("/")
@@ -41,6 +43,18 @@ class MarketingStoreTests(unittest.TestCase):
             from flask import render_template
 
             return render_template("marketing.html")
+
+        @app.route("/login")
+        def login():
+            from flask import redirect
+
+            return redirect("/")
+
+        @app.route("/app")
+        def get_app():
+            from flask import redirect
+
+            return redirect("/")
 
         register_public_web(app)
         cls.app = app
@@ -58,6 +72,11 @@ class MarketingStoreTests(unittest.TestCase):
         self.assertIn("itms-apps://apps.apple.com/app/id6803964661", html)
         self.assertIn('app-id=6803964661', html)
         self.assertIn("Now on the App Store", html)
+        self.assertIn("How it works", html)
+        self.assertIn("Get PlayTracker", html)
+        self.assertIn("Already have PlayTracker? Open the app", html)
+        self.assertIn("v1.3.1", html)
+        self.assertIn("og:image", html)
         self.assertIn("marketing-store.js", html)
 
     def test_homepage_google_play_stays_coming_soon(self):
@@ -71,7 +90,21 @@ class MarketingStoreTests(unittest.TestCase):
         html = response.get_data(as_text=True)
         self.assertIn("mkt-footer-stores", html)
         self.assertIn("is-active", html)
-        self.assertEqual(html.count(self.app_store_url), 2)
+        self.assertIn("Public leagues", html)
+        self.assertIn("hello@playtracker.org", html)
+        self.assertNotIn(">Login<", html)
+        self.assertIn("Get the app", html)
+        self.assertGreaterEqual(html.count(self.app_store_url), 3)
+
+    def test_login_redirects_to_home(self):
+        response = self.client.get("/login")
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.headers["Location"].endswith("/"))
+
+    def test_app_alias_redirects_to_home(self):
+        response = self.client.get("/app")
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.headers["Location"].endswith("/"))
 
 
 if __name__ == "__main__":

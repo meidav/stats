@@ -31,7 +31,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Not on the roster",
-                "lead": "Sign in before you take the court.",
+                "lead": "This page lives in the PlayTracker app.",
             },
             429: {
                 "title": "Side out",
@@ -57,7 +57,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Ante up",
-                "lead": "Buy in first. Sign in to take a seat.",
+                "lead": "This table is in the PlayTracker app.",
             },
             429: {
                 "title": "Slow roll",
@@ -83,7 +83,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Clock not started",
-                "lead": "Sign in before you touch a piece.",
+                "lead": "Open PlayTracker to make that move.",
             },
             429: {
                 "title": "Flag fell",
@@ -109,7 +109,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Not your rack",
-                "lead": "Sign in to play your letters.",
+                "lead": "Open PlayTracker to play your letters.",
             },
             429: {
                 "title": "Lose a turn",
@@ -135,7 +135,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Not on the draw",
-                "lead": "Sign in to take your court.",
+                "lead": "Open PlayTracker to take your court.",
             },
             429: {
                 "title": "Time violation",
@@ -161,7 +161,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Not in the lineup",
-                "lead": "Check in at the scorer's table. Sign in first.",
+                "lead": "Check in from the PlayTracker app.",
             },
             429: {
                 "title": "Shot clock",
@@ -187,7 +187,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Not in the squad",
-                "lead": "Sign in before you take the field.",
+                "lead": "Open PlayTracker before you take the field.",
             },
             429: {
                 "title": "Advantage over",
@@ -213,7 +213,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Not a player",
-                "lead": "Pick a token. Sign in to start the game.",
+                "lead": "Pick a token in the PlayTracker app.",
             },
             429: {
                 "title": "Doubles limit",
@@ -239,7 +239,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "No dice",
-                "lead": "Sign in before you roll.",
+                "lead": "Open PlayTracker before you roll.",
             },
             429: {
                 "title": "Too many rolls",
@@ -265,7 +265,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Not at the table",
-                "lead": "Sign in to place your first settlement.",
+                "lead": "Open PlayTracker to place your first settlement.",
             },
             429: {
                 "title": "Discard half",
@@ -291,7 +291,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Not your color",
-                "lead": "Sign in before you touch a piece.",
+                "lead": "Open PlayTracker to make that move.",
             },
             429: {
                 "title": "Multi-jump pause",
@@ -317,7 +317,7 @@ ERROR_FLAVORS = [
             },
             401: {
                 "title": "Box still sealed",
-                "lead": "Sign in to dump out the pieces.",
+                "lead": "Open PlayTracker to dump out the pieces.",
             },
             429: {
                 "title": "Table shake",

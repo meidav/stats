@@ -123,11 +123,6 @@ main {
   border-radius: 12px;
 }
 
-.mkt-logo-plate-login {
-  padding: 8px 12px;
-  border-radius: 22px;
-}
-
 .mkt-logo {
   font-size: 1.35rem;
   font-weight: 800;
@@ -185,13 +180,13 @@ main {
   color: #3b0764;
   border-color: var(--mkt-peach);
 }
-.mkt-nav-login {
+.mkt-nav-app {
   background: var(--mkt-lilac);
   color: #3b0764;
   border-color: var(--mkt-lilac);
 }
-.mkt-nav-login:hover,
-.mkt-nav-login.is-active {
+.mkt-nav-app:hover,
+.mkt-nav-app.is-active {
   text-decoration: none;
   background: #a78bfa;
   border-color: #a78bfa;
@@ -206,6 +201,8 @@ main {
 
 .mkt-hero,
 .mkt-features,
+.mkt-steps,
+.mkt-get-app,
 .mkt-about,
 .mkt-legal {
   max-width: var(--mkt-page-width);
@@ -267,6 +264,77 @@ main {
   font-size: 1.15rem;
   line-height: 1.55;
   color: var(--mkt-muted);
+}
+
+.mkt-open-app {
+  display: inline-block;
+  margin-top: 14px;
+  color: #4c1d95;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.mkt-steps h2,
+.mkt-get-app h2,
+.mkt-features h2,
+.mkt-about h2 {
+  font-size: 1.8rem;
+  margin: 28px 0 18px;
+}
+
+.mkt-step-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 720px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+
+.mkt-step-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 16px 16px;
+  border-radius: 18px;
+  background: rgba(255, 252, 248, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.mkt-step-num {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #5b21b6;
+  color: #fff7ed;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.mkt-step-list strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.mkt-step-list p {
+  margin: 4px 0 0;
+  color: var(--mkt-muted);
+  line-height: 1.45;
+}
+
+.mkt-get-app {
+  padding-bottom: 56px;
+}
+
+@media (max-width: 720px) {
+  .mkt-step-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .mkt-btn {
@@ -754,12 +822,6 @@ a.mkt-btn {
   margin: 12px 0;
 }
 
-.mkt-features h2,
-.mkt-about h2 {
-  font-size: 1.8rem;
-  margin: 28px 0 18px;
-}
-
 .mkt-about h1 {
   font-size: clamp(2rem, 5vw, 3rem);
 }
@@ -803,16 +865,68 @@ a.mkt-btn {
   max-width: 720px;
 }
 
+.mkt-about-app {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.45);
+}
+
 .mkt-footer {
   margin-top: auto;
   flex-shrink: 0;
-  padding: 22px 24px max(40px, env(safe-area-inset-bottom));
-  background: var(--mkt-peach);
-  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 36px 24px 20px;
+  padding-bottom: max(28px, env(safe-area-inset-bottom));
+  background: linear-gradient(90deg, #3b0764, #5b21b6 55%, #6d28d9);
+  color: #fff7ed;
+  border-top: 1px solid rgba(196, 181, 253, 0.28);
+}
+
+.mkt-footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr minmax(220px, 1.2fr);
+  gap: 28px 40px;
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto 28px;
+}
+
+.mkt-footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.mkt-footer-col h2 {
+  margin: 0 0 4px;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c4b5fd;
+}
+
+.mkt-footer-col a {
+  color: #fff7ed;
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+
+.mkt-footer-col a:hover {
+  color: #fdba74;
+}
+
+.mkt-footer-app p {
+  margin: 4px 0 0;
+  max-width: 16rem;
+  color: #e9d5ff;
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .mkt-footer-stores {
-  margin: 0 auto 16px;
+  margin: 0;
 }
 
 .mkt-footer-stores .mkt-store-link--apple {
@@ -821,22 +935,23 @@ a.mkt-btn {
 
 .mkt-footer-stores .mkt-store-link--apple:hover,
 .mkt-footer-stores .mkt-store-link--apple:focus-visible {
-  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.14);
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.24);
 }
 
 .mkt-copy {
   text-align: center;
   margin: 0;
-  color: var(--mkt-ink);
-  font-size: 0.88rem;
+  color: #e9d5ff;
+  font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.55;
-  padding: 0 8px;
+  padding: 16px 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .mkt-copy a {
   display: inline;
-  color: var(--mkt-ink);
+  color: #fff7ed;
   font-weight: 700;
 }
 
@@ -873,6 +988,10 @@ a.mkt-btn {
   .mkt-footer {
     padding-left: max(16px, env(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
+  }
+  .mkt-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
   .mkt-nav {
     display: none;

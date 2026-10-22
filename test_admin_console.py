@@ -72,7 +72,7 @@ class AdminConsoleTests(unittest.TestCase):
                 entered_by=cls.member.id,
             )
 
-        from flask import Flask, render_template
+        from flask import Flask, redirect, render_template
         from api import init_api
         from api.admin_console import init_admin_console
 
@@ -94,7 +94,7 @@ class AdminConsoleTests(unittest.TestCase):
 
         @app.route("/login")
         def marketing_login():
-            return render_template("marketing_login.html")
+            return redirect("/")
 
         cls.app = app
 
@@ -137,10 +137,9 @@ class AdminConsoleTests(unittest.TestCase):
 
     def test_marketing_login_is_not_admin_console(self):
         response = self.client.get("/login")
-        html = response.get_data(as_text=True)
-        self.assertIn("Coming soon", html)
-        self.assertNotIn("Super-admin console", html)
-        self.assertNotIn('action="/admin-console/login"', html)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.headers["Location"].endswith("/"))
+        self.assertNotIn("/admin-console/login", response.headers["Location"])
 
     def test_member_cannot_use_console_login(self):
         response = self._login_console("member@example.com", "password12")

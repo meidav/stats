@@ -5,12 +5,15 @@
 {% block nav_leagues %}is-active{% endblock %}
 {% block body_class %}mkt-app-page{% endblock %}
 
+{% block meta_description %}{{ league.name }} standings on PlayTracker.{% endblock %}
+{% block og_title %}{{ league.name }} | PlayTracker{% endblock %}
+{% block og_description %}{{ league.name }} standings on PlayTracker.{% endblock %}
+{% block og_url %}{{ share_url }}{% endblock %}
 {% block extra_head %}
     <link rel="canonical" href="{{ share_url }}">
     {% if league.visibility == 'unlisted' %}
     <meta name="robots" content="noindex, nofollow">
     {% endif %}
-    <meta name="description" content="{{ league.name }} standings on PlayTracker.">
 {% endblock %}
 
 {% block content %}
@@ -95,7 +98,7 @@
     <div class="mkt-cta-row">
         {{ open_in_app_button(app_scheme_url) }}
     </div>
-    <p class="mkt-soon">Have the app? Tap Open in PlayTracker. New here? Download free on the App Store. Google Play is coming soon.</p>
+    <p class="mkt-soon">Log games and run this league in the PlayTracker app. Download free on the App Store. Google Play is coming soon.</p>
     {{ store_badges() }}
 </section>
 {% endblock %}

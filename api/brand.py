@@ -5,6 +5,7 @@ APP_TAGLINE = "Track everything you play"
 APP_SLUG = "playtracker"
 APP_DOMAIN = "playtracker.org"
 APP_URL = f"https://{APP_DOMAIN}"
+CONTACT_EMAIL = "hello@playtracker.org"
 
 # App Store listing (PlayTracker Stats)
 APP_STORE_APP_ID = "6803964661"

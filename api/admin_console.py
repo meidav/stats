@@ -1,7 +1,7 @@
 """Dedicated PlayTracker super-admin console.
 
-Separate login, cookie, and JWT audience from the public /login page, the
-legacy Flask-Login session, and the future member web app.
+Separate login, cookie, and JWT audience from the public marketing site, the
+legacy Flask-Login session, and member auth in the iOS app.
 """
 
 import hashlib
