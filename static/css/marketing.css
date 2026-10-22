@@ -406,21 +406,25 @@ a.mkt-btn {
   pointer-events: auto;
 }
 
-.mkt-store-link--apple {
+.mkt-store-link--apple,
+.mkt-store-link--google {
   background: transparent;
   box-shadow: none;
   border-radius: 10px;
   overflow: hidden;
 }
 
-.mkt-store-link--apple .mkt-store-badge {
+.mkt-store-link--apple .mkt-store-badge,
+.mkt-store-link--google .mkt-store-badge {
   width: auto;
   height: 48px;
   max-width: none;
 }
 
 .mkt-store-link--apple:hover,
-.mkt-store-link--apple:focus-visible {
+.mkt-store-link--apple:focus-visible,
+.mkt-store-link--google:hover,
+.mkt-store-link--google:focus-visible {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(17, 24, 39, 0.16);
 }
@@ -499,9 +503,9 @@ a.mkt-btn {
   top: 50%;
   width: min(292px, 38vw);
   margin: 0;
-  padding: 12px;
-  border-radius: 24px;
-  background: rgba(91, 33, 182, 0.7);
+  padding: 8px;
+  border-radius: 22px;
+  background: rgba(91, 33, 182, 0.85);
   border: 0;
   box-shadow: 0 18px 40px rgba(46, 16, 101, 0.16);
   transform: translate(-50%, -50%)
@@ -533,7 +537,7 @@ a.mkt-btn {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   background: #e0e7ff;
 }
@@ -927,14 +931,18 @@ a.mkt-btn {
 
 .mkt-footer-stores {
   margin: 0;
+  justify-content: flex-start;
 }
 
-.mkt-footer-stores .mkt-store-link--apple {
+.mkt-footer-stores .mkt-store-link--apple,
+.mkt-footer-stores .mkt-store-link--google {
   box-shadow: none;
 }
 
 .mkt-footer-stores .mkt-store-link--apple:hover,
-.mkt-footer-stores .mkt-store-link--apple:focus-visible {
+.mkt-footer-stores .mkt-store-link--apple:focus-visible,
+.mkt-footer-stores .mkt-store-link--google:hover,
+.mkt-footer-stores .mkt-store-link--google:focus-visible {
   box-shadow: 0 6px 16px rgba(17, 24, 39, 0.24);
 }
 

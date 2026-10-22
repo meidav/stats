@@ -1,34 +1,54 @@
 (function () {
   var ua = navigator.userAgent || "";
   var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  var isAndroid = /Android/i.test(ua);
 
-  function openAppStore(url, itmsUrl) {
-    if (isIOS && itmsUrl) {
-      window.location.href = itmsUrl;
+  function openStore(webUrl, nativeUrl) {
+    if (nativeUrl && (isIOS || isAndroid)) {
+      window.location.href = nativeUrl;
       return;
     }
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open(webUrl, "_blank", "noopener,noreferrer");
+  }
+
+  function storeFallback(link) {
+    if (isAndroid) {
+      return {
+        web: link.getAttribute("data-play-url") || link.href,
+        native: link.getAttribute("data-market-url") || link.getAttribute("data-play-url"),
+      };
+    }
+    return {
+      web: link.href,
+      native: link.getAttribute("data-store-url") || link.getAttribute("data-itms-url"),
+    };
   }
 
   document.querySelectorAll(".mkt-store-link").forEach(function (link) {
     link.addEventListener("click", function (event) {
       var itmsUrl = link.getAttribute("data-itms-url");
-      if (!isIOS || !itmsUrl) {
+      var marketUrl = link.getAttribute("data-market-url");
+      if (isIOS && itmsUrl) {
+        event.preventDefault();
+        openStore(link.href, itmsUrl);
         return;
       }
-      event.preventDefault();
-      openAppStore(link.href, itmsUrl);
+      if (isAndroid && marketUrl) {
+        event.preventDefault();
+        openStore(link.href, marketUrl);
+      }
     });
   });
 
   document.querySelectorAll(".mkt-smart-open").forEach(function (link) {
     link.addEventListener("click", function (event) {
       var appUrl = link.getAttribute("data-app-url");
-      var storeUrl = link.getAttribute("data-store-url") || link.href;
-      if (!appUrl || !isIOS) {
-        if (isIOS && storeUrl) {
+      var fallback = storeFallback(link);
+
+      if (!appUrl || (!isIOS && !isAndroid)) {
+        if ((isIOS || isAndroid) && fallback.native) {
           event.preventDefault();
-          openAppStore(link.href, storeUrl);
+          openStore(fallback.web, fallback.native);
         }
         return;
       }
@@ -37,7 +57,7 @@
       var hidden = false;
       var timer = window.setTimeout(function () {
         if (!hidden) {
-          openAppStore(link.href, storeUrl);
+          openStore(fallback.web, fallback.native);
         }
       }, 1200);
 

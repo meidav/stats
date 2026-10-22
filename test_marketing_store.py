@@ -14,7 +14,7 @@ class MarketingStoreTests(unittest.TestCase):
 
         from flask import Flask
 
-        from api.brand import APP_STORE_APP_ID, APP_STORE_URL
+        from api.brand import APP_STORE_APP_ID, APP_STORE_URL, PLAY_STORE_URL
         from api.public_web import register_public_web
 
         app = Flask(
@@ -27,13 +27,21 @@ class MarketingStoreTests(unittest.TestCase):
 
         @app.context_processor
         def _globals():
-            from api.brand import APP_STORE_APP_ID, APP_STORE_ITMS_URL, APP_STORE_URL
+            from api.brand import (
+                APP_STORE_APP_ID,
+                APP_STORE_ITMS_URL,
+                APP_STORE_URL,
+                PLAY_STORE_MARKET_URL,
+                PLAY_STORE_URL,
+            )
 
             return {
                 "current_year": date.today().year,
                 "app_store_app_id": APP_STORE_APP_ID,
                 "app_store_url": APP_STORE_URL,
                 "app_store_itms_url": APP_STORE_ITMS_URL,
+                "play_store_url": PLAY_STORE_URL,
+                "play_store_market_url": PLAY_STORE_MARKET_URL,
                 "app_url": "https://playtracker.org",
                 "contact_email": "hello@playtracker.org",
             }
@@ -60,6 +68,7 @@ class MarketingStoreTests(unittest.TestCase):
         cls.app = app
         cls.app_store_url = APP_STORE_URL
         cls.app_store_app_id = APP_STORE_APP_ID
+        cls.play_store_url = PLAY_STORE_URL
 
     def setUp(self):
         self.client = self.app.test_client()
@@ -71,7 +80,9 @@ class MarketingStoreTests(unittest.TestCase):
         self.assertIn(self.app_store_url, html)
         self.assertIn("itms-apps://apps.apple.com/app/id6803964661", html)
         self.assertIn('app-id=6803964661', html)
-        self.assertIn("Now on the App Store", html)
+        self.assertIn("Now on iOS and Android", html)
+        self.assertIn(self.play_store_url, html)
+        self.assertIn("market://details?id=org.playtracker.app", html)
         self.assertIn("How it works", html)
         self.assertIn("Get PlayTracker", html)
         self.assertIn("Already have PlayTracker? Open the app", html)
@@ -79,11 +90,13 @@ class MarketingStoreTests(unittest.TestCase):
         self.assertIn("og:image", html)
         self.assertIn("marketing-store.js", html)
 
-    def test_homepage_google_play_stays_coming_soon(self):
+    def test_homepage_google_play_is_live(self):
         response = self.client.get("/")
         html = response.get_data(as_text=True)
-        self.assertIn("is-soon", html)
-        self.assertIn("coming soon", html.lower())
+        self.assertIn(self.play_store_url, html)
+        self.assertIn("mkt-store-link--google", html)
+        self.assertNotIn("is-soon", html)
+        self.assertNotIn("coming soon", html.lower())
 
     def test_footer_shows_active_app_store_badge(self):
         response = self.client.get("/")
@@ -94,7 +107,9 @@ class MarketingStoreTests(unittest.TestCase):
         self.assertIn("hello@playtracker.org", html)
         self.assertNotIn(">Login<", html)
         self.assertIn("Get the app", html)
+        self.assertIn("iPhone and Android", html)
         self.assertGreaterEqual(html.count(self.app_store_url), 3)
+        self.assertGreaterEqual(html.count(self.play_store_url), 3)
 
     def test_login_redirects_to_home(self):
         response = self.client.get("/login")

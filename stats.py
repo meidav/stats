@@ -101,6 +101,8 @@ def _template_globals():
         APP_STORE_URL,
         APP_URL,
         CONTACT_EMAIL,
+        PLAY_STORE_MARKET_URL,
+        PLAY_STORE_URL,
     )
 
     return {
@@ -108,6 +110,8 @@ def _template_globals():
         "app_store_app_id": APP_STORE_APP_ID,
         "app_store_url": APP_STORE_URL,
         "app_store_itms_url": APP_STORE_ITMS_URL,
+        "play_store_url": PLAY_STORE_URL,
+        "play_store_market_url": PLAY_STORE_MARKET_URL,
         "app_url": APP_URL,
         "contact_email": CONTACT_EMAIL,
     }

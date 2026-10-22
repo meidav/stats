@@ -1,1 +1,1 @@
-Keep score for pickleball, volleyball, tennis, cards, and Sunday game night. Log games in seconds and watch standings update.
+Track leagues, log games in seconds, and watch standings update. Beach volleyball, tennis, chess, cards, and Sunday game night - each in its own league.

@@ -23,13 +23,21 @@ class ErrorPageTests(unittest.TestCase):
 
         @app.context_processor
         def _globals():
-            from api.brand import APP_STORE_APP_ID, APP_STORE_ITMS_URL, APP_STORE_URL
+            from api.brand import (
+                APP_STORE_APP_ID,
+                APP_STORE_ITMS_URL,
+                APP_STORE_URL,
+                PLAY_STORE_MARKET_URL,
+                PLAY_STORE_URL,
+            )
 
             return {
                 "current_year": 2026,
                 "app_store_app_id": APP_STORE_APP_ID,
                 "app_store_url": APP_STORE_URL,
                 "app_store_itms_url": APP_STORE_ITMS_URL,
+                "play_store_url": PLAY_STORE_URL,
+                "play_store_market_url": PLAY_STORE_MARKET_URL,
                 "app_url": "https://playtracker.org",
                 "contact_email": "hello@playtracker.org",
             }
