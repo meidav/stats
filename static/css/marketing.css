@@ -395,10 +395,7 @@ a.mkt-btn {
   border-radius: 10px;
   overflow: hidden;
   background: #000;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.22),
-    0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(17, 24, 39, 0.12);
+  box-shadow: none;
 }
 
 .mkt-store-link {
@@ -438,10 +435,7 @@ a.mkt-btn {
 .mkt-store-link:hover,
 .mkt-store-link:focus-visible {
   transform: translateY(-1px);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.3),
-    0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 8px 18px rgba(17, 24, 39, 0.18);
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.16);
 }
 
 .mkt-store-link:focus-visible {
