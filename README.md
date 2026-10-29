@@ -25,8 +25,9 @@ A comprehensive Flask web application for tracking and analyzing sports game sta
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/stats.git
+   git clone https://github.com/meidav/stats.git
    cd stats
+   git config core.hooksPath .githooks   # blocks committing data files and secrets
    ```
 
 2. **Set up virtual environment**
@@ -118,6 +119,7 @@ The application uses SQLite with the following main tables:
 
 Environment variables can be set in a `.env` file:
 
+- `SECRET_KEY` - Required in production; signs sessions and API tokens
 - `FLASK_ENV` - Environment (development/production)
 - `DATABASE_PATH` - Production database path
 - `TIME_OFFSET` - Timezone offset from UTC
