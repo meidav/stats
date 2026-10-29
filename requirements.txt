@@ -1,6 +1,6 @@
 # Core Flask dependencies
 Flask==2.2.2
-Werkzeug==2.2.2
+Werkzeug==3.1.9
 
 # Database
 SQLAlchemy==1.4.41
