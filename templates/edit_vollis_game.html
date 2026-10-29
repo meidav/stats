@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import vollis_game_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title-hero">{% block title %}Edit vollis game{% endblock %}</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('edit_vollis_games_by_year', year=year) }}" class="nav-pill">← Games</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
+
+    <div class="games-list edit-current-game" style="margin-bottom: 20px;">
+        {{ vollis_game_card(game, year, editable=true) }}
+    </div>
+    <!-- Edit Form -->
+	<div class="form-container">
+		<form method="post" action="{{ url_for('update_vollis_game', id=game[0]) }}" id="edit-vollis-game-form">
+			<datalist id="players_list">
+				{% for player in players %}
+					<option value="{{ player }}">
+				{% endfor %}
+			</datalist>
+			<datalist id="winning_scores_list">
+				{% for score in winning_scores %}
+					<option value="{{ score }}">
+				{% endfor %}
+			</datalist>
+			<datalist id="losing_scores_list">
+				{% for score in losing_scores %}
+					<option value="{{ score }}">
+				{% endfor %}
+			</datalist>
+			
+			<!-- Players Section -->
+			<div class="form-section">
+				<h3>Players</h3>
+				<div class="form-row">
+					<input type="text" name="winner" id="winner_players" placeholder="Winner" value="{{ request.form['winner'] if request.form['winner'] else game[2] }}" list="players_list" autocomplete="on" class="form-field-compact">
+					<input type="text" name="loser" id="loser_players" placeholder="Loser" value="{{ request.form['loser'] if request.form['loser'] else game[4] }}" list="players_list" autocomplete="on" class="form-field-compact">
+				</div>
+			</div>
+
+			<!-- Scores Section -->
+			<div class="form-section">
+				<h3>Scores</h3>
+				<div class="form-row">
+					<input type="number" pattern="[0-9]*" name="winner_score" id="winner_scores" placeholder="Winner's score" value="{{ request.form['winner_score'] if request.form['winner_score'] else game[3] }}" list="winning_scores_list" autocomplete="on" class="form-field-compact">
+					<input type="number" pattern="[0-9]*" name="loser_score" id="losing_scores" placeholder="Loser's score" value="{{ request.form['loser_score'] if request.form['loser_score'] else game[5] }}" list="losing_scores_list" autocomplete="on" class="form-field-compact">
+				</div>
+			</div>
+			
+			<!-- Match Details -->
+			<div class="form-section">
+				<h3>Match details</h3>
+				<div class="form-row">
+					<input type="date" name="date_played" id="date_played" value="{{ request.form.get('date_played', game[1][:10] if game[1] else '') }}" class="form-field-compact">
+					<input type="time" name="time_played" id="time_played" value="{{ request.form.get('time_played', game[1][11:16] if game[1] and game[1]|length > 11 else '') }}" class="form-field-compact">
+				</div>
+			</div>
+			
+			<div class="form-submit-wrap">
+				<button type="submit" class="submit-button">Submit</button>
+			</div>
+		</form>
+	</div>
+
+{% endblock %}

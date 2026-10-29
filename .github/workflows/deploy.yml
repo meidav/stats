@@ -1,0 +1,15 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Railway deploys from GitHub
+        run: |
+          echo "playtracker.org is served by Railway."
+          echo "Pushes to main trigger a Railway image build; PythonAnywhere is no longer in the path."

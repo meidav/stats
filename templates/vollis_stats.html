@@ -1,0 +1,139 @@
+
+<script>
+    window.sortTable = function(columnIndex, tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) {
+            console.error(`Table with ID ${tableId} not found.`);
+            return;
+        }
+
+        const rows = Array.from(table.tBodies[0].rows);
+        const isNumeric = !isNaN(rows[0].cells[columnIndex].innerText.trim());
+        const direction = table.dataset.sortDirection === "asc" ? -1 : 1;
+        table.dataset.sortDirection = table.dataset.sortDirection === "asc" ? "desc" : "asc";
+
+        rows.sort((a, b) => {
+            const aValue = isNumeric
+                ? parseFloat(a.cells[columnIndex].innerText.trim()) || 0
+                : a.cells[columnIndex].textContent.trim().toLowerCase();
+            const bValue = isNumeric
+                ? parseFloat(b.cells[columnIndex].innerText.trim()) || 0
+                : b.cells[columnIndex].textContent.trim().toLowerCase();
+            return aValue > bValue ? direction : aValue < bValue ? -direction : 0;
+        });
+
+        // Re-append rows to the table body after sorting
+        rows.forEach(row => table.tBodies[0].appendChild(row));
+
+        // Force CSS reflow to re-apply styles
+        table.offsetHeight;  // This will force a reflow, re-apply styles
+    };
+</script>
+    
+
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import vollis_game_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title-hero">{{ year }} Vollis Stats</h1>
+    <div class="header-controls">
+        <a href="{{ url_for('vollis_games_by_year', year=year) }}" class="nav-pill">Games</a>
+        <div class="dropdown dropdown-year">
+            <button class="dropbtn" type="button">{{ year }} <svg class="dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="dropdown-content">
+                {% for y in all_years %}
+                    <a href="{{ url_for('vollis_stats', year=y) }}">{{ y }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        <label for="menu__toggle" class="nav-pill menu-trigger" aria-label="Open menu">
+            Menu
+        </label>
+    </div>
+</div>
+<div class="search-bar-wrap">
+    <input type="text" id="playerSearch" class="search-bar" placeholder="Search players..." autocomplete="off">
+</div>
+    <div class="stats-sections">
+    {% if todays_stats %}
+    <h2 class="section-title">Today's vollis stats</h2>
+    <table id="todaysStatsTable" class="stats-table">
+        <thead>
+            <tr>
+                <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'todaysStatsTable')">#</th>
+                <th class="table-col-player clickable" scope="col" onclick="sortTable(1, 'todaysStatsTable')">Player</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(2, 'todaysStatsTable')" title="Wins">W</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(3, 'todaysStatsTable')" title="Losses">L</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(4, 'todaysStatsTable')" title="Win %">%</th>
+                <th class="table-col-stat clickable" scope="col" onclick="sortTable(5, 'todaysStatsTable')">+/-</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in todays_stats %}
+            <tr>
+                <td class="table-col-rank">{{ loop.index }}</td>
+                <td class="table-col-player"><a href="{{ url_for('vollis_player_stats', year=year, name=stat[0] ) }}">{{ stat[0] }}</a></td>
+                <td class="table-col-stat">{{ stat[1] }}</td>
+                <td class="table-col-stat">{{ stat[2] }}</td>
+                <td class="table-col-stat">{{ "{:.2f}".format(stat[3]*100) }}</td>
+                {% if stat[4] > 0 %}
+                    <td class="table-col-stat">+{{ stat[4] }}</td>
+                {% else %}
+                    <td class="table-col-stat">{{ stat[4] }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2 class="section-title">Today's vollis games</h2>
+    <div class="games-list">
+        {% for game in games %}
+            {{ vollis_game_card(game, year, editable=false) }}
+        {% endfor %}
+    </div>
+    {% endif %}
+    <h2 class="section-title">{{ year }} vollis stats</h2>
+    <table id="yearlyStatsTable" class="stats-table">
+        		<thead>
+    				<tr>
+                        <th class="table-col-rank clickable" scope="col" onclick="sortTable(0, 'yearlyStatsTable')">#</th>
+      					<th class="table-col-player clickable" scope="col" onclick="sortTable(1, 'yearlyStatsTable')">Player</th>
+      					<th class="table-col-stat clickable" scope="col" onclick="sortTable(2, 'yearlyStatsTable')" title="Wins">W</th>
+      					<th class="table-col-stat clickable" scope="col" onclick="sortTable(3, 'yearlyStatsTable')" title="Losses">L</th>
+      					<th class="table-col-stat clickable" scope="col" onclick="sortTable(4, 'yearlyStatsTable')" title="Win %">%</th>
+      					<th class="table-col-stat clickable" scope="col" onclick="sortTable(5, 'yearlyStatsTable')" title="Games">G</th>
+    				</tr>
+  				</thead>
+        		<tbody>
+        			{% for player in stats %}
+        			<tr>
+                        <td class="table-col-rank">{{ loop.index }}</td>
+            			<td class="table-col-player"><a href="{{ url_for('vollis_player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+            			<td class="table-col-stat">{{ player[1] }}</td>
+            			<td class="table-col-stat">{{ player[2] }}</td>
+            			<td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+            			<td class="table-col-stat">{{ player[1] + player[2] }}</td>
+            		</tr>
+            		{% endfor %}
+            	</tbody>
+            </table>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('playerSearch');
+    if (el) el.addEventListener('input', function() {
+        var q = this.value.toLowerCase().trim();
+        document.querySelectorAll('.stats-table tbody tr').forEach(function(tr) {
+            var name = (tr.cells[1] && tr.cells[1].textContent) ? tr.cells[1].textContent.toLowerCase() : '';
+            tr.style.display = (!q || name.indexOf(q) !== -1) ? '' : 'none';
+        });
+        document.querySelectorAll('.games-list .game-card').forEach(function(card) {
+            var players = (card.getAttribute('data-players') || '').toLowerCase();
+            card.style.display = (!q || players.indexOf(q) !== -1) ? '' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

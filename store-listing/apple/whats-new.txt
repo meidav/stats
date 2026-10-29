@@ -1,0 +1,3 @@
+Themes, faster game logging, and a clearer home.
+
+Pick an appearance in Settings, including dark looks and Classic navy. Bottom tabs keep My leagues, Public, New league, and Settings close. After you save a game, stay on the add form with a quick summary of the result and today's stats. Score shortcuts sit neatly under each score field, and the played time stays current when you come back to log the next game.

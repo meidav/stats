@@ -1,0 +1,169 @@
+import React, { useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { GlassCard } from './GlassCard';
+import { IconActionRow } from './IconActionRow';
+import { spacing } from '../constants/theme';
+import { formatGameStamp } from '../lib/datetime';
+import { useThemeTokens } from '../lib/theme';
+import { formatSetLine } from '../lib/tennisSets';
+import type { Game } from '../types';
+
+type Props = {
+  games: Game[];
+  canEdit: boolean;
+  winLoss?: boolean;
+  onEdit: (game: Game) => void;
+  onDelete: (game: Game) => void;
+};
+
+export function GameList({ games, canEdit, winLoss, onEdit, onDelete }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+
+  if (games.length === 0) {
+    return <Text style={styles.empty}>No games logged yet.</Text>;
+  }
+
+  return (
+    <View>
+      {games.map((game) => {
+        const setLine = formatSetLine(game.metadata);
+        return (
+        <GlassCard key={game.id} style={styles.card}>
+          <View style={styles.top}>
+            <Text style={styles.when}>{formatGameStamp(game.game_date)}</Text>
+            {canEdit ? (
+              <IconActionRow
+                onEdit={() => onEdit(game)}
+                onDelete={() => onDelete(game)}
+                editLabel="Edit game"
+                deleteLabel="Delete game"
+              />
+            ) : null}
+          </View>
+
+          <View style={[styles.team, styles.winner]}>
+            <View style={styles.players}>
+              {game.winners.map((name) => (
+                <Text key={name} style={styles.player}>
+                  {name}
+                </Text>
+              ))}
+            </View>
+            <Text style={[styles.score, styles.winnerScore]}>
+              {winLoss || (game.winner_score == null && game.loser_score == null)
+                ? 'W'
+                : setLine
+                  ? ''
+                  : game.winner_score}
+            </Text>
+          </View>
+
+          <View style={[styles.team, styles.loser]}>
+            <View style={styles.players}>
+              {game.losers.map((name) => (
+                <Text key={name} style={styles.playerLoser}>
+                  {name}
+                </Text>
+              ))}
+            </View>
+            <Text style={[styles.score, styles.loserScore]}>
+              {winLoss || (game.winner_score == null && game.loser_score == null)
+                ? 'L'
+                : setLine
+                  ? ''
+                  : game.loser_score}
+            </Text>
+          </View>
+          {setLine ? <Text style={styles.sets}>{setLine}</Text> : null}
+        </GlassCard>
+        );
+      })}
+    </View>
+  );
+}
+
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+    empty: {
+      color: colors.textMuted,
+      textAlign: 'center',
+      paddingVertical: spacing.md,
+    },
+    card: {
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+      gap: 8,
+    },
+    top: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minHeight: 36,
+      marginBottom: 4,
+      paddingHorizontal: 14,
+    },
+    when: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.textMuted,
+      paddingRight: spacing.sm,
+    },
+    team: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.md,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+      borderLeftWidth: 4,
+    },
+    winner: {
+      backgroundColor: theme.isDark ? `${colors.win}33` : 'rgba(5, 150, 105, 0.18)',
+      borderLeftColor: colors.win,
+    },
+    loser: {
+      backgroundColor: theme.isDark ? `${colors.loss}33` : 'rgba(225, 29, 72, 0.14)',
+      borderLeftColor: colors.loss,
+    },
+    players: {
+      flex: 1,
+      minWidth: 0,
+      gap: 2,
+    },
+    player: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: theme.isDark ? colors.win : '#065F46',
+    },
+    playerLoser: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: theme.isDark ? colors.loss : '#9F1239',
+    },
+    score: {
+      fontSize: 28,
+      fontWeight: '800',
+      lineHeight: 32,
+      minWidth: 40,
+      textAlign: 'right',
+    },
+    winnerScore: {
+      color: colors.win,
+    },
+    loserScore: {
+      color: colors.loss,
+    },
+    sets: {
+      textAlign: 'center',
+      fontWeight: '800',
+      fontSize: 16,
+      color: colors.text,
+      paddingTop: 2,
+    },
+  });
+}

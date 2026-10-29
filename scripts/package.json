@@ -1,0 +1,12 @@
+{
+  "name": "playtracker-brand-tools",
+  "private": true,
+  "version": "1.0.0",
+  "description": "SVG to PNG rendering for the PlayTracker brand assets",
+  "scripts": {
+    "render": "node render_brand_assets.js"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2"
+  }
+}

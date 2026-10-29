@@ -1,0 +1,55 @@
+import React from 'react';
+import { StyleSheet, Text } from 'react-native';
+
+import { glyphForIcon, kindForIcon } from '../lib/leagueIcons';
+import {
+  BeachVolleyballMark,
+  CheckerGlyph,
+  ChessKnightGlyph,
+  ConnectFourGlyph,
+  FanHand,
+  RummikubTileGlyph,
+  ScrabbleTileGlyph,
+  TrainGlyph,
+  WhiffleBallGlyph,
+} from './TemplateGlyph';
+
+export function LeagueIcon({ id, size = 26 }: { id?: string | null; size?: number }) {
+  const kind = kindForIcon(id);
+  if (kind === 'cards') {
+    return <FanHand size={Math.max(18, size - 4)} />;
+  }
+  if (kind === 'beach') {
+    return <BeachVolleyballMark size={size + 6} />;
+  }
+  if (kind === 'whiffle') {
+    return <WhiffleBallGlyph size={size} />;
+  }
+  if (kind === 'connect_four') {
+    return <ConnectFourGlyph size={size} />;
+  }
+  if (kind === 'rummikub') {
+    return <RummikubTileGlyph size={size} />;
+  }
+  if (kind === 'train') {
+    return <TrainGlyph size={size} />;
+  }
+  if (kind === 'checker') {
+    return <CheckerGlyph size={size} />;
+  }
+  if (kind === 'chess') {
+    return <ChessKnightGlyph size={size} />;
+  }
+  if (kind === 'scrabble') {
+    return <ScrabbleTileGlyph size={size} />;
+  }
+  const glyph = glyphForIcon(id);
+  if (!glyph) return null;
+  return <Text style={[styles.glyph, { fontSize: size, lineHeight: size + 4 }]}>{glyph}</Text>;
+}
+
+const styles = StyleSheet.create({
+  glyph: {
+    textAlign: 'center',
+  },
+});

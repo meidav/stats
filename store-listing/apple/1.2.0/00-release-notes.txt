@@ -1,0 +1,65 @@
+PlayTracker 1.2.0 - App Store Connect
+====================================
+Version: 1.2.0
+Build: 16
+Status: Prepare for Submission (after a fresh iOS prebuild with scene support, then archive + upload)
+
+Paste into ASC
+--------------
+whats-new.txt           -> What's New in This Version
+../promotional-text.txt -> Promotional Text (unchanged, still accurate)
+../description.txt      -> Description (unchanged)
+../keywords.txt         -> Keywords (unchanged)
+../urls-and-metadata.txt -> Version is already 1.2.0 (build 16)
+../review-notes.txt     -> App Review Information
+
+If 1.1.4 is still the version in App Store Connect and it has not shipped,
+create version 1.2.0 (or change the prepared version to 1.2.0) and attach
+build 16 there. Do not upload build 16 onto a 1.1.4 version record.
+
+What's New (customer-facing) -> whats-new.txt
+---------------------------------------------
+Logging a game is faster.
+
+Add game opens on the first winner, with recent players and the keyboard
+ready. Common scores show up as taps under the score fields. For beach
+volleyball doubles, 21 stays first, and a winner over 21 fills the matching
+loser score.
+
+Do not lead with
+----------------
+Expo SDK 57, session-expiry handling, chip width, or keyboard animation.
+Those are in the build. They are not store copy.
+
+Before you archive
+------------------
+The ios/ project on disk was last generated for React Native 0.81.5
+(Expo SDK 54). The app is now Expo SDK 57 (React Native 0.86.3).
+Archiving the current Xcode project will not match the JavaScript.
+
+From mobile/:
+
+  npm run prebuild:ios
+
+That regenerates ios/, runs pod install, and patches Version 1.2.0 / Build 16
+from app.json. It also enables UIKit scene support (required when archiving
+with Xcode 27 / the iOS 27 SDK). Quit Xcode first, then open
+ios/PlayTracker.xcworkspace (not the .xcodeproj). Archive with Any iOS Device,
+then Distribute via Organizer. Organizer re-signs with Apple Distribution on
+upload.
+
+If you already archived build 15 with Xcode 27 before scene support was
+enabled, prefer this build 16 archive for App Store upload instead.
+
+The archive bundles the working tree, including the uncommitted Add Game
+keyboard, score-chip, and session-expiry fixes. Those files are not on
+origin/main yet. Archive this checkout so they ship in build 16.
+
+Production API is already deployed. A release build uses
+https://www.playtracker.org/api/v1 when EXPO_PUBLIC_API_URL is unset.
+
+Review notes
+------------
+Reuse ../review-notes.txt. Same demo account. Add game is worth a look:
+open PT Test BVB 2's, tap add game, and confirm the first winner is focused
+with suggestions and score chips.

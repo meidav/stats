@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Arbel's Stats | {% block title %} {% endblock %}</title>
+    {% include '_favicons.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <!-- Material Symbols for navigation and action icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+    <script>
+        fetch('/api/latest-commit')
+            .then(function (response) { return response.json(); })
+            .then(function (info) {
+                if (info.current) {
+                    console.log(
+                        '[stats] deployed:',
+                        info.current.hash,
+                        info.current.date,
+                        '-',
+                        info.current.subject
+                    );
+                }
+                if (info.previous) {
+                    console.log(
+                        '[stats] previous:',
+                        info.previous.hash,
+                        info.previous.date,
+                        '-',
+                        info.previous.subject
+                    );
+                }
+            })
+            .catch(function () {
+                console.log('[stats] deployed: (could not read commit)');
+            });
+
+        document.addEventListener('click', function(event) {
+            var nav = document.getElementById('main-nav');
+            var targetElement = event.target; // Clicked element
+            var menuToggle = document.getElementById('menu__toggle');
+
+            // Don't close when clicking the menu trigger (label or checkbox)
+            var isMenuTrigger = targetElement.id === 'menu__toggle' || targetElement.closest('label[for="menu__toggle"]') || targetElement.closest('.menu-trigger');
+            if (!nav.contains(targetElement) && !isMenuTrigger) {
+                menuToggle.checked = false;
+            }
+        });
+        
+        // Close menu when clicking on any menu item for better UX
+        document.addEventListener('DOMContentLoaded', function() {
+            var menuItems = document.querySelectorAll('.menu__item');
+            var menuToggle = document.getElementById('menu__toggle');
+            
+            menuItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    menuToggle.checked = false; // Close the menu
+                });
+            });
+        });
+        
+    </script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <nav id="main-nav" aria-label="Main navigation">
+        <div class="hamburger-menu-container">
+            <input id="menu__toggle" type="checkbox" class="menu-toggle-sr" aria-hidden="true" />
+            <label class="nav-pill menu-trigger menu-trigger-floating" for="menu__toggle">Menu</label>
+
+            <!-- Backdrop: click to close drawer -->
+            <label for="menu__toggle" class="menu-backdrop" id="menu-backdrop" aria-hidden="true"></label>
+
+            <ul class="menu__box">
+                <li class="menu-close-row">
+                    <button type="button" class="menu-close-btn" aria-label="Close menu" onclick="document.getElementById('menu__toggle').checked = false">
+                        <span class="material-symbols-rounded menu-icon" aria-hidden="true">close</span>
+                    </button>
+                </li>
+
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Stats</span>
+                    <div class="separator-line"></div>
+                </li>
+                <li><a class="menu__item" href="{{ url_for('index') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">sports_volleyball</span>
+                    Doubles stats
+                </a></li>
+                <li><a class="menu__item" href="{{ url_for('vollis') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">sports_and_outdoors</span>
+                    Vollis stats
+                </a></li>
+                <li><a class="menu__item" href="{{ url_for('tennis') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">sports_tennis</span>
+                    Tennis stats
+                </a></li>
+                <li><a class="menu__item" href="{{ url_for('top_teams') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">social_leaderboard</span>
+                    Top teams
+                </a></li>
+                
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Admin</span>
+                    <div class="separator-line"></div>
+                </li>
+                <li><a class="menu__item admin-item" href="{{ url_for('add_game') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">add_circle</span>
+                    Add game
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('edit_games') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">edit_square</span>
+                    Edit games
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('add_vollis_game') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">add_box</span>
+                    Add vollis game
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('edit_vollis_games') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">edit_square</span>
+                    Edit vollis games
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('add_tennis_match') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">add_diamond</span>
+                    Add tennis match
+                </a></li>
+                <li><a class="menu__item admin-item" href="{{ url_for('edit_tennis_matches') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">edit_square</span>
+                    Edit tennis matches
+                </a></li>
+
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Account</span>
+                    <div class="separator-line"></div>
+                </li>
+                <li><a class="menu__item admin-item" href="{{ url_for('admin_dashboard') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">dashboard_2</span>
+                    Admin dashboard
+                </a></li>
+                {% endif %}
+                
+                {% if current_user.is_authenticated %}
+                {% if not (current_user.is_authenticated and current_user.is_admin) %}
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Account</span>
+                    <div class="separator-line"></div>
+                </li>
+                {% endif %}
+                <li><a class="menu__item" href="{{ url_for('logout') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">logout</span>
+                    Logout ({{ current_user.username }})
+                </a></li>
+                {% else %}
+                <li class="menu-separator menu-separator--label" aria-hidden="true">
+                    <span class="separator-text">Account</span>
+                    <div class="separator-line"></div>
+                </li>
+                <li><a class="menu__item" href="{{ url_for('login') }}">
+                    <span class="material-symbols-rounded menu-icon" aria-hidden="true">login</span>
+                    Login
+                </a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="content">
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="alert 
+                {% if category == 'success' %}
+                    alert-success
+                {% elif category == 'danger' %}
+                    alert-danger
+                {% elif category == 'info' %}
+                    alert-info
+                {% else %}
+                    alert-info
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {% block content %} {% endblock %}
+    </div>
+
+    <div id="delete-game-modal" class="confirm-modal" hidden>
+        <div class="confirm-modal-backdrop" data-close-delete-modal></div>
+        <div class="confirm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-game-title">
+            <h2 id="delete-game-title" class="confirm-modal-title">Delete this game?</h2>
+            <div class="confirm-modal-preview" id="delete-game-preview" aria-hidden="true">
+                <div class="game-meta" id="delete-preview-date"></div>
+                <div class="game-teams game-teams--stacked">
+                    <div class="game-team winner">
+                        <div class="players">
+                            <span id="delete-preview-w1"></span>
+                            <span id="delete-preview-w2"></span>
+                        </div>
+                        <span class="score" id="delete-preview-ws"></span>
+                    </div>
+                    <div class="game-team loser">
+                        <div class="players">
+                            <span id="delete-preview-l1"></span>
+                            <span id="delete-preview-l2"></span>
+                        </div>
+                        <span class="score" id="delete-preview-ls"></span>
+                    </div>
+                </div>
+            </div>
+            <form id="delete-game-form" method="post" action="">
+                <div class="confirm-modal-actions">
+                    <button type="submit" class="confirm-modal-btn confirm-modal-btn--danger">Delete</button>
+                    <button type="button" class="confirm-modal-btn confirm-modal-btn--secondary" data-close-delete-modal>Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/player-datalist.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/win-pct.js') }}"></script>
+    <script>
+    (function () {
+        var modal = document.getElementById('delete-game-modal');
+        var form = document.getElementById('delete-game-form');
+        if (!modal || !form) return;
+
+        function setText(id, value) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            var text = value || '';
+            el.textContent = text;
+            el.style.display = text ? '' : 'none';
+        }
+
+        function openModal(trigger) {
+            form.setAttribute('action', trigger.getAttribute('data-delete-url') || '');
+            setText('delete-preview-date', trigger.getAttribute('data-date'));
+            setText('delete-preview-w1', trigger.getAttribute('data-w1'));
+            setText('delete-preview-w2', trigger.getAttribute('data-w2'));
+            setText('delete-preview-ws', trigger.getAttribute('data-ws'));
+            setText('delete-preview-l1', trigger.getAttribute('data-l1'));
+            setText('delete-preview-l2', trigger.getAttribute('data-l2'));
+            setText('delete-preview-ls', trigger.getAttribute('data-ls'));
+            modal.hidden = false;
+            document.body.classList.add('modal-open');
+            var confirmBtn = form.querySelector('button[type="submit"]');
+            if (confirmBtn) confirmBtn.focus();
+        }
+
+        function closeModal() {
+            modal.hidden = true;
+            document.body.classList.remove('modal-open');
+            form.setAttribute('action', '');
+        }
+
+        document.addEventListener('click', function (event) {
+            var trigger = event.target.closest('.js-open-delete-modal');
+            if (trigger) {
+                event.preventDefault();
+                openModal(trigger);
+                return;
+            }
+            if (event.target.closest('[data-close-delete-modal]')) {
+                event.preventDefault();
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !modal.hidden) closeModal();
+        });
+    })();
+    </script>
+</body>
+</html>

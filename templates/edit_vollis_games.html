@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import vollis_game_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title-hero">Edit {{ year }} Vollis</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('vollis_stats', year=year) }}" class="nav-pill">← Stats</a>
+            <div class="dropdown dropdown-year">
+                <button class="dropbtn" type="button">{{ year }} <svg class="dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+                <div class="dropdown-content">
+                    {% for y in all_years %}
+                        <a href="{{ url_for('edit_vollis_games_by_year', year=y) }}">{{ y }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <a href="{{ url_for('add_vollis_game') }}" class="nav-pill">+ Add</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
+
+    <div class="search-bar-wrap">
+        <input type="text" id="playerFilter" class="search-bar" placeholder="Search all games (players or date)..." autocomplete="off">
+    </div>
+    <p class="games-count games-count-hero" id="gamesCount">{{ games|length }} GAMES</p>
+
+    <div class="games-list" id="gamesList">
+        {% for game in games %}
+            {{ vollis_game_card(game, year, editable=true) }}
+        {% endfor %}
+    </div>
+
+    <div id="noResults" class="no-results-message" style="display: none;">
+        No games found for this filter.
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterInput = document.getElementById('playerFilter');
+    const gameCards = document.querySelectorAll('#gamesList .game-card');
+    const noResults = document.getElementById('noResults');
+    const countEl = document.getElementById('gamesCount');
+
+    function filterGames() {
+        const value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
+        let visible = 0;
+        gameCards.forEach(function(card) {
+            const players = (card.getAttribute('data-players') || '').toLowerCase();
+            const date = (card.getAttribute('data-date') || '').toLowerCase();
+            const show = !value || players.includes(value) || date.includes(value);
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+        if (countEl) countEl.textContent = visible + ' GAMES';
+    }
+
+    if (filterInput) {
+        filterInput.addEventListener('input', filterGames);
+        filterInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { filterInput.value = ''; filterGames(); }
+        });
+    }
+});
+</script>
+{% endblock %}

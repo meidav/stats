@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import vollis_game_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block title %} Add a vollis game {% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title-hero">Add a vollis game</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('vollis') }}" class="nav-pill">← Stats</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            <datalist id="players_list">
+                {% for player in players %}
+                    <option value="{{ player }}"></option>
+                {% endfor %}
+            </datalist>
+            <datalist id="winning_scores_list">
+                {% for score in winning_scores %}
+                    <option value="{{ score }}"></option>
+                {% endfor %}
+            </datalist>
+            <datalist id="losing_scores_list">
+                {% for score in losing_scores %}
+                    <option value="{{ score }}"></option>
+                {% endfor %}
+            </datalist>
+            
+            <div class="form-section">
+                <h3>Players</h3>
+                <div class="form-row">
+                    <input type="text" name="winner" id="winner_players" placeholder="Winner" value="{{ request.form['winner'] }}" list="players_list" autocomplete="on" class="form-field-compact">
+                    <input type="text" name="loser" id="loser_players" placeholder="Loser" value="{{ request.form['loser'] }}" list="players_list" autocomplete="on" class="form-field-compact">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Scores</h3>
+                <div class="form-row">
+                    <input type="number" pattern="[0-9]*" name="winner_score" id="winner_scores" placeholder="Winner's score" value="{{ request.form['winner_score'] }}" list="winning_scores_list" autocomplete="on" class="form-field-compact">
+                    <input type="number" pattern="[0-9]*" name="loser_score" id="losing_scores" placeholder="Loser's score" value="{{ request.form['loser_score'] }}" list="losing_scores_list" autocomplete="on" class="form-field-compact">
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Match details</h3>
+                <div class="form-row">
+                    <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}" class="form-field-compact">
+                    <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}" class="form-field-compact">
+                </div>
+            </div>
+            
+            <div class="form-submit-wrap">
+                <button type="submit" class="submit-button">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="stats-sections">
+    {% if todays_stats %}
+        <div class="add-game-block">
+            <h2 class="section-title">Today's vollis stats</h2>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank" scope="col">#</th>
+                            <th class="table-col-player" scope="col">Player</th>
+                            <th class="table-col-stat" scope="col" title="Wins">W</th>
+                            <th class="table-col-stat" scope="col" title="Losses">L</th>
+                            <th class="table-col-stat" scope="col" title="Win %">%</th>
+                            <th class="table-col-stat" scope="col">+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in todays_stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('vollis_player_stats', year=year, name=stat[0] ) }}">{{ stat[0] }}</a></td>
+                            <td class="table-col-stat">{{ stat[1] }}</td>
+                            <td class="table-col-stat">{{ stat[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(stat[3]*100) }}</td>
+                            <td class="table-col-stat">{% if stat[4] > 0 %}+{{ stat[4] }}{% else %}{{ stat[4] }}{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="add-game-block">
+            <h2 class="section-title">Today's vollis games</h2>
+            <div class="games-list">
+                {% for game in games %}
+                    {{ vollis_game_card(game, year, editable=true) }}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    {% if stats %}
+        <div class="add-game-block">
+            <h2 class="section-title">{{ year }} vollis stats</h2>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank" scope="col">#</th>
+                            <th class="table-col-player" scope="col">Player</th>
+                            <th class="table-col-stat" scope="col" title="Wins">W</th>
+                            <th class="table-col-stat" scope="col" title="Losses">L</th>
+                            <th class="table-col-stat" scope="col" title="Win %">%</th>
+                            <th class="table-col-stat" scope="col" title="Games">G</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('vollis_player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                            <td class="table-col-stat">{{ player[1] }}</td>
+                            <td class="table-col-stat">{{ player[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const now = new Date();
+    const dateInput = document.getElementById('date_played');
+    const timeInput = document.getElementById('time_played');
+    
+    if (dateInput && !dateInput.value) {
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}`;
+    }
+    
+    if (timeInput && !timeInput.value) {
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        timeInput.value = `${hours}:${minutes}`;
+    }
+});
+</script>
+
+{% endblock %}

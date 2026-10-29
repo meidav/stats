@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import doubles_game_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title-hero">{% block title %}Add a game{% endblock %}</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('stats', year=year) }}" class="nav-pill">← Stats</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <form method="post" action="{{ url_for('add_game') }}" id="add-game-form">
+            <datalist id="players">
+                {% for player in players %}
+                    <option value="{{ player }}"></option>
+                {% endfor %}
+            </datalist>
+            <datalist id="w_scores">
+                {% for score in w_scores %}
+                    <option value="{{ score }}"></option>
+                {% endfor %}
+            </datalist>
+            <datalist id="l_scores">
+                {% for score in l_scores %}
+                    <option value="{{ score }}"></option>
+                {% endfor %}
+            </datalist>
+            
+            <!-- Players Section -->
+            <div class="form-section">
+                <h3>Players</h3>
+                <div class="form-row">
+                    <input type="text" name="winner1" id="winner1" placeholder="Winner 1" value="{{ request.form['winner1'] }}" list="players" autocomplete="on" class="form-field-compact">
+                    <input type="text" name="winner2" id="winner2" placeholder="Winner 2" value="{{ request.form['winner2'] }}" list="players" autocomplete="on" class="form-field-compact">
+                </div>
+                <div class="form-row">
+                    <input type="text" name="loser1" id="loser1" placeholder="Loser 1" value="{{ request.form['loser1'] }}" list="players" autocomplete="on" class="form-field-compact">
+                    <input type="text" name="loser2" id="loser2" placeholder="Loser 2" value="{{ request.form['loser2'] }}" list="players" autocomplete="on" class="form-field-compact">
+                </div>
+            </div>
+
+            <!-- Scores Section -->
+            <div class="form-section">
+                <h3>Scores</h3>
+                <div class="form-row">
+                    <input type="number" pattern="[0-9]*" name="winner_score" id="winner_score" placeholder="Winners' score" value="{{ request.form['winner_score'] }}" list="w_scores" autocomplete="on" class="form-field-compact">
+                    <input type="number" pattern="[0-9]*" name="loser_score" id="loser_score" placeholder="Losers' score" value="{{ request.form['loser_score'] }}" list="l_scores" autocomplete="on" class="form-field-compact">
+                </div>
+            </div>
+            
+            <!-- Match Details -->
+            <div class="form-section">
+                <h3>Match details</h3>
+                <div class="form-row">
+                    <input type="date" name="date_played" id="date_played" value="{{ request.form['date_played'] }}" class="form-field-compact">
+                    <input type="time" name="time_played" id="time_played" value="{{ request.form['time_played'] }}" class="form-field-compact">
+                </div>
+            </div>
+            
+            <div class="form-submit-wrap">
+                <button type="submit" class="submit-button">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="stats-sections">
+        {% if todays_stats %}
+        <div class="add-game-block">
+            <h1 class="section-title">Today's stats</h1>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank">#</th>
+                            <th class="table-col-player">Player</th>
+                            <th class="table-col-stat" title="Wins">W</th>
+                            <th class="table-col-stat" title="Losses">L</th>
+                            <th class="table-col-stat" title="Win %">%</th>
+                            <th class="table-col-stat">+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in todays_stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                            <td class="table-col-stat">{{ player[1] }}</td>
+                            <td class="table-col-stat">{{ player[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            <td class="table-col-stat">{% if player[4] > 0 %}+{{ player[4] }}{% else %}{{ player[4] }}{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="add-game-block">
+            <h2 class="section-title">Today's games</h2>
+            <div class="games-list">
+                {% for game in games %}
+                    {{ doubles_game_card(game, year, editable=true) }}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="add-game-block">
+            <h2 class="section-title">{{ year }} stats</h2>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank">#</th>
+                            <th class="table-col-player">Player</th>
+                            <th class="table-col-stat" title="Wins">W</th>
+                            <th class="table-col-stat" title="Losses">L</th>
+                            <th class="table-col-stat" title="Win %">%</th>
+                            <th class="table-col-stat" title="Games">G</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                            <td class="table-col-stat">{{ player[1] }}</td>
+                            <td class="table-col-stat">{{ player[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if rare_stats %}
+        <div class="add-game-block">
+            <h1 class="section-title">Infrequent players</h1>
+            <p class="games-count">Total games: {{tot_games}} | Min games: {{minimum_games}}</p>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank clickable" data-sort="number">#</th>
+                            <th class="table-col-player clickable" data-sort="string">Player</th>
+                            <th class="table-col-stat clickable" data-sort="number" title="Wins">W</th>
+                            <th class="table-col-stat clickable" data-sort="number" title="Losses">L</th>
+                            <th class="table-col-stat clickable" data-sort="number" title="Win %">%</th>
+                            <th class="table-col-stat clickable" data-sort="number" title="Games">G</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in rare_stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                            <td class="table-col-stat">{{ player[1] }}</td>
+                            <td class="table-col-stat">{{ player[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Pre-populate date and time fields with current device time
+    const now = new Date();
+    const dateInput = document.getElementById('date_played');
+    const timeInput = document.getElementById('time_played');
+    
+    if (dateInput && !dateInput.value) {
+        // Format date as YYYY-MM-DD for HTML date input
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}`;
+    }
+    
+    if (timeInput && !timeInput.value) {
+        // Format time as HH:MM for HTML time input
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        timeInput.value = `${hours}:${minutes}`;
+    }
+    
+    const tables = document.querySelectorAll('table');
+
+    tables.forEach(table => {
+        const headers = table.querySelectorAll('thead th[data-sort]');
+        headers.forEach((header, index) => {
+            header.addEventListener('click', () => {
+                const sortType = header.dataset.sort;
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+                const isAscending = header.classList.contains('asc');
+                
+                rows.sort((rowA, rowB) => {
+                    const cellA = rowA.cells[index].textContent.trim();
+                    const cellB = rowB.cells[index].textContent.trim();
+
+                    if (sortType === 'number') {
+                        return isAscending
+                            ? parseFloat(cellA) - parseFloat(cellB)
+                            : parseFloat(cellB) - parseFloat(cellA);
+                    } else {
+                        return isAscending
+                            ? cellA.localeCompare(cellB)
+                            : cellB.localeCompare(cellA);
+                    }
+                });
+
+                rows.forEach(row => table.querySelector('tbody').appendChild(row));
+                headers.forEach(h => h.classList.remove('asc', 'desc'));
+                header.classList.toggle(isAscending ? 'desc' : 'asc');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

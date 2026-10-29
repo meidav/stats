@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block body_class %}has-page-header{% endblock %}
+{% block title %}Manage admins{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title-hero">Manage admins</h1>
+    <div class="header-controls header-controls--spread">
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-pill">← Admin</a>
+        <button type="button" class="nav-pill" id="open-create-admin">Create</button>
+        <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+    </div>
+</div>
+
+<p class="admin-players-count" id="adminsCount">{{ users|length }} account{% if users|length != 1 %}s{% endif %}</p>
+
+<div class="admin-user-list">
+    {% if not users %}
+    <p class="no-results-message">No accounts yet.</p>
+    {% endif %}
+    {% for user in users %}
+    <div class="admin-user-row">
+        <div class="admin-player-avatar" aria-hidden="true">
+            <span>{{ user[1][:1]|upper }}</span>
+        </div>
+        <div class="admin-user-row__main">
+            <div class="admin-user-row__title">
+                <strong>{{ user[1] }}</strong>
+                <span class="admin-badge {{ 'admin-yes' if user[3] else 'admin-no' }}">
+                    {{ 'Admin' if user[3] else 'User' }}
+                </span>
+            </div>
+            <span class="admin-user-row__email">{{ user[2] }}</span>
+            {% if user[4] %}
+            <span class="admin-user-row__meta">Created {{ user[4].split(' ')[0] }}</span>
+            {% endif %}
+        </div>
+        <div class="admin-user-row__actions">
+            <button type="button"
+                    class="admin-user-icon-btn admin-user-edit-btn"
+                    aria-label="Edit {{ user[1] }}"
+                    data-user-id="{{ user[0] }}"
+                    data-username="{{ user[1]|e }}"
+                    data-email="{{ user[2]|e }}"
+                    data-is-admin="{{ '1' if user[3] else '0' }}">
+                <span class="material-symbols-rounded" aria-hidden="true">edit</span>
+            </button>
+            <button type="button"
+                    class="admin-user-icon-btn admin-user-icon-btn--danger admin-user-delete-btn"
+                    aria-label="Delete {{ user[1] }}"
+                    data-user-id="{{ user[0] }}"
+                    data-username="{{ user[1]|e }}">
+                <span class="material-symbols-rounded" aria-hidden="true">delete</span>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div id="deleteModal" class="confirm-modal" hidden>
+    <div class="confirm-modal-backdrop" data-close-modal="deleteModal"></div>
+    <div class="confirm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <h2 id="deleteModalTitle" class="confirm-modal-title">Delete account</h2>
+        <p class="admin-modal-copy">Delete <strong id="userToDelete"></strong>? This cannot be undone.</p>
+        <form id="deleteForm" method="POST" class="confirm-modal-actions">
+            <button type="submit" class="confirm-modal-btn confirm-modal-btn--danger">Delete</button>
+            <button type="button" class="confirm-modal-btn confirm-modal-btn--secondary" data-close-modal="deleteModal">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<div id="createAdminModal" class="confirm-modal" hidden>
+    <div class="confirm-modal-backdrop" data-close-modal="createAdminModal"></div>
+    <div class="confirm-modal-dialog admin-form-dialog" role="dialog" aria-modal="true" aria-labelledby="createAdminModalTitle">
+        <h2 id="createAdminModalTitle" class="confirm-modal-title">Create admin</h2>
+        <form method="POST" action="{{ url_for('create_admin_user') }}" class="admin-modal-form">
+            <label class="admin-modal-label" for="createUsername">Username</label>
+            <input class="form-field-compact" type="text" id="createUsername" name="username" required autocomplete="username" maxlength="80">
+            <label class="admin-modal-label" for="createEmail">Email</label>
+            <input class="form-field-compact" type="email" id="createEmail" name="email" required autocomplete="email" maxlength="120">
+            <label class="admin-modal-label" for="createPassword">Password</label>
+            <input class="form-field-compact" type="password" id="createPassword" name="password" required autocomplete="new-password" minlength="8">
+            <label class="admin-modal-label" for="createPasswordConfirm">Confirm password</label>
+            <input class="form-field-compact" type="password" id="createPasswordConfirm" name="confirm_password" required autocomplete="new-password" minlength="8">
+            <div class="confirm-modal-actions">
+                <button type="submit" class="confirm-modal-btn confirm-modal-btn--primary">Create account</button>
+                <button type="button" class="confirm-modal-btn confirm-modal-btn--secondary" data-close-modal="createAdminModal">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="editUserModal" class="confirm-modal" hidden>
+    <div class="confirm-modal-backdrop" data-close-modal="editUserModal"></div>
+    <div class="confirm-modal-dialog admin-form-dialog" role="dialog" aria-modal="true" aria-labelledby="editUserModalTitle">
+        <h2 id="editUserModalTitle" class="confirm-modal-title">Edit account</h2>
+        <form id="editUserForm" method="POST" class="admin-modal-form">
+            <label class="admin-modal-label" for="editUsername">Username</label>
+            <input class="form-field-compact" type="text" id="editUsername" name="username" required maxlength="80">
+            <label class="admin-modal-label" for="editEmail">Email</label>
+            <input class="form-field-compact" type="email" id="editEmail" name="email" required maxlength="120">
+            <label class="admin-modal-label" for="editPassword">New password (optional)</label>
+            <input class="form-field-compact" type="password" id="editPassword" name="password" autocomplete="new-password" minlength="8">
+            <label class="admin-modal-check">
+                <input type="checkbox" id="editIsAdmin" name="is_admin">
+                <span>Admin privileges</span>
+            </label>
+            <div class="confirm-modal-actions">
+                <button type="submit" class="confirm-modal-btn confirm-modal-btn--primary">Save changes</button>
+                <button type="button" class="confirm-modal-btn confirm-modal-btn--secondary" data-close-modal="editUserModal">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.hidden = false;
+  document.body.classList.add('modal-open');
+}
+
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.hidden = true;
+  if (!document.querySelector('.confirm-modal:not([hidden])')) {
+    document.body.classList.remove('modal-open');
+  }
+}
+
+function confirmDeleteUser(userId, username) {
+  document.getElementById('userToDelete').textContent = username;
+  document.getElementById('deleteForm').action = "{{ url_for('delete_user_admin', user_id=0) }}".replace('/0', '/' + userId);
+  openModal('deleteModal');
+}
+
+function openCreateAdminModal() {
+  document.getElementById('createUsername').value = '';
+  document.getElementById('createEmail').value = '';
+  document.getElementById('createPassword').value = '';
+  document.getElementById('createPasswordConfirm').value = '';
+  openModal('createAdminModal');
+}
+
+function openEditUserModal(userId, username, email, isAdmin) {
+  document.getElementById('editUsername').value = username;
+  document.getElementById('editEmail').value = email;
+  document.getElementById('editPassword').value = '';
+  document.getElementById('editIsAdmin').checked = isAdmin;
+  document.getElementById('editUserForm').action = "{{ url_for('edit_user_admin', user_id=0) }}".replace('/0', '/' + userId);
+  openModal('editUserModal');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  var createBtn = document.getElementById('open-create-admin');
+  if (createBtn) createBtn.addEventListener('click', openCreateAdminModal);
+
+  document.querySelectorAll('[data-close-modal]').forEach(function (el) {
+    el.addEventListener('click', function (event) {
+      event.preventDefault();
+      closeModal(el.getAttribute('data-close-modal'));
+    });
+  });
+
+  document.querySelectorAll('.admin-user-edit-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      openEditUserModal(
+        parseInt(btn.getAttribute('data-user-id'), 10),
+        btn.getAttribute('data-username'),
+        btn.getAttribute('data-email'),
+        btn.getAttribute('data-is-admin') === '1'
+      );
+    });
+  });
+
+  document.querySelectorAll('.admin-user-delete-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      confirmDeleteUser(
+        parseInt(btn.getAttribute('data-user-id'), 10),
+        btn.getAttribute('data-username')
+      );
+    });
+  });
+});
+</script>
+{% endblock %}

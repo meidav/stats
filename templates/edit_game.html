@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import doubles_game_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title-hero">{% block title %}Edit game{% endblock %}</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('edit_games_by_year', year=year) }}" class="nav-pill">← Games</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
+
+    <div class="games-list edit-current-game" style="margin-bottom: 20px;">
+        {{ doubles_game_card(display_game, year, editable=true) }}
+    </div>
+
+    <div class="form-container">
+        <form method="post" action="{{ url_for('update', id=game[0]) }}" id="edit-game-form">
+            <datalist id="players">
+                {% for player in players %}
+                    <option value="{{ player }}">
+                {% endfor %}
+            </datalist>
+            <datalist id="w_scores">
+                {% for score in w_scores %}
+                    <option value="{{ score }}">
+                {% endfor %}
+            </datalist>
+            <datalist id="l_scores">
+                {% for score in l_scores %}
+                    <option value="{{ score }}">
+                {% endfor %}
+            </datalist>
+
+            <div class="form-section">
+                <h3>Players</h3>
+                <div class="form-row">
+                    <input type="text" name="winner1" id="winner1" placeholder="Winner 1" value="{{ game[2] }}" list="players" autocomplete="on" class="form-field-compact">
+                    <input type="text" name="winner2" id="winner2" placeholder="Winner 2" value="{{ game[3] }}" list="players" autocomplete="on" class="form-field-compact">
+                </div>
+                <div class="form-row">
+                    <input type="text" name="loser1" id="loser1" placeholder="Loser 1" value="{{ game[5] }}" list="players" autocomplete="on" class="form-field-compact">
+                    <input type="text" name="loser2" id="loser2" placeholder="Loser 2" value="{{ game[6] }}" list="players" autocomplete="on" class="form-field-compact">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Scores</h3>
+                <div class="form-row">
+                    <input type="number" pattern="[0-9]*" name="winner_score" id="winner_score" placeholder="Winners' score" value="{{ game[4] }}" list="w_scores" autocomplete="on" class="form-field-compact">
+                    <input type="number" pattern="[0-9]*" name="loser_score" id="loser_score" placeholder="Losers' score" value="{{ game[7] }}" list="l_scores" autocomplete="on" class="form-field-compact">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Match details</h3>
+                <div class="form-row">
+                    <input type="date" name="date_played" id="date_played" value="{{ date_value }}" class="form-field-compact">
+                    <input type="time" name="time_played" id="time_played" value="{{ time_value }}" class="form-field-compact">
+                </div>
+            </div>
+
+            <div class="form-submit-wrap">
+                <button type="submit" class="submit-button">Submit</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

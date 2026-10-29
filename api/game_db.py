@@ -1,0 +1,349 @@
+import json
+from datetime import datetime
+
+from db_utils import db_manager
+from api.league_db import get_league_by_id, get_sport_by_id
+from api.sport_templates import get_template
+
+
+def _parse_json_list(value):
+    if isinstance(value, list):
+        return value
+    if value:
+        return json.loads(value)
+    return []
+
+
+def _validate_players(names, expected_count, label):
+    if not isinstance(names, list):
+        raise ValueError(f"{label} must be a list of player names")
+    cleaned = [n.strip() for n in names if n and str(n).strip()]
+    if len(cleaned) != expected_count:
+        raise ValueError(
+            f"{label} must have exactly {expected_count} player(s), got {len(cleaned)}"
+        )
+    return cleaned
+
+
+def _validate_scores(winner_score, loser_score, score_direction):
+    if winner_score is None or loser_score is None:
+        raise ValueError("winner_score and loser_score are required")
+
+    try:
+        winner_score = int(winner_score)
+        loser_score = int(loser_score)
+    except (TypeError, ValueError):
+        raise ValueError("scores must be integers")
+
+    if winner_score == loser_score:
+        raise ValueError("scores cannot be tied")
+
+    if score_direction == "higher_wins":
+        if winner_score <= loser_score:
+            raise ValueError("winner must have the higher score")
+    elif score_direction == "lower_wins":
+        if winner_score >= loser_score:
+            raise ValueError("winner must have the lower score")
+    else:
+        raise ValueError(f"unknown score_direction: {score_direction}")
+
+    return winner_score, loser_score
+
+
+def _game_row_to_dict(row):
+    if row is None:
+        return None
+    data = dict(row)
+    data["winners"] = _parse_json_list(data["winners"])
+    data["losers"] = _parse_json_list(data["losers"])
+    if data.get("metadata"):
+        data["metadata"] = json.loads(data["metadata"])
+    else:
+        data["metadata"] = {}
+    return data
+
+
+def _normalize_game_date(value):
+    if not value:
+        return None
+    text = str(value).strip().replace("T", " ")
+    if text.endswith("Z"):
+        text = text[:-1]
+    plus_at = text.find("+", 10)
+    if plus_at != -1:
+        text = text[:plus_at]
+    text = text.strip()
+    if len(text) == 16:
+        text += ":00"
+    return text[:19]
+
+
+def _empty_score(value):
+    return value is None or value == ""
+
+
+def _resolve_scores(template, winner_score, loser_score, score_direction):
+    """Apply score_mode rules. optional_points may leave scores null."""
+    mode = (template or {}).get("score_mode", "points")
+    both_empty = _empty_score(winner_score) and _empty_score(loser_score)
+    if mode == "win_loss" and both_empty:
+        return 1, 0
+    if mode == "optional_points" and both_empty:
+        return None, None
+    if mode == "optional_points" and (_empty_score(winner_score) or _empty_score(loser_score)):
+        raise ValueError("enter both scores, or leave both blank")
+    return _validate_scores(winner_score, loser_score, score_direction)
+
+
+def add_game(sport_id, winners, losers, winner_score, loser_score, game_date=None, metadata=None, entered_by=None):
+    sport = get_sport_by_id(sport_id)
+    if not sport:
+        raise ValueError("sport not found")
+
+    winners = _validate_players(winners, sport["players_per_side"], "winners")
+    losers = _validate_players(losers, sport["players_per_side"], "losers")
+    template = get_template(sport["template_id"]) or {}
+    winner_score, loser_score = _resolve_scores(
+        template, winner_score, loser_score, sport["score_direction"]
+    )
+
+    if game_date is None:
+        game_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        game_date = _normalize_game_date(game_date) or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    metadata_json = json.dumps(metadata or {})
+
+
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO league_games (
+                sport_id, league_id, game_date, winners, losers,
+                winner_score, loser_score, metadata, entered_by
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                sport_id,
+                sport["league_id"],
+                game_date,
+                json.dumps(winners),
+                json.dumps(losers),
+                winner_score,
+                loser_score,
+                metadata_json,
+                entered_by,
+            ),
+        )
+        game_id = cursor.lastrowid
+        cursor.execute(
+            "UPDATE leagues SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (sport["league_id"],),
+        )
+
+    game = get_game_by_id(game_id)
+    from api.legacy_mirror import mirror_game
+
+    mirror_game(game)
+    return get_game_by_id(game_id)
+
+
+def get_game_by_id(game_id):
+    row = db_manager.execute_query(
+        "SELECT * FROM league_games WHERE id = ?",
+        (game_id,),
+        fetch_one=True,
+    )
+    return _game_row_to_dict(row)
+
+
+def get_player_names_for_user(user_id):
+    rows = db_manager.execute_query(
+        """
+        SELECT winners, losers
+        FROM league_games
+        WHERE league_id IN (
+            SELECT league_id FROM league_members WHERE user_id = ?
+            UNION
+            SELECT id FROM leagues WHERE owner_id = ?
+        )
+        """,
+        (user_id, user_id),
+    ) or []
+    names = set()
+    for row in rows:
+        data = dict(row)
+        names.update(_parse_json_list(data.get("winners")))
+        names.update(_parse_json_list(data.get("losers")))
+    return sorted(names, key=lambda name: name.lower())
+
+
+def _sport_games_where(sport_id, year=None):
+    params = [sport_id]
+    sql = "FROM league_games WHERE sport_id = ?"
+    if year:
+        sql += " AND strftime('%Y', game_date) = ?"
+        params.append(str(year))
+    return sql, params
+
+
+def count_games_for_sport(sport_id, year=None):
+    where_sql, params = _sport_games_where(sport_id, year=year)
+    row = db_manager.execute_query(
+        f"SELECT COUNT(*) AS n {where_sql}",
+        tuple(params),
+        fetch_one=True,
+    )
+    return int(row["n"]) if row else 0
+
+
+def get_sport_years(sport_id):
+    rows = db_manager.execute_query(
+        """
+        SELECT strftime('%Y', game_date) AS year, COUNT(*) AS games
+        FROM league_games
+        WHERE sport_id = ?
+        GROUP BY year
+        ORDER BY year DESC
+        """,
+        (sport_id,),
+    )
+    return [{"year": row["year"], "games": row["games"]} for row in rows or []]
+
+
+def scores_for_template(template_id):
+    """Winner/loser scores for every game of this league type, newest first."""
+    if not template_id:
+        return []
+    rows = db_manager.execute_query(
+        """
+        SELECT g.winner_score AS winner_score, g.loser_score AS loser_score
+        FROM league_games g
+        INNER JOIN sports s ON s.id = g.sport_id
+        WHERE s.template_id = ?
+          AND g.winner_score IS NOT NULL
+          AND g.loser_score IS NOT NULL
+        ORDER BY g.game_date DESC
+        """,
+        (template_id,),
+    ) or []
+    return [dict(row) for row in rows]
+
+
+def get_games_for_sport(sport_id, year=None, limit=100, offset=0):
+    where_sql, params = _sport_games_where(sport_id, year=year)
+    sql = f"SELECT * {where_sql} ORDER BY game_date DESC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+
+    rows = db_manager.execute_query(sql, tuple(params))
+    return [_game_row_to_dict(row) for row in rows]
+
+
+def update_game(game_id, **fields):
+    game = get_game_by_id(game_id)
+    if not game:
+        raise ValueError("game not found")
+
+    sport = get_sport_by_id(game["sport_id"])
+    winners = fields.get("winners", game["winners"])
+    losers = fields.get("losers", game["losers"])
+    winner_score = fields.get("winner_score", game["winner_score"])
+    loser_score = fields.get("loser_score", game["loser_score"])
+
+    winners = _validate_players(winners, sport["players_per_side"], "winners")
+    losers = _validate_players(losers, sport["players_per_side"], "losers")
+    template = get_template(sport["template_id"]) or {}
+    winner_score, loser_score = _resolve_scores(
+        template, winner_score, loser_score, sport["score_direction"]
+    )
+
+    game_date = _normalize_game_date(fields.get("game_date", game["game_date"])) or game["game_date"]
+    metadata = fields.get("metadata", game["metadata"])
+    if isinstance(metadata, dict):
+        existing = game.get("metadata") or {}
+        if existing.get("legacy_id") is not None and "legacy_id" not in metadata:
+            metadata = dict(metadata)
+            metadata["legacy_id"] = existing["legacy_id"]
+            if existing.get("legacy_source") and "legacy_source" not in metadata:
+                metadata["legacy_source"] = existing["legacy_source"]
+    metadata_json = json.dumps(metadata or {})
+
+    with db_manager.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE league_games
+            SET game_date = ?, winners = ?, losers = ?,
+                winner_score = ?, loser_score = ?, metadata = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (
+                game_date,
+                json.dumps(winners),
+                json.dumps(losers),
+                winner_score,
+                loser_score,
+                metadata_json,
+                game_id,
+            ),
+        )
+
+    game = get_game_by_id(game_id)
+    from api.legacy_mirror import mirror_game
+
+    mirror_game(game)
+    return get_game_by_id(game_id)
+
+
+def delete_game(game_id):
+    game = get_game_by_id(game_id)
+    if not game:
+        return False
+
+    from api.legacy_mirror import mirror_delete
+
+    mirror_delete(game)
+    db_manager.execute_query(
+        "DELETE FROM league_games WHERE id = ?",
+        (game_id,),
+        fetch_all=False,
+    )
+    return True
+
+
+def user_can_edit_league(user_id, league_id):
+    league = get_league_by_id(league_id)
+    if not league:
+        return False
+    if league["owner_id"] == user_id:
+        return True
+    row = db_manager.execute_query(
+        """
+        SELECT role FROM league_members
+        WHERE league_id = ? AND user_id = ? AND role IN ('owner', 'admin')
+        """,
+        (league_id, user_id),
+        fetch_one=True,
+    )
+    return row is not None
+
+
+def game_to_dict(game):
+    if game is None:
+        return None
+    return {
+        "id": game["id"],
+        "sport_id": game["sport_id"],
+        "league_id": game["league_id"],
+        "game_date": game["game_date"],
+        "winners": game["winners"],
+        "losers": game["losers"],
+        "winner_score": game["winner_score"],
+        "loser_score": game["loser_score"],
+        "metadata": game["metadata"],
+        "entered_by": game["entered_by"],
+        "created_at": game["created_at"],
+        "updated_at": game["updated_at"],
+    }

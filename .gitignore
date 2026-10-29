@@ -1,0 +1,32 @@
+.DS_Store
+**/.DS_Store
+venv/
+__pycache__/
+*.pyc
+.env
+stats.db
+*-stats.db
+mobile/node_modules/
+.expo/
+dist/
+build/
+
+# Local design dumps and database snapshots
+-assets/
+-db files/
+
+static/uploads/
+!static/uploads/players/.gitkeep
+
+# Never commit databases, backups or secrets
+*.db
+*.db-*
+*.bak
+*.sqlite
+*.sqlite3
+*.csv
+*.p8
+*.pem
+*.key
+.env.*
+!env.example

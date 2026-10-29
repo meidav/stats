@@ -1,0 +1,63 @@
+PlayTracker 1.3.0 - App Store Connect
+====================================
+Version: 1.3.0
+Build: 17
+Status: Prepare for Submission (prebuild for SDK 57, then archive + upload)
+
+Paste into ASC
+--------------
+whats-new.txt              -> What's New in This Version
+../promotional-text.txt    -> Promotional Text (unchanged)
+../description.txt         -> Description (unchanged)
+../keywords.txt            -> Keywords (unchanged)
+../urls-and-metadata.txt   -> Version 1.3.0 (build 17)
+../review-notes.txt        -> App Review Information
+
+Create App Store version 1.3.0 (or update the prepared version) and attach
+build 17. Do not upload this build onto a 1.2.0 version record.
+
+What's New (customer-facing) -> whats-new.txt
+---------------------------------------------
+Themes and a clearer home.
+
+Pick an appearance in Settings, including dark looks and a Classic navy option
+inspired by the original stats site. The bottom tabs keep My leagues, Public,
+New league, and Settings close at hand. Standings, games, and forms follow the
+theme you choose.
+
+Do not lead with
+----------------
+Expo SDK, Phosphor, glass blur implementation, MaskedView, or navigation
+refactors. Those are in the build. They are not store copy.
+
+Screenshots
+-----------
+You are refreshing screenshots for themes. Upload new 6.7" (and optional
+second size) shots after capture. Old 1.2.0 shots will look wrong for this
+release.
+
+Before you archive
+------------------
+From mobile/ (quit Xcode first):
+
+  npm run prebuild:ios
+
+That regenerates ios/, runs pod install, and patches Version 1.3.0 / Build 17
+from app.json (including UIKit scene support for current Xcode). Open
+ios/PlayTracker.xcworkspace (not the .xcodeproj). Archive with Any iOS Device,
+then Distribute via Organizer.
+
+Production API: release builds use https://www.playtracker.org/api/v1 when
+EXPO_PUBLIC_API_URL is unset.
+
+Android
+-------
+EAS production AAB (versionCode 17):
+
+  cd mobile && eas build --platform android --profile production
+
+Review notes
+------------
+Reuse ../review-notes.txt. Account lives under the Settings tab now (not a
+Home footer). Worth a look: Themes in Settings, bottom tabs, and a dark theme
+on a league standings page.

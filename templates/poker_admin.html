@@ -1,0 +1,40 @@
+<!-- templates/poker_admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Arbel's Poker Stats | {% block title %}{% endblock %}</title>
+    <!--
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon-poker.ico') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon-poker.png') }}">
+    -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/poker.css') }}">
+    <meta name="viewport" content="width=device-width">
+</head>
+
+<body>
+
+    <nav id="main-nav">
+        <h1><a href="{{ url_for('poker_index') }}">Poker Sessions</a></h1>
+        <ul>
+            <li><a href="{{ url_for('add_poker_session') }}">Add Session</a></li>
+            <li><a href="{{ url_for('poker_sessions') }}">Session List</a></li>
+            <li><a href="{{ url_for('poker_stats') }}">Stats</a></li>
+        </ul>
+    </nav>
+    
+    <div class="alerts">
+        {% for category, message in get_flashed_messages(with_categories=True) %}
+            <div class="alert {% if category == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+
+</html>

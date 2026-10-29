@@ -1,0 +1,1013 @@
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  AppState,
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import { DateTimeField } from '../components/DateTimeField';
+import { ErrorBanner } from '../components/ErrorBanner';
+import { GameAddedModal } from '../components/GameAddedModal';
+import { GradientButton } from '../components/GradientButton';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenScaffold } from '../components/ScreenScaffold';
+import { SportTypePill } from '../components/SportTypePill';
+import { spacing } from '../constants/theme';
+import { formatLocalDateTime, localToday, parseLocalDateTime } from '../lib/datetime';
+import type { Game, PlayerStat } from '../types';
+import { addGameTitleForTemplate } from '../lib/focus';
+import { formChrome } from '../lib/formTheme';
+import { autoCapWords } from '../lib/names';
+import {
+  TENNIS_FORMATS,
+  isTennisTemplate,
+  setsFromMetadata,
+  tennisScorePayload,
+  type TennisFormat,
+  type TennisSetInput,
+} from '../lib/tennisSets';
+import { ApiError, api } from '../lib/api';
+import { useAuth } from '../lib/auth';
+import { loadCachedLeagues } from '../lib/leagueCache';
+import { loadCachedPlayers, rememberPlayers } from '../lib/playerCache';
+import { chipCapacity, loserScoreChips, rankedScores, winnerScoreChips } from '../lib/scoreChips';
+import { useThemeTokens } from '../lib/theme';
+import type { LeagueStackParamList } from '../navigation/types';
+
+type Props = NativeStackScreenProps<LeagueStackParamList, 'AddGame'>;
+type FocusField = { side: 'winner' | 'loser'; index: number } | 'winnerScore' | 'loserScore' | null;
+
+function padNames(names: string[] | undefined, count: number) {
+  const next = [...(names || [])];
+  while (next.length < count) next.push('');
+  return next.slice(0, count);
+}
+
+const SUGGESTION_LIMIT = 5;
+
+function recentNamesFromGames(games: Array<{ winners: string[]; losers: string[] }>) {
+  const seen = new Set<string>();
+  const recent: string[] = [];
+  for (const game of games) {
+    for (const raw of [...game.winners, ...game.losers]) {
+      const name = raw.trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      recent.push(name);
+    }
+  }
+  return recent;
+}
+
+function suggestionRank(name: string, query: string) {
+  const lower = name.toLowerCase();
+  const q = query.toLowerCase();
+  if (lower.startsWith(q)) return 1000 - lower.length;
+  const index = lower.indexOf(q);
+  if (index >= 0) return 500 - index;
+  return -1;
+}
+
+export function AddGameScreen({ route, navigation }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const chrome = useMemo(() => formChrome(theme), [theme]);
+  const {
+    sportId,
+    sportName,
+    templateId,
+    playersPerSide,
+    scoreMode = 'points',
+    scoresOptional,
+    sideKind = 'player',
+    sportCategory,
+    gameId,
+    winners,
+    losers,
+    winnerScore: initialWinnerScore,
+    loserScore: initialLoserScore,
+    gameDate,
+    metadata,
+  } = route.params;
+  const { token } = useAuth();
+  const editing = Boolean(gameId);
+  const winLoss = scoreMode === 'win_loss';
+  const optionalScores = scoreMode === 'optional_points' || Boolean(scoresOptional && !winLoss);
+  const tennis = isTennisTemplate(templateId);
+  const teamSides = sideKind === 'team' || templateId === 'indoor_volleyball';
+  const oneOnOne = playersPerSide === 1 && !teamSides;
+  const [winnerNames, setWinnerNames] = useState<string[]>(() => padNames(winners, playersPerSide));
+  const [loserNames, setLoserNames] = useState<string[]>(() => padNames(losers, playersPerSide));
+  const [winnerScore, setWinnerScore] = useState(
+    initialWinnerScore != null ? String(initialWinnerScore) : '',
+  );
+  const [loserScore, setLoserScore] = useState(
+    initialLoserScore != null ? String(initialLoserScore) : '',
+  );
+  const initialTennis = setsFromMetadata(metadata, initialWinnerScore, initialLoserScore);
+  const [tennisFormat, setTennisFormat] = useState<TennisFormat>(initialTennis.format);
+  const [tennisSets, setTennisSets] = useState<TennisSetInput[]>(initialTennis.sets);
+  const [playedAt, setPlayedAt] = useState(() => parseLocalDateTime(gameDate));
+  const [players, setPlayers] = useState<string[]>([]);
+  const [recentPlayers, setRecentPlayers] = useState<string[]>([]);
+  const [winnerHints, setWinnerHints] = useState<number[]>([]);
+  const [loserHints, setLoserHints] = useState<number[]>([]);
+  const [chipLimit, setChipLimit] = useState(4);
+  const [playedOpen, setPlayedOpen] = useState(false);
+  const [focusField, setFocusField] = useState<FocusField>(
+    editing ? null : { side: 'winner', index: 0 },
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [savedGame, setSavedGame] = useState<Game | null>(null);
+  const [todayStats, setTodayStats] = useState<PlayerStat[]>([]);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const nameRefs = useRef<Record<string, TextInput | null>>({});
+  const winnerScoreRef = useRef<TextInput>(null);
+  const loserScoreRef = useRef<TextInput>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const losersSectionRef = useRef<View>(null);
+  const scrollOffset = useRef(0);
+  const keyboardHold = useRef(!editing);
+  const focusTarget = useRef<TextInput | null>(null);
+  const playedPinned = useRef(editing);
+  const playedOpenRef = useRef(false);
+  const focusTimers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+
+  function nameKey(side: 'winner' | 'loser', index: number) {
+    return `${side}-${index}`;
+  }
+
+  function clearFocusTimers() {
+    focusTimers.current.forEach(clearTimeout);
+    focusTimers.current = [];
+  }
+
+  function measureScroll(scroll: ScrollView, onMeasure: (y: number, height: number) => void) {
+    (scroll as unknown as View).measureInWindow((_x, y, _w, height) => {
+      onMeasure(y, height);
+    });
+  }
+
+  function revealInput(input: TextInput | null) {
+    const scroll = scrollRef.current;
+    if (!input || !scroll) return;
+    requestAnimationFrame(() => {
+      input.measureInWindow((_x, y, _w, height) => {
+        measureScroll(scroll, (scrollY, scrollHeight) => {
+          const below = y + height - (scrollY + scrollHeight) + 12;
+          const above = scrollY - y + 12;
+          if (below > 0) {
+            scroll.scrollTo({ y: scrollOffset.current + below, animated: false });
+          } else if (above > 0) {
+            scroll.scrollTo({ y: Math.max(0, scrollOffset.current - above), animated: false });
+          }
+        });
+      });
+    });
+  }
+
+  function pinToTop(target: View | null) {
+    const scroll = scrollRef.current;
+    if (!target || !scroll) return;
+    requestAnimationFrame(() => {
+      target.measureInWindow((_x, y) => {
+        measureScroll(scroll, (scrollY) => {
+          const delta = y - scrollY - 4;
+          if (Math.abs(delta) < 1) return;
+          scroll.scrollTo({
+            y: Math.max(0, scrollOffset.current + delta),
+            animated: false,
+          });
+        });
+      });
+    });
+  }
+
+  function forceKeyboard(input: TextInput | null) {
+    if (!input) return;
+    keyboardHold.current = true;
+    focusTarget.current = input;
+    input.focus();
+    clearFocusTimers();
+    for (const delay of [30, 120, 280]) {
+      focusTimers.current.push(
+        setTimeout(() => {
+          if (keyboardHold.current && focusTarget.current === input) input.focus();
+        }, delay),
+      );
+    }
+  }
+
+  function focusNextField(side: 'winner' | 'loser', index: number) {
+    if (side === 'winner' && index + 1 < playersPerSide) {
+      const next = nameRefs.current[nameKey('winner', index + 1)];
+      setFocusField({ side: 'winner', index: index + 1 });
+      forceKeyboard(next);
+      return;
+    }
+    if (side === 'winner') {
+      const next = nameRefs.current[nameKey('loser', 0)];
+      setFocusField({ side: 'loser', index: 0 });
+      forceKeyboard(next);
+      return;
+    }
+    if (side === 'loser' && index + 1 < playersPerSide) {
+      const next = nameRefs.current[nameKey('loser', index + 1)];
+      setFocusField({ side: 'loser', index: index + 1 });
+      forceKeyboard(next);
+      return;
+    }
+    if (!winLoss && !tennis) {
+      setFocusField('winnerScore');
+      forceKeyboard(winnerScoreRef.current);
+      return;
+    }
+    setFocusField(null);
+  }
+
+  function chooseName(side: 'winner' | 'loser', index: number, name: string) {
+    updateName(side, index, name);
+    focusNextField(side, index);
+  }
+
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
+    async function loadHints() {
+      if (!token) return;
+      const cached = await loadCachedPlayers();
+      if (active && cached.length) setPlayers(cached);
+
+      const leagues = await loadCachedLeagues();
+      const [remote, sportGames, ...sportStats] = await Promise.all([
+        api.getMyPlayers(token).catch(() => ({ players: [] as string[] })),
+        api.getSportGames(sportId, token, { limit: 200 }).catch(() => ({
+          games: [] as Array<{
+            winners: string[];
+            losers: string[];
+            winner_score?: number | null;
+            loser_score?: number | null;
+          }>,
+        })),
+        ...leagues.flatMap((league) =>
+          (league.sports || []).map((sport) =>
+            api.getSportStats(sport.id, token, { minGames: 1 }).catch(() => ({ stats: [] as Array<{ player: string }> })),
+          ),
+        ),
+      ]);
+      if (!active) return;
+      const fromGames = (sportGames.games || []).flatMap((game) => [...game.winners, ...game.losers]);
+      const recent = recentNamesFromGames(sportGames.games || []);
+      setRecentPlayers(recent);
+      const fromStats = sportStats.flatMap((item) => (item.stats || []).map((row) => row.player));
+      const merged = await rememberPlayers([
+        ...(remote.players || []),
+        ...fromGames,
+        ...fromStats,
+        ...cached,
+      ]);
+      setPlayers(merged);
+
+      if (!winLoss) {
+        const localWinners = rankedScores((sportGames.games || []).map((game) => game.winner_score));
+        const localLosers = rankedScores((sportGames.games || []).map((game) => game.loser_score));
+        try {
+          const hints = await api.getScoreHints(sportId, token);
+          if (!active) return;
+          if (hints.winner_scores?.length) {
+            setWinnerHints(hints.winner_scores);
+            setLoserHints(hints.loser_scores?.length ? hints.loser_scores : localLosers);
+          } else {
+            setWinnerHints(
+              localWinners.length
+                ? localWinners
+                : hints.winner_score != null
+                  ? [hints.winner_score]
+                  : [],
+            );
+            setLoserHints(localLosers.length ? localLosers : hints.loser_scores ?? []);
+          }
+        } catch {
+          if (!active) return;
+          setWinnerHints(localWinners);
+          setLoserHints(localLosers);
+        }
+      }
+    }
+    loadHints();
+    return () => {
+      active = false;
+    };
+  }, [token, sportId, winLoss]);
+
+  useEffect(() => {
+    const sub = Keyboard.addListener('keyboardDidHide', () => {
+      if (!keyboardHold.current) return;
+      focusTarget.current?.focus();
+    });
+    return () => {
+      sub.remove();
+      clearFocusTimers();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (editing) return;
+    const timer = setTimeout(() => {
+      forceKeyboard(nameRefs.current[nameKey('winner', 0)]);
+    }, 280);
+    return () => clearTimeout(timer);
+  }, [editing]);
+
+  useEffect(() => {
+    if (!playedOpen) return;
+    scrollRef.current?.scrollToEnd({ animated: false });
+  }, [playedOpen]);
+
+  useEffect(() => {
+    function refreshPlayedAt() {
+      if (playedPinned.current || playedOpenRef.current) return;
+      setPlayedAt(new Date());
+    }
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') refreshPlayedAt();
+    });
+    const timer = setInterval(refreshPlayedAt, 30000);
+    return () => {
+      sub.remove();
+      clearInterval(timer);
+    };
+  }, []);
+
+  const winnerChips = useMemo(
+    () => winnerScoreChips(winnerHints, templateId, chipLimit),
+    [winnerHints, templateId, chipLimit],
+  );
+  const loserChips = useMemo(
+    () => loserScoreChips(loserHints, templateId, winnerScore, chipLimit),
+    [loserHints, templateId, winnerScore, chipLimit],
+  );
+
+  function onChipRowLayout(width: number) {
+    const next = chipCapacity(width);
+    setChipLimit((prev) => (prev === next ? prev : next));
+  }
+
+  const winnerLabels = useMemo(
+    () =>
+      Array.from({ length: playersPerSide }, (_, i) => {
+        if (teamSides) return playersPerSide === 1 ? 'Winning team' : `Winning team ${i + 1}`;
+        return oneOnOne ? 'Winner' : `Winner ${i + 1}`;
+      }),
+    [playersPerSide, oneOnOne, teamSides],
+  );
+  const loserLabels = useMemo(
+    () =>
+      Array.from({ length: playersPerSide }, (_, i) => {
+        if (teamSides) return playersPerSide === 1 ? 'Losing team' : `Losing team ${i + 1}`;
+        return oneOnOne ? 'Loser' : `Loser ${i + 1}`;
+      }),
+    [playersPerSide, oneOnOne, teamSides],
+  );
+
+  function suggestionsFor(value: string) {
+    const query = value.trim().toLowerCase();
+    const taken = new Set(
+      [...winnerNames, ...loserNames]
+        .map((name) => name.trim().toLowerCase())
+        .filter(Boolean),
+    );
+    const available = (list: string[]) =>
+      list.filter((name) => !taken.has(name.trim().toLowerCase()));
+
+    if (!query) {
+      const pool = recentPlayers.length ? recentPlayers : players;
+      return available(pool).slice(0, SUGGESTION_LIMIT);
+    }
+
+    return available(players)
+      .map((name) => ({ name, rank: suggestionRank(name, query) }))
+      .filter((item) => item.rank >= 0)
+      .sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name))
+      .slice(0, SUGGESTION_LIMIT)
+      .map((item) => item.name);
+  }
+
+  function updateName(side: 'winner' | 'loser', index: number, value: string) {
+    const next = autoCapWords(value);
+    if (side === 'winner') {
+      setWinnerNames((prev) => prev.map((name, i) => (i === index ? next : name)));
+    } else {
+      setLoserNames((prev) => prev.map((name, i) => (i === index ? next : name)));
+    }
+  }
+
+  function chooseTennisFormat(next: TennisFormat) {
+    setTennisFormat(next);
+    setTennisSets((prev) => {
+      const filled = prev.slice(0, next);
+      while (filled.length < next) filled.push({ winner: '', loser: '' });
+      return filled;
+    });
+  }
+
+  function updateTennisSet(index: number, side: 'winner' | 'loser', value: string) {
+    setTennisSets((prev) =>
+      prev.map((set, i) => (i === index ? { ...set, [side]: value.replace(/[^\d]/g, '') } : set)),
+    );
+  }
+
+  function resetFormForNextGame(options?: { focus?: boolean }) {
+    setWinnerNames(padNames([], playersPerSide));
+    setLoserNames(padNames([], playersPerSide));
+    setWinnerScore('');
+    setLoserScore('');
+    setTennisSets(
+      Array.from({ length: tennisFormat }, () => ({ winner: '', loser: '' })),
+    );
+    playedPinned.current = false;
+    playedOpenRef.current = false;
+    setPlayedAt(new Date());
+    setPlayedOpen(false);
+    setError('');
+    setFocusField({ side: 'winner', index: 0 });
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    if (options?.focus !== false) {
+      setTimeout(() => {
+        forceKeyboard(nameRefs.current[nameKey('winner', 0)]);
+      }, 280);
+    }
+  }
+
+  const dismissSuccess = useCallback(() => {
+    setSuccessOpen(false);
+    setTimeout(() => {
+      forceKeyboard(nameRefs.current[nameKey('winner', 0)]);
+    }, 200);
+  }, []);
+
+  async function handleSubmit() {
+    if (!token) {
+      setError('Your session expired. Sign out and sign in again.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    try {
+      const payload: {
+        winners: string[];
+        losers: string[];
+        winner_score?: number | null;
+        loser_score?: number | null;
+        game_date?: string;
+        metadata?: Record<string, unknown>;
+      } = {
+        winners: winnerNames.map((n) => n.trim()),
+        losers: loserNames.map((n) => n.trim()),
+        game_date: formatLocalDateTime(playedAt),
+      };
+      if (tennis) {
+        const tennisScore = tennisScorePayload(tennisSets, tennisFormat);
+        payload.winner_score = tennisScore.winner_score;
+        payload.loser_score = tennisScore.loser_score;
+        payload.metadata = tennisScore.metadata;
+      } else if (!winLoss) {
+        const w = winnerScore.trim();
+        const l = loserScore.trim();
+        if (optionalScores && !w && !l) {
+          payload.winner_score = null;
+          payload.loser_score = null;
+        } else if (optionalScores && (!w || !l)) {
+          throw new Error('Enter both scores, or leave both blank');
+        } else {
+          payload.winner_score = Number(w);
+          payload.loser_score = Number(l);
+        }
+      }
+      if (editing && gameId) {
+        await api.updateGame(token, gameId, payload);
+        await rememberPlayers([...payload.winners, ...payload.losers]);
+        navigation.goBack();
+        return;
+      }
+
+      const created = await api.addGame(token, sportId, payload);
+      await rememberPlayers([...payload.winners, ...payload.losers]);
+      setRecentPlayers((prev) => {
+        const next = [...payload.winners, ...payload.losers, ...prev];
+        const seen = new Set<string>();
+        return next.filter((name) => {
+          const key = name.trim().toLowerCase();
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      });
+
+      let today: PlayerStat[] = [];
+      try {
+        const stats = await api.getSportStats(sportId, token, {
+          minGames: 1,
+          today: localToday(),
+        });
+        today = stats.today_stats ?? [];
+      } catch {
+        today = [];
+      }
+
+      resetFormForNextGame({ focus: false });
+      keyboardHold.current = false;
+      clearFocusTimers();
+      focusTarget.current = null;
+      Keyboard.dismiss();
+      setSavedGame(created);
+      setTodayStats(today);
+      setSuccessOpen(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not save game');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function renderNameField(
+    side: 'winner' | 'loser',
+    label: string,
+    index: number,
+    value: string,
+    gridItem = false,
+  ) {
+    const focused =
+      focusField &&
+      typeof focusField === 'object' &&
+      focusField.side === side &&
+      focusField.index === index;
+    const matches = focused ? suggestionsFor(value) : [];
+    return (
+      <View
+        key={nameKey(side, index)}
+        style={[styles.fieldWrap, gridItem && styles.fieldGridItem, focused && styles.fieldFocused]}
+      >
+        <TextInput
+          ref={(el) => {
+            nameRefs.current[nameKey(side, index)] = el;
+          }}
+          style={styles.input}
+          placeholder={label}
+          placeholderTextColor={chrome.placeholder}
+          autoCapitalize="words"
+          autoCorrect={false}
+          autoFocus={!editing && side === 'winner' && index === 0}
+          value={value}
+          onFocus={() => {
+            keyboardHold.current = true;
+            focusTarget.current = nameRefs.current[nameKey(side, index)];
+            setFocusField({ side, index });
+            if (side === 'loser') pinToTop(losersSectionRef.current);
+            else revealInput(nameRefs.current[nameKey(side, index)]);
+          }}
+          onChangeText={(next) => updateName(side, index, next)}
+        />
+        {matches.length > 0 ? (
+          <View style={styles.suggestList}>
+            {matches.map((name) => (
+              <View
+                key={name}
+                style={styles.suggestItem}
+                onStartShouldSetResponder={() => {
+                  chooseName(side, index, name);
+                  return true;
+                }}
+              >
+                <Text style={styles.suggestText}>{name}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+      </View>
+    );
+  }
+
+  function renderNameFields(
+    side: 'winner' | 'loser',
+    labels: string[],
+    names: string[],
+  ) {
+    if (playersPerSide === 1) {
+      return renderNameField(side, labels[0], 0, names[0]);
+    }
+    return (
+      <View style={styles.nameGrid}>
+        {labels.map((label, index) =>
+          renderNameField(side, label, index, names[index], true),
+        )}
+      </View>
+    );
+  }
+
+  return (
+    <>
+    <ScreenScaffold
+      edgeHeader
+      instantKeyboard
+      aboveTabBar
+      footer={
+        <View style={styles.footer}>
+          <ErrorBanner message={error} />
+          <GradientButton
+            label={editing ? 'Save changes' : 'Save game'}
+            onPress={handleSubmit}
+            loading={loading}
+            disabled={loading}
+          />
+        </View>
+      }
+    >
+      <ScreenHeader
+        title={
+          editing
+            ? templateId?.startsWith('tennis')
+              ? 'Edit match'
+              : 'Edit game'
+            : addGameTitleForTemplate(templateId)
+        }
+        onBack={() => navigation.goBack()}
+      />
+      <ScrollView
+        ref={scrollRef}
+        style={styles.container}
+        contentContainerStyle={[styles.content, playedOpen && styles.contentPlayedOpen]}
+        onScroll={(event) => {
+          scrollOffset.current = event.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}
+        keyboardShouldPersistTaps="always"
+        keyboardDismissMode="none"
+        scrollEnabled={!playedOpen}
+      >
+        <SportTypePill
+          name={sportName}
+          templateId={templateId}
+          category={sportCategory || 'custom'}
+          style={{ marginTop: spacing.sm, marginBottom: spacing.sm }}
+        />
+
+        <Text style={[styles.section, styles.sectionFirst]}>
+          {teamSides ? 'Winning team' : oneOnOne ? 'Winner' : 'Winners'}
+        </Text>
+        {renderNameFields('winner', winnerLabels, winnerNames)}
+
+        <View ref={losersSectionRef} collapsable={false} style={styles.losersSection}>
+          <Text style={styles.sectionLabel}>
+            {teamSides ? 'Losing team' : oneOnOne ? 'Loser' : 'Losers'}
+          </Text>
+        </View>
+        {renderNameFields('loser', loserLabels, loserNames)}
+
+        {winLoss ? (
+          <Text style={styles.hint}>Just who won. Scores are not tracked for this game.</Text>
+        ) : tennis ? (
+          <View style={styles.tennisBlock}>
+            <Text style={styles.section}>Set scores</Text>
+            <View style={styles.formatRow}>
+              {TENNIS_FORMATS.map((option) => (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[styles.formatChip, tennisFormat === option.id && styles.formatChipOn]}
+                  onPress={() => chooseTennisFormat(option.id)}
+                >
+                  <Text style={[styles.formatText, tennisFormat === option.id && styles.formatTextOn]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {tennisSets.map((set, index) => (
+              <View key={`set-${index}`} style={styles.scoreRow}>
+                <View style={styles.scoreField}>
+                  <Text style={styles.label}>Set {index + 1} winner</Text>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="number-pad"
+                    value={set.winner}
+                    onChangeText={(value) => updateTennisSet(index, 'winner', value)}
+                  />
+                </View>
+                <View style={styles.scoreField}>
+                  <Text style={styles.label}>Set {index + 1} loser</Text>
+                  <TextInput
+                    style={styles.input}
+                    keyboardType="number-pad"
+                    value={set.loser}
+                    onChangeText={(value) => updateTennisSet(index, 'loser', value)}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.scoreRow}>
+            <View style={styles.scoreField}>
+              <Text style={styles.label}>
+                {teamSides ? 'Winning score' : 'Winner score'}
+                {optionalScores ? ' (optional)' : ''}
+              </Text>
+              <TextInput
+                ref={winnerScoreRef}
+                style={styles.input}
+                blurOnSubmit={false}
+                keyboardType="number-pad"
+                value={winnerScore}
+                onFocus={() => {
+                  keyboardHold.current = true;
+                  focusTarget.current = winnerScoreRef.current;
+                  setFocusField('winnerScore');
+                  revealInput(winnerScoreRef.current);
+                }}
+                onChangeText={setWinnerScore}
+                placeholder={optionalScores ? 'Optional' : undefined}
+                placeholderTextColor={chrome.placeholder}
+              />
+              {winnerChips.length ? (
+                <View
+                  style={styles.chipRow}
+                  onLayout={(event) => onChipRowLayout(event.nativeEvent.layout.width)}
+                >
+                  {winnerChips.map((score, index) => (
+                    <View
+                      key={`winner-${score}-${index}`}
+                      style={styles.scoreChipSlot}
+                    >
+                      <TouchableOpacity
+                        style={styles.scoreChip}
+                        hitSlop={{ top: 6, bottom: 6 }}
+                        onPressIn={() => {
+                          setWinnerScore(String(score));
+                          forceKeyboard(winnerScoreRef.current);
+                        }}
+                      >
+                        <Text style={styles.scoreChipText} numberOfLines={1}>
+                          {score}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+            <View style={styles.scoreField}>
+              <Text style={styles.label}>
+                {teamSides ? 'Losing score' : 'Loser score'}
+                {optionalScores ? ' (optional)' : ''}
+              </Text>
+              <TextInput
+                ref={loserScoreRef}
+                style={styles.input}
+                blurOnSubmit={false}
+                keyboardType="number-pad"
+                value={loserScore}
+                onFocus={() => {
+                  keyboardHold.current = true;
+                  focusTarget.current = loserScoreRef.current;
+                  setFocusField('loserScore');
+                  revealInput(loserScoreRef.current);
+                }}
+                onChangeText={setLoserScore}
+                placeholder={optionalScores ? 'Optional' : undefined}
+                placeholderTextColor={chrome.placeholder}
+              />
+              {loserChips.length ? (
+                <View
+                  style={styles.chipRow}
+                  onLayout={(event) => onChipRowLayout(event.nativeEvent.layout.width)}
+                >
+                  {loserChips.map((score, index) => (
+                    <View
+                      key={`loser-${score}-${index}`}
+                      style={styles.scoreChipSlot}
+                    >
+                      <TouchableOpacity
+                        style={styles.scoreChip}
+                        hitSlop={{ top: 6, bottom: 6 }}
+                        onPressIn={() => {
+                          setLoserScore(String(score));
+                          forceKeyboard(loserScoreRef.current);
+                        }}
+                      >
+                        <Text style={styles.scoreChipText} numberOfLines={1}>
+                          {score}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          </View>
+        )}
+        {optionalScores && !winLoss && !tennis ? (
+          <Text style={styles.hint}>Scores optional. Leave both blank to log win/loss only.</Text>
+        ) : null}
+
+        <View style={styles.playedWrap}>
+          <DateTimeField
+            value={playedAt}
+            onChange={(next) => {
+              playedPinned.current = true;
+              setPlayedAt(next);
+            }}
+            onOpenChange={(open) => {
+              playedOpenRef.current = open;
+              setPlayedOpen(open);
+              if (!open) return;
+              keyboardHold.current = false;
+              clearFocusTimers();
+              focusTarget.current = null;
+              Keyboard.dismiss();
+              scrollRef.current?.scrollToEnd({ animated: false });
+            }}
+          />
+        </View>
+      </ScrollView>
+    </ScreenScaffold>
+    <GameAddedModal
+      visible={successOpen}
+      game={savedGame}
+      todayStats={todayStats}
+      winLoss={winLoss}
+      onClose={dismissSuccess}
+    />
+    </>
+  );
+}
+
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  const chrome = formChrome(theme);
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: 120,
+    },
+    contentPlayedOpen: {
+      paddingBottom: 132,
+    },
+    footer: {
+      paddingHorizontal: spacing.lg,
+      gap: spacing.sm,
+    },
+    section: {
+      fontWeight: '700',
+      color: chrome.label,
+      marginBottom: spacing.sm,
+      marginTop: spacing.md,
+    },
+    sectionLabel: {
+      fontWeight: '700',
+      color: chrome.label,
+    },
+    losersSection: {
+      marginTop: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    sectionFirst: {
+      marginTop: 0,
+    },
+    label: {
+      fontWeight: '600',
+      color: chrome.label,
+      marginBottom: spacing.xs,
+    },
+    fieldWrap: {
+      marginBottom: spacing.sm,
+    },
+    fieldGridItem: {
+      flexGrow: 1,
+      flexBasis: '45%',
+      minWidth: '45%',
+      marginBottom: 0,
+    },
+    fieldFocused: {
+      zIndex: 10,
+    },
+    nameGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: chrome.fieldBorder,
+      borderRadius: 10,
+      padding: spacing.md,
+      backgroundColor: chrome.fieldBg,
+      fontSize: 16,
+      color: chrome.inputText,
+      marginBottom: 0,
+    },
+    suggestList: {
+      marginTop: 4,
+      borderRadius: 10,
+      backgroundColor: chrome.suggestBg,
+      borderWidth: 1,
+      borderColor: chrome.suggestBorder,
+      overflow: 'hidden',
+      zIndex: 2,
+    },
+    suggestItem: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: 10,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: chrome.suggestDivider,
+    },
+    suggestText: {
+      color: chrome.inputText,
+      fontWeight: '600',
+    },
+    hint: {
+      color: chrome.muted,
+      marginTop: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    scoreRow: {
+      flexDirection: 'row',
+      gap: spacing.md,
+      marginTop: spacing.md,
+    },
+    tennisBlock: {
+      marginTop: spacing.sm,
+    },
+    formatRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    formatChip: {
+      borderRadius: 999,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      backgroundColor: chrome.chipIdleBg,
+      borderWidth: 1,
+      borderColor: chrome.chipIdleBorder,
+    },
+    formatChipOn: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    formatText: {
+      color: chrome.label,
+      fontWeight: '700',
+      fontSize: 13,
+    },
+    formatTextOn: {
+      color: chrome.chipActiveText,
+    },
+    scoreField: {
+      flex: 1,
+    },
+    playedWrap: {
+      marginTop: spacing.lg,
+    },
+    chipRow: {
+      flexDirection: 'row',
+      flexWrap: 'nowrap',
+      gap: 4,
+      marginTop: spacing.sm,
+    },
+    scoreChipSlot: {
+      flex: 1,
+      minWidth: 0,
+    },
+    scoreChip: {
+      width: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: chrome.scoreChipBg,
+      borderWidth: 1,
+      borderColor: chrome.scoreChipBorder,
+      borderRadius: 8,
+      paddingHorizontal: 2,
+      paddingVertical: 5,
+    },
+    scoreChipText: {
+      color: chrome.scoreChipText,
+      fontWeight: '700',
+      fontSize: 13,
+      textAlign: 'center',
+    },
+  });
+}

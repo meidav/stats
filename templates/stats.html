@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title-hero">{{ year }} Doubles Stats</h1>
+    <div class="header-controls">
+        <a href="{{ url_for('games_by_year', year=year) }}" class="nav-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM9 9h6v6H9z"/></svg>
+            Games
+        </a>
+        <div class="dropdown dropdown-year">
+            <button class="dropbtn" type="button">{{ year }} <svg class="dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="dropdown-content">
+                {% for y in all_years %}
+                    <a href="{{ url_for('stats', year=y) }}">{{ y }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        <label for="menu__toggle" class="nav-pill menu-trigger" aria-label="Open menu">
+            Menu
+        </label>
+    </div>
+</div>
+<div class="search-bar-wrap">
+    <input type="text" id="playerSearch" class="search-bar" placeholder="Search players..." autocomplete="off">
+</div>
+<div class="stats-sections">
+    {% if todays_stats %}
+    <h2 class="section-title">Today's stats</h2>
+    <table id="todays-stats" class="stats-table">
+        <thead>
+            <tr>
+                <th class="table-col-rank clickable" data-sort="number">#</th>
+                <th class="table-col-player clickable" data-sort="string">Player</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Wins">W</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Losses">L</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Win %">%</th>
+                <th class="table-col-stat clickable" data-sort="number">+/-</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in todays_stats %}
+            <tr>
+                <td class="table-col-rank">{{ loop.index }}</td>
+                <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                <td class="table-col-stat">{{ player[1] }}</td>
+                <td class="table-col-stat">{{ player[2] }}</td>
+                <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                <td class="table-col-stat">{{ "+{}".format(player[4]) if player[4] > 0 else player[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if last_30_stats %}
+    <h2 class="section-title">Last 30 days</h2>
+    <table id="last-30-days-stats" class="stats-table">
+        <thead>
+            <tr>
+                <th class="table-col-rank clickable" data-sort="number">#</th>
+                <th class="table-col-player clickable" data-sort="string">Player</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Wins">W</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Losses">L</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Win %">%</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Games">G</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in last_30_stats %}
+            <tr>
+                <td class="table-col-rank">{{ loop.index }}</td>
+                <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=player[0]) }}">{{ player[0] }}</a></td>
+                <td class="table-col-stat">{{ player[1] }}</td>
+                <td class="table-col-stat">{{ player[2] }}</td>
+                <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <h2 class="section-title">{{ year }} stats</h2>
+    <table id="yearly-stats" class="stats-table">
+        <thead>
+            <tr>
+                <th class="table-col-rank clickable" data-sort="number">#</th>
+                <th class="table-col-player clickable" data-sort="string">Player</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Wins">W</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Losses">L</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Win %">%</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Games">G</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in stats %}
+            <tr>
+                <td class="table-col-rank">{{ loop.index }}</td>
+                <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                <td class="table-col-stat">{{ player[1] }}</td>
+                <td class="table-col-stat">{{ player[2] }}</td>
+                <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if rare_stats %}
+    <h2 class="section-title section-title--fewer">Fewer than {{ minimum_games }} games</h2>
+    <p class="games-count">Total games: {{ tot_games }} | Min games: {{ minimum_games }}</p>
+    <table class="stats-table">
+        <thead>
+            <tr>
+                <th class="table-col-rank clickable" data-sort="number">#</th>
+                <th class="table-col-player clickable" data-sort="string">Player</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Wins">W</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Losses">L</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Win %">%</th>
+                <th class="table-col-stat clickable" data-sort="number" title="Games">G</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in rare_stats %}
+            <tr>
+                <td class="table-col-rank">{{ loop.index }}</td>
+                <td class="table-col-player"><a href="{{ url_for('player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                <td class="table-col-stat">{{ player[1] }}</td>
+                <td class="table-col-stat">{{ player[2] }}</td>
+                <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('playerSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.toLowerCase().trim();
+            document.querySelectorAll('.stats-table tbody tr').forEach(tr => {
+                const nameCell = tr.cells[1];
+                const name = nameCell ? nameCell.textContent.toLowerCase() : '';
+                tr.style.display = (!q || name.includes(q)) ? '' : 'none';
+            });
+        });
+    }
+
+    const tables = document.querySelectorAll('table');
+
+    tables.forEach(table => {
+        const headers = table.querySelectorAll('thead th[data-sort]');
+        headers.forEach((header, index) => {
+            header.addEventListener('click', () => {
+                const sortType = header.dataset.sort;
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+                const isAscending = header.classList.contains('asc');
+                
+                rows.sort((rowA, rowB) => {
+                    const cellA = rowA.cells[index].textContent.trim();
+                    const cellB = rowB.cells[index].textContent.trim();
+
+                    if (sortType === 'number') {
+                        return isAscending
+                            ? parseFloat(cellA) - parseFloat(cellB)
+                            : parseFloat(cellB) - parseFloat(cellA);
+                    } else {
+                        return isAscending
+                            ? cellA.localeCompare(cellB)
+                            : cellB.localeCompare(cellA);
+                    }
+                });
+
+                rows.forEach(row => table.querySelector('tbody').appendChild(row));
+                headers.forEach(h => h.classList.remove('asc', 'desc'));
+                header.classList.toggle(isAscending ? 'desc' : 'asc');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

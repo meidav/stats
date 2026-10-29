@@ -1,0 +1,21 @@
+PlayTracker 1.3.2 (build 19)
+============================
+Patch on 1.3.1.
+
+- Equal-width add-game score shortcut pills (max 4 per side)
+- Played date/time refreshes on resume / every 30s unless the user set it
+- Intro / login readable after a dark theme logout; logo padding; brighter intro cards
+- Public / My leagues list clears the floating tab bar; no stacked right-edge card shadow
+- Glass tab active bubble: subtler on dark, primary-tinted on light; squish then spring
+- Tighter header-to-content spacing on hub tabs
+- Floating tab bar sits slightly lower
+
+Version
+-------
+app.json: 1.3.2 / iOS buildNumber 19 / Android versionCode 19
+Xcode (after prebuild:ios): MARKETING_VERSION 1.3.2, CURRENT_PROJECT_VERSION 19
+
+UIScene
+-------
+Already enabled via expo-build-properties ios.enableSceneSupport true
+(avoids the iOS 27 UIScene launch crash that hit StackTracker / In System VB).

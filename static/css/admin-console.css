@@ -1,0 +1,1249 @@
+:root {
+  --ac-ink: #0f172a;
+  --ac-muted: #5b4a73;
+  --ac-purple: #3b0764;
+  --ac-violet: #5b21b6;
+  --ac-lilac: #c4b5fd;
+  --ac-peach: #fdba74;
+  --ac-sky: #93c5fd;
+  --ac-paper: rgba(255, 248, 240, 0.92);
+  --ac-line: rgba(91, 33, 182, 0.16);
+  --ac-win: #047857;
+  --ac-loss: #be123c;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+html {
+  background: var(--ac-peach);
+}
+
+body {
+  color: var(--ac-ink);
+  font-family: "Avenir Next", "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+  background: linear-gradient(180deg, var(--ac-sky) 0%, var(--ac-lilac) 52%, var(--ac-peach) 100%);
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+a { color: var(--ac-violet); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.ac-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.ac-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #3b0764, #5b21b6 55%, #6d28d9);
+  border-bottom: 1px solid rgba(196, 181, 253, 0.35);
+}
+
+.ac-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  padding-top: max(10px, env(safe-area-inset-top));
+}
+
+.ac-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+.ac-brand:hover { text-decoration: none; }
+
+.ac-brand-icon { height: 36px; width: auto; }
+
+.ac-brand-copy { display: flex; flex-direction: column; gap: 0; }
+
+.ac-brand-name {
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #fdba74;
+  font-size: 1.05rem;
+  line-height: 1.1;
+}
+
+.ac-brand-sub {
+  color: #ffedd5;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ac-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.ac-nav-link {
+  color: #ede9fe;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+.ac-nav-link:hover { text-decoration: none; background: rgba(255,255,255,0.08); }
+.ac-nav-link.is-active {
+  background: rgba(253, 186, 116, 0.18);
+  border-color: rgba(253, 186, 116, 0.45);
+  color: #fdba74;
+}
+
+.ac-session {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ac-session-email {
+  color: #ddd6fe;
+  font-size: 0.78rem;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ac-signout {
+  background: transparent;
+  color: #ffedd5;
+  border: 1px solid rgba(255, 237, 213, 0.4);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ac-signout:hover { background: rgba(255,255,255,0.08); }
+
+.ac-main { flex: 1 0 auto; width: 100%; max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; }
+body.ac-roadmap-page .ac-main { max-width: 1400px; }
+
+.ac-footer {
+  margin-top: auto;
+  flex-shrink: 0;
+  padding: 22px 24px max(40px, env(safe-area-inset-bottom));
+  background: var(--ac-peach);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.ac-footer-copy {
+  margin: 0;
+  text-align: center;
+  color: var(--ac-ink);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.55;
+  padding: 0 8px;
+}
+
+.ac-footer-copy a {
+  color: var(--ac-ink);
+  font-weight: 700;
+}
+
+.ac-footer-dot {
+  margin: 0 8px;
+  color: var(--ac-muted);
+}
+
+.ac-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.ac-kicker {
+  margin: 0 0 2px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ac-violet);
+}
+
+h1 {
+  margin: 0;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-size: 1.7rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--ac-purple);
+}
+
+.ac-page-meta, .ac-hint, .ac-muted {
+  margin: 0;
+  color: var(--ac-muted);
+  font-size: 0.82rem;
+}
+
+.ac-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ac-kpi {
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.ac-kpi-value {
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 650;
+  color: var(--ac-purple);
+  line-height: 1;
+}
+
+.ac-kpi-label {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ac-muted);
+}
+
+.ac-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 10px;
+}
+
+.ac-filters-wrap {
+  align-items: flex-end;
+}
+
+.ac-search { flex: 1 1 240px; }
+
+.ac-filters input,
+.ac-filters select,
+.ac-field input {
+  width: 100%;
+  border: 1px solid var(--ac-line);
+  background: #fffaf5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--ac-ink);
+}
+
+.ac-password {
+  position: relative;
+  display: block;
+}
+
+.ac-password input {
+  padding-right: 44px;
+}
+
+.ac-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ac-violet);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.ac-password-toggle:hover {
+  background: rgba(196, 181, 253, 0.35);
+  color: var(--ac-purple);
+}
+
+.ac-password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ac-filters select { width: auto; min-width: 140px; }
+
+.ac-btn-primary,
+.ac-btn-secondary {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ac-btn-primary {
+  background: var(--ac-purple);
+  color: #ffedd5;
+}
+
+.ac-btn-secondary {
+  background: rgba(91, 33, 182, 0.12);
+  color: var(--ac-purple);
+}
+
+.ac-text-link { font-size: 0.82rem; font-weight: 600; }
+
+.ac-result-count {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ac-muted);
+}
+
+.ac-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ac-user-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 14px;
+  gap: 12px;
+  align-items: start;
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: inherit;
+}
+.ac-user-row:hover {
+  text-decoration: none;
+  border-color: rgba(91, 33, 182, 0.4);
+  background: #fff;
+}
+
+.ac-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #5b21b6, #7c3aed);
+  color: #fdba74;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.ac-avatar-lg { width: 56px; height: 56px; font-size: 1.05rem; border-radius: 16px; }
+
+.ac-user-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.ac-user-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 3px 0 0;
+  color: var(--ac-muted);
+  font-size: 0.78rem;
+}
+
+.ac-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ac-lilac);
+}
+
+.ac-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(196, 181, 253, 0.45);
+  color: var(--ac-purple);
+}
+
+.ac-pill-admin { background: rgba(91, 33, 182, 0.16); }
+.ac-pill-warn { background: rgba(253, 186, 116, 0.55); }
+
+.ac-league-chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.ac-league-chips li,
+.ac-chip-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(147, 197, 253, 0.28);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+}
+
+.ac-chip-name { font-weight: 650; }
+.ac-chip-sport, .ac-chip-games { color: var(--ac-muted); }
+.ac-no-leagues { margin: 6px 0 0; font-size: 0.75rem; color: var(--ac-muted); }
+
+.ac-vis {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.ac-vis-public { background: #d1fae5; color: #065f46; }
+.ac-vis-unlisted { background: #e0e7ff; color: #3730a3; }
+.ac-vis-private { background: #ffe4e6; color: #9f1239; }
+
+.ac-chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--ac-lilac);
+  border-bottom: 2px solid var(--ac-lilac);
+  transform: rotate(-45deg);
+  margin-top: 14px;
+}
+
+.ac-table-wrap {
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-radius: 14px;
+  overflow: auto;
+}
+
+.ac-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.ac-table th,
+.ac-table td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ac-line);
+  vertical-align: top;
+}
+
+.ac-table th {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ac-muted);
+  font-weight: 700;
+}
+
+.ac-sort {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ac-sort:hover { color: var(--ac-violet); text-decoration: underline; }
+.ac-sort.is-active { color: var(--ac-purple); }
+
+.ac-table tr:last-child td { border-bottom: 0; }
+.ac-num { text-align: right; font-variant-numeric: tabular-nums; }
+.ac-win { color: var(--ac-win); font-weight: 650; }
+.ac-loss { color: var(--ac-loss); font-weight: 650; }
+
+.ac-game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ac-game {
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.ac-game-when {
+  margin: 0 0 8px;
+  color: var(--ac-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.ac-game-side {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.ac-game-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-weight: 650;
+}
+
+.ac-game-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  min-width: 1.5rem;
+  text-align: right;
+}
+
+.ac-game-win .ac-game-score,
+.ac-game-win .ac-game-players { color: var(--ac-win); }
+.ac-game-loss .ac-game-score,
+.ac-game-loss .ac-game-players { color: var(--ac-loss); }
+
+.ac-head-badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ac-section-nav { margin: 0 0 18px; }
+.ac-panel { margin: 0 0 28px; scroll-margin-top: 80px; }
+.ac-manage-form,
+.ac-manage-card {
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.ac-manage-card h3 { margin: 0; color: var(--ac-purple); font-size: 0.95rem; }
+.ac-inline-form { flex-direction: row; flex-wrap: wrap; align-items: flex-end; }
+.ac-inline-form .ac-field { flex: 1 1 160px; }
+.ac-form-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ac-field textarea,
+.ac-manage-form select,
+.ac-role-select {
+  width: 100%;
+  border: 1px solid var(--ac-line);
+  background: #fffaf5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--ac-ink);
+}
+.ac-role-select { width: auto; min-width: 110px; }
+.ac-btn-danger {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: #9f1239;
+  color: #fff;
+}
+.ac-danger-link { color: #9f1239; font-weight: 700; }
+.ac-danger-panel { border-top: 1px solid rgba(159, 18, 57, 0.25); padding-top: 12px; }
+.ac-alert-ok { background: #d1fae5; color: #065f46; }
+.ac-game-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.ac-member-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+
+.ac-crumb { margin: 0 0 12px; font-size: 0.8rem; color: var(--ac-muted); }
+.ac-detail-head { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; }
+
+.ac-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.ac-facts > div {
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.ac-facts dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ac-muted);
+}
+
+.ac-facts dd { margin: 3px 0 0; font-weight: 650; }
+
+.ac-safety,
+.ac-notice {
+  background: #fdba74;
+  color: #3b0764;
+  border: 1px solid rgba(91, 33, 182, 0.28);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ac-section-title {
+  margin: 22px 0 6px;
+  font-size: 1rem;
+  color: var(--ac-purple);
+}
+
+.ac-empty {
+  background: var(--ac-paper);
+  border: 1px dashed var(--ac-line);
+  border-radius: 12px;
+  padding: 16px;
+  color: var(--ac-muted);
+}
+
+.ac-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.ac-tab {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--ac-line);
+  font-weight: 650;
+  font-size: 0.82rem;
+}
+.ac-tab.is-active {
+  background: var(--ac-purple);
+  color: #fdba74;
+  border-color: var(--ac-purple);
+  text-decoration: none;
+}
+.ac-sport-label { font-weight: 700; color: var(--ac-purple); }
+.ac-year-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.ac-year-links a { font-size: 0.82rem; font-weight: 650; }
+.ac-year-links a.is-active { color: var(--ac-purple); text-decoration: underline; }
+
+.ac-login-page,
+.ac-auth-page .ac-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.ac-login-card,
+.ac-modal {
+  width: min(440px, 100%);
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-radius: 22px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ac-modal h1 {
+  text-align: center;
+}
+
+.ac-modal .ac-kicker {
+  text-align: center;
+}
+
+.ac-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ac-modal .ac-btn-primary {
+  width: 100%;
+  padding: 12px 16px;
+}
+
+.ac-login-brand { text-align: center; }
+.ac-login-brand img { height: 56px; }
+.ac-login-name {
+  margin: 8px 0 0;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  letter-spacing: 0.08em;
+  color: var(--ac-purple);
+  font-size: 1.4rem;
+  font-weight: 650;
+}
+.ac-login-kicker {
+  margin: 2px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ac-violet);
+}
+.ac-login-note { margin: 0; color: var(--ac-muted); font-size: 0.84rem; text-align: center; }
+.ac-field > span:not(.ac-password) {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--ac-muted);
+}
+.ac-alert {
+  margin: 0;
+  background: #ffe4e6;
+  color: #9f1239;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+}
+
+.ac-roadmap-head-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.ac-roadmap-add {
+  border: 0;
+  cursor: pointer;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--ac-violet);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.ac-roadmap-add:hover { background: var(--ac-purple); }
+
+.ac-roadmap-col-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  padding-left: 16px;
+}
+
+.ac-roadmap-col-meta p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--ac-muted);
+  font-weight: 600;
+}
+
+.ac-roadmap-col-add {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid var(--ac-line);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--ac-violet);
+  font-weight: 800;
+  cursor: pointer;
+  line-height: 1;
+}
+.ac-roadmap-col-add:hover { background: rgba(91, 33, 182, 0.12); }
+
+.ac-roadmap-card-actions {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ac-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ac-roadmap-move,
+.ac-roadmap-edit-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.ac-roadmap-move button,
+.ac-roadmap-edit-actions button {
+  border: 0;
+  background: rgba(15, 23, 42, 0.06);
+  color: #64748b;
+  border-radius: 8px;
+  min-width: 28px;
+  height: 28px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 8px;
+}
+.ac-roadmap-move button:hover,
+.ac-roadmap-edit-actions button:hover {
+  background: rgba(91, 33, 182, 0.12);
+  color: var(--ac-violet);
+}
+.ac-roadmap-edit-actions button[data-delete]:hover {
+  background: rgba(190, 24, 93, 0.12);
+  color: var(--ac-loss);
+}
+
+.ac-roadmap-dialog {
+  border: 0;
+  padding: 0;
+  border-radius: 18px;
+  background: transparent;
+  max-width: 520px;
+  width: calc(100vw - 32px);
+}
+.ac-roadmap-dialog::backdrop {
+  background: rgba(30, 27, 75, 0.45);
+}
+
+.ac-roadmap-dialog-card {
+  margin: 0;
+  background: linear-gradient(160deg, #eff6ff, #f5f3ff 55%, #fff7ed);
+  border: 1px solid rgba(91, 33, 182, 0.22);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.ac-roadmap-dialog-head,
+.ac-roadmap-dialog-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.ac-roadmap-dialog-head {
+  border-bottom: 1px solid var(--ac-line);
+}
+
+.ac-roadmap-dialog-foot {
+  border-top: 1px solid var(--ac-line);
+  justify-content: flex-end;
+}
+
+.ac-roadmap-dialog-head h2 {
+  margin: 0;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-size: 1.1rem;
+  color: var(--ac-purple);
+}
+
+.ac-roadmap-dialog-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(91, 33, 182, 0.12);
+  color: var(--ac-violet);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.ac-roadmap-dialog-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ac-roadmap-dialog-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ac-roadmap-dialog .ac-field input,
+.ac-roadmap-dialog .ac-field select,
+.ac-roadmap-dialog .ac-field textarea {
+  width: 100%;
+  border: 1px solid var(--ac-line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--ac-ink);
+}
+
+.ac-roadmap-effort {
+  margin: 0;
+  border: 1px solid var(--ac-line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.ac-roadmap-effort legend {
+  padding: 0 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ac-muted);
+}
+
+.ac-roadmap-effort label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 10px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--ac-ink);
+}
+
+.ac-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--ac-ink);
+  font-size: 0.88rem;
+}
+
+.ac-roadmap-dialog-error {
+  margin: 0;
+  color: #9f1239;
+  background: #ffe4e6;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ac-roadmap-principle {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(253, 186, 116, 0.22);
+  border: 1px solid rgba(253, 186, 116, 0.45);
+  color: var(--ac-ink);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.ac-roadmap-living {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ac-muted);
+}
+
+.ac-roadmap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 0 0 18px;
+  align-items: center;
+}
+
+.ac-roadmap-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--ac-muted);
+}
+
+.ac-roadmap-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.ac-roadmap-premium-mark {
+  color: #b45309;
+  font-size: 0.85rem;
+}
+
+.ac-roadmap-board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(200px, 1fr));
+  gap: 12px;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin: 0 -4px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.ac-roadmap-col {
+  min-width: 220px;
+  background: rgba(255, 248, 240, 0.55);
+  border: 1px solid var(--ac-line);
+  border-radius: 16px;
+  padding: 10px;
+  backdrop-filter: blur(8px);
+}
+
+.ac-roadmap-col-head {
+  margin-bottom: 10px;
+  padding: 4px 4px 8px;
+  border-bottom: 1px solid var(--ac-line);
+}
+
+.ac-roadmap-col-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ac-roadmap-col-title h2 {
+  margin: 0;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-size: 0.98rem;
+  color: var(--ac-purple);
+  letter-spacing: 0.02em;
+}
+
+.ac-roadmap-col-count {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(91, 33, 182, 0.12);
+  color: var(--ac-violet);
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ac-roadmap-col-head p {
+  margin: 4px 0 0 16px;
+  font-size: 0.72rem;
+  color: var(--ac-muted);
+  font-weight: 600;
+}
+
+.ac-roadmap-col-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.ac-roadmap-col--now .ac-roadmap-col-dot { background: #059669; }
+.ac-roadmap-col--next .ac-roadmap-col-dot { background: #2563eb; }
+.ac-roadmap-col--later .ac-roadmap-col-dot { background: #7c3aed; }
+.ac-roadmap-col--idea .ac-roadmap-col-dot { background: #d97706; }
+.ac-roadmap-col--done .ac-roadmap-col-dot { background: #64748b; }
+
+.ac-roadmap-col-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ac-roadmap-empty {
+  margin: 8px 4px;
+  font-size: 0.78rem;
+  color: var(--ac-muted);
+  font-style: italic;
+}
+
+.ac-roadmap-card {
+  background: var(--ac-paper);
+  border: 1px solid var(--ac-line);
+  border-left: 4px solid var(--card-accent, var(--ac-violet));
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(46, 16, 101, 0.06);
+}
+
+.ac-roadmap-card.is-done {
+  opacity: 0.82;
+  border-left-color: #94a3b8;
+}
+
+.ac-roadmap-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ac-roadmap-card h3 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--ac-ink);
+  line-height: 1.25;
+}
+
+.ac-roadmap-card.is-done h3 {
+  color: #475569;
+}
+
+.ac-roadmap-premium {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #b45309;
+  background: rgba(251, 191, 36, 0.18);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  border-radius: 999px;
+  padding: 3px 7px;
+}
+
+.ac-roadmap-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.ac-roadmap-chip {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: color-mix(in srgb, var(--chip, var(--ac-violet)) 16%, white);
+  color: var(--chip, var(--ac-violet));
+  border: 1px solid color-mix(in srgb, var(--chip, var(--ac-violet)) 28%, white);
+}
+
+.ac-roadmap-chip--effort {
+  background: rgba(15, 23, 42, 0.06);
+  color: #475569;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.ac-roadmap-chip--version {
+  background: rgba(5, 150, 105, 0.12);
+  color: #047857;
+  border-color: rgba(5, 150, 105, 0.28);
+}
+
+.ac-roadmap-summary {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.ac-roadmap-card.is-done .ac-roadmap-summary {
+  color: #64748b;
+}
+
+.ac-roadmap-details {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+  color: var(--ac-muted);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.ac-roadmap-details li { margin-bottom: 2px; }
+
+.ac-roadmap-shipped {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ac-line);
+}
+
+.ac-roadmap-shipped h2 {
+  margin: 0 0 10px;
+  font-family: Fredoka, "Avenir Next", sans-serif;
+  font-size: 0.95rem;
+  color: var(--ac-purple);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ac-roadmap-shipped-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ac-roadmap-shipped-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(5, 150, 105, 0.12);
+  border: 1px solid rgba(5, 150, 105, 0.28);
+  color: #047857;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.ac-roadmap-shipped-pill em {
+  font-style: normal;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+@media (max-width: 1100px) {
+  .ac-roadmap-board {
+    grid-template-columns: repeat(5, minmax(210px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .ac-session-email { display: none; }
+  .ac-page-head { flex-direction: column; align-items: flex-start; }
+  .ac-header-bar { flex-wrap: wrap; }
+  .ac-nav { order: 3; width: 100%; }
+  .ac-footer {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Admin | PlayTracker{% endblock %}</title>
+    <meta name="theme-color" content="#3b0764">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-console.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <header class="ac-header">
+        <div class="ac-header-bar">
+            <a class="ac-brand" href="{{ url_for('admin_console.users') }}">
+                <img class="ac-brand-icon" src="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}" alt="">
+                <span class="ac-brand-copy">
+                    <span class="ac-brand-name">PlayTracker</span>
+                    <span class="ac-brand-sub">Admin console</span>
+                </span>
+            </a>
+            {% if admin_user and not must_change_password %}
+            <nav class="ac-nav" aria-label="Admin">
+                <a class="ac-nav-link {% block nav_users %}{% endblock %}" href="{{ url_for('admin_console.users') }}">Users</a>
+                <a class="ac-nav-link {% block nav_leagues %}{% endblock %}" href="{{ url_for('admin_console.leagues') }}">Leagues</a>
+                <a class="ac-nav-link {% block nav_roadmap %}{% endblock %}" href="{{ url_for('admin_console.roadmap') }}">Roadmap</a>
+            </nav>
+            {% endif %}
+            {% if admin_user %}
+            <div class="ac-session">
+                <span class="ac-session-email">{{ admin_user.email }}</span>
+                <form method="POST" action="{{ url_for('admin_console.logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ admin_csrf_token }}">
+                    <button type="submit" class="ac-signout">Sign out</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+    <main class="ac-main">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="ac-footer">
+        <p class="ac-footer-copy">
+            &copy; {{ current_year }}
+            <a href="https://arbelindustries.com" rel="noopener">Arbel Industries</a>.
+            All rights reserved.
+            <span class="ac-footer-dot">·</span>
+            <a href="/privacy">Privacy</a>
+            <span class="ac-footer-dot">·</span>
+            <a href="/terms">Terms</a>
+        </p>
+    </footer>
+    <script>
+    (function () {
+        var eye = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        var eyeOff = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        document.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-password-toggle]');
+            if (!button) return;
+            var wrap = button.closest('.ac-password');
+            var input = wrap && wrap.querySelector('input');
+            var icon = button.querySelector('svg');
+            if (!input || !icon) return;
+            var hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            icon.innerHTML = hidden ? eyeOff : eye;
+            button.setAttribute('aria-label', hidden ? 'Hide password' : 'Show password');
+            button.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+        });
+    })();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

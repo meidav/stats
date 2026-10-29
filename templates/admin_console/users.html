@@ -1,0 +1,119 @@
+{% extends "admin_console/base.html" %}
+{% block title %}Users | PlayTracker admin{% endblock %}
+{% block nav_users %}is-active{% endblock %}
+
+{% block content %}
+<section class="ac-page">
+    <header class="ac-page-head">
+        <div>
+            <p class="ac-kicker">Overview</p>
+            <h1>Users</h1>
+        </div>
+        <p class="ac-page-meta">Every account and every league, including private and unlisted.</p>
+    </header>
+
+    <div class="ac-kpis">
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.users }}</div>
+            <div class="ac-kpi-label">Users</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.admins }}</div>
+            <div class="ac-kpi-label">Super-admins</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.leagues }}</div>
+            <div class="ac-kpi-label">Leagues</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.private_leagues }}</div>
+            <div class="ac-kpi-label">Private</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.unlisted_leagues }}</div>
+            <div class="ac-kpi-label">Unlisted</div>
+        </div>
+        <div class="ac-kpi">
+            <div class="ac-kpi-value">{{ counts.games }}</div>
+            <div class="ac-kpi-label">Games</div>
+        </div>
+    </div>
+
+    <form class="ac-filters" method="GET" action="{{ url_for('admin_console.users') }}">
+        <label class="ac-search">
+            <span class="ac-sr">Search</span>
+            <input type="search" name="q" value="{{ query }}" placeholder="Search name, email, or league">
+        </label>
+        <label>
+            <span class="ac-sr">Role</span>
+            <select name="role">
+                <option value="all" {% if role == 'all' %}selected{% endif %}>All roles</option>
+                <option value="admin" {% if role == 'admin' %}selected{% endif %}>Super-admins</option>
+                <option value="user" {% if role == 'user' %}selected{% endif %}>Members</option>
+            </select>
+        </label>
+        <label>
+            <span class="ac-sr">League visibility</span>
+            <select name="visibility">
+                <option value="">Any visibility</option>
+                {% for item in visibilities %}
+                <option value="{{ item }}" {% if visibility == item %}selected{% endif %}>Has {{ item }} league</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="ac-btn-secondary">Filter</button>
+        {% if query or role != 'all' or visibility %}
+        <a class="ac-text-link" href="{{ url_for('admin_console.users') }}">Clear</a>
+        {% endif %}
+    </form>
+
+    <p class="ac-result-count">{{ users|length }} account{% if users|length != 1 %}s{% endif %}</p>
+
+    <div class="ac-user-list">
+        {% if not users %}
+        <p class="ac-empty">No users match these filters.</p>
+        {% endif %}
+        {% for user in users %}
+        <a class="ac-user-row" href="{{ url_for('admin_console.user_detail', user_id=user.id) }}">
+            <div class="ac-avatar" aria-hidden="true">{{ user.initials }}</div>
+            <div class="ac-user-main">
+                <div class="ac-user-title">
+                    <strong>{{ user.username }}</strong>
+                    {% if user.is_admin %}
+                    <span class="ac-pill ac-pill-admin">Super-admin</span>
+                    {% endif %}
+                    {% if user.is_last_admin %}
+                    <span class="ac-pill ac-pill-warn">Last admin</span>
+                    {% endif %}
+                </div>
+                <div class="ac-user-meta">
+                    <span>{{ user.email }}</span>
+                    <span class="ac-dot"></span>
+                    <span>Active {{ user.last_active_label }}</span>
+                    <span class="ac-dot"></span>
+                    <span>{{ user.league_count }} league{% if user.league_count != 1 %}s{% endif %}</span>
+                </div>
+                {% if user.leagues %}
+                <ul class="ac-league-chips">
+                    {% for league in user.leagues[:4] %}
+                    <li>
+                        <span class="ac-chip-name">{{ league.name }}</span>
+                        <span class="ac-vis ac-vis-{{ league.visibility }}">{{ league.visibility }}</span>
+                        {% if league.sport_name %}<span class="ac-chip-sport">{{ league.sport_name }}</span>{% endif %}
+                        <span class="ac-chip-games">{{ league.game_count }}g</span>
+                    </li>
+                    {% endfor %}
+                    {% if user.leagues|length > 4 %}
+                    <li class="ac-chip-more">+{{ user.leagues|length - 4 }} more</li>
+                    {% endif %}
+                </ul>
+                {% else %}
+                <p class="ac-no-leagues">No leagues</p>
+                {% endif %}
+            </div>
+            <span class="ac-chevron" aria-hidden="true"></span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

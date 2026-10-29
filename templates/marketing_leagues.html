@@ -1,0 +1,45 @@
+{% extends "marketing_base.html" %}
+{% from "marketing_league_macros.html" import sport_mark %}
+{% block title %}Public leagues | PlayTracker{% endblock %}
+{% block nav_leagues %}is-active{% endblock %}
+
+{% block content %}
+<section class="mkt-standings">
+    <p class="mkt-kicker">Public leagues</p>
+    <h1>Leagues you can find</h1>
+    <p class="mkt-lead">Open standings in the browser, or in the PlayTracker app when you have it. Unlisted and private leagues stay off this list.</p>
+
+    {% if leagues %}
+    <ul class="mkt-league-index">
+        {% for league in leagues %}
+        <li>
+            <a class="mkt-league-card" href="/l/{{ league.slug }}">
+                <span class="mkt-league-mark">{{ sport_mark(league) }}</span>
+                <span class="mkt-league-copy">
+                    <strong>{{ league.name }}</strong>
+                    {% if league.activity %}
+                    <span class="mkt-league-activity">{{ league.activity }}</span>
+                    {% endif %}
+                    <span class="mkt-league-meta">{{ league.games_label }}</span>
+                    {% if league.description %}
+                    <span class="mkt-league-note">{{ league.description }}</span>
+                    {% endif %}
+                </span>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="mkt-empty-card">
+        <p>No public leagues yet. Create one in the PlayTracker app and set visibility to Public.</p>
+    </div>
+    {% endif %}
+
+    {% from "marketing_store_macros.html" import store_badges with context %}
+    <div class="mkt-cta-row">
+        <a class="mkt-btn mkt-btn-primary" href="/">Get the app</a>
+    </div>
+    <p class="mkt-soon">Create a league and log games in PlayTracker. Public standings stay on the web for sharing.</p>
+    {{ store_badges() }}
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Scrabble tile">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F8EDD4"/>
+      <stop offset="100%" stop-color="#E8D4A8"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="10" fill="url(#tile)" stroke="#C4A574" stroke-width="2"/>
+  <rect x="8" y="8" width="48" height="48" rx="7" fill="none" stroke="rgba(139,105,20,0.18)" stroke-width="1.5"/>
+  <text x="32" y="42" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700" fill="#1C1917">A</text>
+  <text x="48" y="52" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#44403C">1</text>
+</svg>

@@ -1,0 +1,130 @@
+{% extends "marketing_base.html" %}
+{% from "marketing_store_macros.html" import store_badges with context %}
+{% block title %}PlayTracker{% endblock %}
+{% block nav_app %}is-active{% endblock %}
+
+{% block content %}
+<section class="mkt-hero">
+    <p class="mkt-kicker">Now on iOS and Android</p>
+    <h1 class="mkt-sr-only">PlayTracker</h1>
+    <span class="mkt-logo-plate mkt-logo-plate-hero">
+        <img class="mkt-hero-logo" src="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}" alt="">
+    </span>
+    <p class="mkt-lead">Create leagues and log games in the app. Share public standings on the web, from beach volleyball to chess.</p>
+    {{ store_badges() }}
+    <a
+        class="mkt-open-app mkt-smart-open"
+        href="{{ app_store_url }}"
+        data-store-url="{{ app_store_itms_url }}"
+        data-play-url="{{ play_store_url }}"
+        data-market-url="{{ play_store_market_url }}"
+        data-app-url="playtracker://"
+    >Already have PlayTracker? Open the app</a>
+</section>
+
+<section class="mkt-shots-wrap" data-shots aria-roledescription="carousel" aria-label="PlayTracker app screenshots">
+    <div class="mkt-shots-stage">
+        <button type="button" class="mkt-shots-arrow is-prev" data-shots-prev aria-label="Previous screenshot">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <div class="mkt-shots" data-shots-track>
+            <figure class="mkt-shot" data-full="{{ url_for('static', filename='img/screenshots/v1.3.1/PT-iOS-iPhone-Screenshots-v1.3.1-6-intro.png') }}">
+                <img src="{{ url_for('static', filename='img/screenshots/intro.jpg') }}" width="828" height="1792" alt="Track everything you play. Volleyball, tennis, basketball, and more.">
+            </figure>
+            <figure class="mkt-shot" data-full="{{ url_for('static', filename='img/screenshots/v1.3.1/PT-iOS-iPhone-Screenshots-v1.3.1-3-myleagues.png') }}">
+                <img src="{{ url_for('static', filename='img/screenshots/my-leagues.jpg') }}" width="828" height="1792" alt="Every league in one place, from beach volleyball to chess and gin.">
+            </figure>
+            <figure class="mkt-shot" data-full="{{ url_for('static', filename='img/screenshots/v1.3.1/PT-iOS-iPhone-Screenshots-v1.3.1-1-standings.png') }}">
+                <img src="{{ url_for('static', filename='img/screenshots/standings.jpg') }}" width="828" height="1792" alt="Standings that stay current when you log a game.">
+            </figure>
+            <figure class="mkt-shot" data-full="{{ url_for('static', filename='img/screenshots/v1.3.1/PT-iOS-iPhone-Screenshots-v1.3.1-2-addgame.png') }}">
+                <img src="{{ url_for('static', filename='img/screenshots/add-game.jpg') }}" width="828" height="1792" alt="Log a game in seconds with names, scores, and date.">
+            </figure>
+            <figure class="mkt-shot" data-full="{{ url_for('static', filename='img/screenshots/v1.3.1/PT-iOS-iPhone-Screenshots-v1.3.1-4-profile.png') }}">
+                <img src="{{ url_for('static', filename='img/screenshots/player.jpg') }}" width="828" height="1792" alt="Player profiles with win streaks, partner stats, and history.">
+            </figure>
+            <figure class="mkt-shot" data-full="{{ url_for('static', filename='img/screenshots/v1.3.1/PT-iOS-iPhone-Screenshots-v1.3.1-5-newleague.png') }}">
+                <img src="{{ url_for('static', filename='img/screenshots/new-league.jpg') }}" width="828" height="1792" alt="Start a sports or game night league from a template.">
+            </figure>
+            <figure class="mkt-shot" data-full="{{ url_for('static', filename='img/screenshots/v1.3.1/PT-iOS-iPhone-Screenshots-v1.3.1-7-chooselook.png') }}">
+                <img src="{{ url_for('static', filename='img/screenshots/choose-look.jpg') }}" width="828" height="1792" alt="Choose a look: PlayTracker, Classic, or Night Court.">
+            </figure>
+        </div>
+        <button type="button" class="mkt-shots-arrow is-next" data-shots-next aria-label="Next screenshot">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+    </div>
+    <div class="mkt-shots-dots" data-shots-dots></div>
+</section>
+
+<section class="mkt-steps" id="how">
+    <h2>How it works</h2>
+    <ol class="mkt-step-list">
+        <li>
+            <span class="mkt-step-num">1</span>
+            <div>
+                <strong>Create a league</strong>
+                <p>Pick a sport or game-night template. Keep it private, share an unlisted link, or list it publicly.</p>
+            </div>
+        </li>
+        <li>
+            <span class="mkt-step-num">2</span>
+            <div>
+                <strong>Log a game</strong>
+                <p>Name the winners, add a score if it matters, and standings update as you go.</p>
+            </div>
+        </li>
+        <li>
+            <span class="mkt-step-num">3</span>
+            <div>
+                <strong>Share the table</strong>
+                <p>Send a public or unlisted link. Anyone can open standings in a browser.</p>
+            </div>
+        </li>
+    </ol>
+</section>
+
+<section class="mkt-features" id="why">
+    <h2>Why PlayTracker?</h2>
+    <ul class="mkt-feature-list">
+        <li>
+            <span class="mkt-icon">★</span>
+            <div>
+                <strong>One place for every league</strong>
+                <p>Sports, cards, and board games live in the same list. Mix a Tuesday night crew however you want.</p>
+            </div>
+        </li>
+        <li>
+            <span class="mkt-icon">✓</span>
+            <div>
+                <strong>Fastest game entry</strong>
+                <p>Name the winners, drop a score if it matters, and the standings move. Team names work for indoor volleyball.</p>
+            </div>
+        </li>
+        <li>
+            <span class="mkt-icon">◎</span>
+            <div>
+                <strong>Clean on purpose</strong>
+                <p>Glass cards, a cotton candy gradient, and stats that stay out of the way until you need them.</p>
+            </div>
+        </li>
+        <li>
+            <span class="mkt-icon">♛</span>
+            <div>
+                <strong>Built from real games</strong>
+                <p>It started with beach volleyball standings. Now it covers chess, checkers, Monopoly, and whatever you add next.</p>
+            </div>
+        </li>
+    </ul>
+</section>
+
+<section class="mkt-get-app" id="get-app">
+    <h2>Get PlayTracker</h2>
+    <p class="mkt-lead">Free on the App Store and Google Play. Create leagues and log games on iPhone and Android.</p>
+    {{ store_badges() }}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/marketing-shots.js') }}"></script>
+{% endblock %}

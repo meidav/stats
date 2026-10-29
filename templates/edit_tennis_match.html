@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %} Edit tennis match {% endblock %}
+
+{% block content %}
+
+    <h1 style="margin-bottom: 16px;">Edit tennis match</h1>
+    
+    <!-- Current Match Info Card -->
+    <div style="background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 20px var(--shadow-dark);">
+        <h3 style="margin-bottom: 16px; text-align: center;">Current match details</h3>
+        <table class="stats-table" style="margin-bottom: 0;">
+            <thead>
+                <tr>
+                    <th class="table-col-date">Date</th>
+                    <th class="table-col-player" style="text-align: center !important;">Winner</th>
+                    <th class="table-col-player" style="text-align: center !important;">Loser</th>
+                    <th class="table-col-tennis-score">Sets</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="table-col-date" title="Time: {{ (match[1])[11:19] if match[1] else '' }}">{{ (match[1])[0:10] if match[1] else '' }}</td>
+                    <td class="table-col-player" style="text-align: center !important;"><a href="{{ url_for('tennis_player_stats', year=year, name=match[2] ) }}">{{ match[2] }}</a></td>
+                    <td class="table-col-player" style="text-align: center !important;"><a href="{{ url_for('tennis_player_stats', year=year, name=match[4] ) }}">{{ match[4] }}</a></td>
+                    <td class="table-col-tennis-score">{{ match[7] if match|length > 7 and match[7] else (match[3]|string + '-' + match[5]|string) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Edit Form -->
+    <div class="form-container">
+        <form method="post">
+            <datalist id="players_list">
+                {% for player in players %}
+                    <option value="{{ player }}"></option>
+                {% endfor %}
+            </datalist>
+            
+            <!-- Players -->
+            <div class="form-section" style="margin-bottom: 0;">
+                <h3>Players</h3>
+                <div class="form-row">
+                    <input type="text" name="winner" placeholder="Winner" value="{{ request.form['winner'] or match[2] }}" list="players_list" required class="form-field-compact">
+                    <input type="text" name="loser" placeholder="Loser" value="{{ request.form['loser'] or match[4] }}" list="players_list" required class="form-field-compact">
+                </div>
+            </div>
+
+            <!-- Set Scores -->
+            <div class="form-section" style="margin-bottom: 0;">
+                <h3>Set scores</h3>
+                
+                <div class="tennis-format" role="group" aria-label="Match format">
+                    <button type="button" data-sets="1" onclick="showSets(1)" class="tennis-format-btn is-active" aria-pressed="true">1 Set</button>
+                    <button type="button" data-sets="3" onclick="showSets(3)" class="tennis-format-btn" aria-pressed="false">Best of 3</button>
+                    <button type="button" data-sets="5" onclick="showSets(5)" class="tennis-format-btn" aria-pressed="false">Best of 5</button>
+                </div>
+                
+                <div class="form-row set-row" id="set1">
+                    <input type="number" name="winner_set1" placeholder="Set 1 - W" min="0" max="20" value="{{ request.form.get('winner_set1', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set1" placeholder="Set 1 - L" min="0" max="20" value="{{ request.form.get('loser_set1', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row set-row set-hidden" id="set2">
+                    <input type="number" name="winner_set2" placeholder="Set 2 - W" min="0" max="20" value="{{ request.form.get('winner_set2', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set2" placeholder="Set 2 - L" min="0" max="20" value="{{ request.form.get('loser_set2', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row set-row set-hidden" id="set3">
+                    <input type="number" name="winner_set3" placeholder="Set 3 - W" min="0" max="20" value="{{ request.form.get('winner_set3', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set3" placeholder="Set 3 - L" min="0" max="20" value="{{ request.form.get('loser_set3', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row set-row set-hidden" id="set4">
+                    <input type="number" name="winner_set4" placeholder="Set 4 - W" min="0" max="20" value="{{ request.form.get('winner_set4', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set4" placeholder="Set 4 - L" min="0" max="20" value="{{ request.form.get('loser_set4', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row set-row set-hidden" id="set5">
+                    <input type="number" name="winner_set5" placeholder="Set 5 - W" min="0" max="20" value="{{ request.form.get('winner_set5', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set5" placeholder="Set 5 - L" min="0" max="20" value="{{ request.form.get('loser_set5', '') }}" class="form-field-compact">
+                </div>
+            </div>
+            
+            <!-- Optional Date/Time -->
+            <div class="form-section" style="margin-bottom: 0;">
+                <h3>Match details (optional)</h3>
+                <div class="form-row">
+                    <input type="date" name="date_played" id="date_played" value="{{ request.form.get('date_played', (match[1])[0:10] if match[1] else '') }}" class="form-field-compact">
+                    <input type="time" name="time_played" id="time_played" value="{{ request.form.get('time_played', (match[1])[11:16] if match[1] and match[1]|length > 11 else '') }}" class="form-field-compact">
+                </div>
+            </div>
+
+            <div class="form-submit-wrap">
+                <button type="submit" class="submit-button submit-button--action">Update match</button>
+            </div>
+        </form>
+    </div>
+
+<script>
+function showSets(numSets) {
+    document.querySelectorAll('.tennis-format-btn').forEach(function (btn) {
+        var active = Number(btn.getAttribute('data-sets')) === numSets;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    for (var i = 1; i <= 5; i++) {
+        var row = document.getElementById('set' + i);
+        if (!row) continue;
+        var show = i === 1 || (numSets >= 3 && i <= 3) || (numSets === 5 && i <= 5);
+        row.classList.toggle('set-hidden', !show);
+        row.querySelectorAll('input').forEach(function (input) {
+            input.disabled = !show;
+            if (!show) input.value = '';
+        });
+    }
+}
+
+// Parse existing set scores and populate fields on page load
+document.addEventListener('DOMContentLoaded', function() {
+    {% if match|length > 7 and match[7] %}
+    // Parse set_scores string like "6-3, 6-4" or "6-4, 3-6, 6-2"
+    const setScoresStr = "{{ match[7] }}";
+    const sets = setScoresStr.split(', ');
+    
+    sets.forEach((set, index) => {
+        const scores = set.split('-');
+        if (scores.length === 2) {
+            const winnerField = document.querySelector(`input[name="winner_set${index + 1}"]`);
+            const loserField = document.querySelector(`input[name="loser_set${index + 1}"]`);
+            if (winnerField) winnerField.value = scores[0].trim();
+            if (loserField) loserField.value = scores[1].trim();
+        }
+    });
+    
+    // Show the correct number of sets
+    if (sets.length === 1) {
+        showSets(1);
+    } else if (sets.length <= 3) {
+        showSets(3);
+    } else {
+        showSets(5);
+    }
+    {% else %}
+    // Default to single set if no set scores
+    showSets(1);
+    {% endif %}
+});
+</script>
+
+{% endblock %}

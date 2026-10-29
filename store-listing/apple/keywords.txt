@@ -1,0 +1,1 @@
+leagues,standings,volleyball,pickleball,tennis,badminton,chess,scorekeeper,gamenight,stats

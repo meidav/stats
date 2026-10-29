@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import tennis_match_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block title %} Add a tennis match {% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title-hero">Add a tennis match</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('tennis') }}" class="nav-pill">← Stats</a>
+            <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <form method="post">
+            <datalist id="players_list">
+                {% for player in players %}
+                    <option value="{{ player }}"></option>
+                {% endfor %}
+            </datalist>
+            
+            <div class="form-section" style="margin-bottom: 0;">
+                <h3>Players</h3>
+                <div class="form-row">
+                    <input type="text" name="winner" placeholder="Winner" value="{{ request.form['winner'] }}" list="players_list" required class="form-field-compact">
+                    <input type="text" name="loser" placeholder="Loser" value="{{ request.form['loser'] }}" list="players_list" required class="form-field-compact">
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-bottom: 0;">
+                <h3>Set scores</h3>
+                
+                <div class="tennis-format" role="group" aria-label="Match format">
+                    <button type="button" data-sets="1" onclick="showSets(1)" class="tennis-format-btn is-active" aria-pressed="true">1 Set</button>
+                    <button type="button" data-sets="3" onclick="showSets(3)" class="tennis-format-btn" aria-pressed="false">Best of 3</button>
+                    <button type="button" data-sets="5" onclick="showSets(5)" class="tennis-format-btn" aria-pressed="false">Best of 5</button>
+                </div>
+                
+                <div class="form-row set-row" id="set1">
+                    <input type="number" name="winner_set1" placeholder="Set 1 - W" min="0" max="20" value="{{ request.form.get('winner_set1', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set1" placeholder="Set 1 - L" min="0" max="20" value="{{ request.form.get('loser_set1', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row set-row set-hidden" id="set2">
+                    <input type="number" name="winner_set2" placeholder="Set 2 - W" min="0" max="20" value="{{ request.form.get('winner_set2', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set2" placeholder="Set 2 - L" min="0" max="20" value="{{ request.form.get('loser_set2', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row set-row set-hidden" id="set3">
+                    <input type="number" name="winner_set3" placeholder="Set 3 - W" min="0" max="20" value="{{ request.form.get('winner_set3', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set3" placeholder="Set 3 - L" min="0" max="20" value="{{ request.form.get('loser_set3', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row set-row set-hidden" id="set4">
+                    <input type="number" name="winner_set4" placeholder="Set 4 - W" min="0" max="20" value="{{ request.form.get('winner_set4', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set4" placeholder="Set 4 - L" min="0" max="20" value="{{ request.form.get('loser_set4', '') }}" class="form-field-compact">
+                </div>
+                
+                <div class="form-row set-row set-hidden" id="set5">
+                    <input type="number" name="winner_set5" placeholder="Set 5 - W" min="0" max="20" value="{{ request.form.get('winner_set5', '') }}" class="form-field-compact">
+                    <input type="number" name="loser_set5" placeholder="Set 5 - L" min="0" max="20" value="{{ request.form.get('loser_set5', '') }}" class="form-field-compact">
+                </div>
+            </div>
+            
+            <div class="form-section" style="margin-bottom: 0;">
+                <h3>Match details (optional)</h3>
+                <div class="form-row">
+                    <input type="date" name="date_played" id="date_played" value="{{ request.form.get('date_played', '') }}" class="form-field-compact">
+                    <input type="time" name="time_played" id="time_played" value="{{ request.form.get('time_played', '') }}" class="form-field-compact">
+                </div>
+            </div>
+
+            <div class="form-submit-wrap">
+                <button type="submit" class="submit-button submit-button--action">Add match</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="stats-sections">
+        {% if todays_stats %}
+        <div class="add-game-block">
+            <h2 class="section-title">Today's tennis stats</h2>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank">#</th>
+                            <th class="table-col-player">Player</th>
+                            <th class="table-col-stat" title="Wins">W</th>
+                            <th class="table-col-stat" title="Losses">L</th>
+                            <th class="table-col-stat" title="Win %">%</th>
+                            <th class="table-col-stat">+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in todays_stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=stat[0] ) }}">{{ stat[0] }}</a></td>
+                            <td class="table-col-stat">{{ stat[1] }}</td>
+                            <td class="table-col-stat">{{ stat[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(stat[3]*100) }}</td>
+                            <td class="table-col-stat">{% if stat[4] > 0 %}+{{ stat[4] }}{% else %}{{ stat[4] }}{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if matches %}
+        <div class="add-game-block">
+            <h2 class="section-title">Today's tennis matches</h2>
+            <div class="games-list">
+                {% for match in matches %}
+                    {{ tennis_match_card(match, year, editable=true) }}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if stats %}
+        <div class="add-game-block">
+            <h2 class="section-title">{{ year }} Tennis stats</h2>
+            <div class="table-scroll">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="table-col-rank">#</th>
+                            <th class="table-col-player">Player</th>
+                            <th class="table-col-stat" title="Wins">W</th>
+                            <th class="table-col-stat" title="Losses">L</th>
+                            <th class="table-col-stat" title="Win %">%</th>
+                            <th class="table-col-stat" title="Matches">M</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for player in stats %}
+                        <tr>
+                            <td class="table-col-rank">{{ loop.index }}</td>
+                            <td class="table-col-player"><a href="{{ url_for('tennis_player_stats', year=year, name=player[0] ) }}">{{ player[0] }}</a></td>
+                            <td class="table-col-stat">{{ player[1] }}</td>
+                            <td class="table-col-stat">{{ player[2] }}</td>
+                            <td class="table-col-stat">{{ "{:.2f}".format(player[3]*100) }}</td>
+                            <td class="table-col-stat">{{ player[1] + player[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+<script>
+function showSets(numSets) {
+    document.querySelectorAll('.tennis-format-btn').forEach(function (btn) {
+        var active = Number(btn.getAttribute('data-sets')) === numSets;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    for (var i = 1; i <= 5; i++) {
+        var row = document.getElementById('set' + i);
+        if (!row) continue;
+        var show = i === 1 || (numSets >= 3 && i <= 3) || (numSets === 5 && i <= 5);
+        row.classList.toggle('set-hidden', !show);
+        row.querySelectorAll('input').forEach(function (input) {
+            input.disabled = !show;
+            if (!show) input.value = '';
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var filled = 1;
+    for (var i = 5; i >= 1; i--) {
+        var winnerInput = document.querySelector('input[name="winner_set' + i + '"]');
+        var loserInput = document.querySelector('input[name="loser_set' + i + '"]');
+        if ((winnerInput && winnerInput.value) || (loserInput && loserInput.value)) {
+            filled = i;
+            break;
+        }
+    }
+    showSets(filled >= 4 ? 5 : (filled >= 2 ? 3 : 1));
+
+    const dateInput = document.getElementById('date_played');
+    const timeInput = document.getElementById('time_played');
+    
+    if (dateInput && !dateInput.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${day}`;
+    }
+    
+    if (timeInput && !timeInput.value) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        timeInput.value = `${hours}:${minutes}`;
+    }
+});
+</script>
+{% endblock %}

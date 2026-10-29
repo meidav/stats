@@ -1,0 +1,257 @@
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { CommonActions } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import React, { useMemo, useState } from 'react';
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import { ErrorBanner } from '../components/ErrorBanner';
+import { GradientButton } from '../components/GradientButton';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenScaffold } from '../components/ScreenScaffold';
+import { spacing } from '../constants/theme';
+import { ApiError, api } from '../lib/api';
+import { useAuth } from '../lib/auth';
+import { formChrome } from '../lib/formTheme';
+import { autoCapWords, initials } from '../lib/names';
+import { useThemeTokens } from '../lib/theme';
+import type { LeagueStackParamList } from '../navigation/types';
+
+type Props = NativeStackScreenProps<LeagueStackParamList, 'EditPlayer'>;
+
+export function EditPlayerScreen({ route, navigation }: Props) {
+  const theme = useThemeTokens();
+  const styles = useMemo(() => makeStyles(theme), [theme]);
+  const chrome = useMemo(() => formChrome(theme), [theme]);
+  const { sportId, playerName: initialName, avatarUrl: initialAvatar } = route.params;
+  const { token } = useAuth();
+  const [name, setName] = useState(initialName);
+  const [avatarUri, setAvatarUri] = useState<string | null>(initialAvatar ?? null);
+  const [photoPayload, setPhotoPayload] = useState<string | null | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  async function pickPhoto() {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setError('Allow photo access to set a player picture.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true,
+    });
+    if (result.canceled || !result.assets?.[0]) return;
+    const asset = result.assets[0];
+    if (!asset.base64) {
+      setError('Could not read that photo. Try another image.');
+      return;
+    }
+    const mime = asset.mimeType || 'image/jpeg';
+    setAvatarUri(asset.uri);
+    setPhotoPayload(`data:${mime};base64,${asset.base64}`);
+    setError('');
+  }
+
+  async function handleSave() {
+    if (!token) {
+      setError('Your session expired. Sign out and sign in again.');
+      return;
+    }
+    const nextName = name.trim();
+    if (!nextName) {
+      setError('Add a name to continue.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const payload: { name?: string; photo?: string | null } = {};
+      if (nextName !== initialName) payload.name = nextName;
+      if (photoPayload !== undefined) payload.photo = photoPayload;
+      const saved = await api.updatePlayer(token, sportId, initialName, payload);
+      const params = {
+        sportId,
+        playerName: saved.player,
+        sportName: saved.sport?.name || route.params.sportName,
+        leagueName: saved.league?.name || route.params.leagueName,
+        leagueSlug: saved.league?.slug || route.params.leagueSlug,
+        sportTemplateId: saved.sport?.template_id || route.params.sportTemplateId,
+        sportCategory: saved.sport?.category || route.params.sportCategory,
+        leagueIcon: saved.league?.icon ?? route.params.leagueIcon,
+      };
+      navigation.dispatch((state) => {
+        const routes = state.routes.slice(0, -1);
+        const previous = routes[routes.length - 1];
+        if (previous?.name === 'PlayerProfile') {
+          routes[routes.length - 1] = {
+            ...previous,
+            params: { ...previous.params, ...params },
+          };
+        } else {
+          routes.push({
+            key: `PlayerProfile-${params.sportId}-${params.playerName}`,
+            name: 'PlayerProfile',
+            params,
+          });
+        }
+        return CommonActions.reset({
+          ...state,
+          index: routes.length - 1,
+          routes,
+        });
+      });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not save player');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <ScreenScaffold edgeHeader
+      keyboard
+      aboveTabBar
+      footer={
+        <View style={styles.footer}>
+          <ErrorBanner message={error} />
+          <GradientButton label="Save" onPress={handleSave} loading={loading} disabled={loading} />
+        </View>
+      }
+    >
+      <ScreenHeader title="Edit player" onBack={() => navigation.goBack()} />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.label}>Photo</Text>
+        <View style={styles.photoRow}>
+          <TouchableOpacity style={styles.avatar} onPress={pickPhoto} accessibilityLabel="Change photo">
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>{initials(name || initialName)}</Text>
+            )}
+          </TouchableOpacity>
+          <View style={styles.photoActions}>
+            <TouchableOpacity onPress={pickPhoto} style={styles.photoButton}>
+              <Text style={styles.photoButtonText}>Choose photo</Text>
+            </TouchableOpacity>
+            {avatarUri ? (
+              <TouchableOpacity
+                onPress={() => {
+                  setAvatarUri(null);
+                  setPhotoPayload(null);
+                }}
+                style={styles.photoButton}
+              >
+                <Text style={styles.photoButtonText}>Remove photo</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        </View>
+
+        <Text style={styles.label}>Name</Text>
+        <TextInput
+          style={styles.input}
+          value={name}
+          autoCapitalize="words"
+          onChangeText={(value) => setName(autoCapWords(value))}
+          placeholderTextColor={chrome.placeholder}
+        />
+        <Text style={styles.hint}>This updates the name on every game in this activity.</Text>
+      </ScrollView>
+    </ScreenScaffold>
+  );
+}
+
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  const chrome = formChrome(theme);
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: 120,
+    },
+    footer: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.md,
+      gap: spacing.sm,
+    },
+    label: {
+      marginTop: spacing.md,
+      marginBottom: spacing.sm,
+      fontSize: 13,
+      fontWeight: '800',
+      letterSpacing: 0.4,
+      textTransform: 'uppercase',
+      color: chrome.muted,
+    },
+    hint: {
+      color: chrome.muted,
+      fontSize: 13,
+      marginTop: spacing.sm,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: chrome.fieldBorder,
+      borderRadius: 10,
+      padding: spacing.md,
+      backgroundColor: chrome.fieldBg,
+      fontSize: 16,
+      color: chrome.inputText,
+    },
+    photoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    avatar: {
+      width: 88,
+      height: 88,
+      borderRadius: 44,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    avatarImage: {
+      width: 88,
+      height: 88,
+    },
+    avatarText: {
+      color: theme.id === 'classic' ? '#121820' : '#fff',
+      fontSize: 28,
+      fontWeight: '800',
+    },
+    photoActions: {
+      flex: 1,
+      gap: spacing.sm,
+    },
+    photoButton: {
+      alignSelf: 'flex-start',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 10,
+      backgroundColor: chrome.scoreChipBg,
+    },
+    photoButtonText: {
+      color: chrome.scoreChipText,
+      fontWeight: '700',
+    },
+  });
+}

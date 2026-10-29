@@ -1,0 +1,1112 @@
+"""Dedicated PlayTracker super-admin console.
+
+Separate login, cookie, and JWT audience from the public marketing site, the
+legacy Flask-Login session, and member auth in the iOS app.
+"""
+
+import hashlib
+import hmac
+import os
+import secrets
+import time
+from datetime import timedelta
+from functools import wraps
+
+from flask import (
+    Blueprint,
+    abort,
+    current_app,
+    g,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+from flask_jwt_extended import create_access_token, decode_token
+from jwt.exceptions import PyJWTError
+
+from api.admin_data import (
+    count_admins,
+    ensure_admin_schema,
+    ensure_bootstrap_admin,
+    get_user_for_admin,
+    list_users_for_admin,
+    overview_counts,
+    password_is_forbidden,
+    relative_time,
+    set_user_password,
+    touch_last_seen,
+    user_requires_password_change,
+    would_lock_out,
+    write_audit,
+)
+from api.auth_service import authenticate_with_email
+from api.brand import APP_NAME
+from api.admin_league_service import (
+    ADMIN_FLAGS,
+    PREVIOUS_OWNER_ROLE,
+    add_league_member,
+    admin_update_league_fields,
+    change_primary_sport_template,
+    ensure_admin_league_schema,
+    hard_delete_league,
+    list_league_activity,
+    list_league_members,
+    merge_player_names_in_sport,
+    player_names_for_sport,
+    remove_league_member,
+    restore_league,
+    rotate_invite_code,
+    serialize_league_admin,
+    set_admin_flag,
+    set_invite_disabled,
+    set_member_role,
+    soft_delete_league,
+    transfer_league_owner,
+)
+from api.league_db import (
+    ADMIN_FOCUS_OPTIONS,
+    ADMIN_GAME_MIN_OPTIONS,
+    ADMIN_LEAGUE_SORTS,
+    ADMIN_MEMBER_OPTIONS,
+    ADMIN_RECENCY_OPTIONS,
+    get_league_by_id,
+    get_sports_for_league,
+    list_leagues_for_admin,
+)
+from api.roadmap_data import (
+    create_roadmap_item,
+    delete_roadmap_item,
+    ensure_roadmap_schema,
+    get_roadmap_item,
+    move_roadmap_item,
+    roadmap_board,
+    update_roadmap_item,
+)
+from api.sport_templates import VISIBILITY_OPTIONS, list_templates
+from api.web_present import LEAGUE_ICON_MARKS
+from auth import get_user_by_email, get_user_by_id, verify_password
+
+try:
+    from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+except ImportError:
+    ExpiredSignatureError = PyJWTError
+    InvalidTokenError = PyJWTError
+
+
+ADMIN_JWT_AUDIENCE = "playtracker-admin"
+ADMIN_ACCESS_COOKIE = "pt_admin_access"
+ADMIN_CSRF_COOKIE = "pt_admin_csrf"
+ADMIN_COOKIE_PATH = "/admin-console"
+ADMIN_SESSION_HOURS = 12
+LOGIN_RATE_LIMIT = 5
+LOGIN_RATE_WINDOW_SECONDS = 15 * 60
+
+admin_bp = Blueprint("admin_console", __name__, url_prefix="/admin-console")
+
+_login_attempts = {}
+
+
+def admin_hosts():
+    raw = (os.environ.get("ADMIN_HOST") or "admin.playtracker.org").strip().lower()
+    return {item.strip() for item in raw.split(",") if item.strip()}
+
+
+def is_admin_host(req=None):
+    req = req or request
+    host = (req.host or "").split(":")[0].lower()
+    if host in admin_hosts():
+        return True
+    return host.startswith("admin.") and host not in ("admin.",)
+
+
+def _is_production():
+    try:
+        if current_app.config.get("SESSION_COOKIE_SECURE"):
+            return True
+    except RuntimeError:
+        pass
+    return os.environ.get("FLASK_ENV") == "production"
+
+
+def _client_ip():
+    forwarded = (request.headers.get("X-Forwarded-For") or "").split(",")[0].strip()
+    return forwarded or request.remote_addr or "unknown"
+
+
+def _cookie_kwargs(max_age=None):
+    return {
+        "path": ADMIN_COOKIE_PATH,
+        "httponly": True,
+        "samesite": "Lax",
+        "secure": _is_production(),
+        "max_age": max_age if max_age is not None else ADMIN_SESSION_HOURS * 3600,
+    }
+
+
+def _csrf_secret():
+    try:
+        secret = current_app.config.get("SECRET_KEY") or os.environ.get("SECRET_KEY")
+    except RuntimeError:
+        secret = os.environ.get("SECRET_KEY")
+    if isinstance(secret, bytes):
+        return secret
+    return (secret or "playtracker-admin-csrf").encode("utf-8")
+
+
+def issue_csrf_token():
+    nonce = secrets.token_urlsafe(24)
+    digest = hmac.new(_csrf_secret(), nonce.encode("utf-8"), hashlib.sha256).hexdigest()
+    return f"{nonce}.{digest}"
+
+
+def _tokens_match(left, right):
+    if not left or not right:
+        return False
+    left_b = left.encode("utf-8") if isinstance(left, str) else left
+    right_b = right.encode("utf-8") if isinstance(right, str) else right
+    if len(left_b) != len(right_b):
+        return False
+    return hmac.compare_digest(left_b, right_b)
+
+
+def valid_csrf_token(token):
+    if not token or "." not in token:
+        return False
+    nonce, digest = token.rsplit(".", 1)
+    expected = hmac.new(_csrf_secret(), nonce.encode("utf-8"), hashlib.sha256).hexdigest()
+    return _tokens_match(expected, digest)
+
+
+def _current_or_new_csrf():
+    """Reuse the CSRF cookie only while it still verifies (e.g. not after a SECRET_KEY rotation)."""
+    token = request.cookies.get(ADMIN_CSRF_COOKIE) or ""
+    return token if valid_csrf_token(token) else issue_csrf_token()
+
+
+def login_rate_limited(ip):
+    now = time.time()
+    hits = [stamp for stamp in _login_attempts.get(ip, []) if now - stamp < LOGIN_RATE_WINDOW_SECONDS]
+    _login_attempts[ip] = hits
+    return len(hits) >= LOGIN_RATE_LIMIT
+
+
+def record_login_attempt(ip):
+    _login_attempts.setdefault(ip, []).append(time.time())
+
+
+def clear_login_attempts(ip):
+    _login_attempts.pop(ip, None)
+
+
+def reset_login_rate_limit():
+    _login_attempts.clear()
+
+
+def _set_csrf_cookie(response, token):
+    kwargs = _cookie_kwargs()
+    kwargs["httponly"] = False
+    response.set_cookie(ADMIN_CSRF_COOKIE, token, **kwargs)
+    return response
+
+
+def _set_access_cookie(response, token):
+    response.set_cookie(ADMIN_ACCESS_COOKIE, token, **_cookie_kwargs())
+    return response
+
+
+def _clear_admin_cookies(response):
+    kwargs = _cookie_kwargs(max_age=0)
+    response.set_cookie(ADMIN_ACCESS_COOKIE, "", **kwargs)
+    csrf_kwargs = dict(kwargs)
+    csrf_kwargs["httponly"] = False
+    response.set_cookie(ADMIN_CSRF_COOKIE, "", **csrf_kwargs)
+    return response
+
+
+def create_admin_token(user):
+    csrf = issue_csrf_token()
+    token = create_access_token(
+        identity=str(user.id),
+        additional_claims={
+            "pt_aud": ADMIN_JWT_AUDIENCE,
+            "pt_csrf": csrf,
+            "is_admin": True,
+        },
+        expires_delta=timedelta(hours=ADMIN_SESSION_HOURS),
+    )
+    return token, csrf
+
+
+def _read_admin_jwt():
+    token = request.cookies.get(ADMIN_ACCESS_COOKIE)
+    if not token:
+        auth = request.headers.get("Authorization") or ""
+        if auth.lower().startswith("bearer "):
+            token = auth.split(" ", 1)[1].strip()
+    if not token:
+        return None
+    try:
+        decoded = decode_token(token)
+    except (ExpiredSignatureError, InvalidTokenError, PyJWTError, Exception):
+        return None
+    if decoded.get("pt_aud") != ADMIN_JWT_AUDIENCE:
+        return None
+    return decoded
+
+
+def current_admin_user():
+    decoded = _read_admin_jwt()
+    if not decoded:
+        return None
+    try:
+        user_id = int(decoded.get("sub"))
+    except (TypeError, ValueError):
+        return None
+    user = get_user_by_id(user_id)
+    if not user or not user.is_admin:
+        return None
+    return user
+
+
+def _csrf_ok():
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return True
+    form_token = request.form.get("csrf_token") or request.headers.get("X-CSRF-Token") or ""
+    if not form_token or not valid_csrf_token(form_token):
+        return False
+    cookie_token = request.cookies.get(ADMIN_CSRF_COOKIE) or ""
+    decoded = _read_admin_jwt()
+    jwt_token = (decoded or {}).get("pt_csrf") or ""
+    if cookie_token and not _tokens_match(form_token, cookie_token):
+        return False
+    if jwt_token and not _tokens_match(form_token, jwt_token):
+        return False
+    return bool(cookie_token or jwt_token)
+
+
+def admin_login_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        user = current_admin_user()
+        if not user:
+            if request.accept_mimetypes.best == "application/json":
+                abort(401)
+            return redirect(url_for("admin_console.login", next=request.path))
+        if request.method not in ("GET", "HEAD", "OPTIONS") and not _csrf_ok():
+            abort(400)
+        g.admin_user = user
+        g.must_change_password = user_requires_password_change(user.id)
+        if g.must_change_password and request.endpoint not in (
+            "admin_console.change_password",
+            "admin_console.logout",
+        ):
+            return redirect(url_for("admin_console.change_password"))
+        return f(*args, **kwargs)
+
+    return wrapped
+
+
+def _no_store(response):
+    response.headers["Cache-Control"] = "no-store, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "same-origin"
+    return response
+
+
+@admin_bp.after_request
+def _admin_headers(response):
+    return _no_store(response)
+
+
+@admin_bp.context_processor
+def _admin_template_globals():
+    csrf = _current_or_new_csrf()
+    return {
+        "admin_csrf_token": csrf,
+        "admin_user": getattr(g, "admin_user", None),
+        "app_name": APP_NAME,
+        "admin_count": count_admins(),
+        "must_change_password": bool(getattr(g, "must_change_password", False)),
+    }
+
+
+def init_admin_console(app):
+    ensure_admin_schema()
+    ensure_admin_league_schema()
+    ensure_roadmap_schema()
+    with app.app_context():
+        ensure_bootstrap_admin()
+    if "admin_console" not in app.blueprints:
+        app.register_blueprint(admin_bp)
+
+        @app.before_request
+        def _gate_admin_host():
+            if not is_admin_host():
+                return None
+            path = request.path or "/"
+            if path.startswith("/admin-console") or path.startswith("/static"):
+                return None
+            if path in (
+                "/favicon.ico",
+                "/apple-touch-icon.png",
+                "/apple-touch-icon-precomposed.png",
+            ):
+                return None
+            if path == "/":
+                return redirect("/admin-console/")
+            abort(404)
+
+
+@admin_bp.route("/login", methods=["GET", "POST"])
+def login():
+    if current_admin_user() and request.method == "GET":
+        if user_requires_password_change(current_admin_user().id):
+            return redirect(url_for("admin_console.change_password"))
+        return redirect(url_for("admin_console.users"))
+
+    error = None
+    csrf = _current_or_new_csrf()
+
+    if request.method == "POST":
+        ip = _client_ip()
+        if login_rate_limited(ip):
+            write_audit(
+                None,
+                "admin.login.rate_limited",
+                ip=ip,
+                user_agent=request.headers.get("User-Agent"),
+            )
+            error = "Too many sign-in attempts. Try again in a few minutes."
+            response = make_response(
+                render_template("admin_console/login.html", error=error, admin_csrf_token=csrf),
+                429,
+            )
+            return _set_csrf_cookie(response, csrf)
+
+        posted_csrf = request.form.get("csrf_token") or ""
+        cookie_csrf = request.cookies.get(ADMIN_CSRF_COOKIE) or ""
+        if (
+            not valid_csrf_token(posted_csrf)
+            or not cookie_csrf
+            or not _tokens_match(posted_csrf, cookie_csrf)
+        ):
+            error = "Could not verify this form. Refresh and try again."
+        else:
+            identifier = (request.form.get("email") or request.form.get("username") or "").strip()
+            password = request.form.get("password") or ""
+            record_login_attempt(ip)
+            user = authenticate_with_email(identifier, password) if identifier and password else None
+            if not user or not user.is_admin:
+                write_audit(
+                    getattr(user, "id", None),
+                    "admin.login.failure",
+                    detail=identifier[:120],
+                    ip=ip,
+                    user_agent=request.headers.get("User-Agent"),
+                )
+                error = "Invalid credentials or this account is not a super-admin."
+            else:
+                clear_login_attempts(ip)
+                touch_last_seen(user.id)
+                token, csrf = create_admin_token(user)
+                write_audit(
+                    user.id,
+                    "admin.login.success",
+                    ip=ip,
+                    user_agent=request.headers.get("User-Agent"),
+                )
+                if user_requires_password_change(user.id):
+                    nxt = url_for("admin_console.change_password")
+                else:
+                    nxt = request.args.get("next") or request.form.get("next") or ""
+                    if not nxt.startswith("/admin-console"):
+                        nxt = url_for("admin_console.users")
+                response = redirect(nxt)
+                _set_access_cookie(response, token)
+                _set_csrf_cookie(response, csrf)
+                return response
+
+    response = make_response(
+        render_template("admin_console/login.html", error=error, admin_csrf_token=csrf)
+    )
+    return _set_csrf_cookie(response, csrf)
+
+
+@admin_bp.route("/logout", methods=["POST"])
+@admin_login_required
+def logout():
+    user = g.admin_user
+    write_audit(
+        user.id,
+        "admin.logout",
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    response = redirect(url_for("admin_console.login"))
+    return _clear_admin_cookies(response)
+
+
+@admin_bp.route("/change-password", methods=["GET", "POST"])
+@admin_login_required
+def change_password():
+    error = None
+    user = g.admin_user
+    forced = user_requires_password_change(user.id)
+    if request.method == "POST":
+        current_password = request.form.get("current_password") or ""
+        new_password = request.form.get("new_password") or ""
+        confirm = request.form.get("confirm_password") or ""
+        full = get_user_by_email(user.email)
+        if not full or not verify_password(full, current_password):
+            error = "Current password is incorrect."
+        elif new_password != confirm:
+            error = "New passwords do not match."
+        elif len(new_password) < 8:
+            error = "New password must be at least 8 characters."
+        elif new_password == current_password or password_is_forbidden(new_password):
+            error = "Choose a new password that is not the temporary one."
+        else:
+            set_user_password(user.id, new_password, require_change=False)
+            write_audit(
+                user.id,
+                "admin.password.change",
+                ip=_client_ip(),
+                user_agent=request.headers.get("User-Agent"),
+            )
+            token, csrf = create_admin_token(user)
+            response = redirect(url_for("admin_console.users"))
+            _set_access_cookie(response, token)
+            _set_csrf_cookie(response, csrf)
+            return response
+    return render_template(
+        "admin_console/change_password.html",
+        error=error,
+        forced=forced,
+    )
+
+
+@admin_bp.route("/")
+@admin_bp.route("/users")
+@admin_login_required
+def users():
+    query = (request.args.get("q") or "").strip()
+    role = (request.args.get("role") or "all").strip().lower()
+    visibility = (request.args.get("visibility") or "").strip().lower()
+    if role not in ("all", "admin", "user"):
+        role = "all"
+    if visibility not in VISIBILITY_OPTIONS:
+        visibility = ""
+    rows = list_users_for_admin(
+        query=query or None,
+        role=None if role == "all" else role,
+        visibility=visibility or None,
+    )
+    counts = overview_counts()
+    return render_template(
+        "admin_console/users.html",
+        users=rows,
+        counts=counts,
+        query=query,
+        role=role,
+        visibility=visibility,
+        visibilities=VISIBILITY_OPTIONS,
+    )
+
+
+@admin_bp.route("/users/<int:user_id>")
+@admin_login_required
+def user_detail(user_id):
+    user = get_user_for_admin(user_id)
+    if not user:
+        abort(404)
+    write_audit(
+        g.admin_user.id,
+        "admin.view.user",
+        target_type="user",
+        target_id=user_id,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    return render_template(
+        "admin_console/user_detail.html",
+        user=user,
+        is_self=g.admin_user.id == user["id"],
+        lockout_protected=would_lock_out(user["id"]),
+    )
+
+
+@admin_bp.route("/leagues")
+@admin_login_required
+def leagues():
+    query = (request.args.get("q") or "").strip()
+    visibility = (request.args.get("visibility") or "").strip().lower()
+    if visibility not in VISIBILITY_OPTIONS:
+        visibility = ""
+
+    games_raw = (request.args.get("games") or "").strip()
+    min_games = None
+    if games_raw.isdigit() and int(games_raw) in ADMIN_GAME_MIN_OPTIONS:
+        min_games = int(games_raw)
+
+    recency_key = (request.args.get("recency") or "").strip().lower()
+    recency_days = ADMIN_RECENCY_OPTIONS.get(recency_key)
+
+    focus = (request.args.get("focus") or "").strip().lower()
+    if focus not in ADMIN_FOCUS_OPTIONS:
+        focus = ""
+
+    members = (request.args.get("members") or "").strip()
+    if members not in ADMIN_MEMBER_OPTIONS:
+        members = ""
+
+    flag = (request.args.get("flag") or "").strip().lower()
+    if flag not in ADMIN_FLAGS or not flag:
+        flag = ""
+
+    deleted = (request.args.get("deleted") or "").strip().lower()
+    if deleted not in ("", "only", "all"):
+        deleted = ""
+
+    sort = (request.args.get("sort") or "games").strip().lower()
+    if sort not in ADMIN_LEAGUE_SORTS:
+        sort = "games"
+    direction = (request.args.get("dir") or "desc").strip().lower()
+    if direction not in ("asc", "desc"):
+        direction = "desc"
+
+    rows = list_leagues_for_admin(
+        query=query or None,
+        visibility=visibility or None,
+        min_games=min_games,
+        recency_days=recency_days,
+        focus=focus or None,
+        members=members or None,
+        flag=flag or None,
+        deleted=deleted or None,
+        sort=sort,
+        direction=direction,
+    )
+    for row in rows:
+        row["last_game_label"] = relative_time(row.get("last_game_at"))
+        if not row.get("last_game_at"):
+            row["last_game_label"] = "No games"
+
+    counts = overview_counts()
+    filter_args = {
+        "q": query,
+        "visibility": visibility,
+        "games": games_raw if min_games else "",
+        "recency": recency_key if recency_days else "",
+        "focus": focus,
+        "members": members,
+        "flag": flag,
+        "deleted": deleted,
+        "sort": sort,
+        "dir": direction,
+    }
+    return render_template(
+        "admin_console/leagues.html",
+        leagues=rows,
+        counts=counts,
+        query=query,
+        visibility=visibility,
+        games=str(min_games) if min_games else "",
+        recency=recency_key if recency_days else "",
+        focus=focus,
+        members=members,
+        flag=flag,
+        deleted=deleted,
+        sort=sort,
+        direction=direction,
+        filter_args=filter_args,
+        visibilities=VISIBILITY_OPTIONS,
+        game_mins=ADMIN_GAME_MIN_OPTIONS,
+        recency_options=[
+            ("3d", "Last 3 days"),
+            ("7d", "Last week"),
+            ("30d", "Last month"),
+            ("365d", "Last year"),
+        ],
+        focus_options=ADMIN_FOCUS_OPTIONS,
+        member_options=[
+            ("1", "Solo (1 member)"),
+            ("2+", "Shared (2+)"),
+        ],
+        flag_options=[
+            ("review", "Needs review"),
+            ("spam", "Spam"),
+            ("test", "Test"),
+        ],
+    )
+
+
+@admin_bp.route("/roadmap")
+@admin_login_required
+def roadmap():
+    return render_template(
+        "admin_console/roadmap.html",
+        board=roadmap_board(),
+    )
+
+
+def _roadmap_json_payload():
+    if request.is_json:
+        return request.get_json(silent=True) or {}
+    return request.form.to_dict(flat=True)
+
+
+def _roadmap_wants_json():
+    return (
+        request.is_json
+        or "application/json" in (request.accept_mimetypes.best or "")
+        or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
+
+
+@admin_bp.route("/roadmap/items", methods=["POST"])
+@admin_login_required
+def roadmap_create_item():
+    payload = _roadmap_json_payload()
+    if "details" in payload and isinstance(payload.get("details"), str):
+        payload["details"] = [
+            line.strip() for line in payload["details"].split("\n") if line.strip()
+        ]
+    if payload.get("premium") in ("1", "true", "on", True):
+        payload["premium"] = True
+    else:
+        payload["premium"] = False
+    try:
+        item = create_roadmap_item(payload)
+    except ValueError as err:
+        if _roadmap_wants_json():
+            return jsonify({"error": str(err)}), 400
+        abort(400)
+    write_audit(
+        g.admin_user.id,
+        "admin.roadmap.create",
+        target_type="roadmap",
+        target_id=item["id"],
+        detail=item["title"],
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    if _roadmap_wants_json():
+        return jsonify(item)
+    return redirect(url_for("admin_console.roadmap"))
+
+
+@admin_bp.route("/roadmap/items/<item_id>", methods=["POST", "PATCH"])
+@admin_login_required
+def roadmap_update_item(item_id):
+    if not get_roadmap_item(item_id):
+        abort(404)
+    payload = _roadmap_json_payload()
+    if "details" in payload and isinstance(payload.get("details"), str):
+        payload["details"] = [
+            line.strip() for line in payload["details"].split("\n") if line.strip()
+        ]
+    if "premium" in payload:
+        payload["premium"] = payload.get("premium") in ("1", "true", "on", True)
+    item = update_roadmap_item(item_id, payload)
+    write_audit(
+        g.admin_user.id,
+        "admin.roadmap.update",
+        target_type="roadmap",
+        target_id=item_id,
+        detail=item["title"] if item else None,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    if _roadmap_wants_json():
+        return jsonify(item)
+    return redirect(url_for("admin_console.roadmap"))
+
+
+@admin_bp.route("/roadmap/items/<item_id>/delete", methods=["POST", "DELETE"])
+@admin_login_required
+def roadmap_delete_item(item_id):
+    ok = delete_roadmap_item(item_id)
+    if not ok:
+        abort(404)
+    write_audit(
+        g.admin_user.id,
+        "admin.roadmap.delete",
+        target_type="roadmap",
+        target_id=item_id,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    if _roadmap_wants_json():
+        return jsonify({"ok": True})
+    return redirect(url_for("admin_console.roadmap"))
+
+
+@admin_bp.route("/roadmap/items/<item_id>/move", methods=["POST"])
+@admin_login_required
+def roadmap_move_item(item_id):
+    payload = _roadmap_json_payload()
+    direction = (payload.get("direction") or "").strip().lower()
+    if direction not in ("left", "right", "up", "down"):
+        abort(400)
+    item = move_roadmap_item(item_id, direction)
+    if not item:
+        abort(404)
+    write_audit(
+        g.admin_user.id,
+        "admin.roadmap.move",
+        target_type="roadmap",
+        target_id=item_id,
+        detail=direction,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+    if _roadmap_wants_json():
+        return jsonify(item)
+    return redirect(url_for("admin_console.roadmap"))
+
+
+def _admin_json_payload():
+    if request.is_json:
+        return request.get_json(silent=True) or {}
+    return request.form.to_dict(flat=True)
+
+
+def _admin_wants_json():
+    return (
+        request.is_json
+        or "application/json" in (request.accept_mimetypes.best or "")
+        or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )
+
+
+def _audit_league(action, league_id, detail=None):
+    write_audit(
+        g.admin_user.id,
+        action,
+        target_type="league",
+        target_id=league_id,
+        detail=detail,
+        ip=_client_ip(),
+        user_agent=request.headers.get("User-Agent"),
+    )
+
+
+def _league_mutation_response(league_id, error=None, status=200, redirect_after=True):
+    if error:
+        if _admin_wants_json():
+            return jsonify({"error": error}), status
+        abort(status)
+    payload = serialize_league_admin(get_league_by_id(league_id))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "league": payload})
+    if redirect_after:
+        return redirect(url_for("admin_console.league_detail", league_id=league_id))
+    return payload
+
+
+@admin_bp.route("/leagues/<int:league_id>")
+@admin_login_required
+def league_detail(league_id):
+    ensure_admin_league_schema()
+    league = get_league_by_id(league_id)
+    if not league:
+        abort(404)
+    from api.league_db import sport_to_dict
+    from api.public_web import _pick_sport, _sport_block
+    from api.web_present import with_sport_glyph
+
+    sports = get_sports_for_league(league["id"]) or []
+    selected = _pick_sport(sports, request.args.get("sport"))
+    block = _sport_block(league, selected, year_arg=request.args.get("year")) if selected else None
+    tabs = [with_sport_glyph(sport_to_dict(sport)) for sport in sports]
+    selected_year = block["year"] if block else None
+    for tab in tabs:
+        tab["href"] = url_for(
+            "admin_console.league_detail",
+            league_id=league["id"],
+            sport=tab["id"],
+            year=selected_year or "all",
+        )
+    owner = get_user_by_id(league.get("owner_id")) if league.get("owner_id") else None
+    members = list_league_members(league_id)
+    activity = list_league_activity(league_id)
+    player_names = player_names_for_sport(selected["id"]) if selected else []
+    templates = [
+        {"id": t["id"], "name": t["name"], "category": t.get("category")}
+        for t in list_templates()
+    ]
+    _audit_league("admin.view.league", league_id, league.get("visibility"))
+    return render_template(
+        "admin_console/league_detail.html",
+        league=serialize_league_admin(league),
+        league_row=league,
+        owner=owner,
+        members=members,
+        activity=activity,
+        sport_tabs=tabs,
+        block=block,
+        selected_sport=selected,
+        player_names=player_names,
+        templates=templates,
+        icon_options=sorted(LEAGUE_ICON_MARKS.keys()),
+        visibilities=VISIBILITY_OPTIONS,
+        flag_options=[
+            ("", "No flag"),
+            ("review", "Needs review"),
+            ("spam", "Spam"),
+            ("test", "Test"),
+        ],
+        previous_owner_role=PREVIOUS_OWNER_ROLE,
+    )
+
+
+@admin_bp.route("/leagues/<int:league_id>/update", methods=["POST"])
+@admin_login_required
+def league_admin_update(league_id):
+    data = _admin_json_payload()
+    kwargs = {"admin_user_id": g.admin_user.id}
+    if "name" in data:
+        kwargs["name"] = data.get("name")
+    if "slug" in data:
+        kwargs["slug"] = data.get("slug")
+    if "description" in data:
+        kwargs["description"] = data.get("description")
+    if "icon" in data:
+        kwargs["icon"] = data.get("icon") or None
+    if "visibility" in data:
+        kwargs["visibility"] = data.get("visibility")
+    try:
+        updated = admin_update_league_fields(league_id, **kwargs)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.update", league_id, updated.get("name"))
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/visibility", methods=["POST"])
+@admin_login_required
+def league_admin_visibility(league_id):
+    data = _admin_json_payload()
+    visibility = (data.get("visibility") or "").strip()
+    confirm = data.get("confirm") in (True, "1", "true", "on", "yes")
+    league = get_league_by_id(league_id)
+    if not league:
+        abort(404)
+    if league.get("visibility") == "private" and visibility == "public" and not confirm:
+        return _league_mutation_response(
+            league_id,
+            error="Confirm moving a private league to public.",
+            status=400,
+        )
+    try:
+        admin_update_league_fields(
+            league_id,
+            visibility=visibility,
+            admin_user_id=g.admin_user.id,
+        )
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.visibility", league_id, visibility)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/members", methods=["POST"])
+@admin_login_required
+def league_admin_add_member(league_id):
+    data = _admin_json_payload()
+    try:
+        members = add_league_member(
+            league_id,
+            data.get("identifier") or data.get("email") or data.get("username"),
+            role=data.get("role") or "member",
+            admin_user_id=g.admin_user.id,
+        )
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.member.add", league_id, data.get("identifier"))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "members": members, "league": serialize_league_admin(get_league_by_id(league_id))})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/members/<int:user_id>/role", methods=["POST"])
+@admin_login_required
+def league_admin_member_role(league_id, user_id):
+    data = _admin_json_payload()
+    try:
+        members = set_member_role(
+            league_id,
+            user_id,
+            data.get("role"),
+            admin_user_id=g.admin_user.id,
+        )
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.member.role", league_id, f"{user_id}:{data.get('role')}")
+    if _admin_wants_json():
+        return jsonify({"ok": True, "members": members})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/members/<int:user_id>/remove", methods=["POST"])
+@admin_login_required
+def league_admin_member_remove(league_id, user_id):
+    try:
+        members = remove_league_member(league_id, user_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.member.remove", league_id, str(user_id))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "members": members})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/owner", methods=["POST"])
+@admin_login_required
+def league_admin_transfer_owner(league_id):
+    data = _admin_json_payload()
+    new_owner_id = data.get("owner_id") or data.get("user_id")
+    try:
+        transfer_league_owner(league_id, new_owner_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.owner", league_id, str(new_owner_id))
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/sport", methods=["POST"])
+@admin_login_required
+def league_admin_sport(league_id):
+    data = _admin_json_payload()
+    try:
+        sport = change_primary_sport_template(
+            league_id,
+            data.get("template_id"),
+            sport_id=data.get("sport_id"),
+            admin_user_id=g.admin_user.id,
+        )
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.sport", league_id, data.get("template_id"))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "sport": sport, "league": serialize_league_admin(get_league_by_id(league_id))})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/invite/rotate", methods=["POST"])
+@admin_login_required
+def league_admin_invite_rotate(league_id):
+    try:
+        rotate_invite_code(league_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.invite.rotate", league_id)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/invite/disable", methods=["POST"])
+@admin_login_required
+def league_admin_invite_disable(league_id):
+    data = _admin_json_payload()
+    disabled = data.get("disabled") in (True, "1", "true", "on", "yes", 1, "disable")
+    try:
+        set_invite_disabled(league_id, disabled, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.invite.disable" if disabled else "admin.league.invite.enable", league_id)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/flag", methods=["POST"])
+@admin_login_required
+def league_admin_flag(league_id):
+    data = _admin_json_payload()
+    try:
+        set_admin_flag(league_id, data.get("flag") or "", admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.flag", league_id, data.get("flag") or "cleared")
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/soft-delete", methods=["POST"])
+@admin_login_required
+def league_admin_soft_delete(league_id):
+    try:
+        soft_delete_league(league_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.soft_delete", league_id)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/restore", methods=["POST"])
+@admin_login_required
+def league_admin_restore(league_id):
+    try:
+        restore_league(league_id, admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.restore", league_id)
+    return _league_mutation_response(league_id)
+
+
+@admin_bp.route("/leagues/<int:league_id>/hard-delete", methods=["POST"])
+@admin_login_required
+def league_admin_hard_delete(league_id):
+    data = _admin_json_payload()
+    try:
+        hard_delete_league(league_id, data.get("confirm"), admin_user_id=g.admin_user.id)
+    except ValueError as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league("admin.league.hard_delete", league_id, data.get("confirm"))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "deleted": True})
+    return redirect(url_for("admin_console.leagues"))
+
+
+@admin_bp.route("/leagues/<int:league_id>/games/<int:game_id>/delete", methods=["POST"])
+@admin_login_required
+def league_admin_delete_game(league_id, game_id):
+    from api.game_db import delete_game, get_game_by_id
+
+    game = get_game_by_id(game_id)
+    if not game or game.get("league_id") != league_id:
+        return _league_mutation_response(league_id, error="game not found", status=404)
+    delete_game(game_id)
+    from api.admin_league_service import log_league_activity
+
+    log_league_activity(league_id, "game.delete", admin_user_id=g.admin_user.id, detail=str(game_id))
+    _audit_league("admin.league.game.delete", league_id, str(game_id))
+    if _admin_wants_json():
+        return jsonify({"ok": True, "game_id": game_id})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id))
+
+
+@admin_bp.route("/leagues/<int:league_id>/players/merge", methods=["POST"])
+@admin_login_required
+def league_admin_merge_players(league_id):
+    data = _admin_json_payload()
+    sport_id = data.get("sport_id")
+    try:
+        result = merge_player_names_in_sport(
+            int(sport_id),
+            data.get("from_name") or data.get("from"),
+            data.get("into_name") or data.get("into"),
+            admin_user_id=g.admin_user.id,
+        )
+    except (TypeError, ValueError) as err:
+        return _league_mutation_response(league_id, error=str(err), status=400)
+    _audit_league(
+        "admin.league.player.merge",
+        league_id,
+        f"{result['from']}->{result['into']}",
+    )
+    if _admin_wants_json():
+        return jsonify({"ok": True, "merge": result})
+    return redirect(url_for("admin_console.league_detail", league_id=league_id, sport=sport_id))

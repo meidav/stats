@@ -1,0 +1,50 @@
+PlayTracker 1.1.4 - App Store Connect
+====================================
+Version: 1.1.4
+Build: 14
+Status: Prepare for Submission (after archive + TestFlight)
+
+Paste into ASC
+--------------
+whats-new.txt          -> What's New in This Version
+../promotional-text.txt -> Promotional Text (optional refresh)
+../urls-and-metadata.txt -> confirm Version shows 1.1.4
+
+First public submission
+-----------------------
+No prior version has been reviewed/released, so treat this as the launch
+listing: fold new templates into Description, and use What's New as a
+short product intro (not a "what's changed" changelog).
+
+What's New (customer-facing) -> whats-new.txt
+---------------------------------------------
+PlayTracker is here.
+Keep score for sports and game night with friends: pickleball, volleyball,
+tennis, badminton, Dominoes, Mahjong, and more. Log wins in a few taps,
+use optional scores when you only need the result, and watch standings update.
+
+Description -> ../description.txt (updated for 1.1.4)
+-----------------------------------------------------
+Includes expanded sports / game night templates and optional scores.
+
+Also paste
+----------
+../promotional-text.txt
+../keywords.txt
+
+Do not lead with
+----------------
+Internal copy tweaks, grid sorting, secondary button shade, lockup padding,
+account version footer, or other polish that does not change what people track.
+
+Build steps
+-----------
+From mobile/:
+  npm run prebuild:ios
+  # Archive in Xcode, upload via Organizer, select build 14 on version 1.1.4
+
+Review notes
+------------
+Reuse ../review-notes.txt (playtest@playtracker.org). No new entitlements.
+New templates are server-driven; demo by creating a league and picking
+Pickleball or Dominoes.

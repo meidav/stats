@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{% block title %}PlayTracker{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}PlayTracker: track everything you play. Leagues, standings, and game night in one app.{% endblock %}">
+    <meta property="og:site_name" content="PlayTracker">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}PlayTracker{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Create leagues and log games in the app. Share public standings on the web.{% endblock %}">
+    <meta property="og:image" content="{{ app_url }}/static/img/promo/play-feature-graphic.png">
+    <meta property="og:url" content="{% block og_url %}{{ app_url }}{{ request.path }}{% endblock %}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#3b0764">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    {% if app_store_app_id %}
+    <meta name="apple-itunes-app" content="app-id={{ app_store_app_id }}">
+    {% endif %}
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/playtracker-logo.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/marketing.css') }}?v=8">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <input type="checkbox" id="mkt-nav-toggle" class="mkt-nav-toggle" hidden>
+    <header class="mkt-header">
+        <div class="mkt-header-bar">
+        <a class="mkt-brand" href="/">
+            <img class="mkt-brand-icon" src="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}" alt="">
+            <span class="mkt-brand-copy">
+                <span class="mkt-brand-name">PlayTracker</span>
+                <span class="mkt-tag">Track everything you play</span>
+            </span>
+        </a>
+        <label for="mkt-nav-toggle" class="mkt-burger" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </label>
+        <nav class="mkt-nav">
+            <label for="mkt-nav-toggle" class="mkt-nav-close" aria-label="Close menu"></label>
+            <a class="mkt-nav-link mkt-nav-about {% block nav_about %}{% endblock %}" href="/about">About</a>
+            <a class="mkt-nav-link mkt-nav-leagues {% block nav_leagues %}{% endblock %}" href="/leagues">Leagues</a>
+            <a class="mkt-nav-link mkt-nav-app {% block nav_app %}{% endblock %}" href="/">Get the app</a>
+        </nav>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mkt-footer">
+        {% from "marketing_store_macros.html" import footer_store_badges with context %}
+        <div class="mkt-footer-grid">
+            <div class="mkt-footer-col">
+                <h2>Site</h2>
+                <a href="/">Home</a>
+                <a href="/about">About</a>
+                <a href="/leagues">Public leagues</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+            </div>
+            <div class="mkt-footer-col">
+                <h2>Contact</h2>
+                <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+                <a href="https://arbelindustries.com" rel="noopener">Arbel Industries</a>
+            </div>
+            <div class="mkt-footer-col mkt-footer-app">
+                <h2>Get the app</h2>
+                {{ footer_store_badges() }}
+                <p>Create leagues and log games on iPhone and Android.</p>
+            </div>
+        </div>
+        <p class="mkt-copy">
+            &copy; {{ current_year }}
+            <a href="https://arbelindustries.com" rel="noopener">Arbel Industries</a>.
+            All rights reserved.
+        </p>
+    </footer>
+    {% block extra_js %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/marketing-store.js') }}" defer></script>
+</body>
+</html>

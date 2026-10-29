@@ -1,0 +1,134 @@
+{% extends "marketing_base.html" %}
+{% from "marketing_league_macros.html" import pair_table, year_picker, sport_mark %}
+{% from "marketing_store_macros.html" import open_in_app_button, store_badges with context %}
+{% block title %}{{ player.player }} | {{ league.name }} | PlayTracker{% endblock %}
+{% block nav_leagues %}is-active{% endblock %}
+{% block body_class %}mkt-app-page{% endblock %}
+
+{% block meta_description %}{{ player.player }} stats in {{ league.name }} on PlayTracker.{% endblock %}
+{% block og_title %}{{ player.player }} | {{ league.name }}{% endblock %}
+{% block og_description %}{{ player.player }} stats in {{ league.name }} on PlayTracker.{% endblock %}
+{% block extra_head %}
+    {% if league.visibility == 'unlisted' %}
+    <meta name="robots" content="noindex, nofollow">
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="mkt-standings mkt-player-page">
+    <a class="mkt-back" href="{{ league_url }}" aria-label="Back to league">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </a>
+
+    <div class="mkt-player-hero">
+        <div class="mkt-avatar" aria-hidden="true">
+            {% if player.avatar_url %}
+            <img src="{{ player.avatar_url }}" alt="">
+            {% else %}
+            {{ player.initials }}
+            {% endif %}
+        </div>
+        <div class="mkt-player-hero-text">
+            <h1>{{ player.player }}</h1>
+            <div class="mkt-player-pills">
+                <a class="mkt-profile-pill" href="{{ league_url }}">
+                    {{ sport_mark(league_mark) }}
+                    <span>{{ league.name }}</span>
+                </a>
+                <span class="mkt-profile-pill">
+                    {{ sport_mark(sport) }}
+                    <span>{{ sport.name }}</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {{ year_picker(years, selected_year, all_time_games, year_base) }}
+
+    <div class="mkt-kpi-grid">
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value mkt-win">{{ player.wins }}</span>
+            <span class="mkt-kpi-label">Wins</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value mkt-loss">{{ player.losses }}</span>
+            <span class="mkt-kpi-label">Losses</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value {{ player.pct_class }}">{{ player.pct_label }}</span>
+            <span class="mkt-kpi-label">{{ player.win_pct_label }}</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value mkt-neutral">{{ player.games }}</span>
+            <span class="mkt-kpi-label">Games</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value {{ player.plus_minus_class }}">{{ player.plus_minus_label }}</span>
+            <span class="mkt-kpi-label">+/-</span>
+        </div>
+        <div class="mkt-glass mkt-kpi">
+            <span class="mkt-kpi-value {{ player.streak_class }}">{{ player.streak }}</span>
+            <span class="mkt-kpi-label">{{ player.streak_label }}</span>
+        </div>
+    </div>
+
+    {% if player.last_results %}
+    <div class="mkt-last-games">
+        <h2>Last {{ player.last_results|length }} games</h2>
+        <div class="mkt-result-dots">
+            {% for result in player.last_results %}
+            <span class="mkt-result-dot {% if result == 'W' %}is-win{% else %}is-loss{% endif %}">{{ result }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if sport.players_per_side > 1 and player.partners %}
+    <section class="mkt-pair-block">
+        <h2 class="mkt-win">Stats with partners ({{ player.partners|length }})</h2>
+        {% if player.min_games and player.min_games > 1 %}
+        <p class="mkt-section-hint">{{ player.min_games }}+ games together (5% of this player's games)</p>
+        {% endif %}
+        {{ pair_table(player.partners) }}
+    </section>
+    {% endif %}
+
+    {% if sport.players_per_side > 1 and player.occasional_partners %}
+    <section class="mkt-pair-block">
+        <h2 class="mkt-win">Occasional partners ({{ player.occasional_partners|length }})</h2>
+        <p class="mkt-section-hint">Under {{ player.min_games }} games together</p>
+        {{ pair_table(player.occasional_partners) }}
+    </section>
+    {% endif %}
+
+    {% if player.opponents %}
+    <section class="mkt-pair-block">
+        <h2 class="mkt-loss">Stats vs opponents ({{ player.opponents|length }})</h2>
+        {% if player.min_games and player.min_games > 1 %}
+        <p class="mkt-section-hint">{{ player.min_games }}+ games against (5% of this player's games)</p>
+        {% endif %}
+        {{ pair_table(player.opponents) }}
+    </section>
+    {% endif %}
+
+    {% if player.occasional_opponents %}
+    <section class="mkt-pair-block">
+        <h2 class="mkt-loss">Occasional opponents ({{ player.occasional_opponents|length }})</h2>
+        <p class="mkt-section-hint">Under {{ player.min_games }} games against</p>
+        {{ pair_table(player.occasional_opponents) }}
+    </section>
+    {% endif %}
+
+    <div class="mkt-cta-row">
+        {{ open_in_app_button(app_scheme_url) }}
+    </div>
+    <p class="mkt-soon">Log games and see this player in the PlayTracker app. Download free on the App Store or Google Play.</p>
+    {{ store_badges() }}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/marketing-folds.js') }}"></script>
+{% endblock %}

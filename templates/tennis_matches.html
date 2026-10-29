@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% from 'macros/game_cards.html' import tennis_match_card %}
+{% block body_class %}has-page-header{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1 class="page-title-hero">{{ year }} Tennis Matches</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('tennis_stats', year=year) }}" class="nav-pill">← Stats</a>
+            <div class="dropdown dropdown-year">
+                <button class="dropbtn" type="button">{{ year }} <svg class="dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+                <div class="dropdown-content">
+                    {% for y in all_years %}
+                        <a href="{{ url_for('tennis_matches_by_year', year=y) }}">{{ y }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            <label for="menu__toggle" class="nav-pill menu-trigger" aria-label="Open menu">
+            Menu
+            </label>
+        </div>
+    </div>
+    <div class="search-bar-wrap">
+        <input type="text" id="playerFilter" class="search-bar" placeholder="Search players or dates..." autocomplete="off">
+    </div>
+    <p class="games-count games-count-hero" id="gamesCount">{{ matches|length }} MATCHES</p>
+    <div class="games-list" id="gamesList">
+        {% for match in matches %}
+            {{ tennis_match_card(match, year) }}
+        {% endfor %}
+    </div>
+    <div id="noResults" class="no-results-message" style="display: none;">No matches found.</div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var filterInput = document.getElementById('playerFilter');
+        var cards = document.querySelectorAll('#gamesList .game-card');
+        var noResults = document.getElementById('noResults');
+        var countEl = document.getElementById('gamesCount');
+        function filterMatches() {
+            var value = (filterInput && filterInput.value) ? filterInput.value.toLowerCase().trim() : '';
+            var visible = 0;
+            cards.forEach(function(card) {
+                var show = !value || (card.getAttribute('data-players') || '').toLowerCase().indexOf(value) !== -1 || (card.getAttribute('data-date') || '').toLowerCase().indexOf(value) !== -1;
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            noResults.style.display = visible === 0 ? 'block' : 'none';
+            if (countEl) countEl.textContent = visible + ' MATCHES';
+        }
+        if (filterInput) { filterInput.addEventListener('input', filterMatches); }
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,11 @@
+# Force Python-only build (ignore mobile/ Node app during Railway image build)
+providers = ["python"]
+
+[variables]
+NIXPACKS_PYTHON_VERSION = "3.11"
+
+[phases.setup]
+nixPkgs = ["bash"]
+
+[start]
+cmd = "bash scripts/railway_start.sh"

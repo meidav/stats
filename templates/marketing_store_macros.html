@@ -1,0 +1,62 @@
+{% macro app_store_badge() %}
+<a
+    class="mkt-store-link mkt-store-link--apple"
+    href="{{ app_store_url }}"
+    data-itms-url="{{ app_store_itms_url }}"
+    rel="noopener"
+    target="_blank"
+>
+    <img
+        class="mkt-store-badge is-active is-official"
+        src="{{ url_for('static', filename='img/store/app-store.svg') }}?v=2"
+        alt="Download on the App Store"
+        width="144"
+        height="48"
+    >
+</a>
+{% endmacro %}
+
+{% macro google_play_badge() %}
+<a
+    class="mkt-store-link mkt-store-link--google"
+    href="{{ play_store_url }}"
+    data-market-url="{{ play_store_market_url }}"
+    rel="noopener"
+    target="_blank"
+>
+    <img
+        class="mkt-store-badge is-active is-official"
+        src="{{ url_for('static', filename='img/store/google-play.svg') }}"
+        alt="Get it on Google Play"
+        width="160"
+        height="48"
+    >
+</a>
+{% endmacro %}
+
+{% macro store_badges() %}
+<div class="mkt-stores is-live" aria-label="Download PlayTracker">
+    {{ app_store_badge() }}
+    {{ google_play_badge() }}
+</div>
+{% endmacro %}
+
+{% macro footer_store_badges() %}
+<div class="mkt-stores is-live mkt-footer-stores" aria-label="Download PlayTracker">
+    {{ app_store_badge() }}
+    {{ google_play_badge() }}
+</div>
+{% endmacro %}
+
+{% macro open_in_app_button(app_scheme_url=none) %}
+<a
+    class="mkt-btn mkt-btn-primary mkt-smart-open"
+    href="{{ app_store_url }}"
+    data-store-url="{{ app_store_itms_url }}"
+    data-play-url="{{ play_store_url }}"
+    data-market-url="{{ play_store_market_url }}"
+    {% if app_scheme_url %}data-app-url="{{ app_scheme_url }}"{% endif %}
+>
+    Open in PlayTracker
+</a>
+{% endmacro %}

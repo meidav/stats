@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block body_class %}has-page-header{% endblock %}
+{% block title %}Manage players{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title-hero">Manage players</h1>
+    <div class="header-controls">
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-pill">← Admin</a>
+        <label for="menu__toggle" class="nav-pill menu-trigger">Menu</label>
+    </div>
+</div>
+
+<div class="search-bar-wrap">
+    <form method="GET" action="{{ url_for('admin_players') }}" class="admin-players-search-form">
+        <input type="text" name="search" id="playerFilter" class="search-bar" placeholder="Search players..." value="{{ search_query }}" autocomplete="off">
+        <input type="hidden" name="sort" value="{{ sort_by }}">
+        <input type="hidden" name="order" value="{{ sort_order }}">
+    </form>
+</div>
+
+<div class="admin-players-toolbar">
+    <div class="admin-players-sort" role="group" aria-label="Sort players">
+        <span class="admin-players-sort__label">Sort by</span>
+        <div class="admin-players-sort__options">
+            {% set name_order = 'asc' if sort_by != 'name' or sort_order == 'desc' else 'desc' %}
+            {% set games_order = 'desc' if sort_by != 'games' or sort_order == 'asc' else 'asc' %}
+            <a href="{{ url_for('admin_players', search=search_query, sort='name', order=name_order) }}"
+               class="admin-sort-btn{% if sort_by == 'name' %} is-active{% endif %}"
+               {% if sort_by == 'name' %}aria-current="true"{% endif %}>
+                Name
+                {% if sort_by == 'name' %}
+                <span class="material-symbols-rounded" aria-hidden="true">{% if sort_order == 'asc' %}arrow_upward{% else %}arrow_downward{% endif %}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('admin_players', search=search_query, sort='games', order=games_order) }}"
+               class="admin-sort-btn{% if sort_by == 'games' %} is-active{% endif %}"
+               {% if sort_by == 'games' %}aria-current="true"{% endif %}>
+                Games
+                {% if sort_by == 'games' %}
+                <span class="material-symbols-rounded" aria-hidden="true">{% if sort_order == 'asc' %}arrow_upward{% else %}arrow_downward{% endif %}</span>
+                {% endif %}
+            </a>
+        </div>
+    </div>
+    <p class="admin-players-count" id="playersCount">{{ players|length }} players</p>
+</div>
+
+<div class="admin-player-list" id="playersList">
+    {% if not players %}
+    <p class="no-results-message">No players found{% if search_query %} matching "{{ search_query }}"{% endif %}.</p>
+    {% endif %}
+    {% for player in players %}
+    <a class="admin-player-row" href="{{ url_for('edit_player', player=player.name) }}" data-name="{{ player.name|lower }}">
+        <div class="admin-player-avatar" aria-hidden="true">
+            {% if player.photo_url %}
+            <img src="{{ player.photo_url }}" alt="">
+            {% else %}
+            <span>{{ player.initials }}</span>
+            {% endif %}
+        </div>
+        <div class="admin-player-row__main">
+            <strong>{{ player.name }}</strong>
+            <span>{{ player.game_count }} games</span>
+        </div>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+    </a>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var input = document.getElementById('playerFilter');
+  var rows = document.querySelectorAll('#playersList .admin-player-row');
+  var countEl = document.getElementById('playersCount');
+  if (!input) return;
+  function filterRows() {
+    var q = (input.value || '').toLowerCase().trim();
+    var visible = 0;
+    rows.forEach(function (row) {
+      var show = !q || (row.getAttribute('data-name') || '').indexOf(q) !== -1;
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (countEl) countEl.textContent = visible + ' players';
+  }
+  input.addEventListener('input', filterRows);
+});
+</script>
+{% endblock %}

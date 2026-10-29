@@ -1,0 +1,308 @@
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MagnifyingGlass } from '../components/icons';
+import React, { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+
+import { ErrorBanner } from '../components/ErrorBanner';
+import { GlassCard } from '../components/GlassCard';
+import { GamesCountBadge, gamesBadgeRoom, gamesBadgeRoomTablet } from '../components/GamesCountBadge';
+import { LeagueIcon } from '../components/LeagueIcon';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenScaffold } from '../components/ScreenScaffold';
+import { TemplateGlyph } from '../components/TemplateGlyph';
+import { spacing } from '../constants/theme';
+import { useThemeTokens } from '../lib/theme';
+import { ApiError, api } from '../lib/api';
+import { selectedIconForLeague } from '../lib/leagueIcons';
+import { useIsTablet } from '../lib/layout';
+import type { Sport } from '../types';
+import type { DiscoverStackParamList } from '../navigation/types';
+
+type Props = NativeStackScreenProps<DiscoverStackParamList, 'DiscoverLeagues'>;
+
+type PublicLeague = {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  icon?: string | null;
+  sport_count?: number;
+  sport_name?: string | null;
+  template_id?: string | null;
+  game_count?: number;
+  share_url?: string | null;
+};
+
+function iconForPublicLeague(item: PublicLeague) {
+  const sports = item.template_id
+    ? ([{ template_id: item.template_id }] as Pick<Sport, 'template_id'>[])
+    : [];
+  return selectedIconForLeague({
+    icon: item.icon,
+    sports: sports as Sport[],
+  });
+}
+
+export function DiscoverLeaguesScreen({ navigation }: Props) {
+  const theme = useThemeTokens();
+  const { colors } = theme;
+  const styles = React.useMemo(() => makeStyles(theme), [theme]);
+  const isTablet = useIsTablet();
+  const [leagues, setLeagues] = useState<PublicLeague[]>([]);
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState('');
+
+  const load = useCallback(async (search?: string, showSpinner = false) => {
+    if (showSpinner) setLoading(true);
+    try {
+      const result = await api.discoverLeagues(search?.trim() || undefined);
+      setLeagues(result.leagues ?? []);
+      setError('');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not load public leagues');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      load(undefined, true);
+    }, [load]),
+  );
+
+  function submitSearch() {
+    load(query, true);
+  }
+
+  return (
+    <ScreenScaffold edgeHeader>
+      <ScreenHeader title="Public leagues" />
+
+      <View style={[styles.body, isTablet && styles.bodyTablet]}>
+        <Text style={styles.subtitle}>
+          Browse open leagues on PlayTracker. Tap one to view standings and games.
+        </Text>
+        <View style={styles.searchRow}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search leagues"
+            placeholderTextColor={colors.textMuted}
+            value={query}
+            onChangeText={setQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            onSubmitEditing={submitSearch}
+          />
+          <TouchableOpacity style={styles.searchButton} onPress={submitSearch}>
+            <MagnifyingGlass size={18} color="#fff" weight="bold" />
+          </TouchableOpacity>
+        </View>
+
+        <ErrorBanner message={error} />
+
+        {loading && leagues.length === 0 ? (
+          <ActivityIndicator style={styles.loader} color={colors.primary} />
+        ) : (
+          <FlatList
+            data={leagues}
+            keyExtractor={(item) => String(item.id)}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => {
+                  setRefreshing(true);
+                  load(query);
+                }}
+                tintColor={colors.primary}
+              />
+            }
+            contentContainerStyle={[
+              styles.list,
+              styles.tabPad,
+              leagues.length === 0 ? styles.emptyList : null,
+            ]}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>
+                {error ? 'Pull down to try again.' : 'No public leagues match that search yet.'}
+              </Text>
+            }
+            renderItem={({ item }) => {
+              const displayIcon = iconForPublicLeague(item);
+              const sportLabel = item.sport_name
+                ? item.sport_name
+                : item.sport_count === 1
+                  ? '1 sport'
+                  : `${item.sport_count ?? 0} sports`;
+              const gameCount = item.game_count ?? 0;
+              return (
+                <View
+                  style={[
+                    styles.cardWrap,
+                    gamesBadgeRoom,
+                    isTablet && gamesBadgeRoomTablet,
+                  ]}
+                >
+                  <GlassCard
+                    style={styles.card}
+                    onPress={() =>
+                      navigation.navigate('League', {
+                        slug: item.slug,
+                        name: item.name,
+                      })
+                    }
+                  >
+                    <View style={styles.cardRow}>
+                      <View style={styles.iconWrap}>
+                        {displayIcon ? (
+                          <LeagueIcon id={displayIcon} size={26} />
+                        ) : item.template_id ? (
+                          <TemplateGlyph
+                            template={{ id: item.template_id, category: 'sports' }}
+                            size={24}
+                          />
+                        ) : (
+                          <LeagueIcon id="trophy" size={24} />
+                        )}
+                      </View>
+                      <View style={styles.cardCopy}>
+                        <Text style={styles.cardTitle} numberOfLines={1}>
+                          {item.name}
+                        </Text>
+                        <Text style={styles.cardMeta} numberOfLines={1}>
+                          {sportLabel} · public
+                        </Text>
+                      </View>
+                    </View>
+                  </GlassCard>
+                  <GamesCountBadge count={gameCount} />
+                </View>
+              );
+            }}
+          />
+        )}
+      </View>
+    </ScreenScaffold>
+  );
+}
+
+function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
+  const { colors } = theme;
+  return StyleSheet.create({
+  tabPad: {
+    paddingBottom: 120,
+  },
+  body: {
+    flex: 1,
+    width: '100%',
+    alignSelf: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  bodyTablet: {
+    width: '75%',
+    maxWidth: 720,
+    paddingHorizontal: spacing.md,
+  },
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: colors.textMuted,
+    marginTop: 2,
+    marginBottom: spacing.sm,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.fieldBorder,
+    borderRadius: 12,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    fontSize: 16,
+    backgroundColor: colors.fieldBg,
+    color: colors.text,
+  },
+  searchButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loader: {
+    marginTop: spacing.xl,
+  },
+  list: {
+    paddingBottom: spacing.lg,
+    paddingTop: 2,
+  },
+  emptyList: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: colors.textMuted,
+    fontSize: 15,
+    paddingVertical: spacing.xl,
+  },
+  cardWrap: {
+    position: 'relative',
+    marginBottom: spacing.sm,
+  },
+  card: {
+    padding: spacing.md,
+    // List rows: border only. Card shadows stack into a vertical band on the right.
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconWrap: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: colors.text,
+  },
+  cardMeta: {
+    marginTop: 4,
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+  },
+});
+}
