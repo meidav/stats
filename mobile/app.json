@@ -2,7 +2,7 @@
   "expo": {
     "name": "PlayTracker",
     "slug": "playtracker",
-    "version": "1.3.2",
+    "version": "1.3.3",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -11,7 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "org.playtracker.app",
-      "buildNumber": "19",
+      "buildNumber": "20",
       "appleTeamId": "74CFQ69U9S",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -21,7 +21,7 @@
     "scheme": "playtracker",
     "android": {
       "package": "org.playtracker.app",
-      "versionCode": 19,
+      "versionCode": 20,
       "icon": "./assets/PlayTracker-iOS-App-Icon-1024.png",
       "adaptiveIcon": {
         "backgroundColor": "#3B0764",
@@ -61,14 +61,8 @@
           "photosPermission": "Allow PlayTracker to pick a player photo."
         }
       ],
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "enableSceneSupport": true
-          }
-        }
-      ]
+      "expo-font",
+      "expo-status-bar"
     ],
     "owner": "stacktracker"
   }

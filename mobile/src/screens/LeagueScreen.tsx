@@ -19,7 +19,7 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { GlassHeaderButton, ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { SportTypePill } from '../components/SportTypePill';
 import { StatsTable } from '../components/StatsTable';
@@ -372,7 +372,7 @@ export function LeagueScreen({ route, navigation }: Props) {
         right={
           <View style={styles.topActions}>
             {canEdit ? (
-              <TouchableOpacity
+              <GlassHeaderButton
                 onPress={() =>
                   navigation.navigate('EditLeague', {
                     slug,
@@ -382,25 +382,20 @@ export function LeagueScreen({ route, navigation }: Props) {
                     sportTemplateId: league?.sports?.[0]?.template_id,
                   })
                 }
-                style={styles.headerIconBtn}
                 accessibilityLabel="Edit league"
               >
-                <PencilSimple size={20} color={styles.headerIconColor.color} weight="bold" />
-              </TouchableOpacity>
+                <PencilSimple size={18} color={styles.headerIconColor.color} weight="bold" />
+              </GlassHeaderButton>
             ) : null}
             {canShare ? (
-              <TouchableOpacity
-                onPress={handleShare}
-                style={styles.headerIconBtn}
-                accessibilityLabel="Share league"
-              >
-                <Export size={20} color={styles.headerIconColor.color} weight="bold" />
-              </TouchableOpacity>
+              <GlassHeaderButton onPress={handleShare} accessibilityLabel="Share league">
+                <Export size={18} color={styles.headerIconColor.color} weight="bold" />
+              </GlassHeaderButton>
             ) : null}
             {selectedSport && isMember ? (
-              <TouchableOpacity onPress={openAddGame} activeOpacity={0.85} style={styles.headerIconBtn}>
+              <GlassHeaderButton onPress={openAddGame} accessibilityLabel="Add game">
                 <Plus size={18} color={styles.headerIconColor.color} weight="bold" />
-              </TouchableOpacity>
+              </GlassHeaderButton>
             ) : null}
           </View>
         }
@@ -610,15 +605,7 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
     topActions: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
-    },
-    headerIconBtn: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.1)',
+      gap: 6,
     },
     headerIconColor: {
       color: theme.isDark ? '#F8FAFC' : colors.text,

@@ -1,176 +1,188 @@
-import MaskedView from '@react-native-masked-view/masked-view';
-import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CaretLeft, Plus } from './icons';
-import { APP_NAME } from '../constants/brand';
 import { spacing } from '../constants/theme';
 import { useThemeTokens } from '../lib/theme';
 
-const brandIcon = require('../../assets/playtracker-icon.png');
-
 type Props = {
-  /** Page title under the brand row (My leagues, Settings, …). */
+  /** Centered page title (My leagues, Settings, league name, …). */
   title?: string;
   onBack?: () => void;
   actionLabel?: string;
   onAction?: () => void;
-  /** Extra trailing controls (edit, share, …). */
+  /** Extra trailing controls (edit, share, …). Prefer GlassHeaderButton. */
   right?: React.ReactNode;
 };
 
+const BTN = 36;
+
 /**
- * Shared app chrome: theme-matched bar, icon top-left, gradient PlayTracker wordmark,
- * large centered page title.
+ * iOS-style frosted header: centered title, glass round corners for back / actions.
+ * No brand mark or wordmark (splash + welcome carry the brand).
  */
 export function ScreenHeader({ title, onBack, actionLabel, onAction, right }: Props) {
   const theme = useThemeTokens();
   const insets = useSafeAreaInsets();
-  const hasTrailing = Boolean(right) || Boolean(onAction);
   const titleColor = theme.isDark ? '#F8FAFC' : theme.colors.text;
-  const backBg = theme.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.08)';
+  const overlay = theme.isDark ? 'rgba(12, 12, 16, 0.55)' : 'rgba(255, 252, 248, 0.55)';
+  const border = theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.65)';
+  const hasTrailing = Boolean(right) || Boolean(onAction);
 
   return (
-    <LinearGradient
-      colors={[...theme.gradients.header]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[styles.bar, { paddingTop: insets.top + 6 }]}
+    <View
+      style={[
+        styles.shell,
+        {
+          paddingTop: insets.top + 4,
+          borderBottomColor: border,
+        },
+      ]}
     >
-      <View style={styles.topRow}>
-        <View style={styles.leftCluster}>
+      {Platform.OS === 'ios' ? (
+        <BlurView
+          intensity={theme.isDark ? 48 : 64}
+          tint={theme.isDark ? 'dark' : 'light'}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor:
+              Platform.OS === 'ios' ? overlay : theme.isDark ? 'rgba(18, 24, 32, 0.92)' : 'rgba(255, 252, 248, 0.92)',
+          },
+        ]}
+      />
+
+      <View style={styles.row}>
+        <View style={styles.side}>
           {onBack ? (
-            <TouchableOpacity
-              onPress={onBack}
-              style={[styles.sideButton, { backgroundColor: backBg }]}
-              accessibilityLabel="Back"
-            >
-              <CaretLeft size={22} color={titleColor} weight="bold" />
-            </TouchableOpacity>
+            <GlassHeaderButton onPress={onBack} accessibilityLabel="Back">
+              <CaretLeft size={20} color={titleColor} weight="bold" />
+            </GlassHeaderButton>
           ) : null}
-          <Image source={brandIcon} style={styles.logo} resizeMode="contain" />
-          <MaskedView
-            style={styles.brandMask}
-            maskElement={
-              <Text style={styles.brandMaskText} numberOfLines={1}>
-                {APP_NAME}
-              </Text>
-            }
-          >
-            <LinearGradient
-              colors={[...theme.gradients.brandText]}
-              start={{ x: 0, y: 0.5 }}
-              end={{ x: 1, y: 0.5 }}
-              style={styles.brandFill}
-            >
-              <Text style={[styles.brandMaskText, styles.brandHidden]} numberOfLines={1}>
-                {APP_NAME}
-              </Text>
-            </LinearGradient>
-          </MaskedView>
         </View>
 
-        {hasTrailing ? (
-          <View style={styles.trailing}>
-            {right}
-            {onAction ? (
-              <TouchableOpacity onPress={onAction} activeOpacity={0.85}>
-                <View style={[styles.actionChip, { backgroundColor: backBg }]}>
-                  <Plus size={16} color={titleColor} weight="bold" />
-                  {actionLabel ? (
-                    <Text style={[styles.actionText, { color: titleColor }]}>{actionLabel}</Text>
-                  ) : null}
-                </View>
-              </TouchableOpacity>
-            ) : null}
-          </View>
-        ) : (
-          <View style={styles.sideSpacer} />
-        )}
-      </View>
+        <View style={styles.titleWrap} pointerEvents="none">
+          {title ? (
+            <Text style={[styles.title, { color: titleColor }]} numberOfLines={1}>
+              {title}
+            </Text>
+          ) : null}
+        </View>
 
-      {title ? (
-        <Text style={[styles.pageTitle, { color: titleColor }]} numberOfLines={1}>
-          {title}
-        </Text>
-      ) : null}
-    </LinearGradient>
+        <View style={[styles.side, styles.sideEnd]}>
+          {hasTrailing ? (
+            <View style={styles.trailing}>
+              {right}
+              {onAction ? (
+                <GlassHeaderButton
+                  onPress={onAction}
+                  accessibilityLabel={actionLabel || 'Add'}
+                >
+                  <Plus size={18} color={titleColor} weight="bold" />
+                </GlassHeaderButton>
+              ) : null}
+            </View>
+          ) : null}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+type GlassBtnProps = {
+  onPress: () => void;
+  accessibilityLabel: string;
+  children: React.ReactNode;
+  style?: ViewStyle;
+};
+
+/** Round frosted control for header corners (back, edit, share, …). */
+export function GlassHeaderButton({
+  onPress,
+  accessibilityLabel,
+  children,
+  style,
+}: GlassBtnProps) {
+  const theme = useThemeTokens();
+  const fill = theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.08)';
+  const border = theme.isDark ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.7)';
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.75}
+      accessibilityLabel={accessibilityLabel}
+      style={[
+        styles.glassBtn,
+        {
+          backgroundColor: fill,
+          borderColor: border,
+        },
+        style,
+      ]}
+    >
+      {children}
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  bar: {
+  shell: {
     paddingHorizontal: spacing.md,
     paddingBottom: 10,
-    marginBottom: 2,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
   },
-  topRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    minHeight: 40,
+    minHeight: BTN,
   },
-  leftCluster: {
+  side: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    minWidth: 0,
+    justifyContent: 'flex-start',
+    minWidth: BTN,
   },
-  logo: {
-    width: 44,
-    height: 44,
+  sideEnd: {
+    justifyContent: 'flex-end',
   },
-  brandMask: {
-    maxWidth: 168,
-    marginLeft: -2,
+  titleWrap: {
+    flexShrink: 1,
+    maxWidth: '56%',
+    paddingHorizontal: spacing.xs,
   },
-  brandMaskText: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.1,
-  },
-  brandFill: {
-    flexGrow: 0,
-  },
-  brandHidden: {
-    opacity: 0,
-  },
-  pageTitle: {
-    marginTop: 12,
+  title: {
     textAlign: 'center',
-    fontSize: 26,
-    fontWeight: '800',
-    letterSpacing: 0.15,
-  },
-  sideButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sideSpacer: {
-    width: 36,
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   trailing: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-  actionChip: {
-    flexDirection: 'row',
+  glassBtn: {
+    width: BTN,
+    height: BTN,
+    borderRadius: BTN / 2,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  actionText: {
-    fontWeight: '700',
-    fontSize: 13,
+    justifyContent: 'center',
   },
 });

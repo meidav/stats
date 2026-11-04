@@ -18,7 +18,7 @@ import { CollapsibleSection } from '../components/CollapsibleSection';
 import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
 import { LeagueIcon } from '../components/LeagueIcon';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { GlassHeaderButton, ScreenHeader } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { spacing, type AppTheme } from '../constants/theme';
@@ -129,7 +129,7 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
         right={
           <View style={styles.topActions}>
             {canEdit ? (
-              <TouchableOpacity
+              <GlassHeaderButton
                 onPress={() =>
                   navigation.navigate('EditPlayer', {
                     sportId,
@@ -143,20 +143,15 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
                     leagueIcon: icon,
                   })
                 }
-                style={styles.headerIconBtn}
                 accessibilityLabel="Edit player"
               >
-                <PencilSimple size={20} color={styles.headerIconColor.color} weight="bold" />
-              </TouchableOpacity>
+                <PencilSimple size={18} color={styles.headerIconColor.color} weight="bold" />
+              </GlassHeaderButton>
             ) : null}
             {canShare ? (
-              <TouchableOpacity
-                onPress={handleShare}
-                style={styles.headerIconBtn}
-                accessibilityLabel="Share player"
-              >
-                <Export size={20} color={styles.headerIconColor.color} weight="bold" />
-              </TouchableOpacity>
+              <GlassHeaderButton onPress={handleShare} accessibilityLabel="Share player">
+                <Export size={18} color={styles.headerIconColor.color} weight="bold" />
+              </GlassHeaderButton>
             ) : null}
           </View>
         }
@@ -401,15 +396,7 @@ function makeStyles(theme: AppTheme) {
     topActions: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: spacing.sm,
-    },
-    headerIconBtn: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.1)',
+      gap: 6,
     },
     headerIconColor: {
       color: theme.isDark ? '#F8FAFC' : colors.text,

@@ -1,0 +1,3 @@
+Clearer headers and a lighter chrome.
+
+Screen titles sit in a frosted top bar with round glass controls for back and actions. The app logo no longer repeats on every page, so more room goes to your leagues and games.
