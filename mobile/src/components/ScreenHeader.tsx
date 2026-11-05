@@ -15,9 +15,10 @@ import { spacing } from '../constants/theme';
 import { useThemeTokens } from '../lib/theme';
 
 type Props = {
-  /** Centered page title (My leagues, Settings, league name, …). */
   title?: string;
   onBack?: () => void;
+  /** Default: start when back is present, otherwise center. */
+  titleAlign?: 'center' | 'start';
   actionLabel?: string;
   onAction?: () => void;
   /** Extra trailing controls (edit, share, …). Prefer GlassHeaderButton. */
@@ -25,65 +26,81 @@ type Props = {
 };
 
 const BTN = 36;
+const PAD_TOP = 4;
+const PAD_BOTTOM = 10;
+
+/** Distance from screen top to content below a floating ScreenHeader. */
+export function useHeaderContentInset() {
+  const insets = useSafeAreaInsets();
+  return insets.top + PAD_TOP + BTN + PAD_BOTTOM;
+}
 
 /**
- * iOS-style frosted header: centered title, glass round corners for back / actions.
- * No brand mark or wordmark (splash + welcome carry the brand).
+ * Frosted floating header. Sits absolutely over scrolling content so BlurView
+ * has something to frost. Pair with useHeaderContentInset() padding on lists.
  */
-export function ScreenHeader({ title, onBack, actionLabel, onAction, right }: Props) {
+export function ScreenHeader({
+  title,
+  onBack,
+  titleAlign,
+  actionLabel,
+  onAction,
+  right,
+}: Props) {
   const theme = useThemeTokens();
   const insets = useSafeAreaInsets();
+  const align = titleAlign ?? (onBack ? 'start' : 'center');
   const titleColor = theme.isDark ? '#F8FAFC' : theme.colors.text;
-  const overlay = theme.isDark ? 'rgba(12, 12, 16, 0.55)' : 'rgba(255, 252, 248, 0.55)';
-  const border = theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.65)';
+  // Keep the wash light so blur reads through (native nav bars are ~20-35% tint).
+  const overlay = theme.isDark ? 'rgba(8, 10, 18, 0.28)' : 'rgba(255, 252, 248, 0.32)';
+  const border = theme.isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.55)';
   const hasTrailing = Boolean(right) || Boolean(onAction);
 
   return (
     <View
+      pointerEvents="box-none"
       style={[
         styles.shell,
         {
-          paddingTop: insets.top + 4,
+          paddingTop: insets.top + PAD_TOP,
           borderBottomColor: border,
         },
       ]}
     >
       {Platform.OS === 'ios' ? (
         <BlurView
-          intensity={theme.isDark ? 48 : 64}
-          tint={theme.isDark ? 'dark' : 'light'}
+          intensity={theme.isDark ? 72 : 80}
+          tint={theme.isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight'}
           style={StyleSheet.absoluteFill}
         />
-      ) : null}
-      <View
-        style={[
-          StyleSheet.absoluteFill,
-          {
-            backgroundColor:
-              Platform.OS === 'ios' ? overlay : theme.isDark ? 'rgba(18, 24, 32, 0.92)' : 'rgba(255, 252, 248, 0.92)',
-          },
-        ]}
-      />
+      ) : (
+        <BlurView
+          intensity={theme.isDark ? 64 : 70}
+          tint={theme.isDark ? 'dark' : 'light'}
+          experimentalBlurMethod="dimezisBlurView"
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: overlay }]} />
 
       <View style={styles.row}>
-        <View style={styles.side}>
-          {onBack ? (
-            <GlassHeaderButton onPress={onBack} accessibilityLabel="Back">
-              <CaretLeft size={20} color={titleColor} weight="bold" />
-            </GlassHeaderButton>
-          ) : null}
-        </View>
-
-        <View style={styles.titleWrap} pointerEvents="none">
-          {title ? (
-            <Text style={[styles.title, { color: titleColor }]} numberOfLines={1}>
-              {title}
-            </Text>
-          ) : null}
-        </View>
-
-        <View style={[styles.side, styles.sideEnd]}>
-          {hasTrailing ? (
+        {align === 'start' ? (
+          <>
+            <View style={styles.leadingCluster}>
+              {onBack ? (
+                <GlassHeaderButton onPress={onBack} accessibilityLabel="Back">
+                  <CaretLeft size={20} color={titleColor} weight="bold" />
+                </GlassHeaderButton>
+              ) : null}
+              {title ? (
+                <Text
+                  style={[styles.titleStart, { color: titleColor }]}
+                  numberOfLines={1}
+                >
+                  {title}
+                </Text>
+              ) : null}
+            </View>
             <View style={styles.trailing}>
               {right}
               {onAction ? (
@@ -95,8 +112,40 @@ export function ScreenHeader({ title, onBack, actionLabel, onAction, right }: Pr
                 </GlassHeaderButton>
               ) : null}
             </View>
-          ) : null}
-        </View>
+          </>
+        ) : (
+          <>
+            <View style={styles.side}>
+              {onBack ? (
+                <GlassHeaderButton onPress={onBack} accessibilityLabel="Back">
+                  <CaretLeft size={20} color={titleColor} weight="bold" />
+                </GlassHeaderButton>
+              ) : null}
+            </View>
+            <View style={styles.titleWrap} pointerEvents="none">
+              {title ? (
+                <Text style={[styles.titleCenter, { color: titleColor }]} numberOfLines={1}>
+                  {title}
+                </Text>
+              ) : null}
+            </View>
+            <View style={[styles.side, styles.sideEnd]}>
+              {hasTrailing ? (
+                <View style={styles.trailing}>
+                  {right}
+                  {onAction ? (
+                    <GlassHeaderButton
+                      onPress={onAction}
+                      accessibilityLabel={actionLabel || 'Add'}
+                    >
+                      <Plus size={18} color={titleColor} weight="bold" />
+                    </GlassHeaderButton>
+                  ) : null}
+                </View>
+              ) : null}
+            </View>
+          </>
+        )}
       </View>
     </View>
   );
@@ -117,7 +166,7 @@ export function GlassHeaderButton({
   style,
 }: GlassBtnProps) {
   const theme = useThemeTokens();
-  const fill = theme.isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.08)';
+  const fill = theme.isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(15, 23, 42, 0.08)';
   const border = theme.isDark ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.7)';
 
   return (
@@ -141,8 +190,13 @@ export function GlassHeaderButton({
 
 const styles = StyleSheet.create({
   shell: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 30,
     paddingHorizontal: spacing.md,
-    paddingBottom: 10,
+    paddingBottom: PAD_BOTTOM,
     borderBottomWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
   },
@@ -150,6 +204,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: BTN,
+    gap: spacing.sm,
+  },
+  leadingCluster: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minWidth: 0,
   },
   side: {
     flex: 1,
@@ -166,8 +228,14 @@ const styles = StyleSheet.create({
     maxWidth: '56%',
     paddingHorizontal: spacing.xs,
   },
-  title: {
+  titleCenter: {
     textAlign: 'center',
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  titleStart: {
+    flexShrink: 1,
     fontSize: 17,
     fontWeight: '700',
     letterSpacing: 0.2,
@@ -176,6 +244,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flexShrink: 0,
   },
   glassBtn: {
     width: BTN,

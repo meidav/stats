@@ -1,8 +1,22 @@
 import React from 'react';
-import { SvgXml } from 'react-native-svg';
+import { Image, ImageStyle, StyleProp } from 'react-native';
 
-import { PLAYTRACKER_LOGO_SVG } from './playtrackerLogoXml';
+const logoPng = require('../../assets/playtracker-logo.png');
 
-export function PlayTrackerLogo({ size = 160 }: { size?: number }) {
-  return <SvgXml xml={PLAYTRACKER_LOGO_SVG} width={size} height={size} />;
+/** Stacked PlayTracker lockup (PNG). Prefer BrandLockup for the framed welcome tile. */
+export function PlayTrackerLogo({
+  size = 160,
+  style,
+}: {
+  size?: number;
+  style?: StyleProp<ImageStyle>;
+}) {
+  return (
+    <Image
+      source={logoPng}
+      style={[{ width: size, height: size }, style]}
+      resizeMode="contain"
+      accessibilityLabel="PlayTracker"
+    />
+  );
 }

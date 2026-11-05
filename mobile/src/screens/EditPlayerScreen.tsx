@@ -14,7 +14,7 @@ import {
 
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { spacing } from '../constants/theme';
 import { ApiError, api } from '../lib/api';
@@ -29,6 +29,7 @@ type Props = NativeStackScreenProps<LeagueStackParamList, 'EditPlayer'>;
 export function EditPlayerScreen({ route, navigation }: Props) {
   const theme = useThemeTokens();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+  const headerInset = useHeaderContentInset();
   const chrome = useMemo(() => formChrome(theme), [theme]);
   const { sportId, playerName: initialName, avatarUrl: initialAvatar } = route.params;
   const { token } = useAuth();
@@ -132,7 +133,7 @@ export function EditPlayerScreen({ route, navigation }: Props) {
       <ScreenHeader title="Edit player" onBack={() => navigation.goBack()} />
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: headerInset + spacing.sm }]}
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.label}>Photo</Text>

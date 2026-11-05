@@ -43,7 +43,7 @@ export function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProp
   const innerWidth = Math.max(rowWidth - ROW_PAD * 2, 0);
   const tabWidth = tabCount > 0 ? innerWidth / tabCount : 0;
   const bubbleWidth = Math.max(tabWidth - BUBBLE_INSET * 2, 0);
-  const overlay = theme.isDark ? 'rgba(12, 12, 16, 0.72)' : 'rgba(255, 252, 248, 0.72)';
+  const overlay = theme.isDark ? 'rgba(12, 12, 16, 0.42)' : 'rgba(255, 252, 248, 0.45)';
   const border = theme.isDark ? 'rgba(255, 255, 255, 0.24)' : 'rgba(255, 255, 255, 0.7)';
   // Dark: quiet tint, not a gray slab. Light: primary wash so it reads on bright chrome.
   const bubbleFill = theme.isDark
@@ -120,7 +120,11 @@ export function GlassTabBar({ state, descriptors, navigation }: BottomTabBarProp
         ]}
       >
         {Platform.OS === 'ios' ? (
-          <BlurView intensity={70} tint={theme.isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+          <BlurView
+            intensity={78}
+            tint={theme.isDark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight'}
+            style={StyleSheet.absoluteFill}
+          />
         ) : null}
         <View
           style={[

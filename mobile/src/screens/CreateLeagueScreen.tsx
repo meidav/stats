@@ -11,7 +11,7 @@ import {
 
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { spacing } from '../constants/theme';
@@ -32,6 +32,7 @@ type Props = BottomTabScreenProps<MainTabParamList, 'CreateLeague'>;
 export function CreateLeagueScreen({ navigation }: Props) {
   const theme = useThemeTokens();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+  const headerInset = useHeaderContentInset();
   const chrome = useMemo(() => formChrome(theme), [theme]);
   const { token, user } = useAuth();
   const scrollRef = useRef<ScrollView>(null);
@@ -148,7 +149,7 @@ export function CreateLeagueScreen({ navigation }: Props) {
       <ScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: headerInset + spacing.sm }]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
         automaticallyAdjustKeyboardInsets

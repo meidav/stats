@@ -2,38 +2,32 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Image, StyleSheet, View, ViewStyle } from 'react-native';
 
-import { PlayTrackerLogo } from './PlayTrackerLogo';
-
 type Props = {
   size?: number;
   style?: ViewStyle;
-  /** Prefer PNG on the critical boot path; SVG elsewhere. */
+  /** Kept for callers; rebrand ships PNG only. */
   mode?: 'svg' | 'image';
 };
 
 const logoPng = require('../../assets/playtracker-logo.png');
 
 /**
- * Logo SVG includes some empty canvas. Keep the art inside the tile so the
- * pawn and wordmark are not clipped against the card edges.
+ * Stacked lockup on the brand dark purple ramp (matches splash / store icon).
+ * Logo PNG includes some empty canvas; scale art slightly so it fills the tile.
  */
-const ART_SCALE = 0.9;
+const ART_SCALE = 0.92;
 
-export function BrandLockup({ size = 148, style, mode = 'svg' }: Props) {
+export function BrandLockup({ size = 148, style }: Props) {
   const art = Math.round(size * ART_SCALE);
   return (
     <LinearGradient
-      colors={['#3B0764', '#5B21B6', '#6D28D9']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
+      colors={['#36048E', '#100246', '#000012']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
       style={[styles.card, { width: size, height: size, borderRadius: Math.max(18, size * 0.2) }, style]}
     >
       <View style={styles.art} pointerEvents="none">
-        {mode === 'image' ? (
-          <Image source={logoPng} style={{ width: art, height: art }} resizeMode="contain" />
-        ) : (
-          <PlayTrackerLogo size={art} />
-        )}
+        <Image source={logoPng} style={{ width: art, height: art }} resizeMode="contain" />
       </View>
     </LinearGradient>
   );
@@ -45,7 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(196, 181, 253, 0.35)',
+    borderColor: 'rgba(196, 181, 253, 0.28)',
     shadowColor: '#2E1065',
     shadowOpacity: 0.28,
     shadowRadius: 16,

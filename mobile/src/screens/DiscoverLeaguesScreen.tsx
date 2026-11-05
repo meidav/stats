@@ -17,7 +17,7 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { GlassCard } from '../components/GlassCard';
 import { GamesCountBadge, gamesBadgeRoom, gamesBadgeRoomTablet } from '../components/GamesCountBadge';
 import { LeagueIcon } from '../components/LeagueIcon';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { spacing } from '../constants/theme';
@@ -57,6 +57,7 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
   const theme = useThemeTokens();
   const { colors } = theme;
   const styles = React.useMemo(() => makeStyles(theme), [theme]);
+  const headerInset = useHeaderContentInset();
   const isTablet = useIsTablet();
   const [leagues, setLeagues] = useState<PublicLeague[]>([]);
   const [query, setQuery] = useState('');
@@ -92,28 +93,29 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
     <ScreenScaffold edgeHeader>
       <ScreenHeader title="Public leagues" />
 
-      <View style={[styles.body, isTablet && styles.bodyTablet]}>
-        <Text style={styles.subtitle}>
-          Browse open leagues on PlayTracker. Tap one to view standings and games.
-        </Text>
-        <View style={styles.searchRow}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search leagues"
-            placeholderTextColor={colors.textMuted}
-            value={query}
-            onChangeText={setQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-            onSubmitEditing={submitSearch}
-          />
-          <TouchableOpacity style={styles.searchButton} onPress={submitSearch}>
-            <MagnifyingGlass size={18} color="#fff" weight="bold" />
-          </TouchableOpacity>
+      <View style={[styles.body, isTablet && styles.bodyTablet, { paddingTop: headerInset }]}>
+        <View style={styles.stickyChrome}>
+          <Text style={styles.subtitle}>
+            Browse open leagues on PlayTracker. Tap one to view standings and games.
+          </Text>
+          <View style={styles.searchRow}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search leagues"
+              placeholderTextColor={colors.textMuted}
+              value={query}
+              onChangeText={setQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+              onSubmitEditing={submitSearch}
+            />
+            <TouchableOpacity style={styles.searchButton} onPress={submitSearch}>
+              <MagnifyingGlass size={18} color="#fff" weight="bold" />
+            </TouchableOpacity>
+          </View>
+          <ErrorBanner message={error} />
         </View>
-
-        <ErrorBanner message={error} />
 
         {loading && leagues.length === 0 ? (
           <ActivityIndicator style={styles.loader} color={colors.primary} />
@@ -212,6 +214,9 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
     width: '100%',
     alignSelf: 'center',
     paddingHorizontal: spacing.lg,
+  },
+  stickyChrome: {
+    paddingBottom: spacing.xs,
   },
   bodyTablet: {
     width: '75%',

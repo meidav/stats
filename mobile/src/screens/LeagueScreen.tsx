@@ -19,7 +19,7 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { CollapsibleSection } from '../components/CollapsibleSection';
 import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
-import { GlassHeaderButton, ScreenHeader } from '../components/ScreenHeader';
+import { GlassHeaderButton, ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { SportTypePill } from '../components/SportTypePill';
 import { StatsTable } from '../components/StatsTable';
@@ -43,6 +43,7 @@ const GAMES_PAGE_SIZE = 50;
 export function LeagueScreen({ route, navigation }: Props) {
   const theme = useThemeTokens();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+  const headerInset = useHeaderContentInset();
   const { colors, gradients } = theme;
   const { slug, name, role: routeRole } = route.params;
   const { token } = useAuth();
@@ -401,51 +402,54 @@ export function LeagueScreen({ route, navigation }: Props) {
         }
       />
 
-      {selectedSport ? (
-        <SportTypePill
-          name={selectedSport.name}
-          templateId={selectedSport.template_id}
-          category={selectedSport.category || 'custom'}
-          style={{ marginTop: spacing.sm, marginBottom: spacing.md, marginHorizontal: spacing.lg }}
-        />
-      ) : null}
-
-      {league && league.sports.length > 1 ? (
-        <View style={styles.sportTabs}>
-          {league.sports.map((sport) => (
-            <TouchableOpacity
-              key={sport.id}
-              style={[styles.tab, selectedSport?.id === sport.id && styles.tabActive]}
-              onPress={() => selectSport(sport)}
-            >
-              <TemplateGlyph
-                template={{ id: sport.template_id, category: sport.category || 'custom' }}
-                size={16}
-              />
-              <Text
-                style={[
-                  styles.tabText,
-                  selectedSport?.id === sport.id && styles.tabTextActive,
-                ]}
-              >
-                {sport.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ) : null}
-
-      <ErrorBanner message={error} />
-
       {loading ? (
-        <ActivityIndicator style={styles.loader} color={colors.primary} />
+        <ActivityIndicator style={[styles.loader, { marginTop: headerInset }]} color={colors.primary} />
       ) : (
         <ScrollView
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />
           }
-          contentContainerStyle={totalGames === 0 ? styles.emptyList : styles.list}
+          contentContainerStyle={[
+            totalGames === 0 ? styles.emptyList : styles.list,
+            { paddingTop: headerInset + spacing.sm },
+          ]}
         >
+          <ErrorBanner message={error} />
+
+          {selectedSport ? (
+            <SportTypePill
+              name={selectedSport.name}
+              templateId={selectedSport.template_id}
+              category={selectedSport.category || 'custom'}
+              style={{ marginBottom: spacing.md }}
+            />
+          ) : null}
+
+          {league && league.sports.length > 1 ? (
+            <View style={styles.sportTabs}>
+              {league.sports.map((sport) => (
+                <TouchableOpacity
+                  key={sport.id}
+                  style={[styles.tab, selectedSport?.id === sport.id && styles.tabActive]}
+                  onPress={() => selectSport(sport)}
+                >
+                  <TemplateGlyph
+                    template={{ id: sport.template_id, category: sport.category || 'custom' }}
+                    size={16}
+                  />
+                  <Text
+                    style={[
+                      styles.tabText,
+                      selectedSport?.id === sport.id && styles.tabTextActive,
+                    ]}
+                  >
+                    {sport.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : null}
+
           {totalGames === 0 ? (
             <GlassCard style={styles.emptyCard}>
               {selectedSport ? (
@@ -614,7 +618,6 @@ function makeStyles(theme: ReturnType<typeof useThemeTokens>) {
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: spacing.sm,
-      paddingHorizontal: spacing.lg,
       marginBottom: spacing.md,
     },
     tab: {

@@ -48,7 +48,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     const payload = data as { error?: string; msg?: string; message?: string };
     const raw = payload.error || payload.msg || payload.message || '';
     let message = raw || `Request failed (${response.status})`;
-    if (response.status === 401 && options.token) {
+    // Flask-JWT-Extended often returns 422 "Signature verification failed" when
+    // the server secret rotated or the stored token is stale - treat like 401.
+    const jwtStale =
+      Boolean(options.token) &&
+      (response.status === 401 ||
+        (response.status === 422 && /signature|token|jwt|expired|not enough segments/i.test(raw)));
+    if (jwtStale) {
       message = 'Your session expired. Sign out and sign in again.';
       onUnauthorized?.();
     } else if (response.status === 401) {

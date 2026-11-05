@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 
 
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GradientButton } from '../components/GradientButton';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { spacing } from '../constants/theme';
 import { ApiError, api } from '../lib/api';
@@ -33,6 +33,7 @@ function iconFromParams(params: LeagueStackParamList['EditLeague']) {
 export function EditLeagueScreen({ route, navigation }: Props) {
   const theme = useThemeTokens();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+  const headerInset = useHeaderContentInset();
   const chrome = useMemo(() => formChrome(theme), [theme]);
   const { slug, name: initialName, visibility: initialVisibility, icon: paramIcon, sportTemplateId } =
     route.params;
@@ -117,7 +118,7 @@ export function EditLeagueScreen({ route, navigation }: Props) {
       <ScreenHeader title="Edit league" onBack={() => navigation.goBack()} />
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: headerInset + spacing.sm }]}
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.label}>Name</Text>

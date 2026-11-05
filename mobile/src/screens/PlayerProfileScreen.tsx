@@ -18,7 +18,7 @@ import { CollapsibleSection } from '../components/CollapsibleSection';
 import { GameList } from '../components/GameList';
 import { GlassCard } from '../components/GlassCard';
 import { LeagueIcon } from '../components/LeagueIcon';
-import { GlassHeaderButton, ScreenHeader } from '../components/ScreenHeader';
+import { GlassHeaderButton, ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { spacing, type AppTheme } from '../constants/theme';
@@ -35,6 +35,7 @@ type Props = NativeStackScreenProps<LeagueStackParamList, 'PlayerProfile'>;
 export function PlayerProfileScreen({ route, navigation }: Props) {
   const theme = useThemeTokens();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+  const headerInset = useHeaderContentInset();
   const { colors } = theme;
   const {
     sportId,
@@ -156,11 +157,11 @@ export function PlayerProfileScreen({ route, navigation }: Props) {
           </View>
         }
       />
-      <ErrorBanner message={error} />
       {loading ? (
-        <ActivityIndicator style={styles.loader} color={colors.primary} />
+        <ActivityIndicator style={[styles.loader, { marginTop: headerInset }]} color={colors.primary} />
       ) : profile ? (
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView contentContainerStyle={[styles.content, { paddingTop: headerInset + spacing.sm }]}>
+          <ErrorBanner message={error} />
           <View style={styles.hero}>
             <View style={styles.avatar}>
               {profile.avatar_url ? (

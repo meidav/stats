@@ -1,36 +1,54 @@
 # PlayTracker brand masters
 
-Drop the new rebrand source files here. An agent (or `scripts/build_brand_assets.py`)
-will generate every derived web, mobile, splash, favicon, and store asset from these.
+Drop source files here with the **exact filenames** below. An agent will generate
+web, mobile, splash, favicon, and store assets from these.
 
-Do not put derived outputs in this folder. Only masters.
+Only masters in this folder. No derived sizes.
 
-## Required files (use these exact names)
+## Required (7 files)
 
-| Filename | Canvas | Background | What it is |
+| Filename | Width × height | Background | Contents |
 |---|---|---|---|
-| `mark.svg` | vector | transparent | PT monogram only |
-| `mark.png` | **1600×1600** | transparent | Same mark as PNG |
-| `lockup-horizontal.svg` | vector | transparent | Mark + vertical rule + "PlayTracker" wordmark (side by side) |
-| `lockup-horizontal.png` | **2200×560** | transparent | Same horizontal lockup as PNG |
-| `lockup-stacked.svg` | vector | transparent | Mark above "PlayTracker" wordmark |
-| `lockup-stacked.png` | **1600×1600** | transparent | Same stacked lockup as PNG |
-| `app-icon.png` | **1024×1024** | **opaque** (dark fill) | Store / home-screen icon art. Full bleed. No rounded corners. No transparency. |
+| `mark.svg` | vector (any viewBox; art centered) | **transparent** | PT monogram only. No wordmark, no square plate, no glow behind the mark. |
+| `mark.png` | **1600 × 1600** | **transparent** (PNG with alpha) | Same as `mark.svg`, rasterized. Mark centered with a little padding so edges are not clipped. |
+| `lockup-horizontal.svg` | vector | **transparent** | Mark, thin vertical rule, then "PlayTracker" wordmark in one horizontal row (as in your wide logo). |
+| `lockup-horizontal.png` | **2200 × 560** | **transparent** (PNG with alpha) | Same as horizontal SVG. Art centered; leave a bit of padding on all sides. |
+| `lockup-stacked.svg` | vector | **transparent** | Mark on top, "PlayTracker" wordmark below (as in your square lockup). |
+| `lockup-stacked.png` | **1600 × 1600** | **transparent** (PNG with alpha) | Same as stacked SVG. Art centered with padding. |
+| `app-icon.png` | **1024 × 1024** | **opaque** (solid / gradient fill, **no alpha**) | Mark centered on a dark full-bleed square. **No rounded corners** (stores mask that). **No transparency.** |
 
-## Optional
+## Optional (skip unless easy)
 
 | Filename | Notes |
 |---|---|
-| `wordmark.svg` | Gradient "PlayTracker" text only. Skip unless you need it. |
-| `notes.txt` | Hex colors, preferred splash/icon background, anything else to preserve |
+| `wordmark.svg` | Gradient "PlayTracker" text only. Not required. |
+| `notes.txt` | Hex colors, preferred splash/icon background, font names. |
 
-## Rules
+## Transparency summary
 
-- Prefer SVG for anything with gradients so we can re-export cleanly.
-- PNG masters should be PNG-24 (or PNG-32 with alpha where transparent).
-- `app-icon.png` must be opaque; Apple rejects icons with alpha.
-- You do not need sticker variants, favicons, splash, adaptive icons, or feature graphics. Those get generated from the masters above.
+- **Transparent:** `mark.*`, `lockup-horizontal.*`, `lockup-stacked.*`
+- **Opaque only:** `app-icon.png`
 
-## When ready
+## Photoshop → SVG
 
-Tell the agent the masters are in place. Expected next step: generate all derived assets into `static/img/brand/`, `static/`, `static/img/promo/`, and `mobile/assets/`.
+Photoshop is raster. A good SVG needs real vectors (paths / editable type), not a traced bitmap.
+
+**Best:** design in **Figma** or **Illustrator**, export SVG + PNG from there.
+
+**If you only have Photoshop:**
+
+1. Export the **PNG masters** listed above (File → Export → Export As → PNG, Transparency on except for `app-icon.png`).
+2. For SVG, either:
+   - Rebuild the mark + wordmark in Figma/Illustrator and export SVG, or
+   - Drop **PNG-only** masters and tell the agent; we can ship most surfaces from PNG (SVG is nicer for favicons and infinite scale, but not blocking).
+
+Do **not** rely on Photoshop "Export as SVG" for this logo if the layers are flattened pixels; the SVG will be a huge embedded image, not useful vectors.
+
+## Regenerate derived assets
+
+```bash
+python3 scripts/apply_brand_masters.py
+```
+
+Writes web, mobile, splash, favicon, adaptive icon, and Play feature graphic outputs.
+The older `scripts/build_brand_assets.py` is for the previous volleyball mark and should not be used for this rebrand.

@@ -32,9 +32,12 @@ Assets
 ------
 App icon (1024): mobile/assets/PlayTracker-iOS-App-Icon-1024.png
 Splash:          mobile/assets/splash.png
+Masters:         static/img/brand/_masters/  (regen via scripts/apply_brand_masters.py)
+Play 512 icon:   static/img/promo/play-icon-512.png
+Feature graphic: static/img/promo/play-feature-graphic.png
 
-Screenshots: refresh for themes (you are handling capture). Upload to ASC
-for the 6.7" (and optional second size) slots when ready.
+After a rebrand, re-upload the 1024 icon + feature graphic in ASC / Play Console.
+Screenshots: refresh for themes + new chrome (you are handling capture).
 
 Builds (1.3.3, build 20)
 ------------------------

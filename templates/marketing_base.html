@@ -12,17 +12,18 @@
     <meta property="og:image" content="{{ app_url }}/static/img/promo/play-feature-graphic.png">
     <meta property="og:url" content="{% block og_url %}{{ app_url }}{{ request.path }}{% endblock %}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="theme-color" content="#3b0764">
+    <meta name="theme-color" content="#100246">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     {% if app_store_app_id %}
     <meta name="apple-itunes-app" content="app-id={{ app_store_app_id }}">
     {% endif %}
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/brand/playtracker-icon.svg') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/playtracker-logo.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/marketing.css') }}?v=8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/marketing.css') }}?v=9">
     {% block extra_head %}{% endblock %}
     <!-- Caldera live traffic (visit counts only, no cookies) -->
     <script async src="https://caldera.social/t/1.js" integrity="sha384-UCnwKWu6Be2g87+ZI1+h367D6yOXEuXFQL2U2Z7PuSoH3oSCsu/cmZMbj4s70JlC" crossorigin="anonymous" data-site="6dlcyr29cs0dfc7y"></script>

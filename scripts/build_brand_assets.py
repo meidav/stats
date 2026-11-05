@@ -1,4 +1,14 @@
-"""Regenerate every PlayTracker brand asset from the shared mark geometry.
+"""LEGACY: volleyball-era mark pipeline.
+
+For the 2026 PT monogram rebrand, use instead:
+
+  python3 scripts/apply_brand_masters.py
+
+with masters in static/img/brand/_masters/.
+
+---
+
+Regenerate every PlayTracker brand asset from the shared mark geometry.
 
 Rewrites the brand SVGs in place (see brand_mark.transform), re-renders the
 PNGs that ship alongside them, and refreshes the inline SVG the mobile app

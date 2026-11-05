@@ -105,9 +105,9 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #3b0764, #5b21b6, #6d28d9);
-  border: 1px solid rgba(196, 181, 253, 0.38);
-  box-shadow: 0 10px 24px rgba(46, 16, 101, 0.28);
+  background: linear-gradient(180deg, #36048e, #100246 55%, #000012);
+  border: 1px solid rgba(196, 181, 253, 0.28);
+  box-shadow: 0 10px 24px rgba(16, 2, 70, 0.35);
 }
 
 .mkt-logo-plate-hero {

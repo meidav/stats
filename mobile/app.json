@@ -24,7 +24,7 @@
       "versionCode": 20,
       "icon": "./assets/PlayTracker-iOS-App-Icon-1024.png",
       "adaptiveIcon": {
-        "backgroundColor": "#3B0764",
+        "backgroundColor": "#100246",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -49,7 +49,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#3B0764",
+          "backgroundColor": "#100246",
           "image": "./assets/splash.png",
           "resizeMode": "cover",
           "enableFullScreenImage_legacy": true

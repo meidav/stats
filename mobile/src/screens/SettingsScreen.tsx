@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 import { ErrorBanner } from '../components/ErrorBanner';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { SecondaryButton } from '../components/SecondaryButton';
 import { SignOut, Warning } from '../components/icons';
@@ -28,6 +28,7 @@ export function SettingsScreen() {
   const { user, logout, deleteAccount } = useAuth();
   const { theme, themeId, setThemeId, themes } = useTheme();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+  const headerInset = useHeaderContentInset();
   const [signOutOpen, setSignOutOpen] = useState(false);
   const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
   const [deleting, setDeleting] = useState(false);
@@ -63,7 +64,7 @@ export function SettingsScreen() {
       <ScreenHeader title="Settings" />
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: headerInset + spacing.sm }]}
         keyboardShouldPersistTaps="handled"
       >
         <Text style={[styles.section, styles.sectionFirst]}>Appearance</Text>

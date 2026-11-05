@@ -15,7 +15,7 @@ import { DateTimeField } from '../components/DateTimeField';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { GameAddedModal } from '../components/GameAddedModal';
 import { GradientButton } from '../components/GradientButton';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { ScreenScaffold } from '../components/ScreenScaffold';
 import { SportTypePill } from '../components/SportTypePill';
 import { spacing } from '../constants/theme';
@@ -67,18 +67,25 @@ function recentNamesFromGames(games: Array<{ winners: string[]; losers: string[]
   return recent;
 }
 
-function suggestionRank(name: string, query: string) {
+/** Match quality for typed queries. Higher is better; -1 = no match. */
+function matchQuality(name: string, query: string) {
   const lower = name.toLowerCase();
   const q = query.toLowerCase();
-  if (lower.startsWith(q)) return 1000 - lower.length;
+  if (!q) return 0;
+  if (lower === q) return 300;
+  if (lower.startsWith(q)) return 200;
+  // Prefer word-prefix hits ("Jo" -> "John Caravella") over mid-string.
+  const words = lower.split(/\s+/);
+  if (words.some((word) => word.startsWith(q))) return 150;
   const index = lower.indexOf(q);
-  if (index >= 0) return 500 - index;
+  if (index >= 0) return 50 - Math.min(index, 40);
   return -1;
 }
 
 export function AddGameScreen({ route, navigation }: Props) {
   const theme = useThemeTokens();
   const styles = useMemo(() => makeStyles(theme), [theme]);
+  const headerInset = useHeaderContentInset();
   const chrome = useMemo(() => formChrome(theme), [theme]);
   const {
     sportId,
@@ -388,16 +395,34 @@ export function AddGameScreen({ route, navigation }: Props) {
     );
     const available = (list: string[]) =>
       list.filter((name) => !taken.has(name.trim().toLowerCase()));
+    // Lower index = played more recently. Missing names sort after all recent ones.
+    const recentRank = new Map(
+      recentPlayers.map((name, index) => [name.trim().toLowerCase(), index]),
+    );
+    const recencyScore = (name: string) => {
+      const key = name.trim().toLowerCase();
+      return recentRank.has(key) ? 10_000 - (recentRank.get(key) as number) : 0;
+    };
 
     if (!query) {
       const pool = recentPlayers.length ? recentPlayers : players;
       return available(pool).slice(0, SUGGESTION_LIMIT);
     }
 
+    // Must match the typed characters; among matches, prefer recent play heavily.
     return available(players)
-      .map((name) => ({ name, rank: suggestionRank(name, query) }))
-      .filter((item) => item.rank >= 0)
-      .sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name))
+      .map((name) => ({
+        name,
+        match: matchQuality(name, query),
+        recent: recencyScore(name),
+      }))
+      .filter((item) => item.match >= 0)
+      .sort(
+        (a, b) =>
+          b.recent - a.recent ||
+          b.match - a.match ||
+          a.name.localeCompare(b.name),
+      )
       .slice(0, SUGGESTION_LIMIT)
       .map((item) => item.name);
   }
@@ -646,7 +671,11 @@ export function AddGameScreen({ route, navigation }: Props) {
       <ScrollView
         ref={scrollRef}
         style={styles.container}
-        contentContainerStyle={[styles.content, playedOpen && styles.contentPlayedOpen]}
+        contentContainerStyle={[
+          styles.content,
+          playedOpen && styles.contentPlayedOpen,
+          { paddingTop: headerInset + spacing.sm },
+        ]}
         onScroll={(event) => {
           scrollOffset.current = event.nativeEvent.contentOffset.y;
         }}

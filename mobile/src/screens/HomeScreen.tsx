@@ -22,7 +22,7 @@ import { ScreenScaffold } from '../components/ScreenScaffold';
 import { TemplateGlyph } from '../components/TemplateGlyph';
 import { LeagueIcon } from '../components/LeagueIcon';
 import { IconActionRow } from '../components/IconActionRow';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { ScreenHeader, useHeaderContentInset } from '../components/ScreenHeader';
 import { Warning } from '../components/icons';
 import { SecondaryButton } from '../components/SecondaryButton';
 import { spacing } from '../constants/theme';
@@ -40,6 +40,7 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
   const theme = useThemeTokens();
+  const headerInset = useHeaderContentInset();
   const { colors, gradients } = theme;
   const styles = React.useMemo(() => makeStyles(theme), [theme]);
   const { token } = useAuth();
@@ -140,7 +141,7 @@ export function HomeScreen({ navigation }: Props) {
       <ErrorBanner message={error} />
 
       {loading && !hasLeagues ? (
-        <ActivityIndicator style={styles.loader} color={colors.primary} />
+        <ActivityIndicator style={[styles.loader, { marginTop: headerInset }]} color={colors.primary} />
       ) : hasLeagues ? (
         <View style={[styles.listColumn, isTablet && styles.listColumnTablet]}>
           <FlatList
@@ -157,7 +158,7 @@ export function HomeScreen({ navigation }: Props) {
                 tintColor={colors.primary}
               />
             }
-            contentContainerStyle={[styles.list, styles.tabPad]}
+            contentContainerStyle={[styles.list, styles.tabPad, { paddingTop: headerInset + spacing.sm }]}
             renderItem={({ item }) => {
               const sport = item.sports?.[0];
               const canEdit = item.role === 'owner' || item.role === 'admin';
@@ -235,7 +236,7 @@ export function HomeScreen({ navigation }: Props) {
       ) : (
         <ScrollView
           style={styles.emptyScroll}
-          contentContainerStyle={styles.emptyHost}
+          contentContainerStyle={[styles.emptyHost, { paddingTop: headerInset + spacing.sm }]}
           showsVerticalScrollIndicator={false}
           bounces={false}
         >
