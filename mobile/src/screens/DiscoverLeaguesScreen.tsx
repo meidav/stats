@@ -183,7 +183,7 @@ export function DiscoverLeaguesScreen({ navigation }: Props) {
                         )}
                       </View>
                       <View style={styles.cardCopy}>
-                        <Text style={styles.cardTitle} numberOfLines={1}>
+                        <Text style={styles.cardTitle} numberOfLines={2}>
                           {item.name}
                         </Text>
                         <Text style={styles.cardMeta} numberOfLines={1}>

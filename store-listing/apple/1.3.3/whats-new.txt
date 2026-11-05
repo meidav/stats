@@ -1,3 +1,3 @@
-Clearer headers and a lighter chrome.
+Fresh PT look and frosted headers.
 
-Screen titles sit in a frosted top bar with round glass controls for back and actions. The app logo no longer repeats on every page, so more room goes to your leagues and games.
+A new monogram icon and splash, glass screen titles that float over your leagues, and clearer room for long league names. Logging stays the same: create a league, add games, see standings.

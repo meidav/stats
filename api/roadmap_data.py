@@ -40,11 +40,11 @@ SEED_ITEMS = [
     {
         "id": "fast-add-game",
         "title": "Faster add game",
-        "status": "now",
+        "status": "done",
         "category": "sports",
         "effort": "M",
         "premium": False,
-        "summary": "Make logging a game as quick as possible: focus the first winner, recent players with the keyboard up, and score chips filled with the most common scores for that league type.",
+        "summary": "Shipped in 1.2.0: focus first winner, recent players with keyboard up, score chips, and date/time that scrolls into view.",
         "details": [
             "Winner 1 (or Winner) focused on open, with recent people and the keyboard",
             "Score chips fill the row (about 4-5); most common scores left to right",
@@ -53,7 +53,7 @@ SEED_ITEMS = [
             "Date and time picker scrolls into view",
         ],
         "target": "1.2.0",
-        "sort_order": 0,
+        "sort_order": 10,
     },
     {
         "id": "android-parity",
@@ -69,16 +69,16 @@ SEED_ITEMS = [
             "Google Sign-In on Android builds still incomplete in places",
         ],
         "target": "1.3.1",
-        "sort_order": 0,
+        "sort_order": 11,
     },
     {
         "id": "ui-polish-132",
         "title": "1.3.2 UI polish",
-        "status": "now",
+        "status": "done",
         "category": "platform",
         "effort": "S",
         "premium": False,
-        "summary": "Public list clearance under the glass tab bar, quieter games-badge glow, and a squishier active tab bubble.",
+        "summary": "Shipped in 1.3.2: Public list clearance under the glass tab bar, quieter games-badge glow, and a squishier active tab bubble.",
         "details": [
             "Public leagues list clears the floating tab bar",
             "Games count badge no longer leaves a right-edge glow",
@@ -86,6 +86,25 @@ SEED_ITEMS = [
             "Add-game played time refreshes when returning to the app",
         ],
         "target": "1.3.2",
+        "sort_order": 12,
+    },
+    {
+        "id": "chrome-rebrand-133",
+        "title": "Glass headers + PT rebrand",
+        "status": "now",
+        "category": "platform",
+        "effort": "M",
+        "premium": False,
+        "summary": "Shipping in 1.3.3: floating frosted ScreenHeader, PT monogram rebrand across app/web/store, Expo SDK 58, and 2-line wrap for long league names. Needs new iPhone + iPad screenshots.",
+        "details": [
+            "Floating glass headers over scrolling content; logo removed from in-app headers",
+            "Left-aligned league titles; sport pill scrolls with content",
+            "PT monogram masters applied to icons, splash, favicons, marketing",
+            "Name autofill biased by recent play; stale JWT signature treated as session expiry",
+            "Long league names wrap to two lines in lists and headers",
+            "Store: new screenshots (phone + tablet), icon, feature graphic, What's New",
+        ],
+        "target": "1.3.3",
         "sort_order": 0,
     },
     {
@@ -128,7 +147,7 @@ SEED_ITEMS = [
             "Phosphor icons across chrome",
         ],
         "target": "1.3.0",
-        "sort_order": 0,
+        "sort_order": 13,
     },
     {
         "id": "glass-bottom-nav",
@@ -398,14 +417,26 @@ def seed_roadmap_if_empty():
         _insert_seed_item(item, int(item.get("sort_order") or 0))
 
 
+# Seed IDs whose column/status should be forced from SEED_ITEMS on each board load.
+# Use for cards we know shipped (or are the active release) so live boards catch up.
+_SEED_STATUS_SYNC_IDS = (
+    "fast-add-game",
+    "android-parity",
+    "ui-polish-132",
+    "account-theme",
+    "more-templates",
+    "chrome-rebrand-133",
+)
+
+
 def ensure_missing_seed_items():
-    """Insert seed cards that are not on the board yet, without moving existing cards."""
+    """Insert seed cards that are not on the board yet, and sync known shipped cards."""
     ensure_roadmap_schema()
     for item in SEED_ITEMS:
         if get_roadmap_item(item["id"]):
             continue
         sort_order = int(item.get("sort_order") or 0)
-        if item["id"] == "fast-add-game":
+        if item["id"] == "chrome-rebrand-133":
             row = db_manager.execute_query(
                 "SELECT COALESCE(MIN(sort_order), 0) AS m FROM roadmap_items WHERE status = ?",
                 (item["status"],),
@@ -415,6 +446,8 @@ def ensure_missing_seed_items():
             sort_order = current_min - 1
         _insert_seed_item(item, sort_order)
     _refresh_seed_copy("multi-scorer-league")
+    for item_id in _SEED_STATUS_SYNC_IDS:
+        _sync_seed_item(item_id)
 
 
 def _refresh_seed_copy(item_id: str):
@@ -435,6 +468,52 @@ def _refresh_seed_copy(item_id: str):
             seed["title"],
             seed.get("summary") or None,
             json.dumps(seed.get("details") or []),
+            item_id,
+        ),
+        fetch_all=False,
+    )
+
+
+def _sync_seed_item(item_id: str):
+    """Align title/summary/details/status/target/category/effort with SEED_ITEMS."""
+    seed = next((item for item in SEED_ITEMS if item["id"] == item_id), None)
+    existing = get_roadmap_item(item_id)
+    if not seed or not existing:
+        return
+    status = seed["status"]
+    sort_order = int(existing["sort_order"] or 0)
+    if existing["status"] != status:
+        row = db_manager.execute_query(
+            "SELECT COALESCE(MAX(sort_order), -1) AS m FROM roadmap_items WHERE status = ?",
+            (status,),
+            fetch_one=True,
+        )
+        sort_order = int(dict(row)["m"]) + 1 if row else 0
+    db_manager.execute_query(
+        """
+        UPDATE roadmap_items SET
+            title = ?,
+            summary = ?,
+            details_json = ?,
+            status = ?,
+            category = ?,
+            effort = ?,
+            premium = ?,
+            target = ?,
+            sort_order = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """,
+        (
+            seed["title"],
+            seed.get("summary") or None,
+            json.dumps(seed.get("details") or []),
+            status,
+            seed["category"],
+            seed["effort"],
+            1 if seed.get("premium") else 0,
+            seed.get("target") or None,
+            sort_order,
             item_id,
         ),
         fetch_all=False,

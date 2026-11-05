@@ -1,10 +1,17 @@
 PlayTracker 1.3.3 (build 20)
 ============================
 
-- Glass ScreenHeader: frosted bar, centered title, round corner buttons
-- Removed brand mark / wordmark from in-app headers (brand stays on splash + welcome)
-- League and player edit/share/add actions use the same glass round buttons
-- Expo SDK 58 (matches current Expo Go; UIScene is built-in, enableSceneSupport removed)
+- PT monogram rebrand: app icon, splash, adaptive icons, web favicons
+- Floating frosted ScreenHeader over scrolling content; logo off in-app headers
+- Left-aligned league titles; sport pill scrolls with content
+- Long league names wrap to two lines in lists and headers
+- Name autofill biased by recent play; JWT signature errors clear stale session
+- Expo SDK 58 (matches current Expo Go; UIScene built-in)
+
+Store
+-----
+New iPhone + iPad screenshots required (chrome + icon changed).
+Upload new App Store icon and Play feature / adaptive assets from brand masters.
 
 Version
 -------

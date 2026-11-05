@@ -28,11 +28,13 @@ type Props = {
 const BTN = 36;
 const PAD_TOP = 4;
 const PAD_BOTTOM = 10;
+/** Room for up to two wrapped title lines (~17px font). */
+const TITLE_BLOCK = 44;
 
 /** Distance from screen top to content below a floating ScreenHeader. */
 export function useHeaderContentInset() {
   const insets = useSafeAreaInsets();
-  return insets.top + PAD_TOP + BTN + PAD_BOTTOM;
+  return insets.top + PAD_TOP + Math.max(BTN, TITLE_BLOCK) + PAD_BOTTOM;
 }
 
 /**
@@ -51,7 +53,6 @@ export function ScreenHeader({
   const insets = useSafeAreaInsets();
   const align = titleAlign ?? (onBack ? 'start' : 'center');
   const titleColor = theme.isDark ? '#F8FAFC' : theme.colors.text;
-  // Keep the wash light so blur reads through (native nav bars are ~20-35% tint).
   const overlay = theme.isDark ? 'rgba(8, 10, 18, 0.28)' : 'rgba(255, 252, 248, 0.32)';
   const border = theme.isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.55)';
   const hasTrailing = Boolean(right) || Boolean(onAction);
@@ -95,7 +96,7 @@ export function ScreenHeader({
               {title ? (
                 <Text
                   style={[styles.titleStart, { color: titleColor }]}
-                  numberOfLines={1}
+                  numberOfLines={2}
                 >
                   {title}
                 </Text>
@@ -124,7 +125,7 @@ export function ScreenHeader({
             </View>
             <View style={styles.titleWrap} pointerEvents="none">
               {title ? (
-                <Text style={[styles.titleCenter, { color: titleColor }]} numberOfLines={1}>
+                <Text style={[styles.titleCenter, { color: titleColor }]} numberOfLines={2}>
                   {title}
                 </Text>
               ) : null}
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: BTN,
+    minHeight: Math.max(BTN, TITLE_BLOCK),
     gap: spacing.sm,
   },
   leadingCluster: {
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
   },
   titleWrap: {
     flexShrink: 1,
-    maxWidth: '56%',
+    maxWidth: '62%',
     paddingHorizontal: spacing.xs,
   },
   titleCenter: {
@@ -233,12 +234,15 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     letterSpacing: 0.2,
+    lineHeight: 22,
   },
   titleStart: {
+    flex: 1,
     flexShrink: 1,
     fontSize: 17,
     fontWeight: '700',
     letterSpacing: 0.2,
+    lineHeight: 22,
   },
   trailing: {
     flexDirection: 'row',
