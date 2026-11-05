@@ -1,3 +1,6 @@
-Fresh PT look and frosted headers.
+A refreshed look and clearer headers.
 
-A new monogram icon and splash, glass screen titles that float over your leagues, and clearer room for long league names. Logging stays the same: create a league, add games, see standings.
+• New PlayTracker app icon and splash screen
+• Frosted screen titles instead of the logo on every page
+• More room for your leagues and games, including longer names
+• Logging and standings work the same way as before
