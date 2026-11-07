@@ -13,6 +13,7 @@ import { parseLeagueSlugFromUrl } from './src/lib/leagueLinks';
 import { hasSeenIntroRecently } from './src/lib/onboarding';
 import { ThemeProvider } from './src/lib/theme';
 import { MainTabs } from './src/navigation/MainTabs';
+import { identifyUser, resetAnalyticsUser, trackScreen } from './src/lib/posthog';
 import type { RootStackParamList } from './src/navigation/types';
 
 // Harmless Fabric / native-stack transition noise:
@@ -198,9 +199,35 @@ export default function App() {
   );
 }
 
+function trackCurrentRoute() {
+  const name = navigationRef.getCurrentRoute()?.name;
+  if (name) trackScreen(name);
+}
+
+/** PostHog: tie events to the signed-in user id; reset on logout. */
+function useAnalyticsIdentity() {
+  const { user } = useAuth();
+  const userId = user?.id != null ? String(user.id) : null;
+  const lastUserId = useRef<string | null>(null);
+  useEffect(() => {
+    if (userId) {
+      identifyUser(userId);
+    } else if (lastUserId.current) {
+      resetAnalyticsUser();
+    }
+    lastUserId.current = userId;
+  }, [userId]);
+}
+
 function AppRoot() {
+  useAnalyticsIdentity();
   return (
-    <NavigationContainer ref={navigationRef} theme={navTheme}>
+    <NavigationContainer
+      ref={navigationRef}
+      theme={navTheme}
+      onReady={trackCurrentRoute}
+      onStateChange={trackCurrentRoute}
+    >
       <View style={styles.root}>
         <AppNavigator />
       </View>
