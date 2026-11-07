@@ -27,6 +27,7 @@
     {% block extra_head %}{% endblock %}
     <!-- Caldera live traffic (visit counts only, no cookies) -->
     <script async src="https://caldera.social/t/1.js" integrity="sha384-UCnwKWu6Be2g87+ZI1+h367D6yOXEuXFQL2U2Z7PuSoH3oSCsu/cmZMbj4s70JlC" crossorigin="anonymous" data-site="6dlcyr29cs0dfc7y"></script>
+{% include '_posthog.html' %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <input type="checkbox" id="mkt-nav-toggle" class="mkt-nav-toggle" hidden>
